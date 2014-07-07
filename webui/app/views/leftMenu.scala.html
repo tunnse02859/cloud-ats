@@ -1,0 +1,35 @@
+<nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
+  <div id="left-panel-content" style="overflow: hidden;">
+    <ul style="transition-property: -moz-transform; transform-origin: 0px 0px 0px; transform: translate(0px, 0px);">
+      <li class="active">
+        <a data-target="#vm-main-page" href="javascript:void(0);">
+        <span class="icon-windows"></span>Machines
+        </a>
+      </li>
+      <li>
+        <a data-target="#selenium-main-page" href="javascript:void(0)">
+          <span class="icon-bug"></span>Selenium
+        </a>
+      </li>
+      <li>               
+        <a data-target="#performance-main-page" href="javascript:void(0)">
+          <span class="icon-fire"></span>Performance
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="icon-caret-down"></div>
+  <div class="icon-caret-up"></div>
+  
+</nav>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $("#left-panel a").on("click", function() {
+    $("section.main.container").hide();
+    var target = $(this).attr("data-target");
+    $(target).show();  
+  });
+});
+</script>

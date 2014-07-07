@@ -1,0 +1,132 @@
+@(job: Map[String, String])
+
+@renderStatus(status: String) = {
+  @if(status == "Pending"){
+    <span class="label label-warning">Pending</span>
+  }
+  @if(status == "In Progress"){
+    <span class="label label-info">In Progress</span>
+  }
+  @if(status == "Completed"){
+    <span class="label label-success">Completed</span>
+  }
+}
+
+@renderResult(result: String) = {
+  @if(result == "N/A"){
+    <span>N/A</span>
+  }
+  @if(result == "Success"){
+    <span class="label label-success">Success</span>
+  }
+  @if(result == "Failure"){
+    <span class="label label-important">Failure</span>
+  }
+}
+
+@renderOutputAction(status: String) = {
+  @if(status == "Pending"){
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-console btn btn-mini btn-warning disabled">Console</a>
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-report btn btn-mini btn-primary disabled">Report</a>
+  }
+  @if(status == "In Progress"){
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-console btn btn-mini btn-warning">Console</a>
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-report  btn btn-mini btn-primary disabled">Report</a>
+  }
+  @if(status == "Completed"){
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-console btn btn-mini btn-warning">Console</a>
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-report btn btn-mini btn-primary">Report</a>
+  }
+}
+
+@renderAction(status: String) = {
+  @if(status == "Pending" || status == "In Progress"){
+    @**<a data-target="@job.get("name")" href="javascript:void(0);" class="btn-run btn btn-mini btn-primary disabled">Run</a>**@
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-remove btn btn-mini btn-red">Remove</a>
+  }
+  @if(status == "Completed") {
+    @**<a data-target="@job.get("name")" href="javascript:void(0);" class="btn-run btn btn-mini btn-primary">Run</a>**@
+    <a data-target="@job.get("name")" href="javascript:void(0);" class="btn-remove btn btn-mini btn-red">Remove</a>
+  }
+}
+
+
+@if(job != null) {
+<tr id="@job.get("name")">
+  <td class="name"><a class="btn-job-edit" data-target="@job.get("name")" href="javascript:void(0);">@job.get("name")</a></td>
+  <td class="date"><span>@job.get("date")</span></td>
+  <td class="status">@renderStatus(job.get("status"))</td>
+  <td class="result">@renderResult(job.get("result"))</td>
+  <td class="output">
+      @renderOutputAction(job.get("status"))
+  </td>
+  <td class="action">
+      @renderAction(job.get("status"))
+  </td>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+  var checkStatus = new WS("@controllers.job.routes.JobController.checkStatus(job.get("name")).webSocketURL(request)");
+  checkStatus.onmessage = function(event) {
+    var data = JSON.parse(event.data);
+    console.log(data);
+    
+    //change status `pending` to in `in progress`
+    if(data.status) {
+      var status = $("#@job.get("name") .status");
+      $(status).html(data.status);
+      $("#@job.get("name") .btn-console").removeClass("disabled");
+      
+      
+      //case: change status from `pending` to `in progress`
+      if(!data.result) {
+        $('.top-right').notify({
+          message: {
+            text: '@job.get("type") @job.get("name") is running.' 
+          },
+          type: 'adminflare'
+        }).show();
+        
+        //run job
+        if(data.trigger) {
+            
+              //register socket to view console
+              var pre = '<pre class="@job.get("name")-console pre-scrollable" style="display: none; max-height: 500px;"><code></code></pre>';
+              $(".@job.get("type")-console").append(pre);
+             
+              var log = new WS("@controllers.job.routes.JobController.console(job.get("name")).webSocketURL(request)");
+             
+              log.onmessage = function(event) {
+                code = $("pre.@job.get("name")-console code").get(0);
+                $(code).append(event.data).append("\n");
+                var pre = $(code).parent();
+                
+                if (pre.scrollTop() + 1500 >= $(code).height()) {
+                  pre.scrollTop($(code).height());
+                }
+              }
+        }
+        @**controllers.job.JobController.run(job.get("name"))**@
+      }
+    }
+    
+    if(data.result) {
+    
+      var result = $("#@job.get("name") .result");
+      $(result).html(data.result);
+      $("#@job.get("name") .btn-report").removeClass("disabled");
+      $("#@job.get("name") .btn-run").removeClass("disabled");
+      
+      $('.top-right').notify({
+          message: {
+            text: '@job.get("type") @job.get("name") is completed.' 
+          },
+          type: 'adminflare'
+        }).show();
+    }
+  }  
+});
+</script>
+</tr>
+}

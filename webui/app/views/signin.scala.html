@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>Cloud Testing Service - SignIn</title>
+    <meta content="" name="description">
+    <meta content="width=device-width" name="viewport">
+    
+    <script type="text/javascript" src="@routes.Assets.at("/public", "javascripts/jquery-1.9.0.min.js")"></script>
+    
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/bootstrap.min.css")">
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/adminflare.min.css")">
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/pages.min.css")">
+    <link rel="stylesheet" type="text/css"  href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700">
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#signin-container').submit(function() {
+          document.location = '/';
+          return false;
+        });
+        
+        var updateBoxPosition = function() {
+          $("#signin-container").css({
+            "margin-top": ($(window).height() - $("#signin-container").height()) / 2
+          });
+        }
+
+        $(window).resize(updateBoxPosition);
+        setTimeout(updateBoxPosition, 50);
+      });
+    </script>  
+  </head>
+  
+  <body class="signin-page">
+    <section id="signin-container">
+      <a href="/" title="Cloud Testing Service" class="header">
+        <img alt="" src="assets/images/af-logo-signin.png">
+        <span>
+          Sign in to<br>
+          <strong>SME Cloud</strong>
+        </span>
+      </a>
+      <form action="/" method="get">
+        <fieldset>
+          <div class="fields">
+            <input type="text" name="username" placeholder="Username" id="id_username" tabindex="1">
+            
+            <input type="password" name="password" placeholder="Password" id="id_password" tabindex="2">
+          </div>
+          <a class="forgot-password" tabindex="3">Forgot?</a>
+          
+          <button type="submit" class="btn btn-primary btn-block" tabindex="4">Sign In</button>
+        </fieldset>
+      </form>
+      <div class="social">
+        <p>...or sign in with</p>
+        <a class="twitter" href="/"><i class="icon-twitter"></i></a>
+        <a class="facebook" href="/"><i class="icon-facebook"></i></a>
+        <a class="google" href="/"><i class="icon-google-plus"></i></a>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "%s", 
+  "description": "", 
+  "logrotate": false, 
+  "": ["0", "0", "0", "0"], 
+  "buildDiscarder": {"stapler-class": "hudson.tasks.LogRotator", "daysToKeepStr": "", "numToKeepStr": "", "artifactDaysToKeepStr": "", "artifactNumToKeepStr": ""}, 
+  "properties": {"stapler-class-bag": "true", "hudson-model-ParametersDefinitionProperty": {}}, 
+  "hasSlaveAffinity": {"assignedLabelString": "%s"}, 
+  "displayNameOrNull": "", 
+  "scm": {
+    "value": "2", 
+    "userRemoteConfigs": {
+      "url": "%s", 
+      "credentialsId": "0cc6ff73-d0ef-44c5-82c4-bfb5e9d597d2", 
+      "name": "", 
+      "refspec": ""
+     }, 
+     "branches": {
+       "name": "*/master"
+     }, 
+     "": "auto"
+  }, 
+  "triggerByDependency": {}, 
+  "rootPOM": "pom.xml", 
+  "goals": "%s", 
+  "mavenOpts": "", 
+  "usePrivateRepository": false, 
+  "explicitLocalRepository": {"stapler-class": "hudson.maven.local_repo.DefaultLocalRepositoryLocator"}, 
+  "validationLevel": "-1", 
+  "settings": {"stapler-class": "jenkins.mvn.DefaultSettingsProvider"}, 
+  "globalSettings": {"stapler-class": "jenkins.mvn.DefaultGlobalSettingsProvider"}, 
+  "runIfResult": "failure", "core:apply": ""
+}
