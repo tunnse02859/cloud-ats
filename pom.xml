@@ -33,6 +33,12 @@
 
 			<dependency>
 			  <groupId>org.ats</groupId>
+				<artifactId>cloud-user-mgt</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+			  <groupId>org.ats</groupId>
 				<artifactId>cloud-jenkins</artifactId>
 				<version>0.1-SNAPSHOT</version>
 			</dependency>
@@ -133,6 +139,7 @@
 		<module>common</module>
 		<module>jenkins</module>
 		<module>cloudstack</module>
+		<module>components</module>
 	</modules>
 
 	<repositories>
