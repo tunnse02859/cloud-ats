@@ -26,7 +26,7 @@ $(document).ready(function() {
 
 @if(socket) {
   var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-  var socketLog = new WS("@controllers.vm.routes.VMController.console(name).webSocketURL(request)");
+  var socketLog = new WS("@controllers.demo.vm.routes.VMController.console(name).webSocketURL(request)");
   socketLog.onmessage = function(event) {
     var code = $("#vm-console-output .@name code").get(0);
     $(code).append(event.data).append("\n");
@@ -38,7 +38,7 @@ $(document).ready(function() {
   }
   
   socketLog.onclose = function(event) {
-    vmRouter.controllers.vm.VMController.status("@name").ajax({
+    vmRouter.controllers.demo.vm.VMController.status("@name").ajax({
       success: function(data) {
         console.log("socket closing...");
         console.log(data);
@@ -63,7 +63,7 @@ $(document).ready(function() {
       var obj = $(this)[0];
       var options = obj.options;
       
-      vmRouter.controllers.vm.VMController.detail("@name").ajax({
+      vmRouter.controllers.demo.vm.VMController.detail("@name").ajax({
         success: function(data) {
           options.content = data;
           obj.show();

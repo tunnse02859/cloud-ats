@@ -1,8 +1,8 @@
-package controllers;
+package controllers.demo;
 
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.*;
+import views.html.demo.*;
 
 public class Application extends Controller {
 

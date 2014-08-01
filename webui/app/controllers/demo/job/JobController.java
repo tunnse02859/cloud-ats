@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers.job;
+package controllers.demo.job;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,9 +33,9 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import scala.collection.mutable.StringBuilder;
 import utils.DBFactory;
-import views.html.job.*;
-import views.html.vm.vm;
-import views.html.vm.vmlist;
+import views.html.demo.job.*;
+import views.html.demo.vm.vm;
+import views.html.demo.vm.vmlist;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

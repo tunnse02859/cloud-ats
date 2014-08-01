@@ -38,7 +38,7 @@
       $("#create-vm-modal").modal("hide");
 
       //ajax submit form
-      vmRouter.controllers.vm.VMController.doCreate().ajax({
+      vmRouter.controllers.demo.vm.VMController.doCreate().ajax({
         data: $("#vm-setup form").serialize(),
         dataType: "json",
         success: function(data) {

@@ -41,7 +41,7 @@ $(document).ready(function() {
     var target = $(this).attr("data-target");
     bootbox.confirm("Are you sure to remove " + target + " ?", function (result) {
       if (result) {
-        jobRouter.controllers.job.JobController.remove(target).ajax({
+        jobRouter.controllers.demo.job.JobController.remove(target).ajax({
           success: function(data) {
             $('.top-right').notify({
               message: {
@@ -68,7 +68,7 @@ $(document).ready(function() {
   $(document).on("click", ".@jobType-btn-create-new,.@jobType .btn-job-edit", function() {
     var target = $(this).attr("data-target");
     if (!target) target = "";
-    jobRouter.controllers.job.JobController.create("@jobType", target).ajax({
+    jobRouter.controllers.demo.job.JobController.create("@jobType", target).ajax({
       success : function(data) {
         $("#create-@jobType-modal").html(data);
           $("#create-@jobType-modal div.modal").modal({
@@ -80,7 +80,7 @@ $(document).ready(function() {
   });
   
   //fetch job list
-  jobRouter.controllers.job.JobController.list("@jobType").ajax({
+  jobRouter.controllers.demo.job.JobController.list("@jobType").ajax({
     dataType: "json",
     success: function(data) {
       $(data).each(function(i, sel) {
@@ -128,4 +128,4 @@ $(document).ready(function() {
   </div>
 </section>
 
-@footer()
+@views.html.demo.footer()

@@ -3,7 +3,7 @@
   
     //show create vm modal
     $(document).on("click", "a.btn.createvm", function() {
-      vmRouter.controllers.vm.VMController.create().ajax({
+      vmRouter.controllers.demo.vm.VMController.create().ajax({
         success: function(data) {
           $("#createvm-modal").html(data);
           $("#createvm-modal div.modal").modal({
@@ -25,7 +25,7 @@
       var log = $("#vm-console-output ." + id).get(0);
       if (log) $(log).show();
       else {
-        vmRouter.controllers.vm.VMController.log(id).ajax({
+        vmRouter.controllers.demo.vm.VMController.log(id).ajax({
           success: function(data) {
             $("#vm-console-output").append($(data));
             $("#vm-console-output ." + id).show();
@@ -43,7 +43,7 @@
           $("#" + id + " .vm-status").text("Stopping");
           $("#" + id + " .vm-status").css("color", "#DC6343");
           
-          vmRouter.controllers.vm.VMController.destroy(id).ajax({
+          vmRouter.controllers.demo.vm.VMController.destroy(id).ajax({
             success: function(data) {
               $("#" + id).remove();
               $("pre." + id).remove();
@@ -55,7 +55,7 @@
     });
 
     //fetch list vm
-    vmRouter.controllers.vm.VMController.list("false").ajax({
+    vmRouter.controllers.demo.vm.VMController.list("false").ajax({
       success: function(data) {
         $("#vm-list").html(data);
       }
@@ -86,4 +86,4 @@
   </div>
   <!-- / VM Console -->
 </section>
-@footer()
+@views.html.demo.footer()

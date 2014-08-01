@@ -60,7 +60,7 @@ $(document).ready(function() {
   //click create new vm & hide modal
   $(document).on("click", "#choice-vm-list .widget-actions a", function() {
     $("#create-@jobType-modal div.modal").modal("hide");
-    vmRouter.controllers.vm.VMController.create().ajax({
+    vmRouter.controllers.demo.vm.VMController.create().ajax({
       async: false,
       success: function(data) {
         $("#create-@jobType-modal").html(data);
@@ -102,7 +102,7 @@ $(document).ready(function() {
       }
       var data = $(form).serialize();
       
-    jobRouter.controllers.job.JobController.doCreate().ajax({
+    jobRouter.controllers.demo.job.JobController.doCreate().ajax({
       data: data,
       success: function(data) {
         $(data).insertAfter($("table.@jobType tr").first());

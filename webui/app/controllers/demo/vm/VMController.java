@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers.vm;
+package controllers.demo.vm;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -39,8 +39,8 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 
-import views.html.main;
-import views.html.vm.*;
+import views.html.demo.main;
+import views.html.demo.vm.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

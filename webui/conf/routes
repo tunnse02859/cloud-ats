@@ -3,29 +3,32 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
-GET     /signin                     controllers.Application.signin()
+
+
+############################# Demostration ###############################
+GET     /                           controllers.demo.Application.index()
+GET     /signin                     controllers.demo.Application.signin()
 
 #VM
-GET     /vm                         controllers.vm.VMController.list(fure: java.lang.Boolean)
-GET     /vm/new                     controllers.vm.VMController.create()
-POST    /vm/new                     controllers.vm.VMController.doCreate()
-GET     /vm/destroy/:name           controllers.vm.VMController.destroy(name)
-GET     /vm/ajax                    controllers.vm.VMController.ajax()
-GET     /vm/detail/:id              controllers.vm.VMController.detail(id)
-GET     /vm/console/:name           controllers.vm.VMController.console(name)
-GET     /vm/status/:name            controllers.vm.VMController.status(name)
-GET     /vm/log/:name               controllers.vm.VMController.log(name)
+GET     /vm                         controllers.demo.vm.VMController.list(fure: java.lang.Boolean)
+GET     /vm/new                     controllers.demo.vm.VMController.create()
+POST    /vm/new                     controllers.demo.vm.VMController.doCreate()
+GET     /vm/destroy/:name           controllers.demo.vm.VMController.destroy(name)
+GET     /vm/ajax                    controllers.demo.vm.VMController.ajax()
+GET     /vm/detail/:id              controllers.demo.vm.VMController.detail(id)
+GET     /vm/console/:name           controllers.demo.vm.VMController.console(name)
+GET     /vm/status/:name            controllers.demo.vm.VMController.status(name)
+GET     /vm/log/:name               controllers.demo.vm.VMController.log(name)
 
 #Job
-GET     /job                        controllers.job.JobController.list(jobType)
-GET     /job/create                 controllers.job.JobController.create(jobType, jobName)
-POST    /job/create                 controllers.job.JobController.doCreate()
-POST    /job/edit/:jobName          controllers.job.JobController.edit(jobName)
-GET     /job/remove/:jobName        controllers.job.JobController.remove(jobName)
-GET     /job/ajax                   controllers.job.JobController.ajax()
-GET     /job/status/:jobName        controllers.job.JobController.checkStatus(jobName)
-GET     /job/console/:jobName       controllers.job.JobController.console(jobName)
+GET     /job                        controllers.demo.job.JobController.list(jobType)
+GET     /job/create                 controllers.demo.job.JobController.create(jobType, jobName)
+POST    /job/create                 controllers.demo.job.JobController.doCreate()
+POST    /job/edit/:jobName          controllers.demo.job.JobController.edit(jobName)
+GET     /job/remove/:jobName        controllers.demo.job.JobController.remove(jobName)
+GET     /job/ajax                   controllers.demo.job.JobController.ajax()
+GET     /job/status/:jobName        controllers.demo.job.JobController.checkStatus(jobName)
+GET     /job/console/:jobName       controllers.demo.job.JobController.console(jobName)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

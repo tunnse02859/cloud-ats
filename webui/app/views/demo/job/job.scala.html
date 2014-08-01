@@ -67,7 +67,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
   var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-  var checkStatus = new WS("@controllers.job.routes.JobController.checkStatus(job.get("name")).webSocketURL(request)");
+  var checkStatus = new WS("@controllers.demo.job.routes.JobController.checkStatus(job.get("name")).webSocketURL(request)");
   checkStatus.onmessage = function(event) {
     var data = JSON.parse(event.data);
     console.log(data);
@@ -95,7 +95,7 @@ $(document).ready(function() {
               var pre = '<pre class="@job.get("name")-console pre-scrollable" style="display: none; max-height: 500px;"><code></code></pre>';
               $(".@job.get("type")-console").append(pre);
              
-              var log = new WS("@controllers.job.routes.JobController.console(job.get("name")).webSocketURL(request)");
+              var log = new WS("@controllers.demo.job.routes.JobController.console(job.get("name")).webSocketURL(request)");
              
               log.onmessage = function(event) {
                 code = $("pre.@job.get("name")-console code").get(0);
