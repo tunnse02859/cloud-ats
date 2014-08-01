@@ -3,6 +3,8 @@
  */
 package org.ats.component.usersmgt.user;
 
+import java.util.Collection;
+
 import junit.framework.Assert;
 
 import org.ats.component.usersmgt.DataFactory;
@@ -24,6 +26,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -109,6 +113,23 @@ public class UserDAOTest {
     
     Group actual = GroupDAO.INSTANCE.findOne(this.group.getId());
     Assert.assertTrue(actual.getUsers().isEmpty());
+  }
+  
+  @Test
+  public void testFindUser() throws UserManagementException {
+    User user = new User("HaiNT fake", "fake@mail.com");
+    UserDAO.INSTANCE.create(user);
+    
+    Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("name", "HaiNT"));
+    Assert.assertEquals(1, users.size());
+    Assert.assertEquals(this.user, users.iterator().next());
+
+    user.put("name", "HaiNTfake");
+    UserDAO.INSTANCE.update(user);
+    
+    users = UserDAO.INSTANCE.find(new BasicDBObject("name", "HaiNT"));
+    Assert.assertEquals(1, users.size());
+    Assert.assertEquals(this.user, users.iterator().next());
   }
   
   @After
