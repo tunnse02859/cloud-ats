@@ -37,6 +37,13 @@ public class ManagementDAOTest {
     Assert.assertEquals(2, groups.size());
     Assert.assertTrue(groups.contains(g1));
     Assert.assertTrue(groups.contains(g2));
+    
+    g1.put("name", "System");
+    GroupDAO.INSTANCE.update(g1);
+    
+    groups = GroupDAO.INSTANCE.find(query);
+    Assert.assertEquals(1, groups.size());
+    Assert.assertEquals("Group Admin", groups.iterator().next().get("name"));
   }
   
   @After
