@@ -28,6 +28,8 @@ public class ManagementDAOTest {
     Group g2 = new Group("Group Admin");
     GroupDAO.INSTANCE.create(g1, g2);
 
+    System.out.println(GroupDAO.INSTANCE.getColumn().getIndexInfo());
+    
     BasicDBObject query = new BasicDBObject();
     query.put("$text", new BasicDBObject("$search", "admin"));
     Collection<Group> groups = GroupDAO.INSTANCE.find(query);

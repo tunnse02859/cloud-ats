@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>Cloud Testing Service - SignIn</title>
+    <meta content="" name="description">
+    <meta content="width=device-width" name="viewport">
+    
+    <script type="text/javascript" src="@routes.Assets.at("/public", "javascripts/jquery-1.9.0.min.js")"></script>
+    
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/bootstrap.min.css")">
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/adminflare.min.css")">
+    <link rel="stylesheet" type="text/css" media="all" href="@routes.Assets.at("/public", "stylesheets/pages.min.css")">
+    
+    <link rel="stylesheet" type="text/css"  href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700">
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#signin-container').submit(function() {
+          document.location = '/';
+          return false;
+        });
+        
+        var updateBoxPosition = function() {
+          $("#signin-container").css({
+            "margin-top": ($(window).height() - $("#signin-container").height()) / 2
+          });
+        }
+
+        $(window).resize(updateBoxPosition);
+        setTimeout(updateBoxPosition, 50);
+      });
+    </script>  
+  </head>
+  
+  <body class="signup-page">
+    
+    <section id="signup-container" style="margin-top: 72.5px;">
+    
+      <a href="/" title="Cloud ATS Wizard" class="header">
+        <img alt="" src="assets/images/af-logo-signup.png">
+        <span>
+          Wizard<br>
+          <strong>Cloud ATS</strong>
+        </span>
+      </a>
+      
+      <form action="@controllers.routes.Application.wizard()" method="post">
+        <fieldset>
+          <div class="fields">
+            <input type="text" name="email" placeholder="Email" tabindex="1">
+            <input type="password" name="password" placeholder="Password" tabindex="2">
+            <input type="password" name="repassword" placeholder="Re-Password" tabindex="3">
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block" tabindex="4">Setup</button>
+        </fieldset>
+      </form>
+      
+      <div class="social">
+        <p>Setup <b>root</b> Account</p>
+      </div>
+      
+    </section>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+
+<nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
+  <div id="left-panel-content" style="overflow: hidden;">
+    <ul>
+      <li class="active">
+        <a href="@controllers.routes.Application.main()" ajax-url="@controllers.routes.Dashboard.body()">
+          <span class="icon-dashboard"></span>Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="@controllers.routes.Organization.index()" ajax-url="@controllers.routes.Organization.indexAjax()">
+          <span class="icon-group"></span>Organization
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="icon-caret-down"></div>
+  <div class="icon-caret-up"></div>
+
+</nav>

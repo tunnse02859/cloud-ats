@@ -1,0 +1,28 @@
+@(nav: String, group_id: String)
+<ul class="well nav nav-tabs nav-stacked">
+  <li class="group @if(nav =="group"){ active }">
+    <a href="@controllers.routes.Organization.index()?nav=group&group=@group_id"
+      ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group_id">
+    <i class="icon-group"></i> Group <span class="badge pull-right group @if(nav =="group"){ badge-primary }">
+    @controllers.Organization.count("group")</span></a>
+  </li>
+  <li class="user @if(nav =="user"){ active }">
+    <a href="@controllers.routes.Organization.index()?nav=user&group=@group_id"
+      ajax-url="@controllers.routes.Organization.body()?nav=user&group=@group_id">
+    <i class="icon-user"></i> User <span class="badge pull-right @if(nav =="user"){ badge-primary }">
+    @controllers.Organization.count("user")</span></a>
+  </li>
+  <li class="role @if(nav =="role"){ active }">
+    <a href="@controllers.routes.Organization.index()?nav=role&group=@group_id"
+      ajax-url="@controllers.routes.Organization.body()?nav=role&group=@group_id">
+    <i class="icon-key"></i> Role <span class="badge pull-right @if(nav =="role"){ badge-primary }">
+    @controllers.Organization.count("role")
+    </span></a>
+  </li>
+  <li class="feature @if(nav =="feature"){ active }">
+    <a href="@controllers.routes.Organization.index()?nav=feature&group=@group_id"
+      ajax-url="@controllers.routes.Organization.body()?nav=feature&group=@group_id">
+    <i class="icon-star"></i> Feature <span class="badge pull-right @if(nav =="feature"){ badge-primary }">
+    @controllers.Organization.count("feature")</span></a>
+  </li>
+</ul>

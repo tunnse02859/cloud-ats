@@ -1,0 +1,22 @@
+@**(name: String, level: String, children: Int, users: Int, features: Int, roles: Int)**@
+@(group: org.ats.component.usersmgt.group.Group)
+<tr class="group" id="group-@group.getId()">
+  <td class='group-name'>
+    <a href="@controllers.routes.Organization.index()?nav=group&group=@group.getId()"
+        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()"
+      >
+    @group.getString("name")</a>
+  </td>
+    
+  <td class='group-level'><span class="badge badge-cyan">@group.getString("level")</span></td>
+  <td class='group-children'><span class="badge badge-primary">@group.getGroupChildren().size()</span></td>
+  <td class='group-user'><span class="badge badge-pink">@group.getUsers().size()</span></td>
+  <td class='group-feature'><span class="badge badge-green">@group.getFeatures().size()</span></td>
+  <td class='group-role'><span class="badge badge-orange">@group.getRoles().size()</span></td>
+  <td class='group-action'>
+    <a class='btn btn-mini btn-blue'>Update</a>
+    @if(!group.getBoolean("system")){
+    <a class='btn btn-mini btn-red'>Delete</a>
+    }
+  </td>
+</tr>

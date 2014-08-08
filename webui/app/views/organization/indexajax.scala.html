@@ -1,0 +1,25 @@
+@(nav : String, body: Html, group_id: String)
+<section class="org-breadcrumb row-fluid">
+        <div class="span12">
+          <h3 class="box-header"><i class="icon-cogs"></i> Group Path
+          </h3>
+        
+          <ul class="breadcrumb">
+            @controllers.Organization.groupBreadcrumb(nav)
+          </ul>
+        </div>
+      </section>
+      
+      <section class="org-body row-fluid">
+      
+      <div class="org-left span3">
+        @organization.leftmenu(nav, group_id)
+      </div>
+      
+      <div class="org-right span9">
+        @body
+      </div>
+      
+      </section>
+      
+      @footer()

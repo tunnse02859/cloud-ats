@@ -1,4 +1,4 @@
-name := "ats-cloud-webui"
+name := "cloud-ats-webui"
 
 version := "0.1-SNAPSHOT"
 

@@ -4,9 +4,34 @@
 
 # Home page
 
+GET     /                                controllers.Application.index()
+GET     /wizard                          controllers.Application.wizard()
+POST    /wizard                          controllers.Application.doWizard()
+GET     /signup                          controllers.Application.signup(group: Boolean ?= false)
+POST    /signup                          controllers.Application.doSignup()
+
+GET     /signin                          controllers.Application.signin()
+POST    /signin                          controllers.Application.doSignin()
+
+GET     /signout                         controllers.Application.signout()
+
+GET     /main                            controllers.Application.main()
+
+GET     /*path/                          controllers.Application.untrail(path: String)
+
+############################# Organization ###############################
+
+GET     /main/organization               controllers.Organization.index()
+GET     /main/organization/body          controllers.Organization.body()
+GET     /main/organization/ajax          controllers.Organization.indexAjax()
+GET     /main/organization/filter/:nav   controllers.Organization.filter(nav)
+
+############################# Dashboard ##################################
+
+GET     /main/body                       controllers.Dashboard.body()
 
 ############################# Demostration ###############################
-GET     /demo                           controllers.demo.Application.index()
+GET     /demo                            controllers.demo.Application.index()
 GET     /demo/signin                     controllers.demo.Application.signin()
 
 #VM

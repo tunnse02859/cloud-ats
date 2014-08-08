@@ -1,0 +1,35 @@
+@(rows : Html, system: Boolean)
+<div class="org-group-filter">
+  <h3 class="box-header"><i class="icon-filter"></i> Group Filter & Action
+    <a class="box-collapse pull-right" href="#" style="display: none;">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>
+    <a style="display: block;" class="box-expand pull-right" href="#">show&nbsp;&nbsp;<i class="icon-caret-down"></i></a>
+  </h3>
+  
+  <div class="box no-border no-padding" style="display: none;">
+  <form class="form-search form-inline">
+    
+    <input type="text" id="name" name="name" placeholder="Name" class="input-small">
+    <input type="text" id="level" name="level" placeholder="Level" class="input-mini">
+     
+    @if(!system){
+    <a href="#" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Group</a>
+    }
+    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("group")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+  </form>  
+  </div>
+</div>
+          
+<table class="org-group table table-striped">
+  <tbody>
+    <tr>
+	    <th>Name</th>
+	    <th>Level</th>
+	    <th>Children</th>
+	    <th>Users</th>
+	    <th>Features</th>
+	    <th>Roles</th>
+	    <th>Action</th>
+    </tr>
+    @rows
+  </tbody>
+</table>

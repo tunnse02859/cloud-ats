@@ -2,7 +2,7 @@
   <div class="navbar-inner">
     <div class="container">
       <a class="logo" href="#">
-        <img src="assets/images/af-logo-signin.png" alt="Af_logo" style="height: 25px;">
+        <img src="/assets/images/af-logo-signin.png" alt="Af_logo" style="height: 25px;">
         <span style="margin: 5px; color: #FFFFFF; opacity: 0.5;">
           <strong>Cloud ATS</strong>
         </span>
@@ -11,11 +11,11 @@
         <ul class="nav pull-right">
           <li class="dropdown">
             <a class="dropdown-toggle usermenu" data-toggle="dropdown" href="#">
-              <img alt="Avartar" src="assets/images/avatar.png">
-              <span>John</span>
+              <img alt="Avartar" src="/assets/images/avatar.png">
+              <span>@session.get("email")</span>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="#">Logout</a></li>
+              <li><a href="@controllers.routes.Application.signout()">Logout</a></li>
             </ul>
           </li>
         </ul>
