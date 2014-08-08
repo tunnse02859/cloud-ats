@@ -154,13 +154,7 @@ public class User extends BaseObject<User> {
 
   @Override
   public User from(DBObject obj) {
-    if (obj == null) throw new NullPointerException("Object source is not allowed nullable");
-    this.put("_id", obj.get("_id"));
-    this.put("name", obj.get("name"));
-    this.put("email", obj.get("email"));
-    this.put("active", obj.get("active"));
-    this.put("group_ids", obj.get("group_ids"));
-    this.put("role_ids", obj.get("role_ids"));
+    this.putAll(obj);
     return this;
   }
 }

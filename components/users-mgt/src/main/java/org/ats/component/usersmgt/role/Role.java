@@ -147,11 +147,7 @@ public class Role extends BaseObject<Role> {
 
   @Override
   public Role from(DBObject obj) {
-    if (obj == null) throw new NullPointerException("Object source is not allowed nullable");
-    this.put("_id", obj.get("_id"));
-    this.put("name", obj.get("name"));
-    this.put("group_id", obj.get("group_id"));
-    this.put("permission_ids", obj.get("permission_ids"));
+    this.putAll(obj);
     return this;
   }
 }

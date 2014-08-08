@@ -35,8 +35,7 @@ public class Operation extends BaseObject<Operation> {
 
   @Override
   public Operation from(DBObject obj) {
-    this.put("_id", obj.get("_id"));
-    this.put("name", obj.get("name"));
+    this.putAll(obj);
     return this;
   }
 }

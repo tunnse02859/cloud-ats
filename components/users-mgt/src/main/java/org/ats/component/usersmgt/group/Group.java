@@ -239,13 +239,7 @@ public class Group extends BaseObject<Group> {
 
   @Override
   public Group from(DBObject obj) {
-    if (obj == null) throw new NullPointerException("Object source is not allowed nullable");
-    this.put("_id", obj.get("_id"));
-    this.put("name", obj.get("name"));
-    this.put("user_ids", obj.get("user_ids"));
-    this.put("role_ids", obj.get("role_ids"));
-    this.put("group_children_ids", obj.get("group_children_ids"));
-    this.put("feature_ids", obj.get("feature_ids"));
+    this.putAll(obj);
     return this;
   }
 }

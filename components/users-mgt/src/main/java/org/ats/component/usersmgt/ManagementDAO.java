@@ -39,6 +39,7 @@ public abstract class ManagementDAO<T extends BaseObject<T>> {
   public boolean create(T ... obj) throws UserManagementException {
     DB db = DataFactory.getDatabase(dbName);
     DBCollection col = db.getCollection(colName);
+    col.ensureIndex(new BasicDBObject("name", "text"), "MyIndex");
     WriteResult result = col.insert(obj, WriteConcern.ACKNOWLEDGED);
     return result.getError() == null;
   }

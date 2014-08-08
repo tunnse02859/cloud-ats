@@ -99,9 +99,7 @@ public class Feature extends BaseObject<Feature> {
   
   @Override
   public Feature from(DBObject obj) {
-    this.put("_id", obj.get("_id"));
-    this.put("name", obj.get("name"));
-    this.put("operation_ids", obj.get("operation_ids"));
+    this.putAll(obj);
     return this;
   }
 }

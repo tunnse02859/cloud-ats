@@ -28,10 +28,7 @@ public class Permission extends BaseObject<Permission>{
 
   @Override
   public Permission from(DBObject obj) {
-    if (obj == null) throw new NullPointerException("Object source is not allowed nullable");
-    this.put("_id", obj.get("_id"));
-    this.put("feature_id", obj.get("feature_id"));
-    this.put("operation_id", obj.get("operation_id"));
+   this.putAll(obj);
     return this;
   }
 
