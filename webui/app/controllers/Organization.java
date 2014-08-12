@@ -11,13 +11,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
-import jnr.ffi.Struct.swblk_t;
-
-import org.ats.component.usersmgt.DataFactory;
 import org.ats.component.usersmgt.UserManagementException;
+import org.ats.component.usersmgt.feature.Feature;
+import org.ats.component.usersmgt.feature.FeatureDAO;
+import org.ats.component.usersmgt.feature.Operation;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
+import org.ats.component.usersmgt.role.Permission;
+import org.ats.component.usersmgt.role.Role;
+import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
@@ -35,6 +39,9 @@ import setup.AuthenticatedInterceptor;
 import setup.WizardInterceptor;
 import views.html.organization.*;
 import views.html.organization.group.*;
+import views.html.organization.user.*;
+import views.html.organization.role.*;
+import views.html.organization.feature.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -50,9 +57,6 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Result index() throws UserManagementException {
-    String nav = request().getQueryString("nav");
-    if (nav == null) nav = "group";
-    
     Map<String, String[]> parameters = request().queryString();
     Group current = null;
     if (parameters.containsKey("group")) {
@@ -116,24 +120,41 @@ public class Organization extends Controller {
   private static Html bodyComposite(Map<String, String[]> parameters) throws UserManagementException {
     
     String nav = parameters.containsKey("nav") ? parameters.get("nav")[0] : "group";
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
     
     if ("group".equals(nav)) {
       
-      List<Group> all = listGroupVisible();
-      
       StringBuilder sb = new StringBuilder();
+      List<Group> all = listGroupVisible();
       for (Group g : all) {
         sb.append(group.render(g));
       }
       
-      User user = UserDAO.INSTANCE.findOne(session("user_id"));
-      return groups.render(new Html(sb), user.getBoolean("system"));
+      return groups.render(new Html(sb), currentUser.getBoolean("system"));
+    
     } else if ("user".equals(nav)) {
-      return users.render();
+      
+      StringBuilder sb = new StringBuilder();
+      List<User> all = listUserVisible();
+      for (User u : all) {
+        sb.append(user.render(u, currentUser.getBoolean("system")));
+      }
+      
+      return users.render(new Html(sb), currentUser.getBoolean("system"));
+          
     } else if ("role".equals(nav)) {
-      return roles.render();
+      StringBuilder sb = new StringBuilder();
+      for (Role r : currentGroup.getRoles()) {
+        sb.append(role.render(r, new ArrayList<Permission>(r.getPermissions())));
+      }
+      return roles.render(new Html(sb));
     } else if ("feature".equals(nav)) {
-      return features.render();
+      StringBuilder sb = new StringBuilder();
+      for (Feature f : currentGroup.getFeatures()) {
+        sb.append(feature.render(f, new ArrayList<Operation>(f.getOperations())));
+      }
+      return features.render(new Html(sb));
     }
     return null;
   }
@@ -161,6 +182,19 @@ public class Organization extends Controller {
         return l1 - l2;
       }
     });
+    return all;
+  }
+  
+  private static List<User> listUserVisible() throws UserManagementException {
+    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    List<User> all = null;
+    if (current.getBoolean("system")) {
+      all = new ArrayList<User>(UserDAO.INSTANCE.find(new BasicDBObject()));
+    } else {
+      Pattern p = Pattern.compile(current.getId());
+      Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("group_ids", p));
+      all = new ArrayList<User>(users);
+    }
     return all;
   }
   
@@ -245,10 +279,13 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Result filter(String nav) throws UserManagementException {
+    
     Map<String, String[]> parameters = request().queryString();
     
+    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    
     if ("group".equals(nav)) {
-      Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+
       Set<Group> filter = new HashSet<Group>();
       
       if (current.getBoolean("system")) {
@@ -303,7 +340,70 @@ public class Organization extends Controller {
         
         return ok(json);
       }
+    } else if ("user".equals(nav)) {
+      
+      Set<User> filter = new HashSet<User>();
+      BasicDBObject query = new BasicDBObject();
+      if (parameters.containsKey("email")) {
+        String name = parameters.get("email")[0];
+        query.put("$text", new BasicDBObject("$search", name));
+      }
+      
+      filter.addAll(UserDAO.INSTANCE.find(query));
+      
+      ObjectNode json = Json.newObject();
+      ArrayNode array = json.putArray("users");
+      
+      if (current.getBoolean("system")) {
+        for (User u : filter) {
+          array.add(u.getId());
+        }
+      } else {
+        for (User u : current.getUsers()) {
+          if (filter.contains(u)) array.add(u.getId());
+        }
+      }
+      return ok(json);
+    } else if ("role".equals(nav)) {
+      Set<Role> filter = new HashSet<Role>();
+      ObjectNode json = Json.newObject();
+      ArrayNode array = json.putArray("roles");
+
+      BasicDBObject query = new BasicDBObject();
+      if (parameters.containsKey("name")) {
+        String name = parameters.get("name")[0];
+        query.put("$text", new BasicDBObject("$search", name));
+      } else {
+        for (Role r : current.getRoles()) {
+          array.add(r.getId());
+        }
+      }
+      filter.addAll(RoleDAO.INSTANCE.find(query));
+      for (Role r : current.getRoles()) {
+        if (filter.contains(r)) array.add(r.getId());
+      }
+      return ok(json);
+    } else if ("feature".equals(nav)) {
+      Set<Feature> filter = new HashSet<Feature>();
+      ObjectNode json = Json.newObject();
+      ArrayNode array = json.putArray("features");
+      
+      BasicDBObject query = new BasicDBObject();
+      if (parameters.containsKey("name")) {
+        String name = parameters.get("name")[0];
+        query.put("$text", new BasicDBObject("$search", name));
+      } else {
+        for (Feature f : current.getFeatures()) {
+          array.add(f.getId());
+        }
+      }
+      filter.addAll(FeatureDAO.INSTANCE.find(query));
+      for (Feature f : current.getFeatures()) {
+        if (filter.contains(f)) array.add(f.getId());
+      }
+      return ok(json);
+      
     }
-    return ok("OK");
+    return status(404);
   }
 }

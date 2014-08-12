@@ -1,0 +1,26 @@
+@(rows : Html)
+<div class="org-feature-filter">
+  <h3 class="box-header"><i class="icon-filter"></i> Feature Filter
+    <a class="box-collapse pull-right" href="#" style="display: none;">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>
+    <a style="display: block;" class="box-expand pull-right" href="#">show&nbsp;&nbsp;<i class="icon-caret-down"></i></a>
+  </h3>
+  
+  <div class="box no-border no-padding" style="display: none;">
+  <form class="form-search form-inline">
+    
+    <input type="text" id="feature_name" name="name" placeholder="Feature Name">
+    
+    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("feature")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+  </form>  
+  </div>
+</div>
+<table class="org-feature table table-striped">
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th>Operation</th>
+      <th>Action</th>
+    </tr>
+    @rows
+  </tbody>
+</table>

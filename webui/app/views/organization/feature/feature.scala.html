@@ -1,0 +1,19 @@
+@(feature: org.ats.component.usersmgt.feature.Feature, operations: List[org.ats.component.usersmgt.feature.Operation])
+<tr class="feature feature-@feature.getId()">
+  <td rowspan="@feature.getOperations().size()"><span class="badge badge-blue">@feature.getName()</span></td>
+  @if(operations.size() > 0) {
+    @defining(operations.get(0)) { op =>
+      <td><span class="badge badge-green">@op.getName()</span></td>
+    }
+    
+    @if(!feature.getBoolean("system")) {
+      <td rowspan="@feature.getOperations().size()"><a class="btn btn-mini btn-red">Disable</a></td>  
+    }  
+  }
+</tr>
+
+@for(i <- 1 until operations.size()) {
+  <tr class="feature feature-@feature.getId()">
+    <td><span class="badge badge-green">@operations.get(i).getName()</span></td>
+  </tr>
+}

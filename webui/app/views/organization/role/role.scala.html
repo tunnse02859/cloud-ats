@@ -1,0 +1,35 @@
+@(role: org.ats.component.usersmgt.role.Role, permissions: List[org.ats.component.usersmgt.role.Permission])
+<tr class="role role-@role.getId()">
+  <td rowspan="@permissions.size()"><span class="badge badge-primary">@role.getString("name")</span></td>
+  @if(permissions.size() > 0) {
+    @defining(permissions.get(0)) { per =>
+      <td><span class="badge badge-orange">@per.getFeature().getName()</span></td>
+      <td style="border-left: none;"><span class="badge badge-cyan">@per.getOpertion().getName()</span></td>
+      
+      <td style="border-left: none;">
+      @if(!role.getBoolean("system")){
+        <a class="btn btn-red btn-mini" title="Remove Permission">X</a>
+      }
+      </td>
+    }
+  }
+  <td rowspan="@permissions.size()">
+  @if(!role.getBoolean("system")){
+    <a class="btn btn-blue btn-mini">Edit</a>
+    <a class="btn btn-red btn-mini">Delete</a>
+  }
+  </td>
+</tr>
+
+@for(i <- 1 until permissions.size()) {
+  
+  <tr class="role role-@role.getId()">
+    <td><span class="badge badge-orange">@permissions.get(i).getFeature().getName()</span></td>
+    <td style="border-left: none;"><span class="badge badge-cyan">@permissions.get(i).getOpertion().getName()</span></td>
+    <td style="border-left: none;">
+    @if(!role.getBoolean("system")){
+      <a class="btn btn-red btn-mini" title="Remove Permission">X</a>
+    }
+    </td>
+  </tr>
+}

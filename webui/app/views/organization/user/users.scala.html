@@ -1,0 +1,30 @@
+@(rows : Html, system: Boolean)
+<div class="org-user-filter">
+  <h3 class="box-header"><i class="icon-filter"></i> User Filter
+    <a class="box-collapse pull-right" href="#" style="display: none;">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>
+    <a style="display: block;" class="box-expand pull-right" href="#">show&nbsp;&nbsp;<i class="icon-caret-down"></i></a>
+  </h3>
+  
+  <div class="box no-border no-padding" style="display: none;">
+  <form class="form-search form-inline">
+    
+    <input type="text" id="email" name="email" placeholder="Email">
+     
+    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("user")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+  </form>  
+  </div>
+</div>
+<table class="org-user table table-striped">
+  <tbody>
+    <tr>
+      <th>Avatar</th>
+      <th>Email</th>
+      @if(!system) {
+      <th>Roles</th>
+      }
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+    @rows
+  </tbody>
+</table>

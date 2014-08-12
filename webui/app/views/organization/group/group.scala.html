@@ -1,4 +1,3 @@
-@**(name: String, level: String, children: Int, users: Int, features: Int, roles: Int)**@
 @(group: org.ats.component.usersmgt.group.Group)
 <tr class="group" id="group-@group.getId()">
   <td class='group-name'>
@@ -14,8 +13,8 @@
   <td class='group-feature'><span class="badge badge-green">@group.getFeatures().size()</span></td>
   <td class='group-role'><span class="badge badge-orange">@group.getRoles().size()</span></td>
   <td class='group-action'>
-    <a class='btn btn-mini btn-blue'>Update</a>
     @if(!group.getBoolean("system")){
+    <a class='btn btn-mini btn-blue'>Update</a>
     <a class='btn btn-mini btn-red'>Delete</a>
     }
   </td>

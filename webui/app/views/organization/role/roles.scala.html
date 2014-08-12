@@ -1,0 +1,27 @@
+@(rows : Html)
+<div class="org-role-filter">
+  <h3 class="box-header"><i class="icon-filter"></i> Role Filter & Action
+    <a class="box-collapse pull-right" href="#" style="display: none;">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>
+    <a style="display: block;" class="box-expand pull-right" href="#">show&nbsp;&nbsp;<i class="icon-caret-down"></i></a>
+  </h3>
+  
+  <div class="box no-border no-padding" style="display: none;">
+  <form class="form-search form-inline">
+    
+    <input type="text" id="role_name" name="name" placeholder="Role Name">
+    
+    <a href="#" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Role</a> 
+    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("role")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+  </form>  
+  </div>
+</div>
+<table class="org-role table table-bordered">
+  <tbody>
+    <tr>
+      <th>Name</th>
+      <th colspan="3">Permission</th>
+      <th>Action</th>
+    </tr>
+    @rows
+  </tbody>
+</table>

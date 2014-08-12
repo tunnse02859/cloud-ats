@@ -112,7 +112,7 @@ public class Application extends Controller {
     }
     
     User user = users.iterator().next();
-    if (user.getString("password").equals(password)) {
+    if (user.getString("password").equals(password) && user.getBoolean("active")) {
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
       return redirect(controllers.routes.Application.main());
@@ -148,41 +148,105 @@ public class Application extends Controller {
     String password = form.get("password");
     
     Feature organization = new Feature("Organization");
+    organization.put("system", true);
     
     Operation ad = new Operation("Administration");
     organization.addOperation(ad);
-    
-    FeatureDAO.INSTANCE.create(organization);
-    OperationDAO.INSANCE.create(ad);
     
     Group system = new Group("System Admin");
     system.put("system", true);
     system.put("level", 0);
     system.addFeature(organization);
     
-    User user = new User(email, email);
-    user.put("system", true);
-    user.put("password", password);
-    user.joinGroup(system);
-    UserDAO.INSTANCE.create(user);
+    User root = new User(email, email);
+    root.put("system", true);
+    root.put("password", password);
+    root.joinGroup(system);
     
-    system.addUser(user);
+    system.addUser(root);
     
     Role administration = new Role("Administration", system.getId());
-    Permission per = null;
-    
-    administration.addPermission(per = new Permission(organization.getId(), ad.getId()));
-    PermissionDAO.INSTANCE.create(per);
-    
-    administration.addUser(user);
-    
-    user.addRole(administration);
-    
+    administration.put("system", true);
+    administration.addPermission(new Permission(organization.getId(), ad.getId()));
+    administration.addUser(root);
+    root.addRole(administration);
     system.addRole(administration);
-    
+
+    //persist
+    FeatureDAO.INSTANCE.create(organization);
+    OperationDAO.INSANCE.create(ad);
+    UserDAO.INSTANCE.create(root);
     GroupDAO.INSTANCE.create(system);
     RoleDAO.INSTANCE.create(administration);
     
+    initMockData(root, system);
+    
     return redirect(controllers.routes.Application.index());
+  }
+  
+  private static void initMockData(User rootUser, Group rootGroup) throws UserManagementException {
+    Feature foo = new Feature("Foo Feature");
+    Operation of1 = new Operation("Foo Action 1");
+    Operation of2 = new Operation("Foo Action 2");
+    Operation of3 = new Operation("Foo Action 3");
+    foo.addOperation(of1);
+    foo.addOperation(of2);
+    foo.addOperation(of3);
+    
+    Feature bar = new Feature("Bar Feature");
+    Operation ob1 = new Operation("Bar Action 1");
+    Operation ob2 = new Operation("Bar Action 2");
+    Operation ob3 = new Operation("Bar Action 3");
+    bar.addOperation(ob1);
+    bar.addOperation(ob2);
+    bar.addOperation(ob3);
+    
+    Feature juu  = new Feature("Juu Feature");
+    Operation oj1 = new Operation("Juu Action 1");
+    Operation oj2 = new Operation("Juu Action 2");
+    Operation oj3 = new Operation("Juu Action 3");
+    juu.addOperation(oj1);
+    juu.addOperation(oj2);
+    juu.addOperation(oj3);
+    
+    FeatureDAO.INSTANCE.create(foo, bar, juu);
+    OperationDAO.INSANCE.create(of1, of2, of3, ob1, ob2, ob3, oj1, oj2, oj3);
+    
+    rootGroup.addFeature(foo);
+    rootGroup.addFeature(bar);
+    rootGroup.addFeature(juu);
+    
+    Role fooRole = new Role("Foo Role", rootGroup.getId());
+    fooRole.addPermission(new Permission(foo.getId(), of1.getId()));
+    fooRole.addPermission(new Permission(foo.getId(), of2.getId()));
+    fooRole.addPermission(new Permission(foo.getId(), of3.getId()));
+    
+    Role barRole = new Role("Bar Role", rootGroup.getId());
+    barRole.addPermission(new Permission(bar.getId(), ob1.getId()));
+    barRole.addPermission(new Permission(bar.getId(), ob2.getId()));
+    barRole.addPermission(new Permission(bar.getId(), ob3.getId()));
+    
+    Role juuRole = new Role("Juu Role", rootGroup.getId());
+    juuRole.addPermission(new Permission(juu.getId(), oj1.getId()));
+    juuRole.addPermission(new Permission(juu.getId(), oj2.getId()));
+    juuRole.addPermission(new Permission(juu.getId(), oj3.getId()));
+    
+    Role mixRole = new Role("Mix Role", rootGroup.getId());
+    mixRole.addPermission(new Permission(foo.getId(), of1.getId()));
+    mixRole.addPermission(new Permission(bar.getId(), ob2.getId()));
+    mixRole.addPermission(new Permission(juu.getId(), oj3.getId()));
+    
+    
+    rootGroup.addRole(fooRole);
+    rootGroup.addRole(barRole);
+    rootGroup.addRole(juuRole);
+    rootGroup.addRole(mixRole);
+
+    rootUser.addRole(fooRole);
+    rootUser.addRole(barRole);
+    
+    RoleDAO.INSTANCE.create(fooRole, barRole, juuRole, mixRole);
+    GroupDAO.INSTANCE.update(rootGroup);
+    UserDAO.INSTANCE.update(rootUser);
   }
 }

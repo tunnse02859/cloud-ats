@@ -70,4 +70,10 @@ $(document).ready(function(){
       }
     });
   });
+  
+  $("#main").on("keypress", ".org-group-filter .form-search input", function(e) {
+    if (e.which == 13) {
+      $(this).parent().find("a.filter").click();
+    }
+  });
 });

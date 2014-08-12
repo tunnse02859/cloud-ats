@@ -1,0 +1,32 @@
+@(user: org.ats.component.usersmgt.user.User, system: Boolean)
+<tr class="user" id="user-@user.getId()">
+  <td><img src="/assets/images/avatar.png"></td>
+  <td><span class="badge badge-primary">@user.getString("email")</span></td>
+  @if(!system){
+  <td>
+    @for(role <- user.getRoles()){
+      <a>@role.getString("name")</a>
+    }
+  </td>
+  }
+  <td>
+  @if(user.getBoolean("active")){
+    <span class="badge badge-primary">Active</span>
+  } else {
+    <span class="badge badge-red">Inactive</span>
+  }
+  </td>
+  <td>
+  @if(user.getBoolean("active")){
+    @if(!user.getBoolean("system")) {
+    <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Inactive</a>
+    }
+  }else {
+    <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Active</a>
+  }
+  
+  @if(!user.getBoolean("system")) {
+    <a href="javascript:void(0);" class="btn btn-mini btn-red">Remove</a>
+  }  
+  </td>
+</tr>
