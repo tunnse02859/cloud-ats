@@ -47,10 +47,8 @@ public class RoleDAOTest {
     OperationDAO.INSANCE.create(o2);
     OperationDAO.INSANCE.create(o3);
     
-    Permission perm1 = new Permission(f.getId(), o3.getId());
     role = new Role("Readonly", "fake");
-    role.addPermission(perm1);
-    PermissionDAO.INSTANCE.create(perm1);
+    role.addPermission(new Permission(f.getId(), o3.getId()));
     RoleDAO.INSTANCE.create(role);
   }
   

@@ -60,12 +60,9 @@ public class UserDAOTest {
     OperationDAO.INSANCE.create(o2);
     OperationDAO.INSANCE.create(o3);
     
-    Permission perm1 = new Permission(f.getId(), o3.getId());
-    
     Group sme = new Group("SME");
-
     Role role = new Role("Readonly", sme.getId());
-    role.addPermission(perm1);
+    role.addPermission(new Permission(f.getId(), o3.getId()));
     
     Group cloud = new Group("Cloud");
     sme.addGroupChild(cloud);
@@ -77,7 +74,6 @@ public class UserDAOTest {
     sme.addRole(role);
     
 
-    PermissionDAO.INSTANCE.create(perm1);
     RoleDAO.INSTANCE.create(role);
     
     User user = new User("HaiNT", "haint21@fsoft.com");

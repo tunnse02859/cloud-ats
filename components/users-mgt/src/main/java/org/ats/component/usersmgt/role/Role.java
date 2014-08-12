@@ -45,6 +45,12 @@ public class Role extends BaseObject<Role> {
   }
   
   public void addPermission(Permission permission) {
+    try {
+      PermissionDAO.INSTANCE.create(permission);
+    } catch (UserManagementException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
     this.addPermission(permission.getId());
   }
   
