@@ -39,8 +39,15 @@ public abstract class ManagementDAO<T extends BaseObject<T>> {
   public boolean create(T ... obj) throws UserManagementException {
     DB db = DataFactory.getDatabase(dbName);
     DBCollection col = db.getCollection(colName);
-    col.ensureIndex(new BasicDBObject("name", "text"), "MyIndex");
     WriteResult result = col.insert(obj, WriteConcern.ACKNOWLEDGED);
+    boolean exist = false;
+    for (DBObject index : col.getIndexInfo()) {
+      if ((colName + "Index").equals(index.get("name"))) exist = true;
+    }
+    if (!exist) {
+      col.ensureIndex(new BasicDBObject("name", "text"), colName + "Index");
+      System.out.println("create " + colName + "Index");
+    }
     return result.getError() == null;
   }
 
