@@ -3,6 +3,8 @@
  */
 package org.ats.component.usersmgt.group;
 
+import java.util.LinkedList;
+
 import junit.framework.Assert;
 
 import org.ats.component.usersmgt.DataFactory;
@@ -139,6 +141,42 @@ public class GroupDAOTest {
     
     Assert.assertNull(GroupDAO.INSTANCE.findOne(mobile.getId()));
     Assert.assertNull(RoleDAO.INSTANCE.findOne(role2.getId()));
+  }
+  
+  @Test
+  public void testParentTree() throws UserManagementException {
+    Group g1  = new Group("g1");
+    
+    Group g1_1 = new Group("g1_1");
+    Group g1_2 = new Group("g1_2");
+    Group g1_3 = new Group("g1_3");
+    
+    g1.addGroupChild(g1_1);
+    g1.addGroupChild(g1_2);
+    g1.addGroupChild(g1_3);
+    
+    Group g1_1_1 = new Group("g1_1_1");
+    g1_1.addGroupChild(g1_1_1);
+    
+    Group g1_2_1 = new Group("g1_2_1");
+    g1_2.addGroupChild(g1_2_1);
+    
+    Group g1_3_1 = new Group("g1_3_1");
+    g1_3.addGroupChild(g1_3_1);
+    
+    GroupDAO.INSTANCE.create(g1, g1_1, g1_1_1, g1_2, g1_2_1, g1_3, g1_3_1);
+
+    LinkedList<Group> tree = g1_1_1.buildParentTree();
+    Assert.assertEquals(g1, tree.get(0));
+    Assert.assertEquals(g1_1, tree.get(1));
+    
+    tree = g1_2_1.buildParentTree();
+    Assert.assertEquals(g1, tree.get(0));
+    Assert.assertEquals(g1_2, tree.get(1));
+    
+    tree = g1_3_1.buildParentTree();
+    Assert.assertEquals(g1, tree.get(0));
+    Assert.assertEquals(g1_3, tree.get(1));
   }
   
   @After

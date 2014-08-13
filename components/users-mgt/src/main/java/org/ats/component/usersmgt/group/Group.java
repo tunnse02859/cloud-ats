@@ -3,9 +3,12 @@
  */
 package org.ats.component.usersmgt.group;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.ats.component.usersmgt.BaseObject;
 import org.ats.component.usersmgt.UserManagementException;
@@ -16,6 +19,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 /**
@@ -152,6 +156,22 @@ public class Group extends BaseObject<Group> {
       this.put("group_children_ids", sb.toString());
     } else {
       this.put("group_children_ids", childId);
+    }
+  }
+  
+  public LinkedList<Group> buildParentTree() throws UserManagementException {
+    LinkedList<Group> tree = new LinkedList<Group>();
+    this.buildParentTree(tree, this);
+    return tree;
+  }
+  
+  private void buildParentTree(LinkedList<Group> tree, Group current) throws UserManagementException {
+    Pattern p = Pattern.compile(current.getId());
+    Collection<Group> col = GroupDAO.INSTANCE.find(new BasicDBObject("group_children_ids", p));
+    if (!col.isEmpty() && col.size() == 1) {
+      current = GroupDAO.INSTANCE.findOne(col.iterator().next().getId());
+      tree.addFirst(current);
+      this.buildParentTree(tree, current);
     }
   }
   
