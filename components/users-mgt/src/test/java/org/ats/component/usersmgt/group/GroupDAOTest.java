@@ -177,6 +177,8 @@ public class GroupDAOTest {
     tree = g1_3_1.buildParentTree();
     Assert.assertEquals(g1, tree.get(0));
     Assert.assertEquals(g1_3, tree.get(1));
+    
+    Assert.assertEquals(6, g1.getAllChildren().size());
   }
   
   @After

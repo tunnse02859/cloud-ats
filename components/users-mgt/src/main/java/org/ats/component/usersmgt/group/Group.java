@@ -209,6 +209,22 @@ public class Group extends BaseObject<Group> {
     return children;
   }
   
+  public Set<Group> getAllChildren() {
+    Set<Group> children = new HashSet<Group>();
+    this.getAllChildren(children, this);
+    return children;
+  }
+  
+  private void getAllChildren(Set<Group> holder, Group parent) {
+    Set<Group> children = parent.getGroupChildren();
+    if (!children.isEmpty()) {
+      holder.addAll(children);
+      for (Group g : children) {
+        this.getAllChildren(holder, g);
+      }
+    }
+  }
+  
   public void addFeature(Feature feature) {
     this.addFeature(feature.getId());
   }
