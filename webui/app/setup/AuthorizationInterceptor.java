@@ -4,20 +4,20 @@
 package setup;
 
 import play.libs.F.Promise;
-import play.mvc.Action.Simple;
+import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.SimpleResult;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
- * Aug 4, 2014
+ * Aug 13, 2014
  */
-public class OperationInterceptor extends Simple {
+public class AuthorizationInterceptor extends Action<Authorization> {
 
   @Override
-  public Promise<SimpleResult> call(Context arg0) throws Throwable {
-    return null;
+  public Promise<SimpleResult> call(Context ctx) throws Throwable {
+    return delegate.call(ctx);
   }
 
 }

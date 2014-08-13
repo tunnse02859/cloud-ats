@@ -27,4 +27,5 @@ public class Global extends GlobalSettings {
     EventExecutor.INSTANCE.stop();
     Logger.info("Application shutdown...");
   }
+
 }

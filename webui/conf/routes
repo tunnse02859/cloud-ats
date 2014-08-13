@@ -15,20 +15,26 @@ POST    /signin                          controllers.Application.doSignin()
 
 GET     /signout                         controllers.Application.signout()
 
-GET     /main                            controllers.Application.main()
+GET     /portal                          controllers.Application.main()
 
 GET     /*path/                          controllers.Application.untrail(path: String)
 
 ############################# Organization ###############################
 
-GET     /main/organization               controllers.Organization.index()
-GET     /main/organization/body          controllers.Organization.body()
-GET     /main/organization/ajax          controllers.Organization.indexAjax()
-GET     /main/organization/filter/:nav   controllers.Organization.filter(nav)
+GET     /portal/o               controllers.Organization.index()
+GET     /portal/o/b             controllers.Organization.body()
+GET     /portal/o/aj            controllers.Organization.indexAjax()
+GET     /portal/o/fl/:nav       controllers.Organization.filter(nav)
+
+############################# Group Action ###############################
+
+GET     /portal/o/g/n           controllers.GroupAction.newGroup()
+GET     /portal/o/g/n/c         controllers.GroupAction.doCreate()
+GET     /portal/o/g/n/b         controllers.GroupAction.newGroupBody()
 
 ############################# Dashboard ##################################
 
-GET     /main/body                       controllers.Dashboard.body()
+GET     /portal/dashboard                       controllers.Dashboard.body()
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

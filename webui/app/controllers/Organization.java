@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,8 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import setup.AuthenticatedInterceptor;
+import setup.AuthenticationInterceptor;
+import setup.Authorization;
 import setup.WizardInterceptor;
 import views.html.organization.*;
 import views.html.organization.group.*;
@@ -48,7 +50,8 @@ import views.html.organization.feature.*;
  *
  * Aug 4, 2014
  */
-@With({WizardInterceptor.class, AuthenticatedInterceptor.class})
+@With({WizardInterceptor.class, AuthenticationInterceptor.class})
+@Authorization(feature = "Organization", operation = "Administration")
 public class Organization extends Controller {
 
   /**
@@ -91,9 +94,11 @@ public class Organization extends Controller {
     if (parameters.containsKey("group")) {
        current = GroupDAO.INSTANCE.findOne(parameters.get("group")[0]);
       session().put("group_id", current.getId());
-    } else {
+    } else if (session("group_id") == null) {
       current = getDefaultGroup().iterator().next();
       session().put("group_id", current.getId());
+    } else {
+      current = GroupDAO.INSTANCE.findOne(session("group_id"));
     }
     
     ObjectNode json = Json.newObject();
@@ -107,6 +112,7 @@ public class Organization extends Controller {
     json.put("breadcrumb", breadcrumb.toString());
     json.put("leftmenu", leftMenu.toString());
     json.put("body", body.toString());
+    json.put("group", current.getId());
     
     return ok(json);
   }
@@ -138,10 +144,10 @@ public class Organization extends Controller {
       StringBuilder sb = new StringBuilder();
       List<User> all = listUserVisible();
       for (User u : all) {
-        sb.append(user.render(u, currentUser.getBoolean("system")));
+        sb.append(user.render(u));
       }
       
-      return users.render(new Html(sb), currentUser.getBoolean("system"));
+      return users.render(new Html(sb));
           
     } else if ("role".equals(nav)) {
       StringBuilder sb = new StringBuilder();
@@ -171,7 +177,7 @@ public class Organization extends Controller {
     if (current.getBoolean("system")) {
       all = new ArrayList<Group>(GroupDAO.INSTANCE.find(new BasicDBObject()));
     }  else {
-      all = new ArrayList<Group>(current.getGroupChildren());
+      all = new ArrayList<Group>(current.getAllChildren());
     }
     
     Collections.sort(all, new Comparator<Group>() {
@@ -203,7 +209,7 @@ public class Organization extends Controller {
    * @return The set of groups with highest level.
    * @throws UserManagementException
    */
-  private static Collection<Group> getDefaultGroup() throws UserManagementException {
+  public static Collection<Group> getDefaultGroup() throws UserManagementException {
     User user = UserDAO.INSTANCE.findOne(session("user_id"));
     if (user.getBoolean("system")) {
       return GroupDAO.INSTANCE.find(new BasicDBObject("system", true));
@@ -229,18 +235,25 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Html groupBreadcrumb(String nav) throws UserManagementException {
-    User user = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
     
     StringBuilder sb = new StringBuilder();
     if (current.getBoolean("system")) {
       sb.append("<li class='active'>").append(current.get("name")).append("</li>");
       return new Html(sb);
-    } else if (user.getBoolean("system")) {
+    } else if (currentUser.getBoolean("system")) {
       Group sys = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
       String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + sys.getId();
       String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + sys.getId();
       sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(sys.get("name")).append("</a> <span class='divider'>/</span></li>");
+    }
+    
+    LinkedList<Group> parents = current.buildParentTree();
+    for (Group p : parents) {
+      String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
+      String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
+      sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name")).append("</a> <span class='divider'>/</span></li>");
     }
     sb.append("<li class='active'>").append(current.get("name")).append("</li>");
     return new Html(sb);
@@ -262,7 +275,7 @@ public class Organization extends Controller {
       if (current.getBoolean("system")) {
         return GroupDAO.INSTANCE.count();
       }
-      return current.getGroupChildren().size();
+      return current.getAllChildren().size();
     } 
     else if ("user".equals(nav)) {
       if (current.getBoolean("system")) {

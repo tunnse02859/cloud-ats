@@ -1,0 +1,19 @@
+@(features: Set[org.ats.component.usersmgt.feature.Feature])
+<form class="form-horizontal org-group-new">
+  <fieldset>
+    <legend>Create Child Group</legend>
+		<input type="text" id="newgroupname" name="name" placeholder="Group Name">
+	</fieldset>
+	<fieldset>
+	  <legend>Features</legend>
+	</fieldset>
+	@for(feature <- features){
+	  <input type="checkbox" value="@feature.getId()" name="feature" checked="checked"
+	   @if(feature.getName() == "Organization") { disabled="disabled" } 
+	  >
+	  <span class="badge badge-blue">@feature.getName()</span><br>
+	}
+	<div class="form-actions">
+	 <a href="javascript:void(0);" ajax-url="@controllers.routes.GroupAction.doCreate()" class="create btn btn-primary">Create</a>
+	</div>
+</form>

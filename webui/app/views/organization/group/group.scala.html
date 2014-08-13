@@ -2,17 +2,21 @@
 <tr class="group" id="group-@group.getId()">
   <td class='group-name'>
     <a href="@controllers.routes.Organization.index()?nav=group&group=@group.getId()"
-        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()"
-      >
+        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()">
     @group.getString("name")</a>
   </td>
-    
-  <td class='group-level'><span class="badge badge-cyan">@group.getString("level")</span></td>
-  <td class='group-children'><span class="badge badge-primary">@group.getGroupChildren().size()</span></td>
-  <td class='group-user'><span class="badge badge-pink">@group.getUsers().size()</span></td>
-  <td class='group-feature'><span class="badge badge-green">@group.getFeatures().size()</span></td>
-  <td class='group-role'><span class="badge badge-orange">@group.getRoles().size()</span></td>
-  <td class='group-action'>
+  <td class="group-ancestor">
+    @for(g <- group.buildParentTree()) {
+      / 
+      <a href="@controllers.routes.Organization.index()?nav=group&group=@g.getId()"
+        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@g.getId()">
+      @g.getString("name")</a> 
+    }
+  </td>
+  <td><span class="badge badge-cyan">@group.getString("level")</span></td>
+  <td><span class="badge badge-primary">@group.getAllChildren().size()</span></td>
+  <td><span class="badge badge-pink">@group.getUsers().size()</span></td>
+  <td>
     @if(!group.getBoolean("system")){
     <a class='btn btn-mini btn-blue'>Update</a>
     <a class='btn btn-mini btn-red'>Delete</a>

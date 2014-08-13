@@ -13,7 +13,6 @@ import org.ats.component.usersmgt.feature.OperationDAO;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Permission;
-import org.ats.component.usersmgt.role.PermissionDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
@@ -26,7 +25,7 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import setup.AuthenticatedInterceptor;
+import setup.AuthenticationInterceptor;
 import setup.WizardInterceptor;
 import views.html.*;
 
@@ -66,7 +65,10 @@ public class Application extends Controller {
       admin.joinGroup(company);
       
       Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
-      company.addFeature(organization);
+      
+      for (Feature f : FeatureDAO.INSTANCE.find(new BasicDBObject())) {
+        company.addFeature(f);  
+      }
       
       Role administration = new Role("Administration", company.getId());
       company.addRole(administration);
@@ -131,7 +133,7 @@ public class Application extends Controller {
     return movedPermanently("/" + path);
   }
   
-  @With(AuthenticatedInterceptor.class)
+  @With(AuthenticationInterceptor.class)
   public static Result main() {
     return ok(main.render());
   }

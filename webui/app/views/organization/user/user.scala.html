@@ -1,14 +1,13 @@
-@(user: org.ats.component.usersmgt.user.User, system: Boolean)
+@(user: org.ats.component.usersmgt.user.User)
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td><span class="badge badge-primary">@user.getString("email")</span></td>
-  @if(!system){
-  <td>
+  <td class="user-role">
     @for(role <- user.getRoles()){
-      <a>@role.getString("name")</a>
+      <a href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
+        ajax-url="@controllers.routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
     }
   </td>
-  }
   <td>
   @if(user.getBoolean("active")){
     <span class="badge badge-primary">Active</span>
@@ -17,16 +16,13 @@
   }
   </td>
   <td>
+  @if(session().get("user_id") != user.getId()) {
   @if(user.getBoolean("active")){
-    @if(!user.getBoolean("system")) {
     <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Inactive</a>
-    }
   }else {
     <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Active</a>
   }
-  
-  @if(!user.getBoolean("system")) {
     <a href="javascript:void(0);" class="btn btn-mini btn-red">Remove</a>
-  }  
+  }
   </td>
 </tr>

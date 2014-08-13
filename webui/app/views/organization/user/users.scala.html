@@ -1,4 +1,4 @@
-@(rows : Html, system: Boolean)
+@(rows : Html)
 <div class="org-user-filter">
   <h3 class="box-header"><i class="icon-filter"></i> User Filter
     <a class="box-collapse pull-right" href="#" style="display: none;">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>
@@ -19,9 +19,7 @@
     <tr>
       <th>Avatar</th>
       <th>Email</th>
-      @if(!system) {
       <th>Roles</th>
-      }
       <th>Status</th>
       <th>Action</th>
     </tr>
