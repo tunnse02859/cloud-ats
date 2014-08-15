@@ -28,11 +28,11 @@
   
   @if(system && session().get("user_id") != user.getId()) {
     @if(user.getBoolean("active")){
-    <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Inactive</a>
+    <a href="@controllers.routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
     } else {
-    <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Active</a>
+    <a href="@controllers.routes.UserAction.active(user.getId())" class="btn btn-mini btn-cyan">Active</a>
     }
-    <a href="javascript:void(0);" class="btn btn-mini btn-red">Remove</a>
+    <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
   }
  
   @if(!system) {

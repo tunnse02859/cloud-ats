@@ -1,7 +1,7 @@
 /**
  * 
  */
-package setup;
+package interceptor;
 
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;

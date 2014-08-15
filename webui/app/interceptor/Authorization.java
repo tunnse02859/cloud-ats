@@ -1,7 +1,7 @@
 /**
  * 
  */
-package setup;
+package interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,8 +15,15 @@ import play.mvc.With;
  *
  * Aug 13, 2014
  */
-@With(WithoutSystemInterceptor.class)
+@With(AuthorizationInterceptor.class)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WithoutSystem {
+public @interface Authorization {
+  
+  /** .*/
+  String feature();
+  
+  /** .*/
+  String operation();
+  
 }

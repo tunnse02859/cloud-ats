@@ -3,6 +3,11 @@
  */
 package controllers;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WithoutSystem;
+import interceptor.WizardInterceptor;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,9 +16,12 @@ import java.util.regex.Pattern;
 
 import org.ats.component.usersmgt.EventExecutor;
 import org.ats.component.usersmgt.UserManagementException;
+import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
+import org.ats.component.usersmgt.feature.Operation;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
+import org.ats.component.usersmgt.role.Permission;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
@@ -25,10 +33,6 @@ import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import setup.AuthenticationInterceptor;
-import setup.Authorization;
-import setup.WithoutSystem;
-import setup.WizardInterceptor;
 import views.html.organization.*;
 import views.html.organization.group.*;
 
@@ -65,6 +69,18 @@ public class GroupAction extends Controller {
     for (String f : features) {
       group.addFeature(FeatureDAO.INSTANCE.findOne(f));
     }
+    
+    
+    Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
+    
+    Role administration = new Role("Administration", group.getId());
+    administration.put("system", true);
+    group.addRole(administration);
+    
+    for (Operation operation : organization.getOperations()) {
+      administration.addPermission(new Permission(organization.getId(), operation.getId()));
+    }
+    
     Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
     int level = current.getInt("level");
     group.put("level", level + 1);
@@ -72,6 +88,7 @@ public class GroupAction extends Controller {
     
     GroupDAO.INSTANCE.create(group);
     GroupDAO.INSTANCE.update(current);
+    RoleDAO.INSTANCE.create(administration);
     
     session().put("group_id", group.getId());
     

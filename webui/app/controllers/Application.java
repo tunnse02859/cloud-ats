@@ -3,6 +3,9 @@
  */
 package controllers;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.WizardInterceptor;
+
 import java.util.Collection;
 
 import org.ats.component.usersmgt.UserManagementException;
@@ -25,8 +28,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import setup.AuthenticationInterceptor;
-import setup.WizardInterceptor;
 import views.html.*;
 
 /**
@@ -72,6 +73,7 @@ public class Application extends Controller {
       }
       
       Role administration = new Role("Administration", company.getId());
+      administration.put("system", true);
       company.addRole(administration);
       
       for (Operation operation : organization.getOperations()) {

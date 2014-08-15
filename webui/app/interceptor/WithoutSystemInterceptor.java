@@ -1,7 +1,7 @@
 /**
  * 
  */
-package setup;
+package interceptor;
 
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;

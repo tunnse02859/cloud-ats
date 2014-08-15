@@ -1,4 +1,4 @@
-package setup;
+package interceptor;
 import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;

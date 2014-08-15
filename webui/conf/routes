@@ -39,6 +39,9 @@ GET     /portal/invite/:u/:r/:g controllers.Invitation.index(u, r, g)
 ############################## User Action ###############################
 
 GET     /portal/o/u/a/:u           controllers.UserAction.approve(u)
+GET     /portal/o/u/r/:u           controllers.UserAction.remove(u)
+GET     /portal/o/u/ina/:u         controllers.UserAction.inactive(u)
+GET     /portal/o/u/ac/:u          controllers.UserAction.active(u)
 
 ############################# Dashboard ##################################
 

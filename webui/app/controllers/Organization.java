@@ -3,6 +3,10 @@
  */
 package controllers;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WizardInterceptor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,9 +39,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import setup.AuthenticationInterceptor;
-import setup.Authorization;
-import setup.WizardInterceptor;
 import views.html.organization.*;
 import views.html.organization.group.*;
 import views.html.organization.user.*;
