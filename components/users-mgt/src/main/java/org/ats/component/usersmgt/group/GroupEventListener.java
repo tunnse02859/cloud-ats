@@ -31,6 +31,7 @@ public class GroupEventListener implements EventListener {
         this.processDeleteGroupInUser(event);
         this.processDeleteGroupInRole(event);
         this.processDeleteGroupChildren(event);
+        this.processDeleteGroupInParent(event);
       } catch (UserManagementException e) {
         e.printStackTrace();
       }
@@ -60,6 +61,15 @@ public class GroupEventListener implements EventListener {
     Set<Group> children = group.getGroupChildren();
     for (Group child : children) {
       GroupDAO.INSTANCE.delete(child);
+    }
+  }
+  
+  private void processDeleteGroupInParent(Event event) throws UserManagementException {
+    Group group = new Group(event.getSource());
+    Collection<Group> parents = GroupDAO.INSTANCE.find(new BasicDBObject("group_children_ids", Pattern.compile(group.getId())));
+    for (Group parent : parents) {
+      parent.removeGroupChild(group);
+      GroupDAO.INSTANCE.update(parent);
     }
   }
 }

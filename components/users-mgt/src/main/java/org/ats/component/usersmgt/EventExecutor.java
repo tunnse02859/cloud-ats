@@ -69,6 +69,7 @@ public class EventExecutor {
   }
 
   public void start() {
+    System.out.println("Start Event Executor");
     
     this.service = Executors.newSingleThreadScheduledExecutor();
     

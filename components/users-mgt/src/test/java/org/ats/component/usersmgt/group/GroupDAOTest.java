@@ -126,6 +126,15 @@ public class GroupDAOTest {
     mobile.addRole(role2);
     GroupDAO.INSTANCE.update(mobile);
     
+    //Delete child
+    GroupDAO.INSTANCE.delete(mobile);
+    //Wait until finish processing whole events
+    while(EventExecutor.INSTANCE.isInProgress()) {
+    }
+    this.group = GroupDAO.INSTANCE.findOne(this.group.getId());
+    
+    Assert.assertEquals(1, this.group.getAllChildren().size());
+    
     //Delete group parent
     GroupDAO.INSTANCE.delete(this.group);
   
