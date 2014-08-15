@@ -50,8 +50,6 @@ public class User extends BaseObject<User> {
   
   public void inActive() {
     this.put("active", false);
-    this.put("group_ids", null);
-    this.put("role_ids", null);
   }
   
   public void active() {

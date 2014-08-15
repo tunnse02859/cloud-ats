@@ -26,8 +26,6 @@ public class UserEventListener implements EventListener {
     try {
       if ("delete-user".equals(event.getType())) {
         this.processDeleteUserInGroup(event);
-      } else if ("inactive-user".equals(event.getType())) {
-        this.processInActiveUser(event);
       }
     } catch (UserManagementException e) {
       e.printStackTrace();
@@ -42,15 +40,5 @@ public class UserEventListener implements EventListener {
       group.removeUser(user);
       GroupDAO.INSTANCE.update(group);
     }
-  }
-  
-  private void processInActiveUser(Event event) throws UserManagementException {
-    //Leave groups
-    this.processDeleteUserInGroup(event);
-    
-    //Inactive user
-    User user = new User(event.getSource());
-    user.inActive();
-    UserDAO.INSTANCE.update(user);
   }
 }
