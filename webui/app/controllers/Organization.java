@@ -63,12 +63,15 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
+   
+    //Check right permission on group pass through query string
     if (requestGroupId != null) {
       User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
       if (currentUser.getBoolean("system")) {
         return GroupDAO.INSTANCE.findOne(requestGroupId);
       }
       
+      //Check have right administration permission on exactly group
       BasicDBObject query = new BasicDBObject("group_id", requestGroupId);
       query.put("name", "Administration");
       query.put("user_ids", Pattern.compile(currentUser.getId()));
@@ -78,15 +81,10 @@ public class Organization extends Controller {
         return GroupDAO.INSTANCE.findOne(requestGroupId);
       }
       
-      query.remove("group_id");
-      administration = RoleDAO.INSTANCE.find(query);
-      if (!administration.isEmpty()) {
-        for (Role r : administration) {
-          BasicDBObject q = new BasicDBObject("_id", r.get("group_id"));
-          q.append("group_children_ids", requestGroupId);
-          if (!GroupDAO.INSTANCE.find(q).isEmpty()) 
-            return GroupDAO.INSTANCE.findOne(requestGroupId);
-        }
+      //Or on parent group
+      Group requestGroup = GroupDAO.INSTANCE.findOne(requestGroupId);
+      for (Group g : getAministrationGroup(currentUser)) {
+        if (g.getAllChildren().contains(requestGroup)) return requestGroup;
       }
       
     }
@@ -124,17 +122,8 @@ public class Organization extends Controller {
   }
   
   public static Result body() throws UserManagementException {
-    Map<String, String[]> parameters = request().queryString();
-    Group current = null;
-    if (parameters.containsKey("group")) {
-       current = GroupDAO.INSTANCE.findOne(parameters.get("group")[0]);
-      session().put("group_id", current.getId());
-    } else if (session("group_id") == null) {
-      current = getDefaultGroup().iterator().next();
-      session().put("group_id", current.getId());
-    } else {
-      current = GroupDAO.INSTANCE.findOne(session("group_id"));
-    }
+    Group current = setCurrentGroup(request().getQueryString("group"));
+    session().put("group_id", current.getId());
     
     ObjectNode json = Json.newObject();
 
@@ -240,27 +229,42 @@ public class Organization extends Controller {
   }
   
   /**
-   * 
+   * Build a list of group have administration permission
    * @return The set of groups with highest level.
    * @throws UserManagementException
    */
   static Collection<Group> getDefaultGroup() throws UserManagementException {
     User user = UserDAO.INSTANCE.findOne(session("user_id"));
+    
     if (user.getBoolean("system")) {
       return GroupDAO.INSTANCE.find(new BasicDBObject("system", true));
-    } else {
-      List<Group> list = new ArrayList<Group>(user.getGroups());
-      Collections.sort(list, new Comparator<Group>() {
-        @Override
-        public int compare(Group o1, Group o2) {
-          int l1 = o1.getInt("level");
-          int l2 = o2.getInt("level");
-          return l1 - l2;
-        }
-      });
-      
-      return list;
     }
+    
+    return getAministrationGroup(user);
+  }
+  
+  static Collection<Group> getAministrationGroup(User user) throws UserManagementException {
+    List<Group> list = new ArrayList<Group>();
+    
+    for (Group g : user.getGroups()) {
+      BasicDBObject query = new BasicDBObject("name", "Administration");
+      query.put("group_id", g.getId());
+      query.put("user_ids", Pattern.compile(user.getId()));
+      if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
+        list.add(g);
+      }
+    }
+    
+    Collections.sort(list, new Comparator<Group>() {
+      @Override
+      public int compare(Group o1, Group o2) {
+        int l1 = o1.getInt("level");
+        int l2 = o2.getInt("level");
+        return l1 - l2;
+      }
+    });
+    
+    return list;
   }
   
   /**
@@ -285,10 +289,22 @@ public class Organization extends Controller {
     }
     
     LinkedList<Group> parents = current.buildParentTree();
+    Collection<Group> adGroup = getAministrationGroup(currentUser);
+    Set<Group> allChildren = new HashSet<Group>();
+    for (Group g : adGroup) {
+      allChildren.addAll(g.getAllChildren());
+    }
+    
     for (Group p : parents) {
-      String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
-      String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
-      sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name")).append("</a> <span class='divider'>/</span></li>");
+      if (adGroup.contains(p) || allChildren.contains(p)) {
+        String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
+        String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
+        sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name"));
+      } else {
+        sb.append("<li class='active'>").append(p.get("name")).append("</li>");
+      }
+      
+      sb.append("</a> <span class='divider'> / </span></li>");
     }
     sb.append("<li class='active'>").append(current.get("name")).append("</li>");
     return new Html(sb);

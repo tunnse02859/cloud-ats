@@ -39,16 +39,15 @@
     @if(!user.getBoolean("joined")) {
     <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
     } else {
-    <a href="javascript:void(0);" class="btn btn-mini btn-primary">Edit Role</a>
+    
+      @** You could not leave yourself  **@
       @if(session().get("user_id") != user.getId()) {
       <a href="javascript:void(0);" class="btn btn-mini btn-red">Leave</a>
       }
     }  
-  } else {
-    @if(session().get("user_id") == user.getId()) {
-      <a href="javascript:void(0);" class="btn btn-mini btn-primary">Edit Role</a>  
-    }
   }
+  
+  <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
   
   </td>
 </tr>

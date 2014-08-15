@@ -249,7 +249,10 @@ public class Application extends Controller {
     rootGroup.addRole(mixRole);
 
     rootUser.addRole(fooRole);
+    fooRole.addUser(rootUser);
+    
     rootUser.addRole(barRole);
+    barRole.addUser(rootUser);
     
     RoleDAO.INSTANCE.create(fooRole, barRole, juuRole, mixRole);
     GroupDAO.INSTANCE.update(rootGroup);

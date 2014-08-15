@@ -130,15 +130,17 @@ public class GroupAction extends Controller {
   }
   
   public static Result addUser() throws UserManagementException {
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
-    String[] users = request().queryString().get("user");
-    for (String u : users) {
-      User user = UserDAO.INSTANCE.findOne(u);
-      user.joinGroup(currentGroup);
-      currentGroup.addUser(user);
-      
-      UserDAO.INSTANCE.update(user);
-      GroupDAO.INSTANCE.update(currentGroup);
+    if (request().getQueryString("user") != null) {
+      Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+      String[] users = request().queryString().get("user");
+      for (String u : users) {
+        User user = UserDAO.INSTANCE.findOne(u);
+        user.joinGroup(currentGroup);
+        currentGroup.addUser(user);
+
+        UserDAO.INSTANCE.update(user);
+        GroupDAO.INSTANCE.update(currentGroup);
+      }
     }
     return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
