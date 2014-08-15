@@ -63,6 +63,7 @@ public class Application extends Controller {
       admin.put("password", adminPassword);
       company.addUser(admin.getId());
       admin.joinGroup(company);
+      admin.put("joined", true);
       
       Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
       
@@ -164,6 +165,7 @@ public class Application extends Controller {
     root.put("system", true);
     root.put("password", password);
     root.joinGroup(system);
+    root.put("joined", true);
     
     system.addUser(root);
     

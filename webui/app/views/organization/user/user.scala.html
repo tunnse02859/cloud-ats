@@ -1,4 +1,4 @@
-@(user: org.ats.component.usersmgt.user.User)
+@(user: org.ats.component.usersmgt.user.User, system: Boolean)
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td><span class="badge badge-primary">@user.getString("email")</span></td>
@@ -8,6 +8,15 @@
         ajax-url="@controllers.routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
     }
   </td>
+  @if(!system) {
+  <td>
+    @if(user.getBoolean("joined")) {
+      <span class="badge badge-green">Joined</span>
+    } else {
+      <span class="badge badge-orange">Pending</span>    
+    }
+  </td>    
+  }
   <td>
   @if(user.getBoolean("active")){
     <span class="badge badge-primary">Active</span>
@@ -16,13 +25,30 @@
   }
   </td>
   <td>
-  @if(session().get("user_id") != user.getId()) {
-  @if(user.getBoolean("active")){
+  
+  @if(system && session().get("user_id") != user.getId()) {
+    @if(user.getBoolean("active")){
     <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Inactive</a>
-  }else {
+    } else {
     <a href="javascript:void(0);" class="btn btn-mini btn-cyan">Active</a>
-  }
+    }
     <a href="javascript:void(0);" class="btn btn-mini btn-red">Remove</a>
   }
+ 
+  @if(!system) {
+    @if(!user.getBoolean("joined")) {
+    <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
+    } else {
+    <a href="javascript:void(0);" class="btn btn-mini btn-primary">Edit Role</a>
+      @if(session().get("user_id") != user.getId()) {
+      <a href="javascript:void(0);" class="btn btn-mini btn-red">Leave</a>
+      }
+    }  
+  } else {
+    @if(session().get("user_id") == user.getId()) {
+      <a href="javascript:void(0);" class="btn btn-mini btn-primary">Edit Role</a>  
+    }
+  }
+  
   </td>
 </tr>

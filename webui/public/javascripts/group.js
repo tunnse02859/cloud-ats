@@ -25,6 +25,9 @@ $(document).ready(function(){
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
+      },
+      error: function() {
+        location.reload();
       }
     });
     return false;
@@ -46,6 +49,9 @@ $(document).ready(function(){
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
+      },
+      error: function() {
+        location.reload();
       }
     });
     return false;
@@ -74,6 +80,9 @@ $(document).ready(function(){
         $(data.groups).each(function() {
           $("#group-" + this).show();
         });
+      },
+      error: function() {
+        location.reload();
       }
     });
   });
@@ -96,6 +105,9 @@ $(document).ready(function(){
       dataType: "html",
       success: function(data) {
         $(".org-body .org-right").html(data);
+      },
+      error: function() {
+        location.reload();
       }
     });
     return false;
@@ -121,6 +133,9 @@ $(document).ready(function(){
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
+      },
+      error: function() {
+        location.reload();
       }
     })
     return false;

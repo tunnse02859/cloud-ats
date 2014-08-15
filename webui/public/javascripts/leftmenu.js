@@ -12,6 +12,9 @@ $(document).ready(function() {
       dataType: "html",
       success: function(data) {
         $("#main.container").html(data);
+      },
+      error: function() {
+        location.reload();
       }
     });
     return false;

@@ -19,7 +19,7 @@
   <td>
     @if(!group.getBoolean("system")){
     <a class='btn btn-mini btn-blue'>Update</a>
-    <a class='btn btn-mini btn-red'>Delete</a>
+    <a href="@controllers.routes.GroupAction.deleteGroup(group.getId())" class='btn btn-mini btn-red'>Delete</a>
     }
   </td>
 </tr>

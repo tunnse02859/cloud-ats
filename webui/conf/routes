@@ -31,6 +31,14 @@ GET     /portal/o/fl/:nav       controllers.Organization.filter(nav)
 GET     /portal/o/g/n           controllers.GroupAction.newGroup()
 GET     /portal/o/g/n/c         controllers.GroupAction.doCreate()
 GET     /portal/o/g/n/b         controllers.GroupAction.newGroupBody()
+GET     /portal/o/g/i           controllers.GroupAction.invite()
+GET     /portal/o/g/a           controllers.GroupAction.addUser()
+GET     /portal/o/g/d/:g        controllers.GroupAction.deleteGroup(g)
+GET     /portal/invite/:u/:r/:g controllers.Invitation.index(u, r, g)
+
+############################## User Action ###############################
+
+GET     /portal/o/u/a/:u           controllers.UserAction.approve(u)
 
 ############################# Dashboard ##################################
 

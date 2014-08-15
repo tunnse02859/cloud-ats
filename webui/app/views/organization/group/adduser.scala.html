@@ -1,0 +1,11 @@
+@(users: Set[org.ats.component.usersmgt.user.User])
+<form class="form-horizontal" method="get" action="@controllers.routes.GroupAction.addUser()">
+  <legend>Add More User</legend>
+  @for(user <- users) {
+    <input type="checkbox" name="user" value="@user.getId()"><span class="badge badge-blue">@user.get("email")</span>
+    <br>
+  }
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">OK</button>
+  </div>
+</form>

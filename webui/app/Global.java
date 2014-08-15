@@ -1,4 +1,4 @@
-package setup;
+
 import org.ats.component.usersmgt.EventExecutor;
 
 import play.Application;

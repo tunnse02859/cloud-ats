@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
-import org.ats.component.usersmgt.feature.Operation;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Permission;
@@ -53,6 +52,49 @@ import views.html.organization.feature.*;
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 @Authorization(feature = "Organization", operation = "Administration")
 public class Organization extends Controller {
+  
+  /**
+   * Set session current group by group id pass through query string.
+   * Perform set if current user has right administration permission on this group 
+   * Or has right administration permission on parent of this group
+   * @param requestGroupId
+   * @return
+   * @throws UserManagementException
+   */
+  static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
+    if (requestGroupId != null) {
+      User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+      if (currentUser.getBoolean("system")) {
+        return GroupDAO.INSTANCE.findOne(requestGroupId);
+      }
+      
+      BasicDBObject query = new BasicDBObject("group_id", requestGroupId);
+      query.put("name", "Administration");
+      query.put("user_ids", Pattern.compile(currentUser.getId()));
+      Collection<Role> administration = RoleDAO.INSTANCE.find(query);
+      
+      if (!administration.isEmpty()) {
+        return GroupDAO.INSTANCE.findOne(requestGroupId);
+      }
+      
+      query.remove("group_id");
+      administration = RoleDAO.INSTANCE.find(query);
+      if (!administration.isEmpty()) {
+        for (Role r : administration) {
+          BasicDBObject q = new BasicDBObject("_id", r.get("group_id"));
+          q.append("group_children_ids", requestGroupId);
+          if (!GroupDAO.INSTANCE.find(q).isEmpty()) 
+            return GroupDAO.INSTANCE.findOne(requestGroupId);
+        }
+      }
+      
+    }
+    
+    if (session("group_id") == null) {
+      return getDefaultGroup().iterator().next();
+    }
+    return GroupDAO.INSTANCE.findOne(session("group_id"));
+  }
 
   /**
    * Present a full of content
@@ -60,15 +102,8 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Result index() throws UserManagementException {
-    Map<String, String[]> parameters = request().queryString();
-    Group current = null;
-    if (parameters.containsKey("group")) {
-      current = GroupDAO.INSTANCE.findOne(parameters.get("group")[0]);
-      session().put("group_id", current.getId());
-    } else {
-      current = getDefaultGroup().iterator().next();
-      session().put("group_id", current.getId());
-    }
+    Group current = setCurrentGroup(request().getQueryString("group"));
+    session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
     return ok(index.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), body, current.getId()));
@@ -80,8 +115,7 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Result indexAjax() throws UserManagementException {
-    //Default: current group is highest level group
-    Group current = getDefaultGroup().iterator().next();
+    Group current = setCurrentGroup(request().getQueryString("group"));
     session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
@@ -144,10 +178,10 @@ public class Organization extends Controller {
       StringBuilder sb = new StringBuilder();
       List<User> all = listUserVisible();
       for (User u : all) {
-        sb.append(user.render(u));
+        sb.append(user.render(u, currentUser.getBoolean("system")));
       }
       
-      return users.render(new Html(sb));
+      return users.render(new Html(sb), currentUser.getBoolean("system"));
           
     } else if ("role".equals(nav)) {
       StringBuilder sb = new StringBuilder();
@@ -158,7 +192,7 @@ public class Organization extends Controller {
     } else if ("feature".equals(nav)) {
       StringBuilder sb = new StringBuilder();
       for (Feature f : currentGroup.getFeatures()) {
-        sb.append(feature.render(f, new ArrayList<Operation>(f.getOperations())));
+        sb.append(feature.render(f, currentUser.getBoolean("system")));
       }
       return features.render(new Html(sb));
     }
@@ -209,7 +243,7 @@ public class Organization extends Controller {
    * @return The set of groups with highest level.
    * @throws UserManagementException
    */
-  public static Collection<Group> getDefaultGroup() throws UserManagementException {
+  static Collection<Group> getDefaultGroup() throws UserManagementException {
     User user = UserDAO.INSTANCE.findOne(session("user_id"));
     if (user.getBoolean("system")) {
       return GroupDAO.INSTANCE.find(new BasicDBObject("system", true));

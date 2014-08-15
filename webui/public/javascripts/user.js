@@ -21,6 +21,9 @@ $(document).ready(function() {
         $(data.users).each(function() {
           $("#user-" + this).show();
         });
+      },
+      error: function() {
+        location.reload();
       }
     });
   });

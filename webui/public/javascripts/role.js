@@ -21,6 +21,9 @@ $(document).ready(function() {
         $(data.roles).each(function() {
           $(".role-" + this).show();
         });
+      },
+      error: function() {
+        location.reload();
       }
     });
   });
