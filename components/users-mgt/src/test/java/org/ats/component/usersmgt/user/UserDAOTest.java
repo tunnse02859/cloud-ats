@@ -18,7 +18,6 @@ import org.ats.component.usersmgt.feature.OperationDAO;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Permission;
-import org.ats.component.usersmgt.role.PermissionDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 import org.junit.After;

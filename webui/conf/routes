@@ -44,6 +44,7 @@ GET     /portal/o/u/ina/:u         controllers.UserAction.inactive(u)
 GET     /portal/o/u/ac/:u          controllers.UserAction.active(u)
 GET     /portal/o/u/e/:u           controllers.UserAction.editRoleIndex(u)
 GET     /portal/o/u/de/:u          controllers.UserAction.doEditRole(u)
+GET     /portal/o/u/l/:u           controllers.UserAction.leaveCurrentGroup(u)
 
 ############################# Dashboard ##################################
 

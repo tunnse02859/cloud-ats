@@ -1,4 +1,4 @@
-@(user: org.ats.component.usersmgt.user.User, system: Boolean)
+@(user: org.ats.component.usersmgt.user.User, system: Boolean, currentRoles : Set[org.ats.component.usersmgt.role.Role])
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td>
@@ -8,8 +8,10 @@
   </td>
   <td class="user-role">
     @for(role <- user.getRoles()){
+      @if(currentRoles.contains(role)) {
       <a href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
         ajax-url="@controllers.routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
+      }
     }
   </td>
   @if(!system) {
@@ -46,7 +48,7 @@
     
       @** You could not leave yourself  **@
       @if(session().get("user_id") != user.getId()) {
-      <a href="javascript:void(0);" class="btn btn-mini btn-red">Leave</a>
+      <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
       }
     }  
   }

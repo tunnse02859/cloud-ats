@@ -9,9 +9,11 @@ import interceptor.WithSystem;
 import interceptor.WithoutSystem;
 import interceptor.WizardInterceptor;
 
+import org.ats.component.usersmgt.Event;
 import org.ats.component.usersmgt.EventExecutor;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
+import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
@@ -120,5 +122,26 @@ public class UserAction extends Controller {
       return user_.equals(currentUser);
     }
     return false;
+  }
+  
+  public static Result leaveCurrentGroup(String u) throws UserManagementException {
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    User user_ = UserDAO.INSTANCE.findOne(u);
+    user_.leaveGroup(currentGroup);
+    Event event = new Event(user_) {
+      @Override
+      public String getType() {
+        return "leave-group";
+      }
+    };
+    event.broadcast();
+    while(EventExecutor.INSTANCE.isInProgress()) {
+    }
+    user_ = UserDAO.INSTANCE.findOne(u);
+    if (user_.getGroups().size() == 0) {
+      user_.put("joined", false);
+      UserDAO.INSTANCE.update(user_);
+    }
+    return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
 }
