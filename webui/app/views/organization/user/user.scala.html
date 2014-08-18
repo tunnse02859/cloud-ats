@@ -1,7 +1,11 @@
 @(user: org.ats.component.usersmgt.user.User, system: Boolean)
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
-  <td><span class="badge badge-primary">@user.getString("email")</span></td>
+  <td>
+    <a href="@controllers.routes.Organization.index()?nav=user&group=@controllers.Organization.getHighestGroupBelong(user).getId()">
+    <span class="badge badge-primary">@user.getString("email")</span>
+    </a>
+  </td>
   <td class="user-role">
     @for(role <- user.getRoles()){
       <a href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
@@ -46,7 +50,7 @@
       }
     }  
   }
-  
+
   <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
   
   </td>

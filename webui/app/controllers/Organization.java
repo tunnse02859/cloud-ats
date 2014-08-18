@@ -131,7 +131,7 @@ public class Organization extends Controller {
     
     Html body = bodyComposite(request().queryString());
     
-    Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"));
+    Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
     
     json.put("breadcrumb", breadcrumb.toString());
     json.put("leftmenu", leftMenu.toString());
@@ -187,6 +187,19 @@ public class Organization extends Controller {
       return features.render(new Html(sb));
     }
     return null;
+  }
+  
+  public static Group getHighestGroupBelong(User u) throws UserManagementException {
+    List<Group> list = new ArrayList<Group>(u.getGroups());
+    Collections.sort(list, new Comparator<Group>() {
+      @Override
+      public int compare(Group o1, Group o2) {
+        int l1 = o1.getInt("level");
+        int l2 = o2.getInt("level");
+        return l2 - l1;
+      }
+    });
+    return list.get(0);
   }
   
   /**
@@ -273,13 +286,14 @@ public class Organization extends Controller {
    * @return
    * @throws UserManagementException
    */
-  public static Html groupBreadcrumb(String nav) throws UserManagementException {
+  public static Html groupBreadcrumb(String nav, String group_id) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group currentGroup = setCurrentGroup(group_id);
+    session().put("group_id", currentGroup.getId());
     
     StringBuilder sb = new StringBuilder();
-    if (current.getBoolean("system")) {
-      sb.append("<li class='active'>").append(current.get("name")).append("</li>");
+    if (currentGroup.getBoolean("system")) {
+      sb.append("<li class='active'>").append(currentGroup.get("name")).append("</li>");
       return new Html(sb);
     } else if (currentUser.getBoolean("system")) {
       Group sys = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
@@ -288,25 +302,36 @@ public class Organization extends Controller {
       sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(sys.get("name")).append("</a> <span class='divider'>/</span></li>");
     }
     
-    LinkedList<Group> parents = current.buildParentTree();
-    Collection<Group> adGroup = getAministrationGroup(currentUser);
-    Set<Group> allChildren = new HashSet<Group>();
-    for (Group g : adGroup) {
-      allChildren.addAll(g.getAllChildren());
-    }
+    LinkedList<Group> parents = currentGroup.buildParentTree();
     
-    for (Group p : parents) {
-      if (adGroup.contains(p) || allChildren.contains(p)) {
+    if (!currentUser.getBoolean("system")) {
+      //Prevent current user lookup parent group with no right permission
+      Collection<Group> adGroup = getAministrationGroup(currentUser);
+      Set<Group> allChildren = new HashSet<Group>();
+      for (Group g : adGroup) {
+        allChildren.addAll(g.getAllChildren());
+      }
+      
+      for (Group p : parents) {
+        if (adGroup.contains(p) || allChildren.contains(p)) {
+          String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
+          String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
+          sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name"));
+        } else {
+          sb.append("<li class='active'>").append(p.get("name")).append("</li>");
+        }
+        sb.append("</a> <span class='divider'> / </span></li>");
+      }
+    } else {
+      for (Group p : parents) {
         String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
         String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
         sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name"));
-      } else {
-        sb.append("<li class='active'>").append(p.get("name")).append("</li>");
+        sb.append("</a> <span class='divider'> / </span></li>");
       }
-      
-      sb.append("</a> <span class='divider'> / </span></li>");
     }
-    sb.append("<li class='active'>").append(current.get("name")).append("</li>");
+    
+    sb.append("<li class='active'>").append(currentGroup.get("name")).append("</li>");
     return new Html(sb);
   }
 

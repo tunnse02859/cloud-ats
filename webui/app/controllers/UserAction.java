@@ -72,6 +72,12 @@ public class UserAction extends Controller {
 
     User user_ = UserDAO.INSTANCE.findOne(u);
     
+    if (currentGroup.getBoolean("system")) {
+      Group group = Organization.getHighestGroupBelong(user_);
+      Html body = editrole.render(user_, group);
+      return ok(index.render("user" , body, group.getId()));
+    }
+    
     Html body = editrole.render(user_, currentGroup);
     return ok(index.render("user" , body, currentGroup.getId()));
   }
