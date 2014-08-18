@@ -26,16 +26,20 @@ import com.mongodb.BasicDBObject;
 public class GroupEventListener implements EventListener {
 
   public void execute(Event event) throws EventExecutedException {
-    if ("delete-group".equals(event.getType())) {
-      try {
+    try {
+      if ("delete-group".equals(event.getType())) {
         this.processDeleteGroupInUser(event);
         this.processDeleteGroupInRole(event);
         this.processDeleteGroupChildren(event);
         this.processDeleteGroupInParent(event);
-      } catch (UserManagementException e) {
-        e.printStackTrace();
       }
+    } catch (UserManagementException e) {
+      e.printStackTrace();
     }
+  }
+  
+  private void processLeaveGroup(Event event) throws UserManagementException {
+    Group group = new Group(event.getSource());
   }
 
   private void processDeleteGroupInUser(Event event) throws UserManagementException {

@@ -70,47 +70,75 @@ public class UserDAOTest {
     Group mobile = new Group("Mobile");
     sme.addGroupChild(mobile);
     
+    Group manual = new Group("Manual");
+    Role role1 = new Role("Testing", manual.getId());
+    manual.addRole(role1);
+    
     sme.addFeature(f);
     sme.addRole(role);
     
 
-    RoleDAO.INSTANCE.create(role);
+    RoleDAO.INSTANCE.create(role, role1);
     
     User user = new User("HaiNT", "haint21@fsoft.com");
-    user.addRole(role);
-    user.joinGroup(sme);
     
+    user.addRole(role);
+    role.addUser(user);
+    
+    user.addRole(role1);
+    role1.addUser(user);
+    
+    user.joinGroup(sme);
     sme.addUser(user);
     
+    user.joinGroup(cloud);
+    cloud.addUser(user);
+
+    user.joinGroup(manual);
+    manual.addUser(user);
+    
     UserDAO.INSTANCE.create(user);
-    GroupDAO.INSTANCE.create(sme, cloud, mobile);
+    GroupDAO.INSTANCE.create(sme, cloud, mobile, manual);
 
     this.group = sme;
     this.user = user;
   }
-
-  //@Test
-  public void testInActiveUser() throws UserManagementException {
+  
+  @Test
+  public void testUserLeaveGroup() throws UserManagementException {
+    Group cloud = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Cloud")).iterator().next();
+    Group manual = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Manual")).iterator().next();
     
-    this.user.inActive();
-    UserDAO.INSTANCE.update(this.user);
+    Assert.assertTrue(cloud.getUsers().contains(this.user));
+    Assert.assertTrue(this.group.getUsers().contains(this.user));
     
+    this.user.leaveGroup(this.group);
     Event event = new Event(this.user) {
       @Override
       public String getType() {
-        return "inactive-user";
+        return "leave-group";
       }
     };
     event.broadcast();
     
-    //Wait until finish processing whole events
     while(EventExecutor.INSTANCE.isInProgress()) {
     }
     
-    Group actual = GroupDAO.INSTANCE.findOne(this.group.getId());
-    Assert.assertTrue(actual.getUsers().isEmpty());
+    this.user = UserDAO.INSTANCE.findOne(this.user.getId());
+    this.group = GroupDAO.INSTANCE.findOne(this.group.getId());
+    cloud = GroupDAO.INSTANCE.findOne(cloud.getId());
+    
+    Assert.assertEquals(manual, this.user.getGroups().iterator().next()); 
+    Assert.assertTrue(!cloud.getUsers().contains(this.user));
+    Assert.assertTrue(!this.group.getUsers().contains(this.user));
+    
+    Role role = RoleDAO.INSTANCE.find(new BasicDBObject("name", "Readonly")).iterator().next();
+    Assert.assertTrue(!role.getUsers().contains(this.user));
+    
+    role = RoleDAO.INSTANCE.find(new BasicDBObject("name", "Testing")).iterator().next();
+    Assert.assertEquals(role, this.user.getRoles().iterator().next());
   }
-  
+
   @Test
   public void testFindUser() throws UserManagementException {
     User user = new User("HaiNT fake", "fake@mail.com");
