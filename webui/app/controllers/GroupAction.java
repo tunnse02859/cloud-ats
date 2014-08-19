@@ -8,6 +8,7 @@ import interceptor.Authorization;
 import interceptor.WithoutSystem;
 import interceptor.WizardInterceptor;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -145,10 +146,131 @@ public class GroupAction extends Controller {
     return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
   
+  public static Result editGroup(String g) throws UserManagementException {
+    Group group_ = GroupDAO.INSTANCE.findOne(g);
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    
+    //Prevent edit system group or group level 1
+    if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
+
+    //Prevent edit group level 1 if current user is not system
+    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system")) return forbidden(views.html.forbidden.render());
+    
+    //Prevent edit group which has no right permission
+    if (!currentUser.getBoolean("system")) {
+      Collection<Group> adGroup = Organization.getAdministrationGroup();
+      Set<Group> childrenGroup = new HashSet<Group>();
+      for (Group ag : adGroup) {
+        childrenGroup.addAll(ag.getAllChildren());
+      }
+      
+      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+    }
+    
+    LinkedList<Group> parents = group_.buildParentTree();
+    
+    Html body = editgroup.render(group_, parents.isEmpty() ? new HashSet<Feature>(FeatureDAO.INSTANCE.find(new BasicDBObject())) : parents.getLast().getFeatures());
+    return ok(index.render("group", body, group_.getId()));
+  }
+  
+  public static Result doEditGroup(String g) throws UserManagementException {
+    Group group_ = GroupDAO.INSTANCE.findOne(g);
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    
+    //Prevent edit system group
+    if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
+
+    //Prevent edit group level 1 if current user is not system
+    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system")) return forbidden(views.html.forbidden.render());
+    
+    //Prevent edit group which has no right permission
+    if (!currentUser.getBoolean("system")) {
+      Collection<Group> adGroup = Organization.getAdministrationGroup();
+      Set<Group> childrenGroup = new HashSet<Group>();
+      for (Group ag : adGroup) {
+        childrenGroup.addAll(ag.getAllChildren());
+      }
+      
+      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+    }
+    
+    //
+    Set<String> currentFeature = group_.getString("feature_ids") == null ? new HashSet<String>() : group_.stringIDtoSet(group_.getString("feature_ids"));
+    Set<String> actualFeature = new HashSet<String>();
+    
+    if (request().getQueryString("feature") != null) Collections.addAll(actualFeature, request().queryString().get("feature"));
+    
+    //Add new feature
+    for (String f : actualFeature) {
+      if (!currentFeature.contains(f)) {
+        Feature feature = FeatureDAO.INSTANCE.findOne(f);
+        group_.addFeature(feature);
+      }
+    }
+    
+    //Remove no longer feature
+    for (String f : currentFeature) {
+      if (!actualFeature.contains(f)) {
+        Feature feature = FeatureDAO.INSTANCE.findOne(f);
+        if (feature.getBoolean("system")) continue;
+        group_.removeFeature(feature);
+        
+        //remove in children
+        for (Group child : group_.getAllChildren()) {
+          child.removeFeature(feature);
+          GroupDAO.INSTANCE.update(child);
+        }
+      }
+    }
+    
+    if (request().getQueryString("name") != null) group_.put("name", request().getQueryString("name"));
+   
+    GroupDAO.INSTANCE.update(group_);
+    
+    return redirect(controllers.routes.Organization.index() + "?nav=group");
+  }
+  
+  /**
+   * TODO: Prevent delete group which no has right permission by pass query
+   * @param g
+   * @return
+   * @throws UserManagementException
+   */
   public static Result deleteGroup(String g) throws UserManagementException {
-    GroupDAO.INSTANCE.delete(g);
+    Group group_   = GroupDAO.INSTANCE.findOne(g);
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    
+    //Prevent delete system group or group level 1
+    if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
+    
+    //Prevent delete group which has no right permission
+    if (!currentUser.getBoolean("system")) {
+      Collection<Group> adGroup = Organization.getAdministrationGroup();
+      Set<Group> childrenGroup = new HashSet<Group>();
+      for (Group ag : adGroup) {
+        childrenGroup.addAll(ag.getAllChildren());
+      }
+      
+      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+    }
+    
+    BasicDBObject query = new BasicDBObject("joined", true);
+    query.put("group_ids", Pattern.compile(group_.getId()));
+    Collection<User> users_ = UserDAO.INSTANCE.find(query);
+
+    GroupDAO.INSTANCE.delete(group_);
+    
     while(EventExecutor.INSTANCE.isInProgress()) {
     }
+    
+    if (group_.getInt("level") == 1) {
+      for (User u : users_) {
+        u = UserDAO.INSTANCE.findOne(u.getId());
+        u.put("joined", false);
+        UserDAO.INSTANCE.update(u);
+      }
+    }
+    
     return redirect(controllers.routes.Organization.index() + "?nav=group");
   }
   

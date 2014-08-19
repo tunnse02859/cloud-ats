@@ -1,7 +1,14 @@
 @(currentGroup: org.ats.component.usersmgt.group.Group, currentRole: org.ats.component.usersmgt.role.Role)
 <form class="form-horizontal" method="get" action="@controllers.routes.RoleAction.doEditRole(currentRole.getId())">
-  <legend><span class="badge badge-blue">@currentGroup.get("name")</span> Create Role</legend>
-  <input type="text" name="name" placeholder="Role Name" value="@currentRole.getName()">
+  <legend>Edit Role <span class="badge badge-blue">@currentRole.get("name")</span> in Group <span class="badge badge-blue">@currentGroup.get("name")</span></legend>
+  
+  <div class="control-group">
+    <label class="control-label">Role Name</label>
+    <div class="controls">
+      <input type="text" name="name" placeholder="Role Name" value="@currentRole.getName()">    
+    </div>
+  </div>
+  
   <table class="table table-bordered" style="margin-top: 20px;">
     <tbody>    
     <tr>

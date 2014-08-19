@@ -62,7 +62,7 @@ public class Organization extends Controller {
    * @return
    * @throws UserManagementException
    */
-  static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
+  public static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
    
     //Check right permission on group pass through query string
     if (requestGroupId != null) {
@@ -90,9 +90,15 @@ public class Organization extends Controller {
     }
     
     if (session("group_id") == null) {
-      return getDefaultGroup().iterator().next();
+      return getAdministrationGroup().iterator().next();
     }
-    return GroupDAO.INSTANCE.findOne(session("group_id"));
+    
+    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    if (current == null) {
+      session().remove("group_id");
+      current = setCurrentGroup(null);
+    }
+    return current;
   }
 
   /**
@@ -189,6 +195,12 @@ public class Organization extends Controller {
     return null;
   }
   
+  /**
+   * Return user's group with highest level
+   * @param u
+   * @return
+   * @throws UserManagementException
+   */
   public static Group getHighestGroupBelong(User u) throws UserManagementException {
     List<Group> list = new ArrayList<Group>(u.getGroups());
     Collections.sort(list, new Comparator<Group>() {
@@ -242,11 +254,11 @@ public class Organization extends Controller {
   }
   
   /**
-   * Build a list of group have administration permission
-   * @return The set of groups with highest level.
+   * Build a list of group have administration permission of current user
+   * @return The list of groups order by lowest level.
    * @throws UserManagementException
    */
-  static Collection<Group> getDefaultGroup() throws UserManagementException {
+  static Collection<Group> getAdministrationGroup() throws UserManagementException {
     User user = UserDAO.INSTANCE.findOne(session("user_id"));
     
     if (user.getBoolean("system")) {
@@ -256,6 +268,12 @@ public class Organization extends Controller {
     return getAministrationGroup(user);
   }
   
+  /**
+   * List all groups have administration permission of specified user
+   * @param user
+   * @return
+   * @throws UserManagementException
+   */
   static Collection<Group> getAministrationGroup(User user) throws UserManagementException {
     List<Group> list = new ArrayList<Group>();
     

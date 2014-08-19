@@ -34,6 +34,8 @@ GET     /portal/o/g/n/b         controllers.GroupAction.newGroupBody()
 GET     /portal/o/g/i           controllers.GroupAction.invite()
 GET     /portal/o/g/a           controllers.GroupAction.addUser()
 GET     /portal/o/g/d/:g        controllers.GroupAction.deleteGroup(g)
+GET     /portal/o/g/e/:g        controllers.GroupAction.editGroup(g)
+GET     /portal/o/g/de/:g       controllers.GroupAction.doEditGroup(g)
 GET     /portal/invite/:u/:r/:g controllers.Invitation.index(u, r, g)
 
 ############################## User Action ###############################

@@ -18,7 +18,7 @@
   <td><span class="badge badge-primary">@group.getAllChildren().size()</span></td>
   <td>
     @if(!group.getBoolean("system")){
-    <a class='btn btn-mini btn-blue'>Update</a>
+    <a href="@controllers.routes.GroupAction.editGroup(group.getId())" class='btn btn-mini btn-blue'>Update</a>
     <a href="@controllers.routes.GroupAction.deleteGroup(group.getId())" class='btn btn-mini btn-red'>Delete</a>
     }
   </td>

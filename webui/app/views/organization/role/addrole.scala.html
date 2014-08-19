@@ -1,6 +1,6 @@
 @(currentGroup: org.ats.component.usersmgt.group.Group)
 <form class="form-horizontal" method="get" action="@controllers.routes.RoleAction.doAddRole()">
-  <legend><span class="badge badge-blue">@currentGroup.get("name")</span> Create Role</legend>
+  <legend>Create Role in <span class="badge badge-blue">@currentGroup.get("name")</span></legend>
   <input type="text" name="name" placeholder="Role Name">
   <table class="table table-bordered" style="margin-top: 20px;">
     <tbody>    

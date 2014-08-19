@@ -41,6 +41,7 @@ public class Invitation extends Controller {
     return redirect(controllers.routes.Application.index());
   }
   
+  //Verify the user who sent invitation that has right permission
   private static boolean verify(User user, Role role, Group group) {
     if (!"Administration".equals(role.getName())) return false;
     if (!role.getGroup().equals(group)) return false;
