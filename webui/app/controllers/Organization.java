@@ -199,7 +199,7 @@ public class Organization extends Controller {
         return l2 - l1;
       }
     });
-    return list.get(0);
+    return list.isEmpty() ? null : list.get(0);
   }
   
   /**

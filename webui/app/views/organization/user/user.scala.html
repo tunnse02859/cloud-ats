@@ -2,9 +2,13 @@
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td>
-    <a href="@controllers.routes.Organization.index()?nav=user&group=@controllers.Organization.getHighestGroupBelong(user).getId()">
-    <span class="badge badge-primary">@user.getString("email")</span>
-    </a>
+    @if(controllers.Organization.getHighestGroupBelong(user) == null) {
+      <span class="badge badge-primary">@user.getString("email")</span>
+    } else {
+	    <a href="@controllers.routes.Organization.index()?nav=user&group=@controllers.Organization.getHighestGroupBelong(user).getId()">
+	    <span class="badge badge-primary">@user.getString("email")</span>
+	    </a>
+    }
   </td>
   <td class="user-role">
     @for(role <- user.getRoles()){
