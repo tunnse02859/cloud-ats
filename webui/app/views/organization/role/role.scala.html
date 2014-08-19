@@ -1,6 +1,6 @@
 @(role: org.ats.component.usersmgt.role.Role, permissions: List[org.ats.component.usersmgt.role.Permission])
 <tr class="role role-@role.getId()">
-  <td rowspan="@permissions.size()"><span class="badge badge-primary">@role.getString("name")</span></td>
+  <td @if(permissions.size() > 0) { rowspan="@permissions.size()" }><span class="badge badge-primary">@role.getString("name")</span></td>
   @if(permissions.size() > 0) {
     @defining(permissions.get(0)) { per =>
       <td><span class="badge badge-orange">@per.getFeature().getName()</span></td>
@@ -8,15 +8,17 @@
       
       <td style="border-left: none;">
       @if(!role.getBoolean("system")){
-        <a class="btn btn-red btn-mini" title="Remove Permission">X</a>
+        <a href="@controllers.routes.RoleAction.removePermission(role.getId(), per.getId())" class="btn btn-red btn-mini" title="Remove Permission">X</a>
       }
       </td>
     }
+  } else {
+    <td colspan="3"></td>
   }
-  <td rowspan="@permissions.size()">
+  <td @if(permissions.size() > 0) { rowspan="@permissions.size()" }>
   @if(!role.getBoolean("system")){
-    <a class="btn btn-blue btn-mini">Edit</a>
-    <a class="btn btn-red btn-mini">Delete</a>
+    <a href="@controllers.routes.RoleAction.editRole(role.getId())" class="btn btn-blue btn-mini">Edit</a>
+    <a href="@controllers.routes.RoleAction.deleteRole(role.getId())" class="btn btn-red btn-mini">Delete</a>
   }
   </td>
 </tr>
@@ -28,7 +30,7 @@
     <td style="border-left: none;"><span class="badge badge-cyan">@permissions.get(i).getOpertion().getName()</span></td>
     <td style="border-left: none;">
     @if(!role.getBoolean("system")){
-      <a class="btn btn-red btn-mini" title="Remove Permission">X</a>
+      <a href="@controllers.routes.RoleAction.removePermission(role.getId(), permissions.get(i).getId())" class="btn btn-red btn-mini" title="Remove Permission">X</a>
     }
     </td>
   </tr>

@@ -1,0 +1,29 @@
+@(currentGroup: org.ats.component.usersmgt.group.Group)
+<form class="form-horizontal" method="get" action="@controllers.routes.RoleAction.doAddRole()">
+  <legend><span class="badge badge-blue">@currentGroup.get("name")</span> Create Role</legend>
+  <input type="text" name="name" placeholder="Role Name">
+  <table class="table table-bordered" style="margin-top: 20px;">
+    <tbody>    
+    <tr>
+      <th>Feature</th>
+      <th>Operations</th>
+    </tr>
+    @for(feature <- currentGroup.getFeatures()) {
+      <tr>
+        <td>
+          <span class="badge badge-blue">@feature.getName()</span>
+        </td>
+        @for(op <- feature.getOperations()) {
+        <td>
+          <input type="checkbox" name="operation" value="@op.getId()">
+          <span class="badge badge-orange">@op.getName()</span>
+        </td>
+        }
+      </tr>
+    }
+    </tbody>
+  </table>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">OK</button>
+  </div>
+</form>

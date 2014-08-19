@@ -10,7 +10,7 @@
     
     <input type="text" id="role_name" name="name" placeholder="Role Name">
     
-    <a href="#" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Role</a> 
+    <a href="@controllers.routes.RoleAction.addRole()" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Role</a> 
     <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("role")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
   </form>  
   </div>

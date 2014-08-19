@@ -46,6 +46,15 @@ GET     /portal/o/u/e/:u           controllers.UserAction.editRoleIndex(u)
 GET     /portal/o/u/de/:u          controllers.UserAction.doEditRole(u)
 GET     /portal/o/u/l/:u           controllers.UserAction.leaveCurrentGroup(u)
 
+############################## Role Action ################################
+
+GET     /portal/o/r/n              controllers.RoleAction.addRole()
+GET     /portal/o/r/da             controllers.RoleAction.doAddRole()
+GET     /portal/o/r/e/:r           controllers.RoleAction.editRole(r)
+GET     /portal/o/r/de/:r          controllers.RoleAction.doEditRole(r)
+GET     /portal/o/r/d/:r           controllers.RoleAction.deleteRole(r)
+GET     /portal/o/p/:r/:p          controllers.RoleAction.removePermission(r, p)
+
 ############################# Dashboard ##################################
 
 GET     /portal/dashboard                       controllers.Dashboard.body()

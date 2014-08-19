@@ -34,6 +34,12 @@ $(document).ready(function() {
     }
   });
   
+  $("#main").on("keypress", ".org-right .form-horizontal input", function(e) {
+    if (e.which == 13) {
+      return false;
+    }
+  });
+  
   $("#main").on("submit", ".org-role-filter .form-search", function() {
     return false;
   });
