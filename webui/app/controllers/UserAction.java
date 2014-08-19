@@ -3,6 +3,10 @@
  */
 package controllers;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.WithSystem;
@@ -89,17 +93,39 @@ public class UserAction extends Controller {
   }
   
   public static Result doEditRole(String u) throws UserManagementException {
+    User user_ = UserDAO.INSTANCE.findOne(u);
+
+    Set<String> currentRole = user_.getString("role_ids") == null ? new HashSet<String>() : user_.stringIDtoSet(user_.getString("role_ids"));
+    Set<String> actualRole = new HashSet<String>();
+    
     if (request().getQueryString("role") != null) {
-      User user_ = UserDAO.INSTANCE.findOne(u);
-      String[] roles_id = request().queryString().get("role");
-      for (String role_id : roles_id) {
-        Role role_ = RoleDAO.INSTANCE.findOne(role_id);
+      Collections.addAll(actualRole, request().queryString().get("role"));
+    }
+
+
+    //Add non-existed role
+    for (String r : actualRole) {
+      if (!currentRole.contains(r)) {
+        Role role_ = RoleDAO.INSTANCE.findOne(r);
         role_.addUser(user_);
         user_.addRole(role_);
         RoleDAO.INSTANCE.update(role_);
       }
-      UserDAO.INSTANCE.update(user_);
     }
+
+    //Remove not existed role
+    for (String r : currentRole) {
+      if (!actualRole.contains(r)) {
+        Role role_ = RoleDAO.INSTANCE.findOne(r);
+        if (role_.getBoolean("system")) continue;
+        role_.removeUser(user_);
+        user_.removeRole(role_);
+        RoleDAO.INSTANCE.update(role_);
+      }
+    }
+
+    UserDAO.INSTANCE.update(user_);
+    
     return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
   
