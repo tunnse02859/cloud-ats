@@ -37,4 +37,8 @@ $(document).ready(function() {
   $("#main").on("submit", ".org-user-filter .form-search", function() {
     return false;
   });
+  
+  $("#main").on("submit", ".org-right form", function() {
+    var disabled = $(this).find(':input:disabled').removeAttr('disabled');
+  });
 });

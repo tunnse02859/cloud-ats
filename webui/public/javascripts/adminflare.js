@@ -12,13 +12,13 @@ $(document).ready(function () {
   });
   
   // Collapse/Expand functionality
-  /*$(".box-header").each(function () {
+  $(".box-header").each(function () {
     var box = $(this).next();
     // If next element is a box and hasn't .non-collapsible class
     if (box.hasClass('box') && ! box.hasClass('non-collapsible'))
       $(this).append('<a href="#" class="box-collapse pull-right">hide&nbsp;&nbsp;<i class="icon-caret-up"></i></a>')
              .append('<a href="#" class="box-expand pull-right" style="display: none">show&nbsp;&nbsp;<i class="icon-caret-down"></i></a>');
-  });*/
+  });
   
   // Collapse box
   $(document).on("click", "a.box-collapse", function(){

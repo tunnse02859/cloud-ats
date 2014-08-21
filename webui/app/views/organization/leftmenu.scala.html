@@ -1,4 +1,5 @@
 @(nav: String, group_id: String)
+@import org.ats.component.usersmgt.group._
 <ul class="well nav nav-tabs nav-stacked">
   <li class="group @if(nav =="group"){ active }">
     <a href="@controllers.routes.Organization.index()?nav=group&group=@group_id"
@@ -12,6 +13,7 @@
     <i class="icon-user"></i> User <span class="badge pull-right @if(nav =="user"){ badge-primary }">
     @controllers.Organization.count("user")</span></a>
   </li>
+  @if(!GroupDAO.INSTANCE.findOne(group_id).getBoolean("system")) {
   <li class="role @if(nav =="role"){ active }">
     <a href="@controllers.routes.Organization.index()?nav=role&group=@group_id"
       ajax-url="@controllers.routes.Organization.body()?nav=role&group=@group_id">
@@ -19,6 +21,7 @@
     @controllers.Organization.count("role")
     </span></a>
   </li>
+  }
   <li class="feature @if(nav =="feature"){ active }">
     <a href="@controllers.routes.Organization.index()?nav=feature&group=@group_id"
       ajax-url="@controllers.routes.Organization.body()?nav=feature&group=@group_id">

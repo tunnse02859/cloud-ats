@@ -1,4 +1,4 @@
-@(users: Set[org.ats.component.usersmgt.user.User])
+@(users: List[org.ats.component.usersmgt.user.User])
 <form class="form-horizontal" method="get" action="@controllers.routes.GroupAction.addUser()">
   <legend>Add More User</legend>
   @for(user <- users) {

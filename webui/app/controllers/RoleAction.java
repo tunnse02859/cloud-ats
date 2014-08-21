@@ -24,6 +24,7 @@ import com.mongodb.BasicDBObject;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
+import interceptor.WithoutSystem;
 import interceptor.WizardInterceptor;
 import play.api.templates.Html;
 import play.mvc.Controller;
@@ -41,6 +42,7 @@ import views.html.organization.role.*;
 @Authorization(feature = "Organization", operation = "Administration")
 public class RoleAction extends Controller {
 
+  @WithoutSystem
   public static Result addRole() throws UserManagementException {
     Group current = Organization.setCurrentGroup(null);
     session().put("group_id", current.getId());
@@ -49,6 +51,7 @@ public class RoleAction extends Controller {
     return ok(index.render("role" , body, current.getId()));
   }
   
+  @WithoutSystem
   public static Result doAddRole() throws UserManagementException {
     Group currentGroup = Organization.setCurrentGroup(null);
     session().put("group_id", currentGroup.getId());

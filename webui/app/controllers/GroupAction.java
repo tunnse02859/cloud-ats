@@ -8,10 +8,12 @@ import interceptor.Authorization;
 import interceptor.WithoutSystem;
 import interceptor.WizardInterceptor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -73,6 +75,7 @@ public class GroupAction extends Controller {
     
     
     Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
+    group.addFeature(organization);
     
     Role administration = new Role("Administration", group.getId());
     administration.put("system", true);
@@ -274,22 +277,22 @@ public class GroupAction extends Controller {
     return redirect(controllers.routes.Organization.index() + "?nav=group");
   }
   
-  private static Set<User> getAvailableUser(Group groupInvitation) throws UserManagementException {
+  private static List<User> getAvailableUser(Group groupInvitation) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    LinkedList<Group> groups = groupInvitation.buildParentTree();
-    for (int i = 0; i < groups.size(); i++) {
-      Group parent = groups.get(i);
+    Collection<Group> adGroups = Organization.getAministrationGroup(currentUser);
+    LinkedList<Group> parents = groupInvitation.buildParentTree();
+    Group parent = parents.getLast();
+    
+    for (Group g : parents) {
       BasicDBObject query = new BasicDBObject("name", "Administration");
-      query.put("group_id", parent.getId());
+      query.put("system", true);
+      query.put("group_id", g.getId());
       query.put("user_ids", Pattern.compile(currentUser.getId()));
       if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
-        Set<User> holder = new HashSet<User>();
-        for (User u : parent.getUsers()) {
-          if (!groupInvitation.getUsers().contains(u)) holder.add(u);
-        }
-        return holder;
+        return parent.getUsers();
       }
     }
-    return Collections.emptySet();
+    
+    return Collections.emptyList();
   }
 }

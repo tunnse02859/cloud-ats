@@ -1,4 +1,4 @@
-@(user: org.ats.component.usersmgt.user.User, system: Boolean, currentRoles : Set[org.ats.component.usersmgt.role.Role])
+@(user: org.ats.component.usersmgt.user.User, system: Boolean, currentRoles : List[org.ats.component.usersmgt.role.Role])
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td>
@@ -50,14 +50,14 @@
     <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
     } else {
     
-      @** You could not leave yourself  **@
-      @if(session().get("user_id") != user.getId()) {
+      @if(controllers.UserAction.shouldLeaveGroup(user)) {
       <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
       }
     }  
   }
 
+  @if(!user.getGroups().isEmpty()) {
   <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
-  
+  }
   </td>
 </tr>
