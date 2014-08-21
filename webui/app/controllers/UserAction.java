@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -100,9 +101,10 @@ public class UserAction extends Controller {
   public static Result doEditRole(String u) throws UserManagementException {
     User user_ = UserDAO.INSTANCE.findOne(u);
     Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
 
     List<Role> currentGroupRole = currentGroup.getRoles();
-    Set<String> currentUserRole = user_.getString("role_ids") == null ? new HashSet<String>() : user_.stringIDtoSet(user_.getString("role_ids"));
+    Set<String> userRole = user_.getString("role_ids") == null ? new HashSet<String>() : user_.stringIDtoSet(user_.getString("role_ids"));
     Set<String> actualRole = new HashSet<String>();
     
     if (request().getQueryString("role") != null) {
@@ -111,21 +113,21 @@ public class UserAction extends Controller {
 
     //Add non-existed role
     for (String r : actualRole) {
-      if (!currentUserRole.contains(r)) {
+      if (!userRole.contains(r)) {
         Role role_ = RoleDAO.INSTANCE.findOne(r);
         role_.addUser(user_);
         user_.addRole(role_);
         RoleDAO.INSTANCE.update(role_);
+        UserDAO.INSTANCE.update(user_);
       }
     }
 
     //Remove not existed role
-    for (String r : currentUserRole) {
+    for (String r : userRole) {
       if (!actualRole.contains(r) ) {
         Role role_ = RoleDAO.INSTANCE.findOne(r);
         if (currentGroupRole.contains(role_)) {
           //should not remove administration role
-          boolean shouldRemove = true;
           if (role_.getBoolean("system") && role_.getName().contains("Administration")) {
             LinkedList<Group> parents = currentGroup.buildParentTree();
             for (Group g : parents) {
@@ -137,20 +139,31 @@ public class UserAction extends Controller {
               if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
                 role_.removeUser(user_);
                 user_.removeRole(role_);
+                
+                RoleDAO.INSTANCE.update(role_);
+                UserDAO.INSTANCE.update(user_);
                 break;
               }
             }
           } else {
             role_.removeUser(user_);
             user_.removeRole(role_);
+            
+            RoleDAO.INSTANCE.update(role_);
+            UserDAO.INSTANCE.update(user_);
           }
           
-          RoleDAO.INSTANCE.update(role_);
+          if (currentUser.getBoolean("system") && !user_.getBoolean("system")) {
+            role_.removeUser(user_);
+            user_.removeRole(role_);
+            
+            RoleDAO.INSTANCE.update(role_);
+            UserDAO.INSTANCE.update(user_);
+          }
         }
       }
     }
 
-    UserDAO.INSTANCE.update(user_);
     
     return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
@@ -180,6 +193,9 @@ public class UserAction extends Controller {
           query.append("user_ids", Pattern.compile(currentUser.getId()));
           if (!RoleDAO.INSTANCE.find(query).isEmpty()) return false;
         }
+        
+        if (currentUser.getBoolean("system")) return false;
+        
         return true;
       }
       
@@ -210,8 +226,24 @@ public class UserAction extends Controller {
   
   public static boolean shouldLeaveGroup(User user_) throws UserManagementException {
     Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    
+    if (currentGroup.getBoolean("system")) return false;
+    
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    if (!currentUser.equals(user_)) return true;
+    if (!currentUser.equals(user_)) {
+      //should not leave user have same administration role in current group (level1)
+      if (currentGroup.getInt("level") == 1) {
+        BasicDBObject query  = new BasicDBObject("name", "Administration");
+        query.append("system", true);
+        query.append("group_id", currentGroup.getId());
+        Role adRole = RoleDAO.INSTANCE.find(query).iterator().next();
+        if (adRole.getUsers().contains(user_) && adRole.getUsers().contains(currentUser)) return false;
+      }
+      return true;
+    }
+    
+    if (!currentGroup.getBoolean("system") && currentUser.getBoolean("system")) return true;
+    
     LinkedList<Group> parents = currentGroup.buildParentTree();
     for (Group g : parents) {
       BasicDBObject query = new BasicDBObject("name", "Administration");

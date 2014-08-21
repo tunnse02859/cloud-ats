@@ -63,10 +63,10 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
-   
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    
     //Check right permission on group pass through query string
     if (requestGroupId != null) {
-      User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
       if (currentUser.getBoolean("system")) {
         return GroupDAO.INSTANCE.findOne(requestGroupId);
       }
@@ -90,15 +90,26 @@ public class Organization extends Controller {
     }
     
     if (session("group_id") == null) {
-      return getAdministrationGroup().iterator().next();
+      Collection<Group> adGroups = getAdministrationGroup();
+      return adGroups.isEmpty() ? null : adGroups.iterator().next();
     }
     
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
-    if (current == null) {
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    if (currentGroup == null) {
       session().remove("group_id");
-      current = setCurrentGroup(null);
+      currentGroup = setCurrentGroup(null);
+    } else if (!currentUser.getBoolean("system")) {
+      //double check current group
+      BasicDBObject query = new BasicDBObject("name", "Administration");
+      query.put("system", true);
+      query.put("user_ids", Pattern.compile(currentUser.getId()));
+      query.put("group_id", currentGroup.getId());
+      if (RoleDAO.INSTANCE.find(query).isEmpty()) {
+        session().remove("group_id");
+        currentGroup = setCurrentGroup(null);
+      }
     }
-    return current;
+    return currentGroup;
   }
 
   /**
@@ -108,6 +119,8 @@ public class Organization extends Controller {
    */
   public static Result index() throws UserManagementException {
     Group current = setCurrentGroup(request().getQueryString("group"));
+    if (current == null) return forbidden(views.html.forbidden.render());
+    
     session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
@@ -121,6 +134,8 @@ public class Organization extends Controller {
    */
   public static Result indexAjax() throws UserManagementException {
     Group current = setCurrentGroup(request().getQueryString("group"));
+    if (current == null) return forbidden(views.html.forbidden.render());
+    
     session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
@@ -129,6 +144,8 @@ public class Organization extends Controller {
   
   public static Result body() throws UserManagementException {
     Group currentGroup = setCurrentGroup(request().getQueryString("group"));
+    if (currentGroup == null) return forbidden(views.html.forbidden.render());
+    
     session().put("group_id", currentGroup.getId());
     
     ObjectNode json = Json.newObject();
@@ -302,7 +319,6 @@ public class Organization extends Controller {
         return l1 - l2;
       }
     });
-    
     return list;
   }
   

@@ -26,6 +26,12 @@
       <span class="badge badge-orange">Pending</span>    
     }
   </td>    
+  } else {
+  <td>
+    @if(!user.getBoolean("joined")) {
+      <span class="badge badge-red">N/A</span>
+    }
+  </td>
   }
   <td>
   @if(user.getBoolean("active")){
@@ -36,6 +42,14 @@
   </td>
   <td>
   
+  @if(controllers.UserAction.shouldLeaveGroup(user)) {
+      <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
+  }
+  
+  @if(!user.getGroups().isEmpty() && user.getBoolean("joined")) {
+  <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
+  }
+  
   @if(system && session().get("user_id") != user.getId()) {
     @if(user.getBoolean("active")){
     <a href="@controllers.routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
@@ -45,19 +59,10 @@
     <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
   }
  
-  @if(!system) {
-    @if(!user.getBoolean("joined")) {
+    @if(!system && !user.getBoolean("joined")) {
     <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
-    } else {
-    
-      @if(controllers.UserAction.shouldLeaveGroup(user)) {
-      <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
-      }
-    }  
-  }
+    }
+  
 
-  @if(!user.getGroups().isEmpty() && user.getBoolean("joined")) {
-  <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
-  }
   </td>
 </tr>

@@ -52,6 +52,8 @@ public class GroupAction extends Controller {
   @WithoutSystem
   public static Result newGroup() throws UserManagementException {
     Group current = Organization.setCurrentGroup(null);
+    if (current == null) return forbidden(views.html.forbidden.render());
+    
     session().put("group_id", current.getId());
     
     Html body = newgroup.render(current.getFeatures());
@@ -279,7 +281,6 @@ public class GroupAction extends Controller {
   
   private static List<User> getAvailableUser(Group groupInvitation) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Collection<Group> adGroups = Organization.getAministrationGroup(currentUser);
     LinkedList<Group> parents = groupInvitation.buildParentTree();
     Group parent = parents.getLast();
     

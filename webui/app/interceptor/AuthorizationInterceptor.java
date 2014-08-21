@@ -41,6 +41,8 @@ public class AuthorizationInterceptor extends Action<Authorization> {
       return Promise.<SimpleResult>pure(forbidden(
           views.html.forbidden.render()
       ));
+
+    
       
     Feature feature = FeatureDAO.INSTANCE.find(new BasicDBObject("name", configuration.feature())).iterator().next();
     
