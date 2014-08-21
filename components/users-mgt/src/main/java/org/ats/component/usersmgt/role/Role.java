@@ -3,8 +3,11 @@
  */
 package org.ats.component.usersmgt.role;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.ats.component.usersmgt.BaseObject;
@@ -79,9 +82,9 @@ public class Role extends BaseObject<Role> {
     return false;
   }
   
-  public Set<Permission> getPermissions() {
+  public List<Permission> getPermissions() {
     if (this.get("permission_ids") == null) {
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
     
     Set<String> permission_ids = this.stringIDtoSet(this.getString("permission_ids"));
@@ -95,8 +98,14 @@ public class Role extends BaseObject<Role> {
         throw new RuntimeException(e);
       }
     }
-      
-    return permissions;
+    
+    List<Permission> list = new ArrayList<Permission>(permissions);
+    Collections.sort(list, new Comparator<Permission>() {
+      public int compare(Permission o1, Permission o2) {
+        return o1.getId().compareTo(o2.getId());
+      }
+    });
+    return list;
   }
   
   public void addUser(User user) {
@@ -128,9 +137,9 @@ public class Role extends BaseObject<Role> {
     return false;
   }
   
-  public Set<User> getUsers() {
+  public List<User> getUsers() {
     if (this.get("user_ids") == null) {
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
     
     Set<String> user_ids = this.stringIDtoSet(this.getString("user_ids"));
@@ -144,7 +153,14 @@ public class Role extends BaseObject<Role> {
         throw new RuntimeException(e);
       }
     }
-    return users;
+    
+    List<User> list = new ArrayList<User>(users);
+    Collections.sort(list, new Comparator<User>() {
+      public int compare(User o1, User o2) {
+        return o1.getEmail().compareTo(o2.getEmail());
+      }
+    });
+    return list;
   }
   
   public String getName() {

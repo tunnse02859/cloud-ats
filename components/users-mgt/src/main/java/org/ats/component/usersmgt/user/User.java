@@ -3,8 +3,11 @@
  */
 package org.ats.component.usersmgt.user;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.ats.component.usersmgt.BaseObject;
@@ -86,8 +89,8 @@ public class User extends BaseObject<User> {
     return false;
   }
   
-  public Set<Group> getGroups() {
-    if (this.get("group_ids") == null) return Collections.emptySet();
+  public List<Group> getGroups() {
+    if (this.get("group_ids") == null) return Collections.emptyList();
     
     Set<String> group_ids = this.stringIDtoSet(this.getString("group_ids"));
     Set<Group> groups = new HashSet<Group>();
@@ -100,7 +103,13 @@ public class User extends BaseObject<User> {
         throw new RuntimeException(e);
       }
     }
-    return groups;
+    List<Group> list = new ArrayList<Group>(groups);
+    Collections.sort(list, new Comparator<Group>() {
+      public int compare(Group o1, Group o2) {
+        return o1.getString("name").compareTo(o2.getString("name"));
+      }
+    });
+    return list;
   }
   
   public void addRole(Role role) {
@@ -131,8 +140,8 @@ public class User extends BaseObject<User> {
     return false;
   }
   
-  public Set<Role> getRoles() {
-    if (this.get("role_ids") == null) return Collections.emptySet();
+  public List<Role> getRoles() {
+    if (this.get("role_ids") == null) return Collections.emptyList();
     
     Set<String> role_ids = this.stringIDtoSet(this.getString("role_ids"));
     Set<Role> roles = new HashSet<Role>();
@@ -147,7 +156,13 @@ public class User extends BaseObject<User> {
       }
     }
     
-    return roles;
+    List<Role> list = new ArrayList<Role>(roles);
+    Collections.sort(list, new Comparator<Role>() {
+      public int compare(Role o1, Role o2) {
+        return o1.getString("name").compareTo(o2.getString("name"));
+      }
+    });
+    return list;
   }
 
   @Override

@@ -4,6 +4,7 @@
 package org.ats.component.usersmgt.user;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -39,10 +40,10 @@ public class UserEventListener implements EventListener {
   
   private void processLeaveUserInGroup(Event event) throws UserManagementException {
     User user = new User(event.getSource());
-    Set<Group> currentGroup = user.getGroups();
+    List<Group> currentGroup = user.getGroups();
     
     User actual = UserDAO.INSTANCE.findOne(user.getId());
-    Set<Group> actualGroup = actual.getGroups();
+    List<Group> actualGroup = actual.getGroups();
     
     Group leaveGroup = null;
     for (Group g : actualGroup) {
@@ -55,7 +56,7 @@ public class UserEventListener implements EventListener {
     GroupDAO.INSTANCE.update(leaveGroup);
     
     //remove role of current group
-    Set<Role> roles = user.getRoles();
+    List<Role> roles = user.getRoles();
     for (Role r : leaveGroup.getRoles()) {
       if (roles.contains(r)) {
         user.removeRole(r);

@@ -3,12 +3,16 @@
  */
 package org.ats.component.usersmgt.feature;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.ats.component.usersmgt.BaseObject;
 import org.ats.component.usersmgt.UserManagementException;
+import org.ats.component.usersmgt.role.Role;
 
 import com.mongodb.DBObject;
 
@@ -67,10 +71,10 @@ public class Feature extends BaseObject<Feature> {
     return this.removeOperation(o.getId());
   }
   
-  public Set<Operation> getOperations() {
+  public List<Operation> getOperations() {
     
     if (this.get("operation_ids") == null) {
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
      
     String[] op_ids = this.getString("operation_ids").split("::");
@@ -85,8 +89,14 @@ public class Feature extends BaseObject<Feature> {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
-
-    return operations;
+    
+    List<Operation> list = new ArrayList<Operation>(operations);
+    Collections.sort(list, new Comparator<Operation>() {
+      public int compare(Operation o1, Operation o2) {
+        return o1.getString("name").compareTo(o2.getString("name"));
+      }
+    });
+    return list;
   }
   
   public void setName(String name) {

@@ -3,10 +3,13 @@
  */
 package org.ats.component.usersmgt.group;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -73,10 +76,10 @@ public class Group extends BaseObject<Group> {
     return false;
   }
   
-  public Set<User> getUsers() {
+  public List<User> getUsers() {
     
     if (this.get("user_ids") == null) {
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
     
     String[] user_ids = this.getString("user_ids").split("::");
@@ -90,7 +93,14 @@ public class Group extends BaseObject<Group> {
         throw new RuntimeException(e);
       }
     }
-    return users;
+    
+    List<User> list = new ArrayList<User>(users);
+    Collections.sort(list, new Comparator<User>() {
+      public int compare(User o1, User o2) {
+        return o1.getEmail().compareTo(o2.getEmail());
+      }
+    });
+    return list;
   }
   
   public void addRole(Role role) {
@@ -124,10 +134,10 @@ public class Group extends BaseObject<Group> {
     return false;
   }
   
-  public Set<Role> getRoles() {
+  public List<Role> getRoles() {
     
     if (this.get("role_ids") == null) {
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
     
     Set<String> role_ids = this.stringIDtoSet(this.getString("role_ids"));
@@ -142,7 +152,13 @@ public class Group extends BaseObject<Group> {
       }
     }
     
-    return roles;
+    List<Role> list = new ArrayList<Role>(roles);
+    Collections.sort(list, new Comparator<Role>() {
+      public int compare(Role o1, Role o2) {
+        return o1.getString("name").compareTo(o2.getString("name"));
+      }
+    });
+    return list;
   }
   
   public void addGroupChild(Group child) {
