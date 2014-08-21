@@ -1,4 +1,4 @@
-@(group: org.ats.component.usersmgt.group.Group, features: Set[org.ats.component.usersmgt.feature.Feature])
+@(group: org.ats.component.usersmgt.group.Group, features: List[org.ats.component.usersmgt.feature.Feature])
 <form class="form-horizontal" method="get" action="@controllers.routes.GroupAction.doEditGroup(group.getId())">
   <legend>Update Group <span class="badge badge-blue">@group.get("name")</span></legend>
   <div class="control-group">

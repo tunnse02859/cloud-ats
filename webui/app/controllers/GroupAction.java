@@ -172,7 +172,7 @@ public class GroupAction extends Controller {
     
     LinkedList<Group> parents = group_.buildParentTree();
     
-    Html body = editgroup.render(group_, parents.isEmpty() ? new HashSet<Feature>(FeatureDAO.INSTANCE.find(new BasicDBObject())) : parents.getLast().getFeatures());
+    Html body = editgroup.render(group_, parents.isEmpty() ? new ArrayList<Feature>(FeatureDAO.INSTANCE.find(new BasicDBObject())) : parents.getLast().getFeatures());
     return ok(index.render("group", body, group_.getId()));
   }
   
