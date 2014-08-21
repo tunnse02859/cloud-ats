@@ -271,9 +271,9 @@ public class Group extends BaseObject<Group> {
     return false;
   }
   
-  public Set<Feature> getFeatures() {
+  public List<Feature> getFeatures() {
     
-    if (this.get("feature_ids") == null) return Collections.emptySet();
+    if (this.get("feature_ids") == null) return Collections.emptyList();
     
     Set<String> feature_ids = this.stringIDtoSet(this.getString("feature_ids"));
     Set<Feature> features = new HashSet<Feature>();
@@ -286,7 +286,14 @@ public class Group extends BaseObject<Group> {
         throw new RuntimeException(e);
       }
     }
-    return features;
+    
+    List<Feature> list = new ArrayList<Feature>(features);
+    Collections.sort(list, new Comparator<Feature>() {
+      public int compare(Feature o1, Feature o2) {
+        return o1.getString("name").compareTo(o2.getString("name"));
+      }
+    });
+    return list;
   }
 
   @Override
