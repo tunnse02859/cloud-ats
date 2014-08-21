@@ -23,6 +23,7 @@ $(document).ready(function(){
       dataType: "json",
       success: function(data) {
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
+        $("#main-navbar .current-group").html(data.navbar);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
       },
@@ -47,6 +48,7 @@ $(document).ready(function(){
       dataType: "json",
       success: function(data) {
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
+        $("#main-navbar .current-group").html(data.navbar);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
       },
@@ -131,6 +133,7 @@ $(document).ready(function(){
       data: formValue,
       success: function(data){
         $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
+        $("#main-navbar .current-group").html(data.navbar);
         $(".org-body .org-right").html(data.body);
         $(".org-body .org-left").html(data.leftmenu);
       },

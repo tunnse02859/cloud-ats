@@ -126,7 +126,7 @@ public class GroupAction extends Controller {
       return ok(index.render("group" , body, currentGroup.getId()));
     } else if (currentGroup.getInt("level") > 1) {
       
-      Html body = adduser.render(getAvailableUser(currentGroup));
+      Html body = adduser.render(getAvailableUser(currentGroup), currentGroup.buildParentTree().getLast());
       return ok(index.render("group" , body, currentGroup.getId()));
     } else {
       return forbidden(views.html.forbidden.render());

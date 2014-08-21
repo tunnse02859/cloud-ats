@@ -128,21 +128,29 @@ public class Organization extends Controller {
   }
   
   public static Result body() throws UserManagementException {
-    Group current = setCurrentGroup(request().getQueryString("group"));
-    session().put("group_id", current.getId());
+    Group currentGroup = setCurrentGroup(request().getQueryString("group"));
+    session().put("group_id", currentGroup.getId());
     
     ObjectNode json = Json.newObject();
 
-    Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+    Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     Html body = bodyComposite(request().queryString());
     
-    Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+    Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
+    
+    StringBuilder sb = new StringBuilder();
+    LinkedList<Group> parents = currentGroup.buildParentTree();
+    for (Group parent : parents) {
+      sb.append("/ ").append(parent.getString("name"));
+    }
+    sb.append("/ ").append(currentGroup.getString("name"));
     
     json.put("breadcrumb", breadcrumb.toString());
+    json.put("navbar", sb.toString());
     json.put("leftmenu", leftMenu.toString());
     json.put("body", body.toString());
-    json.put("group", current.getId());
+    json.put("group", currentGroup.getId());
     
     return ok(json);
   }

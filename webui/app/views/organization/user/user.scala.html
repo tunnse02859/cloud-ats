@@ -56,7 +56,7 @@
     }  
   }
 
-  @if(!user.getGroups().isEmpty()) {
+  @if(!user.getGroups().isEmpty() && user.getBoolean("joined")) {
   <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
   }
   </td>
