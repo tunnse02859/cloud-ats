@@ -94,8 +94,10 @@ public class UserAction extends Controller {
   
   public static Result doEditRole(String u) throws UserManagementException {
     User user_ = UserDAO.INSTANCE.findOne(u);
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
 
-    Set<String> currentRole = user_.getString("role_ids") == null ? new HashSet<String>() : user_.stringIDtoSet(user_.getString("role_ids"));
+    Set<Role> currentGroupRole = currentGroup.getRoles();
+    Set<String> currentUserRole = user_.getString("role_ids") == null ? new HashSet<String>() : user_.stringIDtoSet(user_.getString("role_ids"));
     Set<String> actualRole = new HashSet<String>();
     
     if (request().getQueryString("role") != null) {
@@ -105,7 +107,7 @@ public class UserAction extends Controller {
 
     //Add non-existed role
     for (String r : actualRole) {
-      if (!currentRole.contains(r)) {
+      if (!currentUserRole.contains(r)) {
         Role role_ = RoleDAO.INSTANCE.findOne(r);
         role_.addUser(user_);
         user_.addRole(role_);
@@ -114,13 +116,15 @@ public class UserAction extends Controller {
     }
 
     //Remove not existed role
-    for (String r : currentRole) {
-      if (!actualRole.contains(r)) {
+    for (String r : currentUserRole) {
+      if (!actualRole.contains(r) ) {
         Role role_ = RoleDAO.INSTANCE.findOne(r);
-        if (role_.getBoolean("system")) continue;
-        role_.removeUser(user_);
-        user_.removeRole(role_);
-        RoleDAO.INSTANCE.update(role_);
+        if (currentGroupRole.contains(role_)) {
+        if (role_.getBoolean("system") && currentGroup.getBoolean("system")) continue;
+          role_.removeUser(user_);
+          user_.removeRole(role_);
+          RoleDAO.INSTANCE.update(role_);
+        }
       }
     }
 
@@ -138,14 +142,14 @@ public class UserAction extends Controller {
    */
   public static boolean shouldDisable(Role role, User user_) throws UserManagementException {
     if (inRole(role, user_)) {
-      if (!"Administration".equals(role.getName())) return false;
+      if (!(role.getBoolean("system") && user_.getBoolean("system"))) return false;
       
       //Should prevent administration role if it has only one user
       if (role.getUsers().size() == 1) return true;
       
       //Should prevent administration role if user is edited who is current
-      User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-      return user_.equals(currentUser);
+      //User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+      //return user_.equals(currentUser);
     }
     return false;
   }

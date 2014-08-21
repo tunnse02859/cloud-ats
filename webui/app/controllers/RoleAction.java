@@ -19,8 +19,6 @@ import org.ats.component.usersmgt.role.Permission;
 import org.ats.component.usersmgt.role.PermissionDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
-import org.ats.component.usersmgt.user.User;
-import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
