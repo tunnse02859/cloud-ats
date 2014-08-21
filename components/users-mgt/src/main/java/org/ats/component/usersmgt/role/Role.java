@@ -102,7 +102,7 @@ public class Role extends BaseObject<Role> {
     List<Permission> list = new ArrayList<Permission>(permissions);
     Collections.sort(list, new Comparator<Permission>() {
       public int compare(Permission o1, Permission o2) {
-        return o1.getId().compareTo(o2.getId());
+        return o1.getString("feature_id").compareTo(o2.getString("feature_id"));
       }
     });
     return list;
