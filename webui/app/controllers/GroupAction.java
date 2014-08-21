@@ -289,7 +289,9 @@ public class GroupAction extends Controller {
       query.put("group_id", g.getId());
       query.put("user_ids", Pattern.compile(currentUser.getId()));
       if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
-        return parent.getUsers();
+        List<User> users = parent.getUsers();
+        users.removeAll(groupInvitation.getUsers());
+        return users;
       }
     }
     
