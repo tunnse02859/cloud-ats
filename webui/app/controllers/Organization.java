@@ -304,6 +304,7 @@ public class Organization extends Controller {
     
     for (Group g : user.getGroups()) {
       BasicDBObject query = new BasicDBObject("name", "Administration");
+      query.put("system", true);
       query.put("group_id", g.getId());
       query.put("user_ids", Pattern.compile(user.getId()));
       if (!RoleDAO.INSTANCE.find(query).isEmpty()) {

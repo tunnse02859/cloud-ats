@@ -42,6 +42,10 @@
   </td>
   <td>
   
+  @if(!system && !user.getBoolean("joined")) {
+    <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
+  }
+  
   @if(controllers.UserAction.shouldLeaveGroup(user)) {
       <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
   }
@@ -59,10 +63,5 @@
     <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
   }
  
-    @if(!system && !user.getBoolean("joined")) {
-    <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
-    }
-  
-
   </td>
 </tr>

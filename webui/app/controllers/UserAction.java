@@ -160,6 +160,12 @@ public class UserAction extends Controller {
             RoleDAO.INSTANCE.update(role_);
             UserDAO.INSTANCE.update(user_);
           }
+        } else if (currentGroup.getBoolean("system") && !user_.getBoolean("system")) {
+          role_.removeUser(user_);
+          user_.removeRole(role_);
+          
+          RoleDAO.INSTANCE.update(role_);
+          UserDAO.INSTANCE.update(user_);
         }
       }
     }
