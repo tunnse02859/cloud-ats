@@ -3,7 +3,6 @@
  */
 package controllers;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
@@ -17,9 +16,11 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.mongodb.BasicDBObject;
-
 import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.leftmenu;
+
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -27,6 +28,10 @@ import play.mvc.Controller;
  * Aug 22, 2014
  */
 public class FeatureAction extends Controller {
+  
+  public static Result updateFeatureList(String active) throws UserManagementException {
+    return ok(leftmenu.render(active));
+  }
 
   public static boolean hasPermissionOnFeature(Feature feature) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));

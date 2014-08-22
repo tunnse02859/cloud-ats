@@ -6,6 +6,25 @@ $(document).ready(function(){
     }
   };
   
+  var updateByAjax = function(data) {
+    $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
+    $("#main-navbar .current-group").html(data.navbar);
+    $(".org-body .org-right").html(data.body);
+    $(".org-body .org-left").html(data.leftmenu);
+    
+    $.ajax({
+      method: "GET",
+      url: "/portal/o/f/u/Organization",
+      dataType: "html",
+      success: function(data) {
+        $("#left-panel").replaceWith(data);
+      },
+      error: function() {
+        location.reload();
+      }
+    })
+  }
+  
   //Link on left-menu
   $("#main").on("click", ".org-body .org-left a", function() {
     $(".org-body .org-left li").removeClass('active');
@@ -22,10 +41,7 @@ $(document).ready(function(){
       url: ajaxURL,
       dataType: "json",
       success: function(data) {
-        $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
-        $("#main-navbar .current-group").html(data.navbar);
-        $(".org-body .org-right").html(data.body);
-        $(".org-body .org-left").html(data.leftmenu);
+        updateByAjax(data);
       },
       error: function() {
         location.reload();
@@ -47,10 +63,7 @@ $(document).ready(function(){
       url: ajaxURL,
       dataType: "json",
       success: function(data) {
-        $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
-        $("#main-navbar .current-group").html(data.navbar);
-        $(".org-body .org-right").html(data.body);
-        $(".org-body .org-left").html(data.leftmenu);
+        updateByAjax(data);
       },
       error: function() {
         location.reload();
@@ -132,10 +145,7 @@ $(document).ready(function(){
       dataType: "json",
       data: formValue,
       success: function(data){
-        $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
-        $("#main-navbar .current-group").html(data.navbar);
-        $(".org-body .org-right").html(data.body);
-        $(".org-body .org-left").html(data.leftmenu);
+        updateByAjax(data);
       },
       error: function() {
         location.reload();

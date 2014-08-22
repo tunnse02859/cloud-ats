@@ -1,9 +1,10 @@
+@(active : String)
 @import org.ats.component.usersmgt.feature._
 @import com.mongodb._
 <nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
   <div id="left-panel-content" style="overflow: hidden;">
     <ul>
-      <li class="active">
+      <li @if(active == "Dashboard") { class="active" }>
         <a href="@controllers.routes.Application.main()" ajax-url="@controllers.routes.Dashboard.body()">
           <span class="icon-dashboard"></span>Dashboard
         </a>
@@ -13,9 +14,15 @@
         @for(feature <- features) {
           @if(controllers.FeatureAction.hasPermissionOnFeature(feature)) {
             @if(feature.getName() == "Organization") {
-            <li>
+            <li @if(active == "Organization") { class="active" }>
               <a href="@controllers.routes.Organization.index()" ajax-url="@controllers.routes.Organization.indexAjax()">
               <span class="icon-group"></span>Organization
+              </a>
+            </li>
+            } else {
+            <li @if(active == feature.getName()) { class="active" }>
+              <a href="javascript:void(0)">
+              <span class="icon-star"></span>@feature.getName()
               </a>
             </li>
             }

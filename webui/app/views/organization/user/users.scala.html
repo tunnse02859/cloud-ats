@@ -1,6 +1,8 @@
 @(rows : Html, system: Boolean)
+@import org.ats.component.usersmgt.group._
+
 <div class="org-user-filter">
-  <h3 class="box-header"><i class="icon-filter"></i> User Filter
+  <h3 class="box-header"><i class="icon-filter"></i> User Filter & Action
   </h3>
   
   <div class="box no-border no-padding non-collapsible">
@@ -11,6 +13,15 @@
     <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("user")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
     @if(system) {
     <a href="javascript:void(0);" class="pull-right btn btn-primary"><i class="icon icon-plus"></i> System User</a> 
+    }
+    
+    @if(!system){
+      @if(GroupDAO.INSTANCE.findOne(session().get("group_id")).getInt("level") > 1) {
+        <a href="@controllers.routes.GroupAction.invite()" class="btn pull-right" style="margin-right: 5px;">
+        <i class="icon-plus"></i> 
+        Add User
+        </a>
+      }
     }  
   </form>
   

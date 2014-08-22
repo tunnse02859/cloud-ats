@@ -38,7 +38,7 @@ public class Invitation extends Controller {
       }
     }
     
-    return redirect(controllers.routes.Application.index());
+    return redirect(controllers.routes.Application.main());
   }
   
   //Verify the user who sent invitation that has right permission

@@ -33,7 +33,7 @@ public class AuthenticationInterceptor extends Simple {
     //put group id to session if non-exist
     User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
     List<Group> groups = currentUser.getGroups();
-    if (!(ctx.session().containsKey("group_id") && groups.isEmpty())) {
+    if (!ctx.session().containsKey("group_id") && !groups.isEmpty()) {
       Collections.sort(groups, new Comparator<Group>() {
         @Override
         public int compare(Group o1, Group o2) {

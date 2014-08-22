@@ -31,9 +31,15 @@
 		        @for(feature <- features) {
 		          @if(controllers.FeatureAction.hasPermissionOnFeature(feature)) {
 		            @if(feature.getName() == "Organization") {
-		            <li>
+		            <li class="active">
 		              <a href="@controllers.routes.Organization.index()" ajax-url="@controllers.routes.Organization.indexAjax()">
 		              <span class="icon-group"></span>Organization
+		              </a>
+		            </li>
+		            } else {
+		            <li>
+		              <a>
+		              <span class="icon-star"></span>@feature.getName()
 		              </a>
 		            </li>
 		            }

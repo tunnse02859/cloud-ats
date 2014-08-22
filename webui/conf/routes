@@ -57,6 +57,9 @@ GET     /portal/o/r/de/:r          controllers.RoleAction.doEditRole(r)
 GET     /portal/o/r/d/:r           controllers.RoleAction.deleteRole(r)
 GET     /portal/o/p/:r/:p          controllers.RoleAction.removePermission(r, p)
 
+############################## Feature ####################################
+GET     /portal/o/f/u/:active      controllers.FeatureAction.updateFeatureList(active)
+
 ############################# Dashboard ##################################
 
 GET     /portal/dashboard                       controllers.Dashboard.body()
