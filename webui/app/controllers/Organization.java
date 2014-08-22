@@ -213,7 +213,7 @@ public class Organization extends Controller {
     } else if ("feature".equals(nav)) {
       StringBuilder sb = new StringBuilder();
       for (Feature f : currentGroup.getFeatures()) {
-        sb.append(feature.render(f, currentUser.getBoolean("system")));
+        sb.append(feature.render(f, currentGroup.getBoolean("system")));
       }
       return features.render(new Html(sb));
     }
