@@ -23,6 +23,7 @@ import views.html.mock.*;
  * Aug 22, 2014
  */
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
+@Authorization(feature = "Foo Feature", operation = "")
 public class FooFeature extends Controller {
 
   public static Result index() {

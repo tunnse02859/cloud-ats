@@ -98,7 +98,7 @@ public class Application extends Controller {
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
     }
-    return redirect(controllers.routes.Application.main());
+    return redirect(controllers.routes.Application.dashboard());
   }
   
   public static Result signin() {
@@ -120,7 +120,7 @@ public class Application extends Controller {
     if (user.getString("password").equals(password) && user.getBoolean("active")) {
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
-      return redirect(controllers.routes.Application.main());
+      return redirect(controllers.routes.Application.dashboard());
     }
     
     flash().put("signin-faild", "true");
@@ -137,8 +137,8 @@ public class Application extends Controller {
   }
   
   @With(AuthenticationInterceptor.class)
-  public static Result main() {
-    return ok(main.render());
+  public static Result dashboard() {
+    return ok(views.html.dashboard.dashboard.render());
   }
   
   public static Result wizard() throws UserManagementException {

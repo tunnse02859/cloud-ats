@@ -6,6 +6,7 @@ package interceptor;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
 import org.ats.component.usersmgt.group.Group;
+import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Permission;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.user.User;
@@ -17,8 +18,6 @@ import play.mvc.Http.Context;
 import play.mvc.SimpleResult;
 
 import com.mongodb.BasicDBObject;
-
-import controllers.Organization;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -36,7 +35,7 @@ public class AuthorizationInterceptor extends Action<Authorization> {
       ));
     }
     
-    Group currentGroup = Organization.setCurrentGroup(ctx.session().get("group_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(ctx.session().get("group_id"));
     if (currentGroup == null)
       return Promise.<SimpleResult>pure(forbidden(
           views.html.forbidden.render()
@@ -51,11 +50,23 @@ public class AuthorizationInterceptor extends Action<Authorization> {
           views.html.forbidden.render()
       ));
       
+    
     if (currentGroup.getFeatures().contains(feature)) {
       for (Role role : currentUser.getRoles()) {
         for (Permission per : role.getPermissions()) {
-          if (feature.equals(per.getFeature()) && per.getOpertion().getName().equals(configuration.operation()))
-            return delegate.call(ctx);
+          
+          if (!feature.equals(per.getFeature())) continue;
+          
+          if (configuration.operation().isEmpty() && currentGroup.getRoles().contains(role)) {
+              return delegate.call(ctx);
+          }
+          
+          if (per.getOpertion().getName().equals(configuration.operation())) {
+            if (feature.getBoolean("system") && feature.getName().equals("Organization"))
+              return delegate.call(ctx);
+            else if (currentGroup.getRoles().contains(role))
+              return delegate.call(ctx);
+          }
         }
       }
     }

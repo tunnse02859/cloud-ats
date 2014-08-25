@@ -15,7 +15,7 @@ POST    /signin                          controllers.Application.doSignin()
 
 GET     /signout                         controllers.Application.signout()
 
-GET     /portal                          controllers.Application.main()
+GET     /portal                          controllers.Application.dashboard()
 
 GET     /*path/                          controllers.Application.untrail(path: String)
 
@@ -65,6 +65,7 @@ GET     /portal/o/f/d/:f           controllers.FeatureAction.disableFeature(f)
 ############################# Dashboard ##################################
 
 GET     /portal/dashboard          controllers.Dashboard.body()
+GET     /portal/dashboard/:g       controllers.Dashboard.changeGroup(g)
 
 ############################# Mock #######################################
 

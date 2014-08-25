@@ -3,7 +3,9 @@
  */
 package controllers.mock;
 
+import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
+import interceptor.WizardInterceptor;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
@@ -12,6 +14,7 @@ import org.ats.component.usersmgt.group.GroupDAO;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
 import views.html.mock.*;
 
@@ -20,6 +23,8 @@ import views.html.mock.*;
  *
  * Aug 25, 2014
  */
+@With({WizardInterceptor.class, AuthenticationInterceptor.class})
+@Authorization(feature = "Bar Feature", operation = "")
 public class BarFeature extends Controller{
   
   public static Result index() {

@@ -6,23 +6,39 @@
         <img src="/assets/images/af-logo-signin.png" alt="Af_logo" style="height: 25px;">
         <span style="margin: 5px; color: #FFFFFF; opacity: 0.5;">
           <strong>Cloud ATS</strong>
+        </span>
+      </a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li class="divider-vertical"></li>
           @if(session().get("group_id") != null) {
             @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { group =>
               @if(group != null) {
-              <strong class="current-group"> 
+              <li class="active"><a class="current-group" href="#">
                 @for(g <- group.buildParentTree()) {
                   / @g.get("name")
                 }
                 / @group.get("name")
-              </strong>
+                </a>
+              </li>
               } else {
                 @session().put("group_id", null);
               }      
             }
           }
-        </span>
-      </a>
-      <div class="nav-collapse collapse">
+          <li class="divider-vertical"></li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+              Change Group
+              <i class=" icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu change-group-menu">
+            @controllers.Dashboard.groupMenuList()
+            </ul>
+            <li class="divider-vertical"></li>
+          </li>
+        </ul>
+        
         <ul class="nav pull-right">
           <li class="dropdown">
             <a class="dropdown-toggle usermenu" data-toggle="dropdown" href="#">

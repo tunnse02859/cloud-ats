@@ -78,13 +78,15 @@ public class UserAction extends Controller {
   }
   
   public static Result editRoleIndex(String u) throws UserManagementException {
-    Group currentGroup = Organization.setCurrentGroup(null);
+    Group currentGroup = Organization.setCurrentGroup(session("group_id"));
     session().put("group_id", currentGroup.getId());
 
     User user_ = UserDAO.INSTANCE.findOne(u);
     
     if (currentGroup.getBoolean("system")) {
       Group group = Organization.getHighestGroupBelong(user_);
+      session().put("group_id", group.getId());
+      
       Html body = editrole.render(user_, group);
       return ok(index.render("user" , body, group.getId()));
     }
