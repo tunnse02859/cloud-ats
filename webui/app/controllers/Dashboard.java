@@ -15,11 +15,13 @@ import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 import play.api.templates.Html;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -34,8 +36,10 @@ import scala.collection.mutable.StringBuilder;
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class Dashboard extends Controller {
 
-  public static Result body() {
-    return ok(views.html.dashboard.body.render());
+  public static Result body() throws UserManagementException {
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    return ok(views.html.dashboard.body.render(currentUser, currentGroup));
   }
   
   public static Html groupMenuList() throws UserManagementException {
@@ -71,5 +75,22 @@ public class Dashboard extends Controller {
       //return redirect(referer);
     }
     return redirect(controllers.routes.Application.dashboard());
+  }
+  
+  public static Result updateProfile() throws UserManagementException {
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    currentUser.put("firstname", request().getQueryString("firstname"));
+    currentUser.put("lastname", request().getQueryString("lastname"));
+    currentUser.put("im", request().getQueryString("im"));
+    currentUser.put("tel", request().getQueryString("tel"));
+    UserDAO.INSTANCE.update(currentUser);
+    
+    ObjectNode json = Json.newObject();
+    json.put("firstname", currentUser.getString("firstname"));
+    json.put("lastname", currentUser.getString("lastname"));
+    json.put("im", currentUser.getString("im"));
+    json.put("tel", currentUser.getString("tel"));
+    
+    return ok(json);
   }
 }

@@ -65,7 +65,8 @@ GET     /portal/o/f/d/:f           controllers.FeatureAction.disableFeature(f)
 ############################# Dashboard ##################################
 
 GET     /portal/dashboard          controllers.Dashboard.body()
-GET     /portal/dashboard/:g       controllers.Dashboard.changeGroup(g)
+GET     /portal/dashboard/g/:g     controllers.Dashboard.changeGroup(g)
+GET     /portal/dashboard/profile  controllers.Dashboard.updateProfile()
 
 ############################# Mock #######################################
 

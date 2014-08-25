@@ -86,8 +86,10 @@ public class Application extends Controller {
       UserDAO.INSTANCE.create(admin);
       RoleDAO.INSTANCE.create(administration);
       
+      session().clear();
       session().put("email", admin.getEmail());
       session().put("user_id", admin.getId());
+      session().put("group_id", company.getId());
     } else {
       String email = form.get("email");
       String password = form.get("password");
