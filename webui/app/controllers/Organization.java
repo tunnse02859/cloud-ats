@@ -105,6 +105,13 @@ public class Organization extends Controller {
       query.put("user_ids", Pattern.compile(currentUser.getId()));
       query.put("group_id", currentGroup.getId());
       if (RoleDAO.INSTANCE.find(query).isEmpty()) {
+        LinkedList<Group> parents = currentGroup.buildParentTree();
+        for (Group group : parents) {
+          query.put("group_id", group.getId());
+          if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
+            return currentGroup;
+          }
+        }
         session().remove("group_id");
         currentGroup = setCurrentGroup(null);
       }

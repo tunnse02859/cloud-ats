@@ -8,12 +8,16 @@
           <strong>Cloud ATS</strong>
           @if(session().get("group_id") != null) {
             @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { group =>
+              @if(group != null) {
               <strong class="current-group"> 
                 @for(g <- group.buildParentTree()) {
                   / @g.get("name")
                 }
                 / @group.get("name")
-              </strong>                 
+              </strong>
+              } else {
+                @session().put("group_id", null);
+              }      
             }
           }
         </span>

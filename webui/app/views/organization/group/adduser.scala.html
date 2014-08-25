@@ -1,4 +1,4 @@
-@(users: List[org.ats.component.usersmgt.user.User], groupParent: org.ats.component.usersmgt.group.Group)
+@(users: List[org.ats.component.usersmgt.user.User], groupParent: org.ats.component.usersmgt.group.Group, currentGroup: org.ats.component.usersmgt.group.Group)
 <form class="form-horizontal" method="get" action="@controllers.routes.GroupAction.addUser()">
   <legend>Add More User</legend>
   @for(user <- users) {
@@ -7,7 +7,7 @@
   }
   @if(users.isEmpty()) {
     <div class="alert">
-      <p>No user available in <span class="badge badge-blue">@groupParent.get("name")</span> Please go into <span class="badge badge-blue">@groupParent.get("name")</span> to add user.</p>
+      <p>No user available in <span class="badge badge-blue">@currentGroup.get("name")</span> Please go back <span class="badge badge-blue">@groupParent.get("name")</span> to add user.</p>
     </div>
   }
   <div class="form-actions">

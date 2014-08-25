@@ -1,11 +1,17 @@
 $(document).ready(function() {
   $("#left-panel a").on("click", function() {
-    $("#left-panel li").removeClass('active')
     var href = $(this).attr('href');
+    var ajaxURL = $(this).attr("ajax-url");
+    
+    if (ajaxURL === undefined) {
+      return true;
+    }
+    
+    $("#left-panel li").removeClass('active')
+    
     window.history.pushState('obj', 'newtitle', href);
     $(this).parent().addClass('active');
     
-    var ajaxURL = $(this).attr("ajax-url");
     $.ajax({
       method: "GET",
       url: ajaxURL,

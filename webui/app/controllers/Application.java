@@ -222,7 +222,7 @@ public class Application extends Controller {
     rootGroup.addFeature(bar);
     rootGroup.addFeature(juu);
     
-   /* Role fooRole = new Role("Foo Role", rootGroup.getId());
+    Role fooRole = new Role("Foo Role", rootGroup.getId());
     fooRole.addPermission(new Permission(foo.getId(), of1.getId()));
     fooRole.addPermission(new Permission(foo.getId(), of2.getId()));
     fooRole.addPermission(new Permission(foo.getId(), of3.getId()));
@@ -240,10 +240,10 @@ public class Application extends Controller {
     Role mixRole = new Role("Mix Role", rootGroup.getId());
     mixRole.addPermission(new Permission(foo.getId(), of1.getId()));
     mixRole.addPermission(new Permission(bar.getId(), ob2.getId()));
-    mixRole.addPermission(new Permission(juu.getId(), oj3.getId()));*/
+    mixRole.addPermission(new Permission(juu.getId(), oj3.getId()));
     
     
-    /*rootGroup.addRole(fooRole);
+    rootGroup.addRole(fooRole);
     rootGroup.addRole(barRole);
     rootGroup.addRole(juuRole);
     rootGroup.addRole(mixRole);
@@ -254,7 +254,7 @@ public class Application extends Controller {
     rootUser.addRole(barRole);
     barRole.addUser(rootUser);
     
-    RoleDAO.INSTANCE.create(fooRole, barRole, juuRole, mixRole);*/
+    RoleDAO.INSTANCE.create(fooRole, barRole, juuRole, mixRole);
     GroupDAO.INSTANCE.update(rootGroup);
     UserDAO.INSTANCE.update(rootUser);
   }

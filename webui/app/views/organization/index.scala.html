@@ -36,13 +36,30 @@
 		              <span class="icon-group"></span>Organization
 		              </a>
 		            </li>
-		            } else {
-		            <li>
-		              <a>
-		              <span class="icon-star"></span>@feature.getName()
-		              </a>
-		            </li>
-		            }
+		            } 
+		            @if(feature.getName() == "Foo Feature") {
+                <li>
+                  <a href="@controllers.mock.routes.FooFeature.index()">
+                  <span class="icon-star"></span>@feature.getName()
+                  </a>
+                </li>
+                }
+                
+                @if(feature.getName() == "Bar Feature") {
+                <li>
+                  <a href="@controllers.mock.routes.BarFeature.index()">
+                  <span class="icon-star"></span>@feature.getName()
+                  </a>
+                </li>
+                }
+                
+                @if(feature.getName() == "Juu Feature") {
+                <li>
+                  <a href="@controllers.mock.routes.JuuFeature.index()">
+                  <span class="icon-star"></span>@feature.getName()
+                  </a>
+                </li>
+                }
 		          }
 		        }
 		      }

@@ -19,9 +19,27 @@
               <span class="icon-group"></span>Organization
               </a>
             </li>
-            } else {
-            <li @if(active == feature.getName()) { class="active" }>
-              <a href="javascript:void(0)">
+            }
+             
+            @if(feature.getName() == "Foo Feature") {
+            <li @if(active == "Foo Feature") { class="active" }>
+              <a href="@controllers.mock.routes.FooFeature.index()">
+              <span class="icon-star"></span>@feature.getName()
+              </a>
+            </li>
+            }
+            
+            @if(feature.getName() == "Bar Feature") {
+            <li @if(active == "Bar Feature") { class="active" }>
+              <a href="@controllers.mock.routes.BarFeature.index()">
+              <span class="icon-star"></span>@feature.getName()
+              </a>
+            </li>
+            }
+            
+            @if(feature.getName() == "Juu Feature") {
+            <li @if(active == "Juu Feature") { class="active" }>
+              <a href="@controllers.mock.routes.JuuFeature.index()">
               <span class="icon-star"></span>@feature.getName()
               </a>
             </li>

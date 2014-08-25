@@ -3,11 +3,17 @@
  */
 package controllers;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WithSystem;
+import interceptor.WizardInterceptor;
+
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
+import org.ats.component.usersmgt.feature.FeatureDAO;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Permission;
@@ -18,6 +24,7 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.With;
 import views.html.leftmenu;
 
 import com.mongodb.BasicDBObject;
@@ -27,6 +34,7 @@ import com.mongodb.BasicDBObject;
  *
  * Aug 22, 2014
  */
+@With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class FeatureAction extends Controller {
   
   public static Result updateFeatureList(String active) throws UserManagementException {
@@ -45,6 +53,7 @@ public class FeatureAction extends Controller {
     
     //check for Organization feature
     if (feature.getBoolean("system") && feature.getName().equals("Organization")) {
+      if (currentUser.getBoolean("system")) return true;
       LinkedList<Group> parents = currentGroup.buildParentTree();
       for (Group parent : parents) {
         BasicDBObject query = new BasicDBObject("name", "Administration");
@@ -65,5 +74,27 @@ public class FeatureAction extends Controller {
     }
     
     return false;
+  }
+
+  @WithSystem
+  @Authorization(feature = "Organization", operation = "Administration")
+  public static Result disableFeature(String f) throws UserManagementException {
+    Feature feature = FeatureDAO.INSTANCE.findOne(f);
+    if (feature != null && !feature.getBoolean("system") && !feature.getBoolean("disable")) {
+      feature.put("disable", true);
+      FeatureDAO.INSTANCE.update(feature);
+    }
+    return redirect(controllers.routes.Organization.index() + "?nav=feature");
+  }
+  
+  @WithSystem
+  @Authorization(feature = "Organization", operation = "Administration")
+  public static Result enableFeature(String f) throws UserManagementException {
+    Feature feature = FeatureDAO.INSTANCE.findOne(f);
+    if (feature != null && !feature.getBoolean("system") && feature.getBoolean("disable")) {
+      feature.put("disable", false);
+      FeatureDAO.INSTANCE.update(feature);
+    }
+    return redirect(controllers.routes.Organization.index() + "?nav=feature");
   }
 }

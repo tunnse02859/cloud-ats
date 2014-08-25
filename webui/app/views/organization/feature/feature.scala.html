@@ -8,9 +8,20 @@
     <span class="badge badge-green">@op.getName()</span>  
   }
   </td>
+  <td>
+  @if(feature.getBoolean("disable")) {
+    <span class="badge badge-red">disabled</span>
+  } else {
+    <span class="badge badge-blue">enabled</span>
+  }
+  </td>
   <td>  
-  @if(system && !feature.getBoolean("system")) {
-  <a class="btn btn-mini btn-red">Disable</a>  
+  @if(system && !feature.getBoolean("system") && !feature.getBoolean("disable")) {
+  <a href="@controllers.routes.FeatureAction.disableFeature(feature.getId())" class="btn btn-mini btn-red">Disable</a>  
+  }
+  
+  @if(system && !feature.getBoolean("system") && feature.getBoolean("disable")) {
+  <a href="@controllers.routes.FeatureAction.enableFeature(feature.getId())" class="btn btn-mini btn-blue">Enable</a>  
   }
   </td>      
 </tr>

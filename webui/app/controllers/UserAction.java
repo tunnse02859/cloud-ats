@@ -3,7 +3,6 @@
  */
 package controllers;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -171,7 +170,7 @@ public class UserAction extends Controller {
     }
 
     
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(controllers.routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
   }
   
   /**

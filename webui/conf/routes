@@ -59,10 +59,30 @@ GET     /portal/o/p/:r/:p          controllers.RoleAction.removePermission(r, p)
 
 ############################## Feature ####################################
 GET     /portal/o/f/u/:active      controllers.FeatureAction.updateFeatureList(active)
+GET     /portal/o/f/e/:f           controllers.FeatureAction.enableFeature(f)
+GET     /portal/o/f/d/:f           controllers.FeatureAction.disableFeature(f)
 
 ############################# Dashboard ##################################
 
-GET     /portal/dashboard                       controllers.Dashboard.body()
+GET     /portal/dashboard          controllers.Dashboard.body()
+
+############################# Mock #######################################
+
+GET     /portal/foo                controllers.mock.FooFeature.index()
+GET     /portal/foo/a1             controllers.mock.FooFeature.doAction1()
+GET     /portal/foo/a2             controllers.mock.FooFeature.doAction2()   
+GET     /portal/foo/a3             controllers.mock.FooFeature.doAction3()
+
+GET     /portal/bar                controllers.mock.BarFeature.index()
+GET     /portal/bar/a1             controllers.mock.BarFeature.doAction1()
+GET     /portal/bar/a2             controllers.mock.BarFeature.doAction2()   
+GET     /portal/bar/a3             controllers.mock.BarFeature.doAction3()
+
+GET     /portal/juu                controllers.mock.JuuFeature.index()
+GET     /portal/juu/a1             controllers.mock.JuuFeature.doAction1()
+GET     /portal/juu/a2             controllers.mock.JuuFeature.doAction2()   
+GET     /portal/juu/a3             controllers.mock.JuuFeature.doAction3()
+
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

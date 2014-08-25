@@ -24,7 +24,6 @@ import com.mongodb.BasicDBObject;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
-import interceptor.WithoutSystem;
 import interceptor.WizardInterceptor;
 import play.api.templates.Html;
 import play.mvc.Controller;

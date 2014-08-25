@@ -128,7 +128,7 @@ public class GroupAction extends Controller {
       return ok(index.render("group" , body, currentGroup.getId()));
     } else if (currentGroup.getInt("level") > 1) {
       
-      Html body = adduser.render(getAvailableUser(currentGroup), currentGroup.buildParentTree().getLast());
+      Html body = adduser.render(getAvailableUser(currentGroup), currentGroup.buildParentTree().getLast(), currentGroup);
       return ok(index.render("group" , body, currentGroup.getId()));
     } else {
       return forbidden(views.html.forbidden.render());
@@ -136,8 +136,8 @@ public class GroupAction extends Controller {
   }
   
   public static Result addUser() throws UserManagementException {
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
     if (request().getQueryString("user") != null) {
-      Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
       String[] users = request().queryString().get("user");
       for (String u : users) {
         User user = UserDAO.INSTANCE.findOne(u);
@@ -148,7 +148,7 @@ public class GroupAction extends Controller {
         GroupDAO.INSTANCE.update(currentGroup);
       }
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(controllers.routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
   }
   
   public static Result editGroup(String g) throws UserManagementException {
@@ -181,6 +181,7 @@ public class GroupAction extends Controller {
   public static Result doEditGroup(String g) throws UserManagementException {
     Group group_ = GroupDAO.INSTANCE.findOne(g);
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
     
     //Prevent edit system group
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
@@ -229,10 +230,10 @@ public class GroupAction extends Controller {
     }
     
     if (request().getQueryString("name") != null) group_.put("name", request().getQueryString("name"));
-   
+    
     GroupDAO.INSTANCE.update(group_);
     
-    return redirect(controllers.routes.Organization.index() + "?nav=group");
+    return redirect(controllers.routes.Organization.index() + "?nav=group&group=" + currentGroup.getId());
   }
   
   /**
