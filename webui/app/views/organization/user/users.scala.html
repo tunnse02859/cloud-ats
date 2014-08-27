@@ -12,7 +12,7 @@
      
     <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("user")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
     @if(system) {
-    <a href="javascript:void(0);" class="pull-right btn btn-primary"><i class="icon icon-plus"></i> System User</a> 
+    <a href="@controllers.routes.UserAction.createUserSystem()" class="pull-right btn btn-primary"><i class="icon icon-plus"></i> System User</a> 
     }
     
     @if(!system){

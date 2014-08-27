@@ -29,6 +29,8 @@ import org.ats.component.usersmgt.user.UserDAO;
 import com.mongodb.BasicDBObject;
 
 import play.api.templates.Html;
+import play.data.DynamicForm;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -260,5 +262,30 @@ public class UserAction extends Controller {
       if (!RoleDAO.INSTANCE.find(query).isEmpty()) return true;
     }
     return false;
+  }
+  
+  @WithSystem
+  public static Result createUserSystem() throws UserManagementException {
+    Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    Html body = systemuser.render();  
+    return ok(index.render("user" , body, systemGroup.getId()));
+  }
+  
+  @WithSystem
+  public static Result doCreateUserSystem() throws UserManagementException {
+    Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    DynamicForm form = Form.form().bindFromRequest();
+    String email = form.get("email");
+    String password = form.get("password");
+    User user = new User(email, email);
+    user.put("password", password);
+    user.put("joined", true);
+    user.joinGroup(systemGroup);
+    systemGroup.addUser(user);
+    
+    UserDAO.INSTANCE.create(user);
+    GroupDAO.INSTANCE.update(systemGroup);
+    
+    return redirect(controllers.routes.Organization.index() + "?nav=user");
   }
 }

@@ -206,7 +206,7 @@ public class Organization extends Controller {
       StringBuilder sb = new StringBuilder();
       List<User> all = listUserVisible();
       for (User u : all) {
-        sb.append(user.render(u, currentUser.getBoolean("system"), currentGroup.getRoles()));
+        sb.append(user.render(u, currentUser.getBoolean("system") || currentGroup.getBoolean("system"), currentGroup.getRoles()));
       }
       
       return users.render(new Html(sb), currentUser.getBoolean("system"));

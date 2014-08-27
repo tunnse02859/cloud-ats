@@ -47,6 +47,8 @@ GET     /portal/o/u/ac/:u          controllers.UserAction.active(u)
 GET     /portal/o/u/e/:u           controllers.UserAction.editRoleIndex(u)
 GET     /portal/o/u/de/:u          controllers.UserAction.doEditRole(u)
 GET     /portal/o/u/l/:u           controllers.UserAction.leaveCurrentGroup(u)
+GET     /portal/o/u/s              controllers.UserAction.createUserSystem()
+POST    /portal/o/u/s/c            controllers.UserAction.doCreateUserSystem()
 
 ############################## Role Action ################################
 

@@ -1,4 +1,7 @@
 @(user: org.ats.component.usersmgt.user.User, system: Boolean, currentRoles : List[org.ats.component.usersmgt.role.Role])
+@import org.ats.component.usersmgt.user._
+@import org.ats.component.usersmgt.group._
+
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td>
@@ -55,12 +58,20 @@
   }
   
   @if(system && session().get("user_id") != user.getId()) {
+    
+    @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { currentGroup =>
+    @defining(UserDAO.INSTANCE.findOne(session().get("user_id"))) { currentUser =>
+    
+    @if(!user.getBoolean("system")) {
     @if(user.getBoolean("active")){
     <a href="@controllers.routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
     } else {
     <a href="@controllers.routes.UserAction.active(user.getId())" class="btn btn-mini btn-cyan">Active</a>
     }
     <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
+    }
+    }
+    }
   }
  
   </td>

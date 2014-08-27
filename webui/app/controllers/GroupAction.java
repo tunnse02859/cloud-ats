@@ -154,15 +154,16 @@ public class GroupAction extends Controller {
   public static Result editGroup(String g) throws UserManagementException {
     Group group_ = GroupDAO.INSTANCE.findOne(g);
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
     
     //Prevent edit system group or group level 1
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
 
     //Prevent edit group level 1 if current user is not system
-    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system")) return forbidden(views.html.forbidden.render());
+    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system") &&  !currentGroup.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent edit group which has no right permission
-    if (!currentUser.getBoolean("system")) {
+    if (!currentUser.getBoolean("system") && !currentGroup.getBoolean("system")) {
       Collection<Group> adGroup = Organization.getAdministrationGroup();
       Set<Group> childrenGroup = new HashSet<Group>();
       for (Group ag : adGroup) {
@@ -187,10 +188,10 @@ public class GroupAction extends Controller {
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
 
     //Prevent edit group level 1 if current user is not system
-    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system")) return forbidden(views.html.forbidden.render());
+    if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system") &&  !currentGroup.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent edit group which has no right permission
-    if (!currentUser.getBoolean("system")) {
+    if (!currentUser.getBoolean("system") && !currentGroup.getBoolean("system")) {
       Collection<Group> adGroup = Organization.getAdministrationGroup();
       Set<Group> childrenGroup = new HashSet<Group>();
       for (Group ag : adGroup) {
@@ -245,12 +246,13 @@ public class GroupAction extends Controller {
   public static Result deleteGroup(String g) throws UserManagementException {
     Group group_   = GroupDAO.INSTANCE.findOne(g);
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
     
     //Prevent delete system group or group level 1
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent delete group which has no right permission
-    if (!currentUser.getBoolean("system")) {
+    if (!currentUser.getBoolean("system") && !currentGroup.getBoolean("system")) {
       Collection<Group> adGroup = Organization.getAdministrationGroup();
       Set<Group> childrenGroup = new HashSet<Group>();
       for (Group ag : adGroup) {
