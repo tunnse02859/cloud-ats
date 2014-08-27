@@ -96,5 +96,9 @@ public class UserEventListener implements EventListener {
       group.removeUser(user);
       GroupDAO.INSTANCE.update(group);
     }
+    for (Role role : user.getRoles()) {
+      role.removeUser(user);
+      RoleDAO.INSTANCE.update(role);
+    }
   }
 }

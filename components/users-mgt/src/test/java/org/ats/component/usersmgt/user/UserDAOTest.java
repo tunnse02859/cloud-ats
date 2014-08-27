@@ -137,6 +137,16 @@ public class UserDAOTest {
     role = RoleDAO.INSTANCE.find(new BasicDBObject("name", "Testing")).iterator().next();
     Assert.assertEquals(role, this.user.getRoles().iterator().next());
   }
+  
+  @Test
+  public void tetRemoveUser() throws UserManagementException {
+    Role role = this.user.getRoles().get(0);
+    UserDAO.INSTANCE.delete(this.user);
+    while(EventExecutor.INSTANCE.isInProgress()) {
+    }
+    role = RoleDAO.INSTANCE.findOne(role.getId());
+    Assert.assertTrue(role.getUsers().isEmpty());
+  }
 
   @Test
   public void testFindUser() throws UserManagementException {
