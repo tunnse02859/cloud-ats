@@ -67,7 +67,8 @@ public class Organization extends Controller {
     
     //Check right permission on group pass through query string
     if (requestGroupId != null) {
-      if (currentUser.getBoolean("system")) {
+      
+      if (isSystem(currentUser)) {
         return GroupDAO.INSTANCE.findOne(requestGroupId);
       }
       
@@ -98,7 +99,7 @@ public class Organization extends Controller {
     if (currentGroup == null) {
       session().remove("group_id");
       currentGroup = setCurrentGroup(null);
-    } else if (!currentUser.getBoolean("system")) {
+    } else if (!isSystem(currentUser)) {
       //double check current group
       BasicDBObject query = new BasicDBObject("name", "Administration");
       query.put("system", true);
@@ -199,17 +200,17 @@ public class Organization extends Controller {
         sb.append(group.render(g));
       }
       
-      return groups.render(new Html(sb), currentUser.getBoolean("system"));
+      return groups.render(new Html(sb), isSystem(currentUser));
     
     } else if ("user".equals(nav)) {
       
       StringBuilder sb = new StringBuilder();
       List<User> all = listUserVisible();
       for (User u : all) {
-        sb.append(user.render(u, currentUser.getBoolean("system") || currentGroup.getBoolean("system"), currentGroup.getRoles()));
+        sb.append(user.render(u, isSystem(currentUser), currentGroup.getRoles()));
       }
       
-      return users.render(new Html(sb), currentUser.getBoolean("system"));
+      return users.render(new Html(sb), isSystem(currentUser));
           
     } else if ("role".equals(nav)) {
       StringBuilder sb = new StringBuilder();
@@ -220,7 +221,7 @@ public class Organization extends Controller {
     } else if ("feature".equals(nav)) {
       StringBuilder sb = new StringBuilder();
       for (Feature f : currentGroup.getFeatures()) {
-        sb.append(feature.render(f, currentGroup.getBoolean("system")));
+        sb.append(feature.render(f, isSystem(currentUser)));
       }
       return features.render(new Html(sb));
     }
@@ -345,7 +346,7 @@ public class Organization extends Controller {
     if (currentGroup.getBoolean("system")) {
       sb.append("<li class='active'>").append(currentGroup.get("name")).append("</li>");
       return new Html(sb);
-    } else if (currentUser.getBoolean("system")) {
+    } else if (isSystem(currentUser)) {
       Group sys = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
       String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + sys.getId();
       String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + sys.getId();
@@ -544,5 +545,10 @@ public class Organization extends Controller {
       
     }
     return status(404);
+  }
+  
+  public static boolean isSystem(User user) throws UserManagementException {
+    Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    return systemGroup.getUsers().contains(user);
   }
 }

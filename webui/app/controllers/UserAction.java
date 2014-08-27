@@ -203,7 +203,7 @@ public class UserAction extends Controller {
           if (!RoleDAO.INSTANCE.find(query).isEmpty()) return false;
         }
         
-        if (currentUser.getBoolean("system")) return false;
+        if (Organization.isSystem(currentUser)) return false;
         
         return true;
       }

@@ -92,7 +92,7 @@ $(document).ready(function() {
     </form>
   </div>
   
-  @if(currentGroup.getUsers().size() > 1) {
+  @if(currentGroup != null && currentGroup.getUsers().size() > 1) {
   <div class="span6">
     <h3 class="box-header">
       <i class="icon-user"></i> Your Co-Worker(s)

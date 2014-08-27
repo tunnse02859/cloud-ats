@@ -59,9 +59,6 @@
   
   @if(system && session().get("user_id") != user.getId()) {
     
-    @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { currentGroup =>
-    @defining(UserDAO.INSTANCE.findOne(session().get("user_id"))) { currentUser =>
-    
     @if(!user.getBoolean("system")) {
     @if(user.getBoolean("active")){
     <a href="@controllers.routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
@@ -69,8 +66,6 @@
     <a href="@controllers.routes.UserAction.active(user.getId())" class="btn btn-mini btn-cyan">Active</a>
     }
     <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
-    }
-    }
     }
   }
  
