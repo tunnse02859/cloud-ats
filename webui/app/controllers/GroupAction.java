@@ -70,6 +70,7 @@ public class GroupAction extends Controller {
   public static Result doCreate() throws UserManagementException {
     String name = request().getQueryString("name");
     Group group = new Group(name);
+    group.put("desc", request().getQueryString("desc"));
     String[] features = request().queryString().get("feature");
     for (String f : features) {
       group.addFeature(FeatureDAO.INSTANCE.findOne(f));
@@ -80,6 +81,7 @@ public class GroupAction extends Controller {
     group.addFeature(organization);
     
     Role administration = new Role("Administration", group.getId());
+    administration.put("desc", "This is administration role for organization management");
     administration.put("system", true);
     group.addRole(administration);
     
@@ -231,7 +233,7 @@ public class GroupAction extends Controller {
     }
     
     if (request().getQueryString("name") != null) group_.put("name", request().getQueryString("name"));
-    
+    group_.put("desc", request().getQueryString("desc"));
     GroupDAO.INSTANCE.update(group_);
     
     return redirect(controllers.routes.Organization.index() + "?nav=group&group=" + currentGroup.getId());

@@ -8,6 +8,12 @@
       <input type="text" name="name" placeholder="Role Name" value="@currentRole.getName()">    
     </div>
   </div>
+   <div class="control-group">
+    <label class="control-label">Role Description</label>
+    <div class="controls">
+      <textarea name="desc" placeholder="Description">@currentRole.getString("desc")</textarea>
+    </div>
+  </div>
   
   <table class="table table-bordered" style="margin-top: 20px;">
     <tbody>    

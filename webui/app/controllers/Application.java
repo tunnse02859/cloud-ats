@@ -73,6 +73,7 @@ public class Application extends Controller {
       }
       
       Role administration = new Role("Administration", company.getId());
+      administration.put("desc", "This is administration role for organization management");
       administration.put("system", true);
       company.addRole(administration);
       
@@ -155,12 +156,14 @@ public class Application extends Controller {
     String password = form.get("password");
     
     Feature organization = new Feature("Organization");
+    organization.put("desc", "This is organization management feature");
     organization.put("system", true);
     
     Operation ad = new Operation("Administration");
     organization.addOperation(ad);
     
     Group system = new Group("System Admin");
+    system.put("desc", "This is group of system");
     system.put("system", true);
     system.put("level", 0);
     system.addFeature(organization);
@@ -174,6 +177,7 @@ public class Application extends Controller {
     system.addUser(root);
     
     Role administration = new Role("Administration", system.getId());
+    administration.put("desc", "This is administration role for organization management");
     administration.put("system", true);
     administration.addPermission(new Permission(organization.getId(), ad.getId()));
     administration.addUser(root);
@@ -194,25 +198,43 @@ public class Application extends Controller {
   
   private static void initMockData(User rootUser, Group rootGroup) throws UserManagementException {
     Feature foo = new Feature("Foo Feature");
+    foo.put("desc", "This is dummy feature");
+    
     Operation of1 = new Operation("Foo Action 1");
+    of1.put("desc", "This is dummy operation");
     Operation of2 = new Operation("Foo Action 2");
+    of2.put("desc", "This is dummy operation");
     Operation of3 = new Operation("Foo Action 3");
+    of3.put("desc", "This is dummy operation");
+    
     foo.addOperation(of1);
     foo.addOperation(of2);
     foo.addOperation(of3);
     
     Feature bar = new Feature("Bar Feature");
+    bar.put("desc", "This is dummy feature");
+    
     Operation ob1 = new Operation("Bar Action 1");
+    ob1.put("desc", "This is dummy operation");
     Operation ob2 = new Operation("Bar Action 2");
+    ob2.put("desc", "This is dummy operation");
     Operation ob3 = new Operation("Bar Action 3");
+    ob3.put("desc", "This is dummy operation");
+    
     bar.addOperation(ob1);
     bar.addOperation(ob2);
     bar.addOperation(ob3);
     
     Feature juu  = new Feature("Juu Feature");
+    juu.put("desc", "This is dummy feature");
+    
     Operation oj1 = new Operation("Juu Action 1");
+    oj1.put("desc", "This is dummy operation");
     Operation oj2 = new Operation("Juu Action 2");
+    oj2.put("desc", "This is dummy operation");
     Operation oj3 = new Operation("Juu Action 3");
+    oj3.put("desc", "This is dummy operation");
+    
     juu.addOperation(oj1);
     juu.addOperation(oj2);
     juu.addOperation(oj3);
@@ -225,21 +247,25 @@ public class Application extends Controller {
     rootGroup.addFeature(juu);
     
     Role fooRole = new Role("Foo Role", rootGroup.getId());
+    fooRole.put("desc", "This is dummy role");
     fooRole.addPermission(new Permission(foo.getId(), of1.getId()));
     fooRole.addPermission(new Permission(foo.getId(), of2.getId()));
     fooRole.addPermission(new Permission(foo.getId(), of3.getId()));
     
     Role barRole = new Role("Bar Role", rootGroup.getId());
+    barRole.put("desc", "This is dummy role");
     barRole.addPermission(new Permission(bar.getId(), ob1.getId()));
     barRole.addPermission(new Permission(bar.getId(), ob2.getId()));
     barRole.addPermission(new Permission(bar.getId(), ob3.getId()));
     
     Role juuRole = new Role("Juu Role", rootGroup.getId());
+    juuRole.put("desc", "This is dummy role");
     juuRole.addPermission(new Permission(juu.getId(), oj1.getId()));
     juuRole.addPermission(new Permission(juu.getId(), oj2.getId()));
     juuRole.addPermission(new Permission(juu.getId(), oj3.getId()));
     
     Role mixRole = new Role("Mix Role", rootGroup.getId());
+    mixRole.put("desc", "This is dummy role");
     mixRole.addPermission(new Permission(foo.getId(), of1.getId()));
     mixRole.addPermission(new Permission(bar.getId(), ob2.getId()));
     mixRole.addPermission(new Permission(juu.getId(), oj3.getId()));

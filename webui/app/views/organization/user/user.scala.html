@@ -16,7 +16,8 @@
   <td class="user-role">
     @for(role <- user.getRoles()){
       @if(currentRoles.contains(role)) {
-      <a href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
+      <a rel="tooltip" data-toggle="tooltip" title="@role.getString("desc")"
+        href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
         ajax-url="@controllers.routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
       }
     }

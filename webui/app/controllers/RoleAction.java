@@ -55,8 +55,12 @@ public class RoleAction extends Controller {
     
     if (request().getQueryString("name") != null && request().getQueryString("operation") != null) {
       String name = request().getQueryString("name");
+      String desc = request().getQueryString("desc");
+      
       String[] op_ids = request().queryString().get("operation");
       Role role_ = new Role(name, currentGroup.getId());
+      role_.put("desc", desc);
+      
       for (String op_id : op_ids) {
         Feature f = FeatureDAO.INSTANCE.find(new BasicDBObject("operation_ids", Pattern.compile(op_id))).iterator().next();
         role_.addPermission(new Permission(f.getId(), op_id));

@@ -1,8 +1,9 @@
 @(group: org.ats.component.usersmgt.group.Group)
 <tr class="group" id="group-@group.getId()">
   <td class='group-name'>
-    <a href="@controllers.routes.Organization.index()?nav=group&group=@group.getId()"
-        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()">
+    <a rel="tooltip" title="@group.getString("desc")"
+      href="@controllers.routes.Organization.index()?nav=group&group=@group.getId()"
+      ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()">
     @group.getString("name")</a>
   </td>
   <td class="group-ancestor">

@@ -7,6 +7,12 @@
       <input type="text" name="name" placeholder="Group Name" value="@group.get("name")">
     </div>
   </div>
+  <div class="control-group">
+    <label class="control-label">Group Description</label>
+    <div class="controls">
+      <textarea name = "desc" placeholder="Group Description">@group.getString("desc")</textarea>
+    </div>
+  </div>
   @for(feature <- features) {
     <div class="control-group">
       <div class="controls">
@@ -14,7 +20,7 @@
       @if(group.getFeatures().contains(feature)) {checked="checked" } 
       @if(feature.getBoolean("system")) { disabled="disabled" }
       > 
-      <span class="badge badge-blue">@feature.getName()</span>
+      <span class="badge badge-blue" rel="tooltip" title="@feature.getString("desc")">@feature.getName()</span>
       </div>
     </div>
   }
@@ -22,3 +28,7 @@
     <button type="submit" class="btn btn-blue">OK</button>
   </div>
 </form>
+
+<script type="text/javascript">
+$('[rel="tooltip"]').tooltip({placement: 'right'});
+</script>

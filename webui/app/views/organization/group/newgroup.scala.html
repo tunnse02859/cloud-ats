@@ -2,16 +2,31 @@
 <form class="form-horizontal org-group-new">
   <fieldset>
     <legend>Create Child Group</legend>
-		<input type="text" id="newgroupname" name="name" placeholder="Group Name">
+    <div class="control-group">
+      <div class="controls">
+        <input type="text" id="newgroupname" name="name" placeholder="Group Name">      
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="controls">
+        <textarea name="desc" placeholder="Group Description"></textarea>      
+      </div>
+    </div>
+    
 	</fieldset>
 	<fieldset>
 	  <legend>Features</legend>
 	</fieldset>
 	@for(feature <- features){
+	  <div class="control-group">
+      <div class="controls">
 	  <input type="checkbox" value="@feature.getId()" name="feature" checked="checked"
 	   @if(feature.getName() == "Organization") { disabled="disabled" } 
 	  >
 	  <span class="badge badge-blue">@feature.getName()</span><br>
+	  </div>
+	  </div>
 	}
 	<div class="form-actions">
 	 <a href="javascript:void(0);" ajax-url="@controllers.routes.GroupAction.doCreate()" class="create btn btn-primary">Create</a>

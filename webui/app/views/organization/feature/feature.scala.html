@@ -2,10 +2,10 @@
   system: Boolean)
   
 <tr class="feature feature-@feature.getId()">
-  <td><span class="badge badge-blue">@feature.getName()</span></td>
+  <td><span class="badge badge-blue" rel="tooltip" title="@feature.getString("desc")">@feature.getName()</span></td>
   <td>
   @for(op <- feature.getOperations()) {
-    <span class="badge badge-green">@op.getName()</span>  
+    <span class="badge badge-green" rel="tooltip" title="@op.getString("desc")">@op.getName()</span>  
   }
   </td>
   <td>

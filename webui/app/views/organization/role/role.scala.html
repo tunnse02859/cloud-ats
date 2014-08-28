@@ -1,10 +1,12 @@
 @(role: org.ats.component.usersmgt.role.Role, permissions: List[org.ats.component.usersmgt.role.Permission])
 <tr class="role role-@role.getId()">
-  <td @if(permissions.size() > 0) { rowspan="@permissions.size()" }><span class="badge badge-primary">@role.getString("name")</span></td>
+  <td @if(permissions.size() > 0) { rowspan="@permissions.size()" }>
+    <span class="badge badge-primary" rel="tooltip" title="@role.getString("desc")">@role.getString("name")</span>
+  </td>
   @if(permissions.size() > 0) {
     @defining(permissions.get(0)) { per =>
-      <td><span class="badge badge-orange">@per.getFeature().getName()</span></td>
-      <td style="border-left: none;"><span class="badge badge-cyan">@per.getOpertion().getName()</span></td>
+      <td><span class="badge badge-orange" rel="tooltip" title="@per.getFeature().getString("desc")">@per.getFeature().getName()</span></td>
+      <td style="border-left: none;"><span class="badge badge-cyan" rel="tooltip" title="@per.getOpertion().getString("desc")">@per.getOpertion().getName()</span></td>
       
       <td style="border-left: none;">
       @if(!role.getBoolean("system")){
@@ -26,8 +28,8 @@
 @for(i <- 1 until permissions.size()) {
   
   <tr class="role role-@role.getId()">
-    <td><span class="badge badge-orange">@permissions.get(i).getFeature().getName()</span></td>
-    <td style="border-left: none;"><span class="badge badge-cyan">@permissions.get(i).getOpertion().getName()</span></td>
+    <td><span class="badge badge-orange" rel="tooltip" title="@permissions.get(i).getFeature().getString("desc")">@permissions.get(i).getFeature().getName()</span></td>
+    <td style="border-left: none;"><span class="badge badge-cyan" rel="tooltip" title="@permissions.get(i).getOpertion().getString("desc")">@permissions.get(i).getOpertion().getName()</span></td>
     <td style="border-left: none;">
     @if(!role.getBoolean("system")){
       <a href="@controllers.routes.RoleAction.removePermission(role.getId(), permissions.get(i).getId())" class="btn btn-red btn-mini" title="Remove Permission">X</a>
