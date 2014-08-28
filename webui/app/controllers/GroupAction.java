@@ -163,7 +163,7 @@ public class GroupAction extends Controller {
     if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system") &&  !currentGroup.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent edit group which has no right permission
-    if (!currentUser.getBoolean("system") && !currentGroup.getBoolean("system")) {
+    if (!Organization.isSystem(currentUser) && !currentGroup.getBoolean("system")) {
       Collection<Group> adGroup = Organization.getAdministrationGroup();
       Set<Group> childrenGroup = new HashSet<Group>();
       for (Group ag : adGroup) {
@@ -252,7 +252,7 @@ public class GroupAction extends Controller {
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent delete group which has no right permission
-    if (!currentUser.getBoolean("system") && !currentGroup.getBoolean("system")) {
+    if (!Organization.isSystem(currentUser) && !currentGroup.getBoolean("system")) {
       Collection<Group> adGroup = Organization.getAdministrationGroup();
       Set<Group> childrenGroup = new HashSet<Group>();
       for (Group ag : adGroup) {

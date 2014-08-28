@@ -355,7 +355,7 @@ public class Organization extends Controller {
     
     LinkedList<Group> parents = currentGroup.buildParentTree();
     
-    if (!currentUser.getBoolean("system")) {
+    if (!isSystem(currentUser)) {
       //Prevent current user lookup parent group with no right permission
       Collection<Group> adGroup = getAministrationGroup(currentUser);
       Set<Group> allChildren = new HashSet<Group>();
