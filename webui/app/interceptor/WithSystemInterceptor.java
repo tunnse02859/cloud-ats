@@ -6,6 +6,7 @@ package interceptor;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import controllers.Organization;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
@@ -24,7 +25,7 @@ public class WithSystemInterceptor extends Action<WithSystem> {
     else {
       User user = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
       if (user == null || !user.isActive()) return Promise.<SimpleResult>pure(redirect(controllers.routes.Application.signout()));
-      if (!user.getBoolean("system")) return Promise.<SimpleResult>pure(forbidden(
+      if (!Organization.isSystem(user)) return Promise.<SimpleResult>pure(forbidden(
           views.html.forbidden.render()
       ));
     }
