@@ -27,6 +27,7 @@ public class Main {
 
   public static void main(String args[]) throws IOException {
     Options options = new Options();
+    options.addOption("m", "master", true, "Jenkins Master IP");
     options.addOption("c", "create-slave", false, "Create Jenkins Slave in this machine.");
     options.addOption("d", "destroy-slave", false, "Destroy Jenkins Slave in this machine.");
     options.addOption("g", "slave-gui", false, "Use Jenkins Slave GUI instance");
@@ -35,10 +36,11 @@ public class Main {
     HelpFormatter formatter = new HelpFormatter();
     try {
       CommandLine cmd = parser.parse(options, args);
+      String master = cmd.getOptionValue("m");
       if (cmd.hasOption('c')){
-        createSlave(cmd.hasOption('g') ? true : false);
+        createSlave(cmd.hasOption('g') ? true : false, master);
       } else if (cmd.hasOption('d')) {
-        destroySlave();
+        destroySlave(master);
       } else {
         formatter.printHelp(Main.class.getName(), options);
       }
@@ -47,8 +49,8 @@ public class Main {
     }
   }
   
-  private static void createSlave(boolean gui) throws IOException {
-    JenkinsMaster master = new JenkinsMaster("git.sme.org", "http", 8080);
+  private static void createSlave(boolean gui, String masterIp) throws IOException {
+    JenkinsMaster master = new JenkinsMaster(masterIp, "http", 8080);
     NetworkInterface eth0 = NetworkInterface.getByName("eth0");
     Enumeration<InetAddress> inets = eth0.getInetAddresses();
     while (inets.hasMoreElements()) {
@@ -74,8 +76,8 @@ public class Main {
     }
   }
   
-  private static void destroySlave() throws IOException {
-    JenkinsMaster master = new JenkinsMaster("git.sme.org", "http", 8080);
+  private static void destroySlave(String masterIp) throws IOException {
+    JenkinsMaster master = new JenkinsMaster(masterIp, "http", 8080);
     NetworkInterface eth0 = NetworkInterface.getByName("eth0");
     Enumeration<InetAddress> inets = eth0.getInetAddresses();
     while (inets.hasMoreElements()) {
