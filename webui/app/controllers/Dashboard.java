@@ -69,10 +69,16 @@ public class Dashboard extends Controller {
   public static Result changeGroup(String g) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     Group group = GroupDAO.INSTANCE.findOne(g);
-    if (group.getUsers().contains(currentUser) || currentUser.getBoolean("system")) {
+    if (group.getUsers().contains(currentUser) 
+        || currentUser.getBoolean("system")) {
+      
       String referer = request().getHeader("referer");
+      if (referer.indexOf("&group") != -1) {
+        referer = referer.substring(0, referer.indexOf("&group"));
+      }
       session("group_id", group.getId());
-      //return redirect(referer);
+      //
+      return redirect(referer);
     }
     return redirect(controllers.routes.Application.dashboard());
   }

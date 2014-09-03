@@ -165,14 +165,10 @@ public class GroupAction extends Controller {
     if (group_.getInt("level") == 1 && ! currentUser.getBoolean("system") &&  !currentGroup.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent edit group which has no right permission
-    if (!Organization.isSystem(currentUser) && !currentGroup.getBoolean("system")) {
-      Collection<Group> adGroup = Organization.getAdministrationGroup();
-      Set<Group> childrenGroup = new HashSet<Group>();
-      for (Group ag : adGroup) {
-        childrenGroup.addAll(ag.getAllChildren());
-      }
-      
-      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+    if (!Organization.isSystem(currentUser) 
+        && !currentGroup.getBoolean("system") 
+        && !Organization.isRightAdministration(group_)) {
+      return forbidden(views.html.forbidden.render());
     }
     
     LinkedList<Group> parents = group_.buildParentTree();
@@ -193,14 +189,11 @@ public class GroupAction extends Controller {
     if (group_.getInt("level") == 1 && !Organization.isSystem(currentUser) &&  !currentGroup.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent edit group which has no right permission
-    if (!Organization.isSystem(currentUser) && !currentGroup.getBoolean("system")) {
-      Collection<Group> adGroup = Organization.getAdministrationGroup();
-      Set<Group> childrenGroup = new HashSet<Group>();
-      for (Group ag : adGroup) {
-        childrenGroup.addAll(ag.getAllChildren());
-      }
+    if (!Organization.isSystem(currentUser) 
+        && !currentGroup.getBoolean("system")
+        && !Organization.isRightAdministration(group_)) {
       
-      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+      return forbidden(views.html.forbidden.render());
     }
     
     //
@@ -254,14 +247,11 @@ public class GroupAction extends Controller {
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
     
     //Prevent delete group which has no right permission
-    if (!Organization.isSystem(currentUser) && !currentGroup.getBoolean("system")) {
-      Collection<Group> adGroup = Organization.getAdministrationGroup();
-      Set<Group> childrenGroup = new HashSet<Group>();
-      for (Group ag : adGroup) {
-        childrenGroup.addAll(ag.getAllChildren());
-      }
+    if (!Organization.isSystem(currentUser) 
+        && !currentGroup.getBoolean("system")
+        && !Organization.isRightAdministration(group_)) {
       
-      if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return forbidden(views.html.forbidden.render());
+      return forbidden(views.html.forbidden.render());
     }
     
     BasicDBObject query = new BasicDBObject("joined", true);

@@ -167,9 +167,9 @@ public class Organization extends Controller {
     StringBuilder sb = new StringBuilder();
     LinkedList<Group> parents = currentGroup.buildParentTree();
     for (Group parent : parents) {
-      sb.append("/ ").append(parent.getString("name"));
+      sb.append(" / ").append(parent.getString("name"));
     }
-    sb.append("/ ").append(currentGroup.getString("name"));
+    sb.append(" / ").append(currentGroup.getString("name"));
     
     json.put("breadcrumb", breadcrumb.toString());
     json.put("navbar", sb.toString());
@@ -550,5 +550,17 @@ public class Organization extends Controller {
   public static boolean isSystem(User user) throws UserManagementException {
     Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
     return systemGroup.getUsers().contains(user);
+  }
+  
+  public static boolean isRightAdministration(Group group_) throws UserManagementException {
+    Collection<Group> adGroup = Organization.getAdministrationGroup();
+    Set<Group> childrenGroup = new HashSet<Group>();
+    for (Group ag : adGroup) {
+      childrenGroup.addAll(ag.getAllChildren());
+    }
+    
+    if (! (adGroup.contains(group_) || childrenGroup.contains(group_))) return false;
+    
+    return true;
   }
 }
