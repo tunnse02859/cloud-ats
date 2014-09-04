@@ -1,5 +1,7 @@
 @(currentGroup: org.ats.component.usersmgt.group.Group, currentRole: org.ats.component.usersmgt.role.Role)
-<form class="form-horizontal" method="get" action="@controllers.routes.RoleAction.doEditRole(currentRole.getId())">
+@import controllers.organization._
+
+<form class="form-horizontal" method="get" action="@routes.RoleAction.doEditRole(currentRole.getId())">
   <legend>Edit Role <span class="badge badge-blue">@currentRole.get("name")</span> in Group <span class="badge badge-blue">@currentGroup.get("name")</span></legend>
   
   <div class="control-group">
@@ -29,7 +31,7 @@
         @for(op <- feature.getOperations()) {
         <td>
           <input type="checkbox" name="operation" value="@op.getId()"
-            @if(controllers.RoleAction.shouldChecked(currentRole, op)) { checked="checked" }
+            @if(RoleAction.shouldChecked(currentRole, op)) { checked="checked" }
           >
           <span class="badge badge-orange">@op.getName()</span>
         </td>

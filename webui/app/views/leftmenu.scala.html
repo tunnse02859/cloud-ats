@@ -1,6 +1,8 @@
 @(active : String)
 @import org.ats.component.usersmgt.feature._
 @import com.mongodb._
+@import controllers.organization._
+
 <nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
   <div id="left-panel-content" style="overflow: hidden;">
     <ul>
@@ -12,10 +14,10 @@
       
       @defining(FeatureDAO.INSTANCE.find(new BasicDBObject())) { features =>
         @for(feature <- features) {
-          @if(controllers.FeatureAction.hasPermissionOnFeature(feature)) {
+          @if(FeatureAction.hasPermissionOnFeature(feature)) {
             @if(feature.getName() == "Organization") {
             <li @if(active == "Organization") { class="active" }>
-              <a href="@controllers.routes.Organization.index()" ajax-url="@controllers.routes.Organization.indexAjax()">
+              <a href="@routes.Organization.index()" ajax-url="@routes.Organization.indexAjax()">
               <span class="icon-group"></span>Organization
               </a>
             </li>

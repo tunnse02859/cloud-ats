@@ -1,6 +1,7 @@
 @(feature: org.ats.component.usersmgt.feature.Feature, 
   system: Boolean)
-  
+@import controllers.organization._
+
 <tr class="feature feature-@feature.getId()">
   <td><span class="badge badge-blue" rel="tooltip" title="@feature.getString("desc")">@feature.getName()</span></td>
   <td>
@@ -17,11 +18,11 @@
   </td>
   <td>  
   @if(system && !feature.getBoolean("system") && !feature.getBoolean("disable")) {
-  <a href="@controllers.routes.FeatureAction.disableFeature(feature.getId())" class="btn btn-mini btn-red">Disable</a>  
+  <a href="@routes.FeatureAction.disableFeature(feature.getId())" class="btn btn-mini btn-red">Disable</a>  
   }
   
   @if(system && !feature.getBoolean("system") && feature.getBoolean("disable")) {
-  <a href="@controllers.routes.FeatureAction.enableFeature(feature.getId())" class="btn btn-mini btn-blue">Enable</a>  
+  <a href="@routes.FeatureAction.enableFeature(feature.getId())" class="btn btn-mini btn-blue">Enable</a>  
   }
   </td>      
 </tr>

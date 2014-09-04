@@ -1,4 +1,5 @@
 @(rows : Html)
+@import controllers.organization._
 
 <div class="org-role-filter">
   <h3 class="box-header"><i class="icon-filter"></i> Role Filter & Action
@@ -9,8 +10,8 @@
     
     <input type="text" id="role_name" name="name" placeholder="Role Name">
     
-    <a href="@controllers.routes.RoleAction.addRole()" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Role</a> 
-    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("role")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+    <a href="@routes.RoleAction.addRole()" class="btn btn-primary pull-right"><i class="icon-plus"></i> Create Role</a> 
+    <a href="javascript:void(0);" ajax-url="@routes.Organization.filter("role")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
   </form>  
   </div>
 </div>

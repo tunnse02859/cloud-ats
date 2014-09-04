@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
@@ -11,6 +11,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import controllers.routes;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -38,7 +39,7 @@ public class Invitation extends Controller {
       }
     }
     
-    return redirect(controllers.routes.Application.dashboard());
+    return redirect(routes.Application.dashboard());
   }
   
   //Verify the user who sent invitation that has right permission

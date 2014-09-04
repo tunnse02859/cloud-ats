@@ -46,7 +46,7 @@ public class Dashboard extends Controller {
     StringBuilder sb = new StringBuilder();
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     
-    List<Group> groups = currentUser.getBoolean("system") ? new ArrayList<Group>(GroupDAO.INSTANCE.find(new BasicDBObject())) :  currentUser.getGroups();
+    List<Group> groups = currentUser.getGroups();
     Collections.sort(groups, new Comparator<Group>() {
       @Override
       public int compare(Group o1, Group o2) {
@@ -69,8 +69,7 @@ public class Dashboard extends Controller {
   public static Result changeGroup(String g) throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     Group group = GroupDAO.INSTANCE.findOne(g);
-    if (group.getUsers().contains(currentUser) 
-        || currentUser.getBoolean("system")) {
+    if (group.getUsers().contains(currentUser)) {
       
       String referer = request().getHeader("referer");
       if (referer.indexOf("&group") != -1) {

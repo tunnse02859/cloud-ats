@@ -1,16 +1,18 @@
 @(group: org.ats.component.usersmgt.group.Group)
+@import controllers.organization._
+
 <tr class="group" id="group-@group.getId()">
   <td class='group-name'>
     <a rel="tooltip" title="@group.getString("desc")"
-      href="@controllers.routes.Organization.index()?nav=group&group=@group.getId()"
-      ajax-url="@controllers.routes.Organization.body()?nav=group&group=@group.getId()">
+      href="@routes.Organization.index()?nav=group&group=@group.getId()"
+      ajax-url="@routes.Organization.body()?nav=group&group=@group.getId()">
     @group.getString("name")</a>
   </td>
   <td class="group-ancestor">
     @for(g <- group.buildParentTree()) {
       / 
-      <a href="@controllers.routes.Organization.index()?nav=group&group=@g.getId()"
-        ajax-url="@controllers.routes.Organization.body()?nav=group&group=@g.getId()">
+      <a href="@routes.Organization.index()?nav=group&group=@g.getId()"
+        ajax-url="@routes.Organization.body()?nav=group&group=@g.getId()">
       @g.getString("name")</a> 
     }
   </td>
@@ -21,8 +23,8 @@
   <td><span class="badge badge-pink">@group.getFeatures().size()</span></td>
   <td>
     @if(!group.getBoolean("system")){
-    <a href="@controllers.routes.GroupAction.editGroup(group.getId())" class='btn btn-mini btn-blue'>Update</a>
-    <a href="@controllers.routes.GroupAction.deleteGroup(group.getId())" class='btn btn-mini btn-red'>Delete</a>
+    <a href="@routes.GroupAction.editGroup(group.getId())" class='btn btn-mini btn-blue'>Update</a>
+    <a href="@routes.GroupAction.deleteGroup(group.getId())" class='btn btn-mini btn-red'>Delete</a>
     }
   </td>
 </tr>

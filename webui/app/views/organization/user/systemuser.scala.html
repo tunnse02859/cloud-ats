@@ -1,4 +1,6 @@
-<form class="form-horizontal" method="post" action="@controllers.routes.UserAction.doCreateUserSystem()">
+@import controllers.organization._
+
+<form class="form-horizontal" method="post" action="@routes.UserAction.doCreateUserSystem()">
   <legend>Create new user for system group</legend>
   
   <div class="control-group">

@@ -1,14 +1,15 @@
 @(user: org.ats.component.usersmgt.user.User, system: Boolean, currentRoles : List[org.ats.component.usersmgt.role.Role])
 @import org.ats.component.usersmgt.user._
 @import org.ats.component.usersmgt.group._
+@import controllers.organization._
 
 <tr class="user" id="user-@user.getId()">
   <td><img src="/assets/images/avatar.png"></td>
   <td>
-    @if(controllers.Organization.getHighestGroupBelong(user) == null) {
+    @if(Organization.getHighestGroupBelong(user) == null) {
       <span class="badge badge-primary">@user.getString("email")</span>
     } else {
-	    <a href="@controllers.routes.Organization.index()?nav=user&group=@controllers.Organization.getHighestGroupBelong(user).getId()">
+	    <a href="@routes.Organization.index()?nav=user&group=@Organization.getHighestGroupBelong(user).getId()">
 	    <span class="badge badge-primary">@user.getString("email")</span>
 	    </a>
     }
@@ -17,8 +18,8 @@
     @for(role <- user.getRoles()){
       @if(currentRoles.contains(role)) {
       <a rel="tooltip" data-toggle="tooltip" title="@role.getString("desc")"
-        href="@controllers.routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
-        ajax-url="@controllers.routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
+        href="@routes.Organization.index()?nav=role&group=@role.getGroup().getId()"
+        ajax-url="@routes.Organization.body()?nav=role&group=@role.getGroup().getId()">@role.getString("name")</a><br>
       }
     }
   </td>
@@ -47,26 +48,26 @@
   <td>
   
   @if(!system && !user.getBoolean("joined")) {
-    <a href="@controllers.routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
+    <a href="@routes.UserAction.approve(user.getId())" class="btn btn-mini btn-orange">Approve</a>
   }
   
-  @if(controllers.UserAction.shouldLeaveGroup(user)) {
-      <a href="@controllers.routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
+  @if(UserAction.shouldLeaveGroup(user)) {
+      <a href="@routes.UserAction.leaveCurrentGroup(user.getId())" class="btn btn-mini btn-red">Leave</a>
   }
   
   @if(!user.getGroups().isEmpty() && user.getBoolean("joined")) {
-  <a href="@controllers.routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
+  <a href="@routes.UserAction.editRoleIndex(user.getId)" class="btn btn-mini btn-primary">Edit Role</a> 
   }
   
   @if(system && session().get("user_id") != user.getId()) {
     
     @if(!user.getBoolean("system")) {
     @if(user.getBoolean("active")){
-    <a href="@controllers.routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
+    <a href="@routes.UserAction.inactive(user.getId())" class="btn btn-mini btn-cyan">Inactive</a>
     } else {
-    <a href="@controllers.routes.UserAction.active(user.getId())" class="btn btn-mini btn-cyan">Active</a>
+    <a href="@routes.UserAction.active(user.getId())" class="btn btn-mini btn-cyan">Active</a>
     }
-    <a href="@controllers.routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
+    <a href="@routes.UserAction.remove(user.getId())" class="btn btn-mini btn-red">Remove</a>
     }
   }
  

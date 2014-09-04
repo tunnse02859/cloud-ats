@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +28,7 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.organization.routes;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -51,7 +52,7 @@ public class UserAction extends Controller {
     User user_ = UserDAO.INSTANCE.findOne(u);
     user_.put("joined", true);
     UserDAO.INSTANCE.update(user_);
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
   
   @WithSystem
@@ -60,7 +61,7 @@ public class UserAction extends Controller {
     UserDAO.INSTANCE.delete(user_);
     while(EventExecutor.INSTANCE.isInProgress()) {
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
   
   @WithSystem
@@ -68,7 +69,7 @@ public class UserAction extends Controller {
     User user_ = UserDAO.INSTANCE.findOne(u);
     user_.inActive();
     UserDAO.INSTANCE.update(user_);
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
   
   @WithSystem
@@ -76,7 +77,7 @@ public class UserAction extends Controller {
     User user_ = UserDAO.INSTANCE.findOne(u);
     user_.active();
     UserDAO.INSTANCE.update(user_);
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
   
   public static Result editRoleIndex(String u) throws UserManagementException {
@@ -174,7 +175,7 @@ public class UserAction extends Controller {
     }
 
     
-    return redirect(controllers.routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
+    return redirect(routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
   }
   
   /**
@@ -230,7 +231,7 @@ public class UserAction extends Controller {
       user_.put("joined", false);
       UserDAO.INSTANCE.update(user_);
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
   
   public static boolean shouldLeaveGroup(User user_) throws UserManagementException {
@@ -286,6 +287,6 @@ public class UserAction extends Controller {
     UserDAO.INSTANCE.create(user);
     GroupDAO.INSTANCE.update(systemGroup);
     
-    return redirect(controllers.routes.Organization.index() + "?nav=user");
+    return redirect(routes.Organization.index() + "?nav=user");
   }
 }

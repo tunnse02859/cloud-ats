@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
@@ -28,6 +28,8 @@ import play.mvc.With;
 import views.html.leftmenu;
 
 import com.mongodb.BasicDBObject;
+
+import controllers.organization.routes;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -84,7 +86,7 @@ public class FeatureAction extends Controller {
       feature.put("disable", true);
       FeatureDAO.INSTANCE.update(feature);
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=feature");
+    return redirect(routes.Organization.index() + "?nav=feature");
   }
   
   @WithSystem
@@ -95,6 +97,6 @@ public class FeatureAction extends Controller {
       feature.put("disable", false);
       FeatureDAO.INSTANCE.update(feature);
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=feature");
+    return redirect(routes.Organization.index() + "?nav=feature");
   }
 }

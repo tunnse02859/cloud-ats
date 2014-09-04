@@ -21,48 +21,48 @@ GET     /*path/                          controllers.Application.untrail(path: S
 
 ############################# Organization ###############################
 
-GET     /portal/o               controllers.Organization.index()
-GET     /portal/o/b             controllers.Organization.body()
-GET     /portal/o/aj            controllers.Organization.indexAjax()
-GET     /portal/o/fl/:nav       controllers.Organization.filter(nav)
+GET     /portal/o               controllers.organization.Organization.index()
+GET     /portal/o/b             controllers.organization.Organization.body()
+GET     /portal/o/aj            controllers.organization.Organization.indexAjax()
+GET     /portal/o/fl/:nav       controllers.organization.Organization.filter(nav)
 
 ############################# Group Action ###############################
 
-GET     /portal/o/g/n           controllers.GroupAction.newGroup()
-GET     /portal/o/g/n/c         controllers.GroupAction.doCreate()
-GET     /portal/o/g/n/b         controllers.GroupAction.newGroupBody()
-GET     /portal/o/g/i           controllers.GroupAction.invite()
-GET     /portal/o/g/a           controllers.GroupAction.addUser()
-GET     /portal/o/g/d/:g        controllers.GroupAction.deleteGroup(g)
-GET     /portal/o/g/e/:g        controllers.GroupAction.editGroup(g)
-GET     /portal/o/g/de/:g       controllers.GroupAction.doEditGroup(g)
-GET     /portal/invite/:u/:r/:g controllers.Invitation.index(u, r, g)
+GET     /portal/o/g/n           controllers.organization.GroupAction.newGroup()
+GET     /portal/o/g/n/c         controllers.organization.GroupAction.doCreate()
+GET     /portal/o/g/n/b         controllers.organization.GroupAction.newGroupBody()
+GET     /portal/o/g/i           controllers.organization.GroupAction.invite()
+GET     /portal/o/g/a           controllers.organization.GroupAction.addUser()
+GET     /portal/o/g/d/:g        controllers.organization.GroupAction.deleteGroup(g)
+GET     /portal/o/g/e/:g        controllers.organization.GroupAction.editGroup(g)
+GET     /portal/o/g/de/:g       controllers.organization.GroupAction.doEditGroup(g)
+GET     /portal/invite/:u/:r/:g controllers.organization.Invitation.index(u, r, g)
 
 ############################## User Action ###############################
 
-GET     /portal/o/u/a/:u           controllers.UserAction.approve(u)
-GET     /portal/o/u/r/:u           controllers.UserAction.remove(u)
-GET     /portal/o/u/ina/:u         controllers.UserAction.inactive(u)
-GET     /portal/o/u/ac/:u          controllers.UserAction.active(u)
-GET     /portal/o/u/e/:u           controllers.UserAction.editRoleIndex(u)
-GET     /portal/o/u/de/:u          controllers.UserAction.doEditRole(u)
-GET     /portal/o/u/l/:u           controllers.UserAction.leaveCurrentGroup(u)
-GET     /portal/o/u/s              controllers.UserAction.createUserSystem()
-POST    /portal/o/u/s/c            controllers.UserAction.doCreateUserSystem()
+GET     /portal/o/u/a/:u           controllers.organization.UserAction.approve(u)
+GET     /portal/o/u/r/:u           controllers.organization.UserAction.remove(u)
+GET     /portal/o/u/ina/:u         controllers.organization.UserAction.inactive(u)
+GET     /portal/o/u/ac/:u          controllers.organization.UserAction.active(u)
+GET     /portal/o/u/e/:u           controllers.organization.UserAction.editRoleIndex(u)
+GET     /portal/o/u/de/:u          controllers.organization.UserAction.doEditRole(u)
+GET     /portal/o/u/l/:u           controllers.organization.UserAction.leaveCurrentGroup(u)
+GET     /portal/o/u/s              controllers.organization.UserAction.createUserSystem()
+POST    /portal/o/u/s/c            controllers.organization.UserAction.doCreateUserSystem()
 
 ############################## Role Action ################################
 
-GET     /portal/o/r/n              controllers.RoleAction.addRole()
-GET     /portal/o/r/da             controllers.RoleAction.doAddRole()
-GET     /portal/o/r/e/:r           controllers.RoleAction.editRole(r)
-GET     /portal/o/r/de/:r          controllers.RoleAction.doEditRole(r)
-GET     /portal/o/r/d/:r           controllers.RoleAction.deleteRole(r)
-GET     /portal/o/p/:r/:p          controllers.RoleAction.removePermission(r, p)
+GET     /portal/o/r/n              controllers.organization.RoleAction.addRole()
+GET     /portal/o/r/da             controllers.organization.RoleAction.doAddRole()
+GET     /portal/o/r/e/:r           controllers.organization.RoleAction.editRole(r)
+GET     /portal/o/r/de/:r          controllers.organization.RoleAction.doEditRole(r)
+GET     /portal/o/r/d/:r           controllers.organization.RoleAction.deleteRole(r)
+GET     /portal/o/p/:r/:p          controllers.organization.RoleAction.removePermission(r, p)
 
 ############################## Feature ####################################
-GET     /portal/o/f/u/:active      controllers.FeatureAction.updateFeatureList(active)
-GET     /portal/o/f/e/:f           controllers.FeatureAction.enableFeature(f)
-GET     /portal/o/f/d/:f           controllers.FeatureAction.disableFeature(f)
+GET     /portal/o/f/u/:active      controllers.organization.FeatureAction.updateFeatureList(active)
+GET     /portal/o/f/e/:f           controllers.organization.FeatureAction.enableFeature(f)
+GET     /portal/o/f/d/:f           controllers.organization.FeatureAction.disableFeature(f)
 
 ############################# Dashboard ##################################
 

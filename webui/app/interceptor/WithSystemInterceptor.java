@@ -6,7 +6,7 @@ package interceptor;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import controllers.Organization;
+import controllers.organization.Organization;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;

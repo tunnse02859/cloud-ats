@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
@@ -45,6 +45,7 @@ import views.html.organization.user.*;
 import views.html.organization.role.*;
 import views.html.organization.feature.*;
 
+import controllers.organization.routes;
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -348,8 +349,8 @@ public class Organization extends Controller {
       return new Html(sb);
     } else if (isSystem(currentUser)) {
       Group sys = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
-      String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + sys.getId();
-      String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + sys.getId();
+      String href = routes.Organization.index().toString() + "?nav=" + nav + "&group=" + sys.getId();
+      String ajax = routes.Organization.body().toString() + "?nav=" + nav + "&group=" + sys.getId();
       sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(sys.get("name")).append("</a> <span class='divider'>/</span></li>");
     }
     
@@ -365,8 +366,8 @@ public class Organization extends Controller {
       
       for (Group p : parents) {
         if (adGroup.contains(p) || allChildren.contains(p)) {
-          String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
-          String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
+          String href = routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
+          String ajax = routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
           sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name"));
         } else {
           sb.append("<li class='active'>").append(p.get("name")).append("</li>");
@@ -375,8 +376,8 @@ public class Organization extends Controller {
       }
     } else {
       for (Group p : parents) {
-        String href = controllers.routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
-        String ajax = controllers.routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
+        String href = routes.Organization.index().toString() + "?nav=" + nav + "&group=" + p.getId();
+        String ajax = routes.Organization.body().toString() + "?nav=" + nav + "&group=" + p.getId();
         sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(p.get("name"));
         sb.append("</a> <span class='divider'> / </span></li>");
       }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,6 +22,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.organization.routes;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.WizardInterceptor;
@@ -69,7 +70,7 @@ public class RoleAction extends Controller {
       currentGroup.addRole(role_);
       GroupDAO.INSTANCE.update(currentGroup);
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=role");
+    return redirect(routes.Organization.index() + "?nav=role");
   }
   
   public static Result editRole(String r) throws UserManagementException {
@@ -121,7 +122,7 @@ public class RoleAction extends Controller {
       RoleDAO.INSTANCE.update(role_);
     }
     
-    return redirect(controllers.routes.Organization.index() + "?nav=role");
+    return redirect(routes.Organization.index() + "?nav=role");
   }
   
   public static Result deleteRole(String r) throws UserManagementException {
@@ -138,7 +139,7 @@ public class RoleAction extends Controller {
     while (EventExecutor.INSTANCE.isInProgress()) {
     }
     
-    return redirect(controllers.routes.Organization.index() + "?nav=role");
+    return redirect(routes.Organization.index() + "?nav=role");
   }
   
   public static Result removePermission(String r, String p) throws UserManagementException {
@@ -162,7 +163,7 @@ public class RoleAction extends Controller {
     
     RoleDAO.INSTANCE.update(role_);
     
-    return redirect(controllers.routes.Organization.index() + "?nav=role");
+    return redirect(routes.Organization.index() + "?nav=role");
   }
   
   public static boolean shouldChecked(Role role_, Operation op) throws UserManagementException {

@@ -1,12 +1,14 @@
 @(user: org.ats.component.usersmgt.user.User, currentGroup: org.ats.component.usersmgt.group.Group)
-<form class="form-horizontal" method="get" action="@controllers.routes.UserAction.doEditRole(user.getId())">
+@import controllers.organization._
+
+<form class="form-horizontal" method="get" action="@routes.UserAction.doEditRole(user.getId())">
   <legend>Edit Role <span class="badge badge-blue">@user.get("email")</span>
    in <span class="badge badge-blue">@currentGroup.get("name")</span>
   </legend>
   @for(role <- currentGroup.getRoles()) {
     <input 
-    @if(controllers.UserAction.inRole(role, user)) { checked="checked" }
-    @if(controllers.UserAction.shouldDisable(role, user)) { disabled="disabled" } 
+    @if(UserAction.inRole(role, user)) { checked="checked" }
+    @if(UserAction.shouldDisable(role, user)) { disabled="disabled" } 
     type="checkbox" name="role" value="@role.getId"> <span class="badge badge-blue">@role.getName()</span> <br>
   }
   <div class="form-actions">

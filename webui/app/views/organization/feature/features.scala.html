@@ -1,4 +1,6 @@
 @(rows : Html)
+@import controllers.organization._
+
 <div class="org-feature-filter">
   <h3 class="box-header"><i class="icon-filter"></i> Feature Filter
   </h3>
@@ -8,7 +10,7 @@
     
     <input type="text" id="feature_name" name="name" placeholder="Feature Name">
     
-    <a href="javascript:void(0);" ajax-url="@controllers.routes.Organization.filter("feature")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+    <a href="javascript:void(0);" ajax-url="@routes.Organization.filter("feature")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
   </form>  
   </div>
 </div>

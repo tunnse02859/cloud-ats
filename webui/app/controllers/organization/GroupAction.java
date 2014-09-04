@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers;
+package controllers.organization;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
@@ -32,6 +32,7 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.organization.routes;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -100,7 +101,7 @@ public class GroupAction extends Controller {
     
     session().put("group_id", group.getId());
     
-    return redirect(controllers.routes.Organization.body());
+    return redirect(routes.Organization.body());
   }
   
   @WithoutSystem
@@ -124,7 +125,7 @@ public class GroupAction extends Controller {
       
       sb.setLength(0);
       sb.append("http://").append(request().host());
-      sb.append(controllers.routes.Invitation.index(currentUser.getId(), adRole.getId(), currentGroup.getId()));
+      sb.append(routes.Invitation.index(currentUser.getId(), adRole.getId(), currentGroup.getId()));
       
       Html body = invite.render(groupPath, sb.toString());
       return ok(index.render("group" , body, currentGroup.getId()));
@@ -150,7 +151,7 @@ public class GroupAction extends Controller {
         GroupDAO.INSTANCE.update(currentGroup);
       }
     }
-    return redirect(controllers.routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
+    return redirect(routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
   }
   
   public static Result editGroup(String g) throws UserManagementException {
@@ -229,7 +230,7 @@ public class GroupAction extends Controller {
     group_.put("desc", request().getQueryString("desc"));
     GroupDAO.INSTANCE.update(group_);
     
-    return redirect(controllers.routes.Organization.index() + "?nav=group&group=" + currentGroup.getId());
+    return redirect(routes.Organization.index() + "?nav=group&group=" + currentGroup.getId());
   }
   
   /**
@@ -271,7 +272,7 @@ public class GroupAction extends Controller {
       }
     }
     
-    return redirect(controllers.routes.Organization.index() + "?nav=group");
+    return redirect(routes.Organization.index() + "?nav=group");
   }
   
   private static List<User> getAvailableUser(Group groupInvitation) throws UserManagementException {

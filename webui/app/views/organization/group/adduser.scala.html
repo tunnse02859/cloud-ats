@@ -1,5 +1,7 @@
 @(users: List[org.ats.component.usersmgt.user.User], groupParent: org.ats.component.usersmgt.group.Group, currentGroup: org.ats.component.usersmgt.group.Group)
-<form class="form-horizontal" method="get" action="@controllers.routes.GroupAction.addUser()">
+@import controllers.organization._
+ 
+<form class="form-horizontal" method="get" action="@routes.GroupAction.addUser()">
   <legend>Add More User</legend>
   @for(user <- users) {
     <input type="checkbox" name="user" value="@user.getId()"><span class="badge badge-blue">@user.get("email")</span>

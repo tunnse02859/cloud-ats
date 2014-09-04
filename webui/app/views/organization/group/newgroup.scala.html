@@ -1,4 +1,6 @@
 @(features: List[org.ats.component.usersmgt.feature.Feature])
+@import controllers.organization._
+
 <form class="form-horizontal org-group-new">
   <fieldset>
     <legend>Create Child Group</legend>
@@ -29,6 +31,6 @@
 	  </div>
 	}
 	<div class="form-actions">
-	 <a href="javascript:void(0);" ajax-url="@controllers.routes.GroupAction.doCreate()" class="create btn btn-primary">Create</a>
+	 <a href="javascript:void(0);" ajax-url="@routes.GroupAction.doCreate()" class="create btn btn-primary">Create</a>
 	</div>
 </form>
