@@ -70,6 +70,10 @@ GET     /portal/dashboard          controllers.Dashboard.body()
 GET     /portal/dashboard/g/:g     controllers.Dashboard.changeGroup(g)
 GET     /portal/dashboard/profile  controllers.Dashboard.updateProfile()
 
+############################# Virtual Machine ############################
+
+GET     /portal/vm                 controllers.vm.VirtualMachine.index()
+
 ############################# Mock #######################################
 
 GET     /portal/foo                controllers.mock.FooFeature.index()

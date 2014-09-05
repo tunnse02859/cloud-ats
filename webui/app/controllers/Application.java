@@ -67,10 +67,7 @@ public class Application extends Controller {
       admin.put("joined", true);
       
       Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
-      
-      for (Feature f : FeatureDAO.INSTANCE.find(new BasicDBObject())) {
-        company.addFeature(f);  
-      }
+      company.addFeature(organization);  
       
       Role administration = new Role("Administration", company.getId());
       administration.put("desc", "This is administration role for organization management");
@@ -191,9 +188,40 @@ public class Application extends Controller {
     GroupDAO.INSTANCE.create(system);
     RoleDAO.INSTANCE.create(administration);
     
-    initMockData(root, system);
+    //initMockData(root, system);
+    createVMFeature(root, system);
     
     return redirect(controllers.routes.Application.index());
+  }
+  
+  private static void createVMFeature(User rootUser, Group systemGroup) throws UserManagementException {
+    Feature feature = new Feature("Virtual Machine");
+    
+    Operation o1 = new Operation("Manage System VM");
+    Operation o2 = new Operation("Manage User VM");
+    Operation o3 = new Operation("Manage Offering");
+    
+    feature.addOperation(o1);
+    feature.addOperation(o2);
+    feature.addOperation(o3);
+    
+    Role vmRole = new Role("VM Management", systemGroup.getId());
+    vmRole.addPermission(new Permission(feature.getId(), o1.getId()));
+    vmRole.addPermission(new Permission(feature.getId(), o2.getId()));
+    vmRole.addPermission(new Permission(feature.getId(), o3.getId()));
+    vmRole.addUser(rootUser);
+    
+    rootUser.addRole(vmRole);
+    
+    systemGroup.addFeature(feature);
+    systemGroup.addRole(vmRole);
+    
+    FeatureDAO.INSTANCE.create(feature);
+    OperationDAO.INSANCE.create(o1, o2, o3);
+    RoleDAO.INSTANCE.create(vmRole);
+    
+    UserDAO.INSTANCE.update(rootUser);
+    GroupDAO.INSTANCE.update(systemGroup);
   }
   
   private static void initMockData(User rootUser, Group rootGroup) throws UserManagementException {

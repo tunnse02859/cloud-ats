@@ -1,0 +1,78 @@
+@(body : Html, active: String)
+@import org.ats.component.usersmgt.feature._
+@import com.mongodb._
+@import controllers.organization._
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cloud ATS</title>
+  
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta content="" name="description">
+    <meta content="width=device-width" name="viewport">
+    
+    @assets()
+  </head>
+  
+  <body class=" fluid-layout">
+    
+    @navbar()
+    
+    <nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
+      <div id="left-panel-content" style="overflow: hidden;">
+        <ul>
+          <li>
+            <a href="@controllers.routes.Application.dashboard()" ajax-url="@controllers.routes.Dashboard.body()">
+              <span class="icon-dashboard"></span>Dashboard
+            </a>
+          </li>
+          @defining(FeatureDAO.INSTANCE.find(new BasicDBObject())) { features =>
+            @for(feature <- features) {
+              @if(FeatureAction.hasPermissionOnFeature(feature)) {
+                
+                @if(feature.getName() == "Organization") {
+                <li>
+                  <a href="@routes.Organization.index()" ajax-url="@routes.Organization.indexAjax()">
+                  <span class="icon-group"></span>@feature.getName()
+                  </a>
+                </li>
+                }
+                
+                @if(feature.getName() == "Virtual Machine") {
+                <li class="active">
+                  <a href="@controllers.vm.routes.VirtualMachine.index()">
+                  <span class="icon-desktop"></span>@feature.getName()
+                  </a>
+                </li>
+                }
+                
+              }
+            }
+          }
+        </ul>
+      </div>
+    
+      <div class="icon-caret-down"></div>
+      <div class="icon-caret-up"></div>
+    
+    </nav>
+    
+    <section id="main" class="main container">
+
+      <section class="org-body row-fluid">
+      
+      <div class="span12">
+      @body
+      </div>
+        
+      </section>
+      
+      @footer()
+
+    </section>
+
+  </body>
+  
+</html>

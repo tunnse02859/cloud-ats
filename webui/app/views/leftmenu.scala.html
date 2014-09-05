@@ -22,30 +22,14 @@
               </a>
             </li>
             }
-             
-            @if(feature.getName() == "Foo Feature") {
-            <li @if(active == "Foo Feature") { class="active" }>
-              <a href="@controllers.mock.routes.FooFeature.index()">
-              <span class="icon-star"></span>@feature.getName()
+            @if(feature.getName() == "Virtual Machine") {
+            <li @if(active == "Virtual Machine") { class="active" }>
+              <a href="@controllers.vm.routes.VirtualMachine.index()">
+              <span class="icon-desktop"></span>@feature.getName()
               </a>
             </li>
             }
             
-            @if(feature.getName() == "Bar Feature") {
-            <li @if(active == "Bar Feature") { class="active" }>
-              <a href="@controllers.mock.routes.BarFeature.index()">
-              <span class="icon-star"></span>@feature.getName()
-              </a>
-            </li>
-            }
-            
-            @if(feature.getName() == "Juu Feature") {
-            <li @if(active == "Juu Feature") { class="active" }>
-              <a href="@controllers.mock.routes.JuuFeature.index()">
-              <span class="icon-star"></span>@feature.getName()
-              </a>
-            </li>
-            }
           }
         }
       }

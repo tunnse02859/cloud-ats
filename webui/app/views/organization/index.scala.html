@@ -34,30 +34,14 @@
 		            @if(feature.getName() == "Organization") {
 		            <li class="active">
 		              <a href="@routes.Organization.index()" ajax-url="@routes.Organization.indexAjax()">
-		              <span class="icon-group"></span>Organization
+		              <span class="icon-group"></span>@feature.getName()
 		              </a>
 		            </li>
 		            } 
-		            @if(feature.getName() == "Foo Feature") {
+		            @if(feature.getName() == "Virtual Machine") {
                 <li>
-                  <a href="@controllers.mock.routes.FooFeature.index()">
-                  <span class="icon-star"></span>@feature.getName()
-                  </a>
-                </li>
-                }
-                
-                @if(feature.getName() == "Bar Feature") {
-                <li>
-                  <a href="@controllers.mock.routes.BarFeature.index()">
-                  <span class="icon-star"></span>@feature.getName()
-                  </a>
-                </li>
-                }
-                
-                @if(feature.getName() == "Juu Feature") {
-                <li>
-                  <a href="@controllers.mock.routes.JuuFeature.index()">
-                  <span class="icon-star"></span>@feature.getName()
+                  <a href="@controllers.vm.routes.VirtualMachine.index()">
+                  <span class="icon-desktop"></span>@feature.getName()
                   </a>
                 </li>
                 }
