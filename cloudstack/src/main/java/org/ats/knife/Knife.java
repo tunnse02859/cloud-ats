@@ -22,9 +22,6 @@ import com.jcraft.jsch.JSchException;
 public class Knife {
   
   /** .*/
-  private static Knife instance = null;
-  
-  /** .*/
   String workstation;
   
   /** .*/
@@ -44,6 +41,13 @@ public class Knife {
     this.server = properties.getProperty("chef-server");
     this.username = properties.getProperty("username");
     this.password = properties.getProperty("password");
+  }
+  
+  public Knife(String workstation, String server, String username, String password) {
+    this.workstation = workstation;
+    this.server = server;
+    this.username = username;
+    this.password = password;
   }
   
   public boolean bootstrap(String nodeIP, String nodeName, String... recipes) throws JSchException, IOException {
@@ -88,6 +92,6 @@ public class Knife {
   }
 
   public static Knife getInstance() throws IOException {
-    return instance == null ? instance = new Knife() : instance;
+    return  new Knife();
   }
 }

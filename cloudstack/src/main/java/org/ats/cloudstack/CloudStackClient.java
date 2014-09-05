@@ -34,9 +34,6 @@ class CloudStackClient {
   /** .*/
   private final String secretKey;
   
-  /**.*/
-  private static CloudStackClient instance;
-  
   private CloudStackClient() throws IOException {
     InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cs.properties");
     Properties csProps = new Properties();
@@ -44,6 +41,12 @@ class CloudStackClient {
     this.host = csProps.getProperty("host");
     this.apiKey = csProps.getProperty("api-key");
     this.secretKey = csProps.getProperty("secret-key");
+  }
+  
+  public CloudStackClient(String host, String apiKey, String secretKey) {
+    this.host = host;
+    this.apiKey = apiKey;
+    this.secretKey = secretKey;
   }
   
   public String getHost() {
@@ -127,6 +130,6 @@ class CloudStackClient {
   }
 
   public static CloudStackClient getInstance() throws IOException {
-    return instance == null ? instance = new CloudStackClient() : instance;
+    return new CloudStackClient();
   }
 }
