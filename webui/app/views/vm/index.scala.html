@@ -14,6 +14,7 @@
     <meta content="width=device-width" name="viewport">
     
     @assets()
+    <script type="text/javascript" src="@controllers.routes.Assets.at("/public", "javascripts/vm.js")"></script>
   </head>
   
   <body class=" fluid-layout">
@@ -42,7 +43,7 @@
                 
                 @if(feature.getName() == "Virtual Machine") {
                 <li class="active">
-                  <a href="@controllers.vm.routes.VirtualMachine.index()">
+                  <a href="@controllers.vm.routes.VMController.index()">
                   <span class="icon-desktop"></span>@feature.getName()
                   </a>
                 </li>

@@ -1,0 +1,120 @@
+@import controllers.vm._
+
+<legend>Virtual Machine Feature Initialization</legend>
+
+<div class="row-fluid">
+  <div class="cloud wizard">
+    <ul class="steps">
+      <li class="active" data-target="#step1">
+        <span class="badge badge-info">1</span>GitLab - Jenkins
+      </li>
+      <li data-target="#step2"><span class="badge">2</span>Chef</li>
+      <li data-target="#step3"><span class="badge">3</span>Cloud API</li>
+    </ul>
+  </div>
+  <form class="form-horizontal" action="@routes.VMController.doWizard()" method="post">
+  <div class="step-content">
+    
+    <div id="step1" class="step-pane active" style="margin-top: 20px;">
+      
+      <div class="control-group">
+        <label class="control-label">Public IP</label>
+        <div class="controls">
+          <input required="" type="text" name="jenkins-ip" placeholder="Public IP">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Username</label>
+        <div class="controls">
+          <input required="" type="text" name="jenkins-username" placeholder="Username">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Password</label>
+        <div class="controls">
+          <input required="" type="text" name="jenkins-password" placeholder="Password">
+        </div>
+      </div>
+    </div>
+    
+    <div id="step2" class="step-pane" style="margin-top: 20px;">
+      
+      <div class="control-group">
+        <label class="control-label">Chef Server</label>
+        <div class="controls">
+          <input required="" type="text" name="chef-server-ip" placeholder="Server IP">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Chef Workstation</label>
+        <div class="controls">
+          <input required="" type="text" name="chef-workstation-ip" placeholder="Workstation IP">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Username</label>
+        <div class="controls">
+          <input required="" type="text" name="chef-username" placeholder="Username">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Password</label>
+        <div class="controls">
+          <input required="" type="text" name="chef-password" placeholder="Password">
+        </div>
+      </div>
+
+    </div>
+    
+    <div id="step3" class="step-pane" style="margin-top: 20px;">
+      
+      <div class="control-group">
+        <div class="controls">
+        <label class="radio">
+          <input type="radio" checked="checked"> CloudStack
+        </label>
+        <label class="radio">
+          <input type="radio" disabled="disabled"> Amazon Web Service
+        </label>
+        </div>
+      </div>
+      <legend></legend>
+      
+      <div class="control-group">
+        <label class="control-label">CloudStack API</label>
+        <div class="controls">
+          <input required="" type="text" name="cloudstack-api-url" placeholder="URL">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">API Key</label>
+        <div class="controls">
+          <input required="" type="text" name="cloudstack-api-key" placeholder="Api Key">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Secret Key</label>
+        <div class="controls">
+          <input required="" type="text" name="cloudstack-api-secret" placeholder="Secret Key">
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div class="form-actions">
+    <input type="button" value="Previous" class="cloud prev btn" disabled="disabled">
+    <input type="button" value="Next" class=" cloud next btn btn-primary">
+    <input type="submit" value="Finish" class="cloud finish btn btn-blue" style="display: none;">
+  </div>
+
+  </form>
+  
+</div>

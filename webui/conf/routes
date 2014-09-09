@@ -72,7 +72,8 @@ GET     /portal/dashboard/profile  controllers.Dashboard.updateProfile()
 
 ############################# Virtual Machine ############################
 
-GET     /portal/vm                 controllers.vm.VirtualMachine.index()
+GET     /portal/vm                 controllers.vm.VMController.index()
+POST    /portal/vm/wizard          controllers.vm.VMController.doWizard()
 
 ############################# Mock #######################################
 
