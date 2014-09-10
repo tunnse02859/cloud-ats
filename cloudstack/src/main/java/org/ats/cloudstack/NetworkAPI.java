@@ -17,7 +17,12 @@ import com.cloud.network.Networks.TrafficType;
  */
 public class NetworkAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<Network> listNetworks(String id, String zoneId, TrafficType trafficType) throws IOException {
+    return listNetworks(CloudStackClient.getInstance(), id, zoneId, trafficType);
+  }
+  
+  public static List<Network> listNetworks(CloudStackClient client, String id, String zoneId, TrafficType trafficType) throws IOException {
     StringBuilder sb = new StringBuilder("command=listNetworks&response=json");
     
     if (id != null && !id.isEmpty())
@@ -29,7 +34,7 @@ public class NetworkAPI extends CloudStackAPI {
     if (trafficType != null)
       sb.append("&traffictype=").append(trafficType);
     
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     return buildModels(Network.class, response, "listnetworksresponse", "network");
   }
 }

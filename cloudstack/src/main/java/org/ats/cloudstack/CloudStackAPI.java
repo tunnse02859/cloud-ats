@@ -30,11 +30,16 @@ import com.fasterxml.jackson.databind.ObjectReader;
  */
 public abstract class CloudStackAPI {
   
-  protected static String request(String command) throws IOException {
-    CloudStackClient client = CloudStackClient.getInstance();
+  protected static String request(CloudStackClient client, String command) throws IOException {
     String url = client.buildCommandURL(command);
     DefaultHttpClient http = HttpClientFactory.getInstance();
-    return HttpClientUtil.fetch(http, url.replaceAll(" ", "%20"));
+    return HttpClientUtil.fetch(http, url.replaceAll(" ", "%20"));    
+  }
+  
+  @Deprecated
+  protected static String request(String command) throws IOException {
+    CloudStackClient client = CloudStackClient.getInstance();
+    return request(client, command);
   }
   
   protected static <T extends AbstractModel> List<T> buildModels(Class<T> clazz, String response, String rootNode, String arrayNode, ModelFilter<T> filter) throws JsonProcessingException, JSONException, IOException {

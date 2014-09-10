@@ -15,7 +15,12 @@ import org.ats.cloudstack.model.ServiceOffering;
  */
 public class ServiceOfferingAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<ServiceOffering> listServiceOfferings(String id, String name) throws IOException {
+    return listServiceOfferings(CloudStackClient.getInstance(), id, name);
+  }
+  
+  public static List<ServiceOffering> listServiceOfferings(CloudStackClient client, String id, String name) throws IOException {
     StringBuilder sb = new StringBuilder("command=listServiceOfferings&response=json");
     
     if (id != null && !id.isEmpty())
@@ -23,7 +28,7 @@ public class ServiceOfferingAPI extends CloudStackAPI {
     
     if (name != null && !name.isEmpty())
       sb.append("&name=").append(name);
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     return buildModels(ServiceOffering.class, response, "listserviceofferingsresponse", "serviceoffering");
   }
 }

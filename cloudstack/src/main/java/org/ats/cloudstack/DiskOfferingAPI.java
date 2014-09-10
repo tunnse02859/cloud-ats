@@ -15,7 +15,12 @@ import org.ats.cloudstack.model.DiskOffering;
  */
 public class DiskOfferingAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<DiskOffering> listDiskOfferings(String id, String name) throws IOException  {
+    return listDiskOfferings(CloudStackClient.getInstance(), id, name);
+  }
+  
+  public static List<DiskOffering> listDiskOfferings(CloudStackClient client, String id, String name) throws IOException  {
     StringBuilder sb = new StringBuilder("command=listDiskOfferings&response=json");
     
     if (id != null && !id.isEmpty()) 
@@ -24,7 +29,7 @@ public class DiskOfferingAPI extends CloudStackAPI {
     if (name != null && !name.isEmpty())
       sb.append("&name=").append(name);
     
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     return buildModels(DiskOffering.class, response, "listdiskofferingsresponse", "diskoffering");
   }
 }

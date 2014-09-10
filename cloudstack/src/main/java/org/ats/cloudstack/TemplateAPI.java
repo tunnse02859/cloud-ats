@@ -17,7 +17,12 @@ import com.cloud.template.VirtualMachineTemplate.TemplateFilter;
  */
 public class TemplateAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<Template> listTemplates(TemplateFilter filter, String id, String name, String zoneId) throws IOException {
+    return listTemplates(CloudStackClient.getInstance(), filter, id, name, zoneId);
+  }
+  
+  public static List<Template> listTemplates(CloudStackClient client, TemplateFilter filter, String id, String name, String zoneId) throws IOException {
     StringBuilder sb = new StringBuilder("command=listTemplates&response=json&templatefilter=").append(filter);
     
     if (id != null && !id.isEmpty())
@@ -29,7 +34,7 @@ public class TemplateAPI extends CloudStackAPI {
     if (zoneId != null && !zoneId.isEmpty())
       sb.append("&zoneid=").append(zoneId);
     
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     return buildModels(Template.class, response, "listtemplatesresponse", "template");
   }
 }

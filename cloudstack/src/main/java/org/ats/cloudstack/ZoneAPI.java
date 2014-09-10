@@ -15,9 +15,14 @@ import org.ats.cloudstack.model.Zone;
  */
 public class ZoneAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<Zone> listAvailableZones() throws IOException {
+    return listAvailableZones(CloudStackClient.getInstance());
+  }
+  
+  public static List<Zone> listAvailableZones(CloudStackClient client) throws IOException {
     String cmd = "command=listZones&available=true&response=json";
-    String response = request(cmd);
+    String response = request(client, cmd);
     return buildModels(Zone.class, response, "listzonesresponse", "zone");
   }
 }

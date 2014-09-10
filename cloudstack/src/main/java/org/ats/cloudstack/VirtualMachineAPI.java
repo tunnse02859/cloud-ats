@@ -21,10 +21,15 @@ import com.cloud.vm.VirtualMachine.State;
  */
 public class VirtualMachineAPI extends CloudStackAPI {
   
+  @Deprecated
   public static String[] quickDeployVirtualMachine(String name, String template, String service, String disk) throws IOException {
-    String zoneId = ZoneAPI.listAvailableZones().get(0).id;
-    String templateId = TemplateAPI.listTemplates(TemplateFilter.all, null, template, zoneId).get(0).id;
-    String serviceOfferingId = ServiceOfferingAPI.listServiceOfferings(null, service).get(0).id;
+    return quickDeployVirtualMachine(CloudStackClient.getInstance(), name, template, service, disk);
+  }
+  
+  public static String[] quickDeployVirtualMachine(CloudStackClient client, String name, String template, String service, String disk) throws IOException {
+    String zoneId = ZoneAPI.listAvailableZones(client).get(0).id;
+    String templateId = TemplateAPI.listTemplates(client, TemplateFilter.all, null, template, zoneId).get(0).id;
+    String serviceOfferingId = ServiceOfferingAPI.listServiceOfferings(client, null, service).get(0).id;
     
     StringBuilder sb = new StringBuilder("command=deployVirtualMachine&response=json");
     sb.append("&zoneid=").append(zoneId);
@@ -32,7 +37,7 @@ public class VirtualMachineAPI extends CloudStackAPI {
     sb.append("&serviceofferingid=").append(serviceOfferingId);
     
     if (disk != null && !disk.isEmpty()) {
-      DiskOffering dof = DiskOfferingAPI.listDiskOfferings(null, disk).get(0);
+      DiskOffering dof = DiskOfferingAPI.listDiskOfferings(client, null, disk).get(0);
       sb.append("&diskofferingid=").append(dof.id);
       sb.append("&size=").append(dof.diskSize);
     }
@@ -42,23 +47,33 @@ public class VirtualMachineAPI extends CloudStackAPI {
       sb.append("&displayname=").append(name);
     }
     
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     JSONObject json = new JSONObject(response).getJSONObject("deployvirtualmachineresponse");
     String vmId = json.getString("id");
     String jobId = json.getString("jobid");
     return new String[] { vmId, jobId };
   }
   
+  @Deprecated
   public static String  destroyVM(String id, boolean expunge) throws IOException {
+    return destroyVM(CloudStackClient.getInstance(), id, expunge);
+  }
+  
+  public static String  destroyVM(CloudStackClient client, String id, boolean expunge) throws IOException {
     StringBuilder sb = new StringBuilder("command=destroyVirtualMachine&response=json");
     sb.append("&id=").append(id);
     sb.append("&expunge=").append(expunge);
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     JSONObject json = new JSONObject(response).getJSONObject("destroyvirtualmachineresponse");
     return json.getString("jobid");
   }
 
+  @Deprecated
   public static List<VirtualMachine> listVirtualMachines(String id, String name, State state, String templateId, ApiConstants.VMDetails details) throws IOException {
+    return listVirtualMachines(CloudStackClient.getInstance(), id, name, state, templateId, details);
+  }
+  
+  public static List<VirtualMachine> listVirtualMachines(CloudStackClient client, String id, String name, State state, String templateId, ApiConstants.VMDetails details) throws IOException {
     StringBuilder sb = new StringBuilder("command=listVirtualMachines&response=json");
     
     if (id != null && !id.isEmpty())
@@ -77,12 +92,17 @@ public class VirtualMachineAPI extends CloudStackAPI {
       sb.append("&details=").append(details);
     
     String command = sb.toString();
-    String response = request(command);
+    String response = request(client, command);
     return buildModels(VirtualMachine.class, response, "listvirtualmachinesresponse", "virtualmachine");
   }
   
+  @Deprecated
   public static VirtualMachine findVMById(String vmId, ApiConstants.VMDetails details) throws IOException {
-    List<VirtualMachine> list = listVirtualMachines(vmId, null, null, null, details);
+    return findVMById(CloudStackClient.getInstance(), vmId, details);
+  }
+  
+  public static VirtualMachine findVMById(CloudStackClient client, String vmId, ApiConstants.VMDetails details) throws IOException {
+    List<VirtualMachine> list = listVirtualMachines(client, vmId, null, null, null, details);
     return list.get(0);
   }
 }

@@ -15,9 +15,14 @@ import org.json.JSONObject;
  */
 public class AsyncJobAPI extends CloudStackAPI {
 
+  @Deprecated
   public static Job queryAsyncJobResult(String jobId) throws IOException   {
+    return queryAsyncJobResult(CloudStackClient.getInstance(), jobId);
+  }
+  
+  public static Job queryAsyncJobResult(CloudStackClient client, String jobId) throws IOException   {
     StringBuilder sb = new StringBuilder("command=queryAsyncJobResult&response=json&jobid=").append(jobId);
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     JSONObject json = new JSONObject(response).getJSONObject("queryasyncjobresultresponse");
     return buildModel(Job.class, json);
   }

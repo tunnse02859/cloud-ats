@@ -17,7 +17,12 @@ import org.json.JSONObject;
  */
 public class VolumeAPI extends CloudStackAPI {
 
+  @Deprecated
   public static List<Volume> listVolumes(String id, String name, String type, String vmId, ModelFilter<Volume> filter) throws IOException {
+    return listVolumes(CloudStackClient.getInstance(), id, name, type, vmId, filter);
+  }
+  
+  public static List<Volume> listVolumes(CloudStackClient client, String id, String name, String type, String vmId, ModelFilter<Volume> filter) throws IOException {
     StringBuilder sb = new StringBuilder("command=listVolumes&response=json");
     
     if (id != null && !id.isEmpty())
@@ -32,7 +37,7 @@ public class VolumeAPI extends CloudStackAPI {
     if (vmId != null && !vmId.isEmpty())
       sb.append("&virtualmachineid=").append(vmId);
     
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
 
     return buildModels(Volume.class, response, "listvolumesresponse", "volume", filter);
   }
@@ -55,9 +60,14 @@ public class VolumeAPI extends CloudStackAPI {
     return success;
   }
   
+  @Deprecated
   public static boolean deleteVolume(String id) throws IOException {
+    return deleteVolume(CloudStackClient.getInstance(), id);
+  }
+  
+  public static boolean deleteVolume(CloudStackClient client, String id) throws IOException {
     StringBuilder sb = new StringBuilder("command=deleteVolume&response=json&id=").append(id);
-    String response = request(sb.toString());
+    String response = request(client, sb.toString());
     JSONObject json = new JSONObject(response).getJSONObject("deletevolumeresponse");
     return json.getBoolean("success");
   }

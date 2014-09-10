@@ -23,7 +23,7 @@ import org.apache.commons.codec.binary.Base64;
  *
  * Apr 24, 2014
  */
-class CloudStackClient {
+public class CloudStackClient {
   
   /** .*/
   private final String host;
@@ -129,6 +129,7 @@ class CloudStackClient {
     return null;
   }
 
+  @Deprecated
   public static CloudStackClient getInstance() throws IOException {
     return new CloudStackClient();
   }
