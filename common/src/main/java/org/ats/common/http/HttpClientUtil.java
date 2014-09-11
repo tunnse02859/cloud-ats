@@ -7,16 +7,23 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -26,6 +33,24 @@ public class HttpClientUtil {
   public static String fetch(HttpClient httpclient, String uri) throws IOException
   {
     return getContentBodyAsString(execute(httpclient, uri));
+  }
+  
+  public static HttpResponse post(HttpClient httpclient, String uri, Map<String, String> parameters) throws IOException {
+    if(httpclient == null) 
+    {
+      throw new NullPointerException();
+    }
+    if(uri == null)
+    {
+      throw new NullPointerException();
+    }
+    HttpPost post = new HttpPost(uri);
+    List<NameValuePair> list = new ArrayList<NameValuePair>();
+    for (Map.Entry<String, String> entry : parameters.entrySet()) {
+      list.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+    }
+    post.setEntity(new UrlEncodedFormEntity(list));
+    return httpclient.execute(post);
   }
   
   public static HttpResponse execute(HttpClient httpclient, String uri) throws IOException {
