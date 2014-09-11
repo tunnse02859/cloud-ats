@@ -8,7 +8,7 @@ package org.ats.component.usersmgt;
  *
  * Jul 7, 2014
  */
-public class UserManagementException extends Throwable {
+public class UserManagementException extends Exception {
 
   private static final long serialVersionUID = 1L;
   
