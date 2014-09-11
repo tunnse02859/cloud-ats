@@ -11,7 +11,8 @@ libraryDependencies ++= Seq(
 	"org.ats" % "cloud-jenkins" % "0.1-SNAPSHOT",
 	"org.ats" % "cloud-users-mgt" % "0.1-SNAPSHOT",
 	"org.apache.cloudstack" % "cloud-api" % "4.3.0",
-	"org.mongodb" % "mongo-java-driver" % "2.12.2"
+	"org.mongodb" % "mongo-java-driver" % "2.12.2",
+	"com.typesafe.akka" % "akka-actor_2.10" % "2.2.4"
 )     
 
 resolvers += (

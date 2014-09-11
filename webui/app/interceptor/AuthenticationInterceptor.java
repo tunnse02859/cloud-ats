@@ -6,6 +6,7 @@ package interceptor;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.user.User;
@@ -41,6 +42,11 @@ public class AuthenticationInterceptor extends Simple {
         }
       });
       ctx.session().put("group_id", groups.get(0).getId());
+    }
+    String uuid= ctx.session().get("uuid");
+    if(uuid == null) {
+      uuid = UUID.randomUUID().toString();
+      ctx.session().put("uuid", uuid);
     }
     return delegate.call(ctx);
   }

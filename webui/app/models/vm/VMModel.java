@@ -17,15 +17,15 @@ import com.mongodb.DBObject;
  *
  * Sep 6, 2014
  */
-public class VirtualMachine extends BasicDBObject {
+public class VMModel extends BasicDBObject {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
   
-  public VirtualMachine(String name, String groupId, String publicIp, String username, String password) {
-    this.put("_id", UUID.randomUUID().toString());
+  public VMModel(String id, String name, String groupId, String publicIp, String username, String password) {
+    this.put("_id", id);
     this.put("name", name);
     this.put("group_id", groupId);
     this.put("public_ip", publicIp);
@@ -33,8 +33,12 @@ public class VirtualMachine extends BasicDBObject {
     this.put("password", password);
   }
   
-  public VirtualMachine() {
-    this(null, null, null, null, null);
+  public VMModel() {
+    this(null, null, null, null, null, null);
+  }
+  
+  public String getId() {
+    return this.getString("_id");
   }
   
   public String getName() {
@@ -61,7 +65,7 @@ public class VirtualMachine extends BasicDBObject {
     return this.getString("password");
   }
   
-  public VirtualMachine from(DBObject source) {
+  public VMModel from(DBObject source) {
     this.put("_id", source.get("_id"));
     this.put("name", source.get("name"));
     this.put("group_id", source.get("group_id"));

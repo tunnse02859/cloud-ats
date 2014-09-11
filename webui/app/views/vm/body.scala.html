@@ -1,7 +1,33 @@
 @(system: Boolean, 
   rootGroup: org.ats.component.usersmgt.group.Group,
-  vms: List[models.vm.VirtualMachine])
+  vms: List[models.vm.VMModel])
 @import controllers.vm._
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+  var vmStatus = new WS("@routes.VMController.vmStatus(rootGroup.getId(), session().get("uuid")).webSocketURL(request)");
+
+   vmStatus.onmessage = function(event) {
+    var data = JSON.parse(event.data);
+    $(data.vms).each(function() {
+      var span = $("tr#" + this.id + " td.status span.badge").html(this.status);
+      if(this.status === "Running") {
+        $(span).addClass("badge-green");        
+      } else {
+        $(span).removeClass("badge-green");
+      }
+    });
+  }
+
+  window.onbeforeunload = function() {
+    vmStatus.onclose = function () {
+    };
+    vmStatus.close()
+};
+});
+</script>
 
 <section class="cloud-vm row-fluid">
   <div class="span12 well">
@@ -54,10 +80,10 @@
               <th>Action</th>
             </tr>
             @for(vm <- vms) {
-            <tr>
+            <tr id="@vm.getId()">
               <td><span class="badge badge-blue">@vm.get("name")</span></td>
               <td><span class="badge badge-green">@vm.get("public_ip")</span></td>
-              <td></td>
+              <td class="status"><span class="badge"></span></td>
               <td>
                 <a class="btn btn-mini btn-blue">Edit</a>
                 <a class="btn btn-mini btn-cyan">Console</a>
