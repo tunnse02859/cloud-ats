@@ -103,6 +103,6 @@ public class VirtualMachineAPI extends CloudStackAPI {
   
   public static VirtualMachine findVMById(CloudStackClient client, String vmId, ApiConstants.VMDetails details) throws IOException {
     List<VirtualMachine> list = listVirtualMachines(client, vmId, null, null, null, details);
-    return list.get(0);
+    return list.isEmpty() ? null : list.get(0);
   }
 }
