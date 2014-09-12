@@ -109,6 +109,13 @@ public class VMHelper {
     return map;
   }
   
+  public static String getSystemProperty(String name) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(systemColumn);
+    DBObject obj = col.findOne(new BasicDBObject("_id", name));
+    return (String) obj.get("value");
+  }
+  
   public static CloudStackClient getCloudStackClient() {
     Map<String, String> properties = getSystemProperties();
     String cloudstackApiUrl = properties.get("cloudstack-api-url");

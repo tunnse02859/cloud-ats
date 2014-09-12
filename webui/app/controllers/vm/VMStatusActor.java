@@ -59,6 +59,7 @@ public class VMStatusActor extends UntypedActor {
         ArrayNode array = jsonObj.arrayNode();
         for (VMModel sel : VMHelper.getVMsByGroupID(channel.groupId)) {
           VirtualMachine vm = VirtualMachineAPI.findVMById(client, sel.getId(), null);
+          if (vm == null) return;
           array.add(Json.newObject().put("id", vm.id).put("status", vm.state));
         }
         jsonObj.put("vms", array);

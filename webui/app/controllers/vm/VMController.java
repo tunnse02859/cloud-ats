@@ -11,18 +11,28 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPathConstants;
+
 import models.vm.VMModel;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.ats.cloudstack.CloudStackAPI;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.cloudstack.TemplateAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
 import org.ats.cloudstack.model.Template;
 import org.ats.cloudstack.model.VirtualMachine;
+import org.ats.common.html.HtmlParser;
+import org.ats.common.html.XPathUtil;
+import org.ats.common.http.HttpClientUtil;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.cloud.template.VirtualMachineTemplate.TemplateFilter;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -94,6 +104,8 @@ public class VMController extends Controller {
     String cloudstackApiUrl = form.get("cloudstack-api-url");
     String cloudstackApiKey = form.get("cloudstack-api-key");
     String cloudstackApiSecret = form.get("cloudstack-api-secret");
+    String cloudstackUsername = form.get("cloudstack-username");
+    String cloudstackPassword = form.get("cloudstack-password");
     
     CloudStackClient client = new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
     
@@ -123,10 +135,29 @@ public class VMController extends Controller {
     properties.put("cloudstack-api-url", cloudstackApiUrl);
     properties.put("cloudstack-api-key", cloudstackApiKey);
     properties.put("cloudstack-api-secret", cloudstackApiSecret);
+    properties.put("cloudstack-username", cloudstackUsername);
+    properties.put("cloudstack-password", cloudstackPassword);
     
     VMHelper.setSystemProperties(properties);
     VMHelper.createSystemVM(jenkinsVM, chefServerVM, chefWorkstationVM);
 
     return redirect(controllers.vm.routes.VMController.index());
+  }
+  
+  public static Result viewConsoleURL(String vmId) throws Exception {
+    String cloudstackApiUrl = VMHelper.getSystemProperty("cloudstack-api-url");
+    String cloudstackUsername = VMHelper.getSystemProperty("cloudstack-username");
+    String cloudstackPassword = VMHelper.getSystemProperty("cloudstack-password");
+    
+    DefaultHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
+    String cloudstackConsoleUrl = cloudstackApiUrl.substring(0, cloudstackApiUrl.lastIndexOf('/') + 1) + "console?cmd=access&vm=" + vmId;
+    String response = HttpClientUtil.fetch(client, cloudstackConsoleUrl);
+    
+    HtmlParser parser = new HtmlParser();
+    Document doc = parser.parseWellForm(response);
+    NodeList nodeList = (NodeList)XPathUtil.read(doc, "/html/frameset/frame", XPathConstants.NODESET);
+    Node node = nodeList.item(0);
+    response().setContentType("html");
+    return ok("<iframe style='width: 95%;height: 350px;' src='" + node.getAttributes().getNamedItem("src").getNodeValue() + "'></iframe>");
   }
 }

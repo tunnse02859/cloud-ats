@@ -48,5 +48,36 @@ $(document).ready(function() {
   
   /* Cloud VM list
    ===================================================== */
-  
+  $("body").on("click", ".cloud-vm a.plus", function() {
+    var div = $(this).closest("tr").next("tr").find("div.vm-info");
+    var icon = $(this).find("i.icon");
+    
+    if ($(div).css('display') == 'none') {
+      $(div).slideDown(400);
+      $(icon).removeClass("icon-plus");
+      $(icon).addClass("icon-minus");
+    } else {
+      $(div).slideUp(400);
+      $(icon).removeClass("icon-minus");
+      $(icon).addClass("icon-plus");
+    }
+  });
+  /* Click Terminal */
+  $("body").on("click", ".cloud-vm a#click-terminal", function() {
+    var ajaxURL = $(this).attr("ajax-url");
+    var terminal = $(this).closest("div.vm-info").find("div.vm-terminal");
+    if ($(terminal).find("iframe").length == 0) {
+      $.ajax({
+        url: ajaxURL,
+        dataType: "html",
+        success: function(data) {
+          $(terminal).html(data);
+        },
+        error: function(e, data) {
+          console.log(e);
+          console.log(data);
+        }
+      });
+    }
+  });
 });
