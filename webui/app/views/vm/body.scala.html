@@ -11,8 +11,9 @@ $(document).ready(function() {
 
    vmStatus.onmessage = function(event) {
     var data = JSON.parse(event.data);
+    console.log(data);
     $(data.vms).each(function() {
-      var span = $("tr#" + this.id + " td.status span.badge").html(this.status);
+      var span = $("tr.vm-status-" + this.id + " td.status span.badge").html(this.status);
       if(this.status === "Running") {
         $(span).addClass("badge-green");        
       } else {
@@ -26,17 +27,9 @@ $(document).ready(function() {
     };
     vmStatus.close()
   };
+  
 });
 </script>
-
-<style class="text/css">
-  .vm-info {
-    /* border: 1px solid #DDDDDD; 
-    border-bottom: none;  
-    height: 350px; */
-    display: none;
-  }
-</style>
 
 <section class="cloud-vm">
     <ul class="nav nav-tabs">
@@ -80,6 +73,7 @@ $(document).ready(function() {
         </div>
         
         <div class="span9">
+          
           <table class="table">
             <tr>
               <th></th>
@@ -89,56 +83,10 @@ $(document).ready(function() {
               <th>Action</th>
             </tr>
             @for(vm <- vms) {
-            <tr id="@vm.getId()">
-              <td><a class="plus btn btn-mini"><i class="icon icon-plus"></i></a></td>
-              <td>
-                <span class="label label-blue">@vm.get("name")</span>
-              </td>
-              <td><span class="label label-green">@vm.get("public_ip")</span></td>
-              <td class="status"><span class="badge"></span></td>
-              <td>
-                <a class="btn btn-mini btn-blue">Start</a>
-                <a class="btn btn-mini btn-red">Stop</a>
-                <a class="btn btn-mini btn-orange">Reboot</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 0px; border: none;" colspan="5">
-                <div class="vm-info">
-                  <ul class="nav nav-tabs">
-								    <li class="active">
-								      <a data-toggle="tab" href="#vm-properties-@vm.getId()">Properties</a>
-								    </li>
-								    <li><a id="click-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a></li>
-								    <li><a data-toggle="tab" href="#vm-logs-@vm.getId()">Logs</a></li>
-							    </ul>
-							    
-							    <div class="tab-content">
-							     
-							     <div id="vm-properties-@vm.getId()" class="tab-pane active in">
-							     @views.html.vm.vm_properties_form(vm)
-							     </div>
-							     
-							     <div id="vm-terminal-@vm.getId()" class="vm-terminal tab-pane fade">
-							     </div>
-							     
-							     <div id="vm-logs-@vm.getId()" class="tab-pane fade">
-							     </div>
-
-							    </div>
-                </div>
-              </td>
-            </tr>
+            @views.html.vm.vmstatus(vm)
+            @views.html.vm.vmproperties(vm)
             }
-            <!-- <tr>
-              <td style="padding: 0px; border: none;" colspan="5">
-                <div class="row-fluid">
-                    <iframe class="span12" height="500px;" src="http://172.27.4.85/ajax?token=H98B8NAxW7dKaM8MKWg--bui5m0rHkclRpUvvqeN53I-XgFA7PzKV_MwUYRuQ-c6ZJrhmL9t0LzY6BXe5Fwc5lKc3NZx6HHXU9hezM0VXPZLGFNAwL22tyedPMlcxTiOr7gEZQoopXDcZCLohTn2j_7KbutOvvh8rB3QQr1gaYv_v8g71t5BG9uO67MsnrDM850pGr9pfGj9nAmexnxgeGzUAEUgVbeUOMSaf4W1DCjLpNMuqDyMImlbNBj9F18lneX3eEkTD_i8vRg8PAzubQ"></iframe>
-                </div>
-              </td>
-            </tr> -->
           </table>
-          <!-- <iframe width="95%" height="500px;" src="http://172.27.4.85/ajax?token=H98B8NAxW7dKaM8MKWg--bui5m0rHkclRpUvvqeN53I-XgFA7PzKV_MwUYRuQ-c6ZJrhmL9t0LzY6BXe5Fwc5lKc3NZx6HHXU9hezM0VXPZLGFNAwL22tyedPMlcxTiOr7gEZQoopXDcZCLohTn2j_7KbutOvvh8rB3QQr1gaYv_v8g71t5BG9uO67MsnrDMdfui3qYBvfradBA0grzkJFT1a43_JI6xgBkTjLAS1IG-rNsgb1on8Ps0ld7_2Rui7peaQEVunOG13nZr9Mdmng"></iframe> -->
         </div>
         
         </section>

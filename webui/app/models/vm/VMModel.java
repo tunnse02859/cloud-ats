@@ -3,8 +3,6 @@
  */
 package models.vm;
 
-import java.util.UUID;
-
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
@@ -24,17 +22,19 @@ public class VMModel extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
   
-  public VMModel(String id, String name, String groupId, String publicIp, String username, String password) {
+  public VMModel(String id, String name, String groupId, String template, String templateId, String publicIp, String username, String password) {
     this.put("_id", id);
     this.put("name", name);
     this.put("group_id", groupId);
     this.put("public_ip", publicIp);
     this.put("username", username);
     this.put("password", password);
+    this.put("template", template);
+    this.put("template_id", templateId);
   }
   
   public VMModel() {
-    this(null, null, null, null, null, null);
+    this(null, null, null, null, null, null, null, null);
   }
   
   public String getId() {
@@ -51,6 +51,14 @@ public class VMModel extends BasicDBObject {
     } catch (UserManagementException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public String getTemplate() {
+    return this.getString("template");
+  }
+  
+  public String getTemplateId() {
+    return this.getString("template_id");
   }
   
   public String getPublicIP() {
@@ -72,6 +80,8 @@ public class VMModel extends BasicDBObject {
     this.put("public_ip", source.get("public_ip"));
     this.put("username", source.get("username"));
     this.put("password", source.get("password"));
+    this.put("template", source.get("template"));
+    this.put("template_id", source.get("template_id"));
     return this;
   }
 }

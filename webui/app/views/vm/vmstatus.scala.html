@@ -1,0 +1,24 @@
+@(vm: models.vm.VMModel, expanded: Boolean = false)
+@import controllers.vm._
+
+<tr class="vm-status-@vm.getId()">
+  <td>
+    <a class="plus btn btn-mini">
+      @if(expanded) {
+        <i class="icon icon-minus"></i>
+      } else {
+        <i class="icon icon-plus"></i>
+      }
+    </a>
+  </td>
+  <td>
+    <span class="label label-blue">@vm.get("name")</span>
+  </td>
+  <td><span class="label label-green">@vm.get("public_ip")</span></td>
+  <td class="status"><span class="badge"></span></td>
+  <td>
+    <a class="btn btn-mini btn-blue">Start</a>
+    <a class="btn btn-mini btn-red">Stop</a>
+    <a class="btn btn-mini btn-orange">Reboot</a>
+  </td>
+</tr>

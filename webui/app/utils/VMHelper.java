@@ -12,9 +12,6 @@ import models.vm.VMModel;
 
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.component.usersmgt.DataFactory;
-import org.ats.component.usersmgt.UserManagementException;
-import org.ats.component.usersmgt.group.Group;
-import org.ats.component.usersmgt.group.GroupDAO;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -36,61 +33,68 @@ public class VMHelper {
   private static String databaseName = "cloud-ats-vm";
   
   /** .*/
-  private static String systemColumn = "cloud-system";
+  private static String vmColumn = "vm";
   
   /** .*/
-  private static String userColumn = "cloud-user";
+  private static String propertiesColumn = "properties";
   
   public static DB getDatabase() {
     return DataFactory.getDatabase(databaseName);
   }
   
-  public static long systemCount() {
+  public static long vmCount() {
     DB vmDB = DataFactory.getDatabase(databaseName);
-    return vmDB.getCollection(systemColumn).count();
+    return vmDB.getCollection(vmColumn).count();
   }
   
-  public static boolean createSystemVM(VMModel... vms) {
+  public static boolean createVM(VMModel... vms) {
     DB db = getDatabase();
-    DBCollection col = db.getCollection(systemColumn);
+    DBCollection col = db.getCollection(vmColumn);
     WriteResult result = col.insert(vms, WriteConcern.ACKNOWLEDGED);
     boolean exist = false;
     for (DBObject index : col.getIndexInfo()) {
-      if ("System VM Index".equals(index.get("name"))) exist = true;
+      if ("VM Index".equals(index.get("name"))) exist = true;
     }
     if (!exist) {
-      col.ensureIndex(new BasicDBObject("name", "text"), "System VM Index");
-      System.out.println("create System VM Index");
+      col.ensureIndex(new BasicDBObject("name", "text"), "VM Index");
+      System.out.println("Create VM Index");
     }
     return result.getError() == null;
   }
   
-  public static boolean createUserVm(VMModel... vms) {
+  public static VMModel updateVM(VMModel vm) {
     DB db = getDatabase();
-    DBCollection col = db.getCollection(userColumn);
-    WriteResult result = col.insert(vms, WriteConcern.ACKNOWLEDGED);
+    DBCollection col = db.getCollection(vmColumn);
+    col.save(vm);
+    return vm;
+  }
+  
+  public static boolean removeVM(VMModel vm) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(vmColumn);
+    WriteResult result = col.remove(vm);
     return result.getError() == null;
   }
   
   public static List<VMModel> getVMsByGroupID(String groupId) {
     DB vmDB = getDatabase();
-    try {
-      Group group = GroupDAO.INSTANCE.findOne(groupId);
-      boolean system = group.getBoolean("system");
-      DBCursor cursor = vmDB.getCollection(system ? systemColumn : userColumn).find(new BasicDBObject("group_id", groupId));
-      List<VMModel> vms = new ArrayList<VMModel>();
-      while (cursor.hasNext()) {
-        vms.add(new VMModel().from(cursor.next()));
-      }
-      return vms;
-    } catch (UserManagementException e) {
-      throw new RuntimeException(e);
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(new BasicDBObject("group_id", groupId));
+    List<VMModel> vms = new ArrayList<VMModel>();
+    while (cursor.hasNext()) {
+      vms.add(new VMModel().from(cursor.next()));
     }
+    return vms;
+  }
+  
+  public static VMModel getVMByID(String vmId) {
+    DB vmDB = getDatabase();
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(new BasicDBObject("_id", vmId));
+    return cursor.hasNext() ? new VMModel().from(cursor.next()) : null;
   }
   
   public static void setSystemProperties(Map<String, String> properties) {
     DB db = getDatabase();
-    DBCollection col = db.getCollection(systemColumn);
+    DBCollection col = db.getCollection(propertiesColumn);
     for (Map.Entry<String, String> entry : properties.entrySet()) {
       col.insert(BasicDBObjectBuilder.start("_id", entry.getKey()).append("value", entry.getValue()).append("system_property", true).get());
     }
@@ -98,7 +102,7 @@ public class VMHelper {
   
   public static Map<String, String> getSystemProperties() {
     DB db = getDatabase();
-    DBCollection col = db.getCollection(systemColumn);
+    DBCollection col = db.getCollection(propertiesColumn);
     DBCursor cursor = col.find(new BasicDBObject("system_property", true));
     Map<String, String> map = new HashMap<String, String>();
     while (cursor.hasNext()) {
@@ -111,7 +115,7 @@ public class VMHelper {
   
   public static String getSystemProperty(String name) {
     DB db = getDatabase();
-    DBCollection col = db.getCollection(systemColumn);
+    DBCollection col = db.getCollection(propertiesColumn);
     DBObject obj = col.findOne(new BasicDBObject("_id", name));
     return (String) obj.get("value");
   }

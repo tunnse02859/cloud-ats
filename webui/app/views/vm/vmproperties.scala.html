@@ -1,0 +1,71 @@
+@(vm: models.vm.VMModel,
+  error: Html = null,
+  expanded: Boolean = false
+)
+@import controllers.vm._
+
+<tr class="vm-properties-@vm.getId()">
+  <td style="padding: 0px; border: none;" colspan="5">
+    <div class="vm-info" style="display: @if(expanded) { block; } else { none; }">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a data-toggle="tab" href="#vm-properties-@vm.getId()">Properties</a>
+        </li>
+        <li><a class="tab-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a></li>
+        <li><a data-toggle="tab" href="#vm-logs-@vm.getId()">Logs</a></li>
+      </ul>
+      
+      <div class="tab-content">
+       
+       <div id="vm-properties-@vm.getId()" class="vm-properties tab-pane active in">
+					
+					@if(error != null) {
+					  @error
+					}
+					<form id="properties-@vm.getId()" class="form form-horizontal vm-properties">
+					  
+					  <input type="hidden" value="@vm.getId()" name="vmId">
+					  
+					  <div class="control-group">
+					   <label class="control-label">Public IP</label>
+					   <div class="controls">
+					     <span class="label label-blue">@vm.getPublicIP()</span>
+					     <input style="display: none;" required="required" value="@vm.getPublicIP()" type="text" name="ip" placeholder="Public IP">
+					   </div>
+					 </div>
+					 
+					 <div class="control-group">
+					   <label class="control-label">Username</label>
+					   <div class="controls">
+					     <span class="label label-blue">@vm.getUsername()</span>
+					     <input style="display: none;" value="@vm.getUsername()" type="text" name="username" placeholder="Username">
+					   </div>
+					 </div>
+					 
+					 <div class="control-group">
+					   <label class="control-label">Password</label>
+					   <div class="controls">
+					     <span class="label">************</span>
+					     <input style="display: none;" required="required" value="" type="password" name="password" placeholder="Password">
+					   </div>
+					 </div>
+					 
+					 <div class="form-actions">
+					  <button type="button" class="btn btn-blue update" data="properties-@vm.getId()">Update</button>
+					  <button style="display: none;" type="button" class="btn btn-cyan submit" data="properties-@vm.getId()" ajax-url="@routes.VMController.updateVMProperties()">Submit</button>
+					  <button style="display: none;" type="button" class="btn btn-orange cancel" data="properties-@vm.getId()">Cancel</button>
+					 </div>
+					</form>
+
+       </div>
+       
+       <div id="vm-terminal-@vm.getId()" class="vm-terminal tab-pane fade">
+       </div>
+       
+       <div id="vm-logs-@vm.getId()" class="vm-logs tab-pane fade">
+       </div>
+
+      </div>
+    </div>
+  </td>
+</tr>
