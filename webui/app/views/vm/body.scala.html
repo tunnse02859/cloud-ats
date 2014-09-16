@@ -1,6 +1,4 @@
-@(system: Boolean, 
-  rootGroup: org.ats.component.usersmgt.group.Group,
-  vms: List[models.vm.VMModel])
+@(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, vms: List[models.vm.VMModel])
 @import controllers.vm._
 
 <script type="text/javascript">
@@ -10,16 +8,26 @@ $(document).ready(function() {
   var vmStatus = new WS("@routes.VMController.vmStatus(rootGroup.getId(), session().get("uuid")).webSocketURL(request)");
 
    vmStatus.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    console.log(data);
-    $(data.vms).each(function() {
-      var span = $("tr.vm-status-" + this.id + " td.status span.badge").html(this.status);
-      if(this.status === "Running") {
-        $(span).addClass("badge-green");        
-      } else {
-        $(span).removeClass("badge-green");
-      }
-    });
+   var data = JSON.parse(event.data);
+   $(data.vms).each(function() {
+     var tr = $("tr.vm-status-" + this.id);
+     if ($(tr).length > 0) {
+       var span = $(tr).find("td.status span.badge").html(this.status);
+       if(this.status === "Running") {
+         $(span).removeClass();
+         $(span).addClass("badge badge-green");
+         $(tr).find(".btn.stop,.btn.reboot").removeClass("disabled");
+       } else if(this.status === "Stopped") {
+         $(span).removeClass();
+         $(span).addClass("badge badge-red");
+         $(tr).find(".btn.start").removeClass("disabled");
+       } else {
+         $(tr).find(".btn.stop,.btn.start,.btn.reboot").addClass("disabled");
+         $(span).removeClass();
+         $(span).addClass("badge");
+       }
+     }
+   });
   }
 
   window.onbeforeunload = function() {
@@ -58,33 +66,34 @@ $(document).ready(function() {
         <div class="span3">
         <ul class="nav nav-tabs nav-stacked">
           <li class="active">
-            <a href="#"><i class="icon-linux"></i> System VMs</a>
+            <a href="#"><i class="icon-cogs"></i> System VMs</a>
           </li>
-          @if(rootGroup.getBoolean("system")) {
+          @if(system) {
           <li>
             <a href="#"><i class="icon-list"></i> Properties</a>
           </li>
           } else {
           <li>
-            <a href="#"><i class="icon-windows"></i> User VMs</a>
-          </li>
+            <a href="#"><i class="icon-cog"></i> Normal VMs</a>
+          </li>          
           }
         </ul>
         </div>
         
         <div class="span9">
           
-          <table class="table">
+          <table class="table vm-list">
             <tr>
               <th></th>
               <th>Name</th>
               <th>Public IP</th>
               <th>Status</th>
               <th>Action</th>
+              @if(system){<th></th>}
             </tr>
             @for(vm <- vms) {
-            @views.html.vm.vmstatus(vm)
-            @views.html.vm.vmproperties(vm)
+            @views.html.vm.vmstatus(vm, system)
+            @views.html.vm.vmproperties(vm, system)
             }
           </table>
         </div>

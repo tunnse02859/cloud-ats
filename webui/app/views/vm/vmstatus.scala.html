@@ -1,4 +1,4 @@
-@(vm: models.vm.VMModel, expanded: Boolean = false)
+@(vm: models.vm.VMModel, system: Boolean, expanded: Boolean = false)
 @import controllers.vm._
 
 <tr class="vm-status-@vm.getId()">
@@ -17,8 +17,13 @@
   <td><span class="label label-green">@vm.get("public_ip")</span></td>
   <td class="status"><span class="badge"></span></td>
   <td>
-    <a class="btn btn-mini btn-blue">Start</a>
-    <a class="btn btn-mini btn-red">Stop</a>
-    <a class="btn btn-mini btn-orange">Reboot</a>
+    <a class="disabled start btn btn-mini btn-blue">Start</a>
+    <a class="disabled stop btn btn-mini btn-orange">Stop</a>
+    <a class="disabled reboot btn btn-mini btn-red">Restore</a>
   </td>
+  @if(system){
+  <td>
+    <a class="btn btn-mini btn-red">Destroy</a>
+  </td>
+  }
 </tr>

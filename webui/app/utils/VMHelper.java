@@ -4,6 +4,8 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,29 @@ public class VMHelper {
     while (cursor.hasNext()) {
       vms.add(new VMModel().from(cursor.next()));
     }
+    Collections.sort(vms, new Comparator<VMModel>() {
+      @Override
+      public int compare(VMModel o1, VMModel o2) {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
+    return vms;
+  }
+  
+  public static List<VMModel> getVMsByGroupID(String groupId, DBObject filter) {
+    filter.put("group_id", groupId);
+    DB vmDB = getDatabase();
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(filter);
+    List<VMModel> vms = new ArrayList<VMModel>();
+    while (cursor.hasNext()) {
+      vms.add(new VMModel().from(cursor.next()));
+    }
+    Collections.sort(vms, new Comparator<VMModel>() {
+      @Override
+      public int compare(VMModel o1, VMModel o2) {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
     return vms;
   }
   

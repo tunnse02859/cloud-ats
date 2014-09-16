@@ -47,6 +47,7 @@ import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.WithSystem;
 import interceptor.WizardInterceptor;
+import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.libs.Json;
@@ -84,7 +85,9 @@ public class VMController extends Controller {
       query.append("user_ids", Pattern.compile(currentUser.getId()));
       group = GroupDAO.INSTANCE.find(query).iterator().next();
     }
-    return ok(index.render(body.render(system, group, VMHelper.getVMsByGroupID(group.getId())), "Virtual Machine"));
+    
+    Html html = body.render(system, group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)));
+    return ok(index.render(html, "Virtual Machine"));
   }
   
   public static WebSocket<JsonNode> vmStatus(final String groupId, final String sessionId) {
@@ -120,7 +123,7 @@ public class VMController extends Controller {
     Template template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "gitlab-jenkins",  null).get(0);
     VirtualMachine vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel jenkinsVM = new VMModel(vm.id, "system-jenkins", systemGroup.getId(), vm.templateName, vm.templateId, jenkinsIP, jenkinsUsername, jenkinsPassword);
-    jenkinsVM.put("jenkins", true);
+    jenkinsVM.put("system", true);
     
     String chefServerIp = form.get("chef-server-ip");
     String chefWorkstationIp = form.get("chef-workstation-ip");
@@ -130,10 +133,12 @@ public class VMController extends Controller {
     template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-server",  null).get(0);
     vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel chefServerVM = new VMModel(vm.id, "chef-server", systemGroup.getId(), vm.templateName, vm.templateId, chefServerIp, chefUsername, chefPassword);
+    chefServerVM.put("system", true);
     
     template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-workstation",  null).get(0);
     vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel chefWorkstationVM = new VMModel(vm.id, "chef-workstation", systemGroup.getId(), vm.templateName, vm.templateId, chefWorkstationIp, chefUsername, chefPassword);
+    chefWorkstationVM.put("system", true);
     
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("cloudstack-api-url", cloudstackApiUrl);
@@ -162,9 +167,15 @@ public class VMController extends Controller {
     NodeList nodeList = (NodeList)XPathUtil.read(doc, "/html/frameset/frame", XPathConstants.NODESET);
     Node node = nodeList.item(0);
     response().setContentType("html");
-    return ok("<iframe style='width: 95%;height: 350px;' src='" + node.getAttributes().getNamedItem("src").getNodeValue() + "'></iframe>");
+    return ok(terminal.render(node.getAttributes().getNamedItem("src").getNodeValue()));
   }
   
+  //TODO: Check system vm
+  public static Result startVM(String vmId) throws Exception {
+    return ok();
+  }
+  
+  @WithSystem
   public static Result updateVMProperties() throws Exception {
     DynamicForm form = Form.form().bindFromRequest();
     
@@ -182,8 +193,8 @@ public class VMController extends Controller {
       vmModel.put("password", password);
       VMHelper.updateVM(vmModel);
      
-      json.put("vmStatus", vmstatus.render(vmModel, true).toString());
-      json.put("vmProperties", vmproperties.render(vmModel, null, true).toString());
+      json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+      json.put("vmProperties", vmproperties.render(vmModel, true, null, true).toString());
       return ok(json);
     }
     
@@ -192,8 +203,8 @@ public class VMController extends Controller {
       if (ip.equals(vm.nic[0].ipAddress)) {
         VMModel existedVMModel = VMHelper.getVMByID(vm.id);
         if (existedVMModel != null) {
-          json.put("vmStatus", vmstatus.render(vmModel, true).toString());
-          json.put("vmProperties", vmproperties.render(vmModel, alert.render("The ip " + ip + " is in use."), true).toString());
+          json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+          json.put("vmProperties", vmproperties.render(vmModel, true, alert.render("The ip " + ip + " is in use."), true).toString());
           return ok(json);
         } else {
           VMHelper.removeVM(vmModel);
@@ -203,15 +214,15 @@ public class VMController extends Controller {
           vmModel.put("password", password);
           VMHelper.createVM(vmModel);
           
-          json.put("vmStatus", vmstatus.render(vmModel, true).toString());
-          json.put("vmProperties", vmproperties.render(vmModel, null, true).toString());
+          json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+          json.put("vmProperties", vmproperties.render(vmModel, true, null, true).toString());
           return ok(json);
         }
       }
     }
     
-    json.put("vmStatus", vmstatus.render(vmModel, true).toString());
-    json.put("vmProperties", vmproperties.render(vmModel, alert.render("The ip " + ip + " is not available."), true).toString());
+    json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+    json.put("vmProperties", vmproperties.render(vmModel, true, alert.render("The ip " + ip + " is not available."), true).toString());
     return ok(json);
   }
 }

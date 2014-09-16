@@ -1,4 +1,5 @@
 @(vm: models.vm.VMModel,
+  system: Boolean,
   error: Html = null,
   expanded: Boolean = false
 )
@@ -8,10 +9,12 @@
   <td style="padding: 0px; border: none;" colspan="5">
     <div class="vm-info" style="display: @if(expanded) { block; } else { none; }">
       <ul class="nav nav-tabs">
+        @if(system){
         <li class="active">
           <a data-toggle="tab" href="#vm-properties-@vm.getId()">Properties</a>
         </li>
-        <li><a class="tab-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a></li>
+        }
+        <li @if(!system){class="active"}><a class="tab-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a></li>
         <li><a data-toggle="tab" href="#vm-logs-@vm.getId()">Logs</a></li>
       </ul>
       
