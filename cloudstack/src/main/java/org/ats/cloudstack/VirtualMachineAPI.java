@@ -67,6 +67,33 @@ public class VirtualMachineAPI extends CloudStackAPI {
     JSONObject json = new JSONObject(response).getJSONObject("destroyvirtualmachineresponse");
     return json.getString("jobid");
   }
+  
+  public static String startVM(CloudStackClient client, String id) throws IOException {
+    StringBuilder sb = new StringBuilder("command=startVirtualMachine&response=json");
+    sb.append("&id=").append(id);
+    String response = request(client, sb.toString());
+    JSONObject json = new JSONObject(response).getJSONObject("startvirtualmachineresponse");
+    return json.getString("jobid");
+  }
+  
+  public static String stopVM(CloudStackClient client, String id, boolean forced) throws IOException {
+    StringBuilder sb = new StringBuilder("command=stopVirtualMachine&response=json");
+    sb.append("&id=").append(id).append("&forced=").append(forced);
+    String response = request(client, sb.toString());
+    JSONObject json = new JSONObject(response).getJSONObject("stopvirtualmachineresponse");
+    return json.getString("jobid");
+  }
+  
+  public static String restoreVM(CloudStackClient client, String id, String templateId) throws IOException {
+    StringBuilder sb = new StringBuilder("command=restoreVirtualMachine&response=json");
+    sb.append("&virtualmachineid=").append(id);
+    if (templateId != null && !templateId.isEmpty()) {
+      sb.append("&templateid=").append(templateId);
+    }
+    String response = request(client, sb.toString());
+    JSONObject json = new JSONObject(response).getJSONObject("restorevirtualmachineresponse");
+    return json.getString("jobid");
+  }
 
   @Deprecated
   public static List<VirtualMachine> listVirtualMachines(String id, String name, State state, String templateId, ApiConstants.VMDetails details) throws IOException {
