@@ -126,6 +126,22 @@ $(document).ready(function() {
     });
   });
   
+  /* start vm */
+  $("body").on("click", ".cloud-vm .vm-list .btn.stop,.btn.start,.btn.restore", function() {
+    var href = $(this).attr("href");
+    $.ajax({
+      url: href,
+      dataType: "html",
+      success: function(data) {
+        console.log("success");
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+    return false;
+  });
+  
   /* Validation
   =====================================================
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation({

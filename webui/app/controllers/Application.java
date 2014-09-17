@@ -198,7 +198,7 @@ public class Application extends Controller {
     Feature feature = new Feature("Virtual Machine");
     
     Operation o1 = new Operation("Manage System VM");
-    Operation o2 = new Operation("Manage User VM");
+    Operation o2 = new Operation("Manage Normal VM");
     Operation o3 = new Operation("Manage Offering");
     
     feature.addOperation(o1);

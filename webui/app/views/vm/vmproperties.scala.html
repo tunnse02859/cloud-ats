@@ -14,7 +14,9 @@
           <a data-toggle="tab" href="#vm-properties-@vm.getId()">Properties</a>
         </li>
         }
-        <li @if(!system){class="active"}><a class="tab-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a></li>
+        <li @if(!system){class="active"}>
+          <a class="tab-terminal" data-toggle="tab" ajax-url="@routes.VMController.viewConsoleURL(vm.getId())" href="#vm-terminal-@vm.getId()">Terminal</a>
+        </li>
         <li><a data-toggle="tab" href="#vm-logs-@vm.getId()">Logs</a></li>
       </ul>
       

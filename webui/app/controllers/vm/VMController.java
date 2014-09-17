@@ -28,8 +28,14 @@ import org.ats.common.html.HtmlParser;
 import org.ats.common.html.XPathUtil;
 import org.ats.common.http.HttpClientUtil;
 import org.ats.component.usersmgt.UserManagementException;
+import org.ats.component.usersmgt.feature.Feature;
+import org.ats.component.usersmgt.feature.FeatureDAO;
+import org.ats.component.usersmgt.feature.Operation;
+import org.ats.component.usersmgt.feature.OperationDAO;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
+import org.ats.component.usersmgt.role.Permission;
+import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.w3c.dom.Document;
@@ -153,26 +159,44 @@ public class VMController extends Controller {
     return redirect(controllers.vm.routes.VMController.index());
   }
   
-  public static Result viewConsoleURL(String vmId) throws Exception {
+  public static Result viewConsoleURL(String vmId) {
     String cloudstackApiUrl = VMHelper.getSystemProperty("cloudstack-api-url");
     String cloudstackUsername = VMHelper.getSystemProperty("cloudstack-username");
     String cloudstackPassword = VMHelper.getSystemProperty("cloudstack-password");
     
-    DefaultHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
-    String cloudstackConsoleUrl = cloudstackApiUrl.substring(0, cloudstackApiUrl.lastIndexOf('/') + 1) + "console?cmd=access&vm=" + vmId;
-    String response = HttpClientUtil.fetch(client, cloudstackConsoleUrl);
-    
-    HtmlParser parser = new HtmlParser();
-    Document doc = parser.parseWellForm(response);
-    NodeList nodeList = (NodeList)XPathUtil.read(doc, "/html/frameset/frame", XPathConstants.NODESET);
-    Node node = nodeList.item(0);
-    response().setContentType("html");
-    return ok(terminal.render(node.getAttributes().getNamedItem("src").getNodeValue()));
+    try {
+      DefaultHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
+      String cloudstackConsoleUrl = cloudstackApiUrl.substring(0, cloudstackApiUrl.lastIndexOf('/') + 1) + "console?cmd=access&vm=" + vmId;
+      String response = HttpClientUtil.fetch(client, cloudstackConsoleUrl);
+
+      HtmlParser parser = new HtmlParser();
+      Document doc = parser.parseWellForm(response);
+      NodeList nodeList = (NodeList)XPathUtil.read(doc, "/html/frameset/frame", XPathConstants.NODESET);
+      Node node = nodeList.item(0);
+      response().setContentType("html");
+      String src = node.getAttributes().getNamedItem("src").getNodeValue();
+      return ok(terminal.render(src));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ok();
+    }
   }
   
-  //TODO: Check system vm
-  public static Result startVM(String vmId) throws Exception {
-    return ok();
+  public static Result vmAction(String action, String vmId) throws Exception {
+
+    if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
+    
+    CloudStackClient client = VMHelper.getCloudStackClient();
+    
+    if ("start".equals(action)) {
+      VirtualMachineAPI.startVM(client, vmId);
+    } else if ("stop".equals(action)) {
+      VirtualMachineAPI.stopVM(client, vmId, false);
+    } else if ("restore".equals(action)) {
+      VirtualMachineAPI.restoreVM(client, vmId, null);
+    }
+    
+    return redirect(controllers.vm.routes.VMController.index());
   }
   
   @WithSystem
@@ -193,7 +217,7 @@ public class VMController extends Controller {
       vmModel.put("password", password);
       VMHelper.updateVM(vmModel);
      
-      json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+      json.put("vmStatus", vmstatus.render(vmModel, true).toString());
       json.put("vmProperties", vmproperties.render(vmModel, true, null, true).toString());
       return ok(json);
     }
@@ -203,7 +227,7 @@ public class VMController extends Controller {
       if (ip.equals(vm.nic[0].ipAddress)) {
         VMModel existedVMModel = VMHelper.getVMByID(vm.id);
         if (existedVMModel != null) {
-          json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+          json.put("vmStatus", vmstatus.render(vmModel, true).toString());
           json.put("vmProperties", vmproperties.render(vmModel, true, alert.render("The ip " + ip + " is in use."), true).toString());
           return ok(json);
         } else {
@@ -214,15 +238,42 @@ public class VMController extends Controller {
           vmModel.put("password", password);
           VMHelper.createVM(vmModel);
           
-          json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+          json.put("vmStatus", vmstatus.render(vmModel, true).toString());
           json.put("vmProperties", vmproperties.render(vmModel, true, null, true).toString());
           return ok(json);
         }
       }
     }
     
-    json.put("vmStatus", vmstatus.render(vmModel, true, true).toString());
+    json.put("vmStatus", vmstatus.render(vmModel, true).toString());
     json.put("vmProperties", vmproperties.render(vmModel, true, alert.render("The ip " + ip + " is not available."), true).toString());
     return ok(json);
+  }
+  
+  private static boolean hasRightPermission(String vmId) throws Exception {
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    VMModel vmModel = VMHelper.getVMByID(vmId);
+    Group group = vmModel.getGroup();
+    
+    if (!group.getUsers().contains(currentUser)) return false;
+    if (vmModel.getBoolean("system") && ! hasPermission("Manage System VM")) return false;
+    if (! vmModel.getBoolean("system") && ! hasPermission("Manage Normal VM")) return false;
+    return true;
+  }
+  
+  private static boolean hasPermission(String operation) throws Exception {
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    
+    Feature vmMgt = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
+    Operation opt = OperationDAO.INSANCE.find(new BasicDBObject("name", operation)).iterator().next();
+
+    for (Role role : currentUser.getRoles()) {
+      for (Permission per : role.getPermissions()) {
+        if (per.getFeature().equals(vmMgt) && per.getOpertion().equals(opt)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

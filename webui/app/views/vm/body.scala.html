@@ -16,13 +16,13 @@ $(document).ready(function() {
        if(this.status === "Running") {
          $(span).removeClass();
          $(span).addClass("badge badge-green");
-         $(tr).find(".btn.stop,.btn.reboot").removeClass("disabled");
+         $(tr).find(".btn.stop,.btn.restore").show();
        } else if(this.status === "Stopped") {
          $(span).removeClass();
          $(span).addClass("badge badge-red");
-         $(tr).find(".btn.start").removeClass("disabled");
+         $(tr).find(".btn.start,.btn.restore").show();
        } else {
-         $(tr).find(".btn.stop,.btn.start,.btn.reboot").addClass("disabled");
+         $(tr).find(".btn.stop,.btn.start,.btn.restore").hide();
          $(span).removeClass();
          $(span).addClass("badge");
        }
@@ -89,10 +89,9 @@ $(document).ready(function() {
               <th>Public IP</th>
               <th>Status</th>
               <th>Action</th>
-              @if(system){<th></th>}
             </tr>
             @for(vm <- vms) {
-            @views.html.vm.vmstatus(vm, system)
+            @views.html.vm.vmstatus(vm)
             @views.html.vm.vmproperties(vm, system)
             }
           </table>
