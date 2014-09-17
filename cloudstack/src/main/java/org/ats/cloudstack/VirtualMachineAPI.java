@@ -91,7 +91,7 @@ public class VirtualMachineAPI extends CloudStackAPI {
       sb.append("&templateid=").append(templateId);
     }
     String response = request(client, sb.toString());
-    JSONObject json = new JSONObject(response).getJSONObject("restorevirtualmachineresponse");
+    JSONObject json = new JSONObject(response).getJSONObject("restorevmresponse");
     return json.getString("jobid");
   }
 
