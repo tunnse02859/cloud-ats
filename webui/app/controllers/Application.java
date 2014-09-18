@@ -80,9 +80,22 @@ public class Application extends Controller {
       administration.addUser(admin);
       admin.addRole(administration);
       
+      Feature vmFeature = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
+      Operation sysMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage System VM")).iterator().next();
+      Operation normalMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage Normal VM")).iterator().next();
+      
+      Role vmRole = new Role("VM Management", company.getId());
+      
+      vmRole.addPermission(new Permission(vmFeature.getId(), sysMgt.getId()));
+      vmRole.addPermission(new Permission(vmFeature.getId(), normalMgt.getId()));
+
+      vmRole.addUser(admin);
+      admin.addRole(vmRole);
+      company.addRole(vmRole);
+      
       GroupDAO.INSTANCE.create(company);
       UserDAO.INSTANCE.create(admin);
-      RoleDAO.INSTANCE.create(administration);
+      RoleDAO.INSTANCE.create(administration, vmRole);
       
       session().clear();
       session().put("email", admin.getEmail());
@@ -199,16 +212,13 @@ public class Application extends Controller {
     
     Operation o1 = new Operation("Manage System VM");
     Operation o2 = new Operation("Manage Normal VM");
-    Operation o3 = new Operation("Manage Offering");
     
     feature.addOperation(o1);
     feature.addOperation(o2);
-    feature.addOperation(o3);
     
     Role vmRole = new Role("VM Management", systemGroup.getId());
     vmRole.addPermission(new Permission(feature.getId(), o1.getId()));
     vmRole.addPermission(new Permission(feature.getId(), o2.getId()));
-    vmRole.addPermission(new Permission(feature.getId(), o3.getId()));
     vmRole.addUser(rootUser);
     
     rootUser.addRole(vmRole);
@@ -217,7 +227,7 @@ public class Application extends Controller {
     systemGroup.addRole(vmRole);
     
     FeatureDAO.INSTANCE.create(feature);
-    OperationDAO.INSANCE.create(o1, o2, o3);
+    OperationDAO.INSANCE.create(o1, o2);
     RoleDAO.INSTANCE.create(vmRole);
     
     UserDAO.INSTANCE.update(rootUser);

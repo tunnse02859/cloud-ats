@@ -29,6 +29,8 @@ public class AuthorizationInterceptor extends Action<Authorization> {
   @Override
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
     User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+    if (currentUser == null) return Promise.<SimpleResult>pure(redirect("/"));
+    
     if (!currentUser.getBoolean("joined")) {
       return Promise.<SimpleResult>pure(forbidden(
           views.html.forbidden.render()

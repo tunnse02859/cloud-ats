@@ -6,6 +6,7 @@ package controllers.vm;
 import static akka.pattern.Patterns.ask;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,14 +15,17 @@ import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathConstants;
 
+import models.vm.OfferingModel;
 import models.vm.VMModel;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.ats.cloudstack.CloudStackAPI;
 import org.ats.cloudstack.CloudStackClient;
+import org.ats.cloudstack.ServiceOfferingAPI;
 import org.ats.cloudstack.TemplateAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
+import org.ats.cloudstack.model.ServiceOffering;
 import org.ats.cloudstack.model.Template;
 import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.html.HtmlParser;
@@ -51,6 +55,7 @@ import controllers.organization.Organization;
 import controllers.vm.VMStatusActor.VMChannel;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
+import interceptor.VMWizardIterceptor;
 import interceptor.WithSystem;
 import interceptor.WizardInterceptor;
 import play.api.templates.Html;
@@ -63,6 +68,7 @@ import play.mvc.WebSocket;
 import play.mvc.With;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
+import utils.OfferingHelper;
 import utils.VMHelper;
 import views.html.vm.*;
 
@@ -75,11 +81,12 @@ import views.html.vm.*;
 @Authorization(feature = "Virtual Machine", operation = "")
 public class VMController extends Controller {
   
+  @With(VMWizardIterceptor.class)
   public static Result index() throws UserManagementException {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     
     if (VMHelper.vmCount() == 0) {
-      return currentUser.getBoolean("system") ? ok(index.render(wizard.render(), "Virtual Machine")) : forbidden(views.html.forbidden.render());
+      return currentUser.getBoolean("system") ? ok(index.render(wizard.render())) : forbidden(views.html.forbidden.render());
     }
     
     boolean system = Organization.isSystem(currentUser);
@@ -92,10 +99,11 @@ public class VMController extends Controller {
       group = GroupDAO.INSTANCE.find(query).iterator().next();
     }
     
-    Html html = body.render(system, group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)));
-    return ok(index.render(html, "Virtual Machine"));
+    Html html = vmbody.render(system, group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)));
+    return ok(index.render(html));
   }
   
+  @With(VMWizardIterceptor.class)
   public static WebSocket<JsonNode> vmStatus(final String groupId, final String sessionId) {
     return new WebSocket<JsonNode>() {
       @Override
@@ -108,10 +116,41 @@ public class VMController extends Controller {
       }
     };
   }
+  
+  @With(VMWizardIterceptor.class)
+  @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
+  public static Result offeringView() throws Exception {
+    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    boolean system = Organization.isSystem(currentUser);
+    
+    Group group = null;
+    if (system) {
+      group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    } else {
+      BasicDBObject query = new BasicDBObject("level", 1);
+      query.append("user_ids", Pattern.compile(currentUser.getId()));
+      group = GroupDAO.INSTANCE.find(query).iterator().next();
+    }
+    List<OfferingModel> list = system ? OfferingHelper.getOfferings() : OfferingHelper.getEnableOfferings();
+    Html html = offeringbody.render(system, group, list);
+    return ok(index.render(html));
+  }
+  
+  @WithSystem
+  public static Result getOfferings() throws Exception {
+    String cloudstackApiUrl = request().getQueryString("cloudstack-api-url");
+    String cloudstackApiKey = request().getQueryString("cloudstack-api-key");
+    String cloudstackApiSecret = request().getQueryString("cloudstack-api-secret");
+    CloudStackClient client = new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
+    
+    List<ServiceOffering> list = ServiceOfferingAPI.listServiceOfferings(client, null, null);
+    return ok(offering.render(list));
+  }
 
   @WithSystem
   public static Result doWizard() throws UserManagementException, IOException {
     DynamicForm form = Form.form().bindFromRequest();
+    
     Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
     
     String cloudstackApiUrl = form.get("cloudstack-api-url");
@@ -130,6 +169,7 @@ public class VMController extends Controller {
     VirtualMachine vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel jenkinsVM = new VMModel(vm.id, "system-jenkins", systemGroup.getId(), vm.templateName, vm.templateId, jenkinsIP, jenkinsUsername, jenkinsPassword);
     jenkinsVM.put("system", true);
+    jenkinsVM.put("offering_id", vm.serviceOfferingId);
     
     String chefServerIp = form.get("chef-server-ip");
     String chefWorkstationIp = form.get("chef-workstation-ip");
@@ -140,11 +180,13 @@ public class VMController extends Controller {
     vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel chefServerVM = new VMModel(vm.id, "chef-server", systemGroup.getId(), vm.templateName, vm.templateId, chefServerIp, chefUsername, chefPassword);
     chefServerVM.put("system", true);
+    chefServerVM.put("offering_id", vm.serviceOfferingId);
     
     template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-workstation",  null).get(0);
     vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel chefWorkstationVM = new VMModel(vm.id, "chef-workstation", systemGroup.getId(), vm.templateName, vm.templateId, chefWorkstationIp, chefUsername, chefPassword);
     chefWorkstationVM.put("system", true);
+    chefWorkstationVM.put("offering_id", vm.serviceOfferingId);
     
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("cloudstack-api-url", cloudstackApiUrl);
@@ -156,9 +198,21 @@ public class VMController extends Controller {
     VMHelper.setSystemProperties(properties);
     VMHelper.createVM(jenkinsVM, chefServerVM, chefWorkstationVM);
 
+    createOffering(form, client);
+    
     return redirect(controllers.vm.routes.VMController.index());
   }
   
+  private static void createOffering(DynamicForm form, CloudStackClient client) throws IOException {
+    List<ServiceOffering> list = ServiceOfferingAPI.listServiceOfferings(client, null, null);
+    for (ServiceOffering offering : list) {
+      OfferingModel model = new OfferingModel(offering.id, offering.name, offering.cpuNumber, offering.cpuSpeed, offering.memory);
+      model.put("disabled", form.get("offering-" + offering.id) != null ? false : true);
+      OfferingHelper.createOffering(model);
+    }
+  }
+  
+  @With(VMWizardIterceptor.class)
   public static Result viewConsoleURL(String vmId) {
     String cloudstackApiUrl = VMHelper.getSystemProperty("cloudstack-api-url");
     String cloudstackUsername = VMHelper.getSystemProperty("cloudstack-username");
@@ -182,6 +236,14 @@ public class VMController extends Controller {
     }
   }
   
+  /**
+   * Start, Stop or Restore VM
+   * @param action
+   * @param vmId
+   * @return
+   * @throws Exception
+   */
+  @With(VMWizardIterceptor.class)
   public static Result vmAction(String action, String vmId) throws Exception {
 
     if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
@@ -196,10 +258,11 @@ public class VMController extends Controller {
       VirtualMachineAPI.restoreVM(client, vmId, null);
     }
     
-    return redirect(controllers.vm.routes.VMController.index());
+    return status(200);
   }
   
   @WithSystem
+  @With(VMWizardIterceptor.class)
   public static Result updateVMProperties() throws Exception {
     DynamicForm form = Form.form().bindFromRequest();
     
@@ -261,11 +324,15 @@ public class VMController extends Controller {
     return true;
   }
   
-  private static boolean hasPermission(String operation) throws Exception {
+  public static boolean hasPermission(String operation) throws Exception {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     
     Feature vmMgt = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
-    Operation opt = OperationDAO.INSANCE.find(new BasicDBObject("name", operation)).iterator().next();
+    
+    Collection<Operation> opts = OperationDAO.INSANCE.find(new BasicDBObject("name", operation));
+    if (opts.isEmpty()) return false;
+    
+    Operation opt = opts.iterator().next();
 
     for (Role role : currentUser.getRoles()) {
       for (Permission per : role.getPermissions()) {

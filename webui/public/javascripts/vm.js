@@ -1,4 +1,7 @@
 $(document).ready(function() {
+  
+  $("[rel=tooltip]").tooltip();
+  
   /* Wizard
   ================================================== */
   $('.cloud.wizard').on('change', function (e, data) {
@@ -9,7 +12,21 @@ $(document).ready(function() {
       $('.cloud.btn.next').show();
       $('.cloud.btn.finish').hide();
     }
-    if (data.step === 2 && data.direction === 'next') {
+    if (data.step === 3 && data.direction === 'next') {
+      var cloudstackApiUrl = $("input[name='cloudstack-api-url']").val();
+      var cloudstackApiKey = $("input[name='cloudstack-api-key']").val();
+      var cloudstackApiSecret = $("input[name='cloudstack-api-secret']").val();
+      var data = "cloudstack-api-url="+cloudstackApiUrl+"&cloudstack-api-key="+cloudstackApiKey+"&cloudstack-api-secret="+cloudstackApiSecret;
+      var container = $(".step-content #step4");
+      $.ajax({
+        url: "/portal/vm/so",
+        dataType: "html",
+        data: data,
+        async: false,
+        success: function(data) {
+          $(container).html(data);
+        }
+      });
       $('.cloud.btn.next').hide();
       $('.cloud.btn.finish').show();
     }
@@ -20,7 +37,7 @@ $(document).ready(function() {
     if (item.step === 1) {
       $('.cloud.btn.prev').attr("disabled", "disabled");
     }
-    if (item.step !== 3) {
+    if (item.step !== 4) {
       $('.cloud.btn.next').show();
       $('.cloud.btn.finish').hide();
     }
@@ -39,7 +56,7 @@ $(document).ready(function() {
   });
   
   $('.cloud.btn.next').on('click', function () {
-  $('.cloud.wizard').wizard('next', 'foo');
+    $('.cloud.wizard').wizard('next', 'foo');
   });
 
   /* Cloud VM list

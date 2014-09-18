@@ -15,6 +15,9 @@
     <span class="label label-blue">@vm.get("name")</span>
   </td>
   <td><span class="label label-green">@vm.get("public_ip")</span></td>
+  <td><span class="label label-cyan" rel="tooltip" 
+    title="CPU(@vm.getOffering().getNumberOfCpu()) @vm.getOffering().getCpuSpeed() MHz @vm.getOffering().getMemory() MB">
+    @vm.getOffering().getName()</span></td>
   <td class="status"><span class="badge"></span></td>
   <td>
     <a style="display: none;" class="start btn btn-mini btn-blue" href="@routes.VMController.vmAction("start", vm.getId())">Start</a>

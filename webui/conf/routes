@@ -78,6 +78,8 @@ GET     /portal/vm/s/:g/:s         controllers.vm.VMController.vmStatus(g, s)
 GET     /portal/vm/c/:i            controllers.vm.VMController.viewConsoleURL(i)
 POST    /portal/vm/u               controllers.vm.VMController.updateVMProperties()
 GET     /portal/vm/a/:a/:i         controllers.vm.VMController.vmAction(a, i)
+GET     /portal/vm/so              controllers.vm.VMController.getOfferings()
+GET     /portal/vm/o               controllers.vm.VMController.offeringView()        
 
 ############################# Mock #######################################
 

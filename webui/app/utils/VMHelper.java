@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import models.vm.OfferingModel;
 import models.vm.VMModel;
 
 import org.ats.cloudstack.CloudStackClient;
@@ -29,21 +30,8 @@ import com.mongodb.WriteResult;
  *
  * Sep 10, 2014
  */
-public class VMHelper {
+public class VMHelper extends AbstractHelper {
 
-  /** .*/
-  private static String databaseName = "cloud-ats-vm";
-  
-  /** .*/
-  private static String vmColumn = "vm";
-  
-  /** .*/
-  private static String propertiesColumn = "properties";
-  
-  public static DB getDatabase() {
-    return DataFactory.getDatabase(databaseName);
-  }
-  
   public static long vmCount() {
     DB vmDB = DataFactory.getDatabase(databaseName);
     return vmDB.getCollection(vmColumn).count();

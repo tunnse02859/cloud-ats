@@ -7,6 +7,8 @@ import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 
+import utils.OfferingHelper;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -53,6 +55,10 @@ public class VMModel extends BasicDBObject {
     }
   }
   
+  public OfferingModel getOffering() {
+    return OfferingHelper.getOffering(this.getString("offering_id"));
+  }
+  
   public String getTemplate() {
     return this.getString("template");
   }
@@ -82,6 +88,8 @@ public class VMModel extends BasicDBObject {
     this.put("password", source.get("password"));
     this.put("template", source.get("template"));
     this.put("template_id", source.get("template_id"));
+    this.put("system", source.get("system"));
+    this.put("offering_id", source.get("offering_id"));
     return this;
   }
 }

@@ -1,0 +1,113 @@
+@(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, vms: List[models.vm.VMModel])
+@import controllers.vm._
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+  var vmStatus = new WS("@routes.VMController.vmStatus(rootGroup.getId(), session().get("uuid")).webSocketURL(request)");
+
+   vmStatus.onmessage = function(event) {
+   var data = JSON.parse(event.data);
+   $(data.vms).each(function() {
+     var tr = $("tr.vm-status-" + this.id);
+     if ($(tr).length > 0) {
+       var span = $(tr).find("td.status span.badge").html(this.status);
+       if(this.status === "Running") {
+         $(span).removeClass();
+         $(span).addClass("badge badge-green");
+         $(tr).find(".btn.stop,.btn.restore").show();
+       } else if(this.status === "Stopped") {
+         $(span).removeClass();
+         $(span).addClass("badge badge-red");
+         $(tr).find(".btn.start,.btn.restore").show();
+       } else {
+         $(tr).find(".btn.stop,.btn.start,.btn.restore").hide();
+         $(span).removeClass();
+         $(span).addClass("badge");
+       }
+     }
+   });
+  }
+
+  window.onbeforeunload = function() {
+    vmStatus.onclose = function () {
+    };
+    vmStatus.close()
+  };
+  
+});
+</script>
+
+<section class="cloud-vm">
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a data-toggle="tab" href="#list">@rootGroup.get("name")</a>
+    </li>
+    @if(system){
+    <li class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        Select Group
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+        <li>
+        <a class="group" href="javascript:void(0);">Neopost</a>
+        </li>
+      </ul>
+    </li>
+    }
+  </ul>
+  
+  <div class="tab-content">
+    <div id="home" class="tab-pane fade active in">
+      <section class="row-fluid">
+
+      <div class="span3">
+      <ul class="nav nav-tabs nav-stacked">
+        @if(VMController.hasPermission("Manage System VM")) {
+        <li class="active">
+          <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
+        </li>
+        }
+        @if(!system && VMController.hasPermission("Manage Normal VM")) {
+        <li>
+          <a href="#"><i class="icon-cog"></i> Normal VMs</a>
+        </li>          
+        }
+        @if(VMController.hasPermission("Manage System VM")) {
+        <li>
+          <a href="@routes.VMController.offeringView()"><i class="icon-random"></i> Offering</a>
+        </li>
+        }
+        @if(system) {
+        <li>
+          <a href="#"><i class="icon-list"></i> Properties</a>
+        </li>
+        }
+      </ul>
+      </div>
+      
+      <div class="span9">
+        
+        <table class="table vm-list">
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Public IP</th>
+            <th>Offering</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          @for(vm <- vms) {
+          @views.html.vm.vmstatus(vm)
+          @views.html.vm.vmproperties(vm, system)
+          }
+        </table>
+      </div>
+      
+      </section>
+      
+    </div>
+  </div>
+</section>
