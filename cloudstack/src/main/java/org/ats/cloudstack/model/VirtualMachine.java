@@ -35,6 +35,14 @@ public class VirtualMachine extends AbstractModel {
   @JsonProperty("templatename")
   public String templateName;
   
+  /**.*/
+  @JsonProperty("serviceofferingid")
+  public String serviceOfferingId;
+  
+  /**.*/
+  @JsonProperty("serviceofferingname")
+  public String serviceOfferingName;
+  
   /** .*/
   public Nic[] nic;
   

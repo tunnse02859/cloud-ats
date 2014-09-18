@@ -19,7 +19,7 @@ public class ServiceOffering extends AbstractModel {
   public String name;
   
   /** .*/
-  @JsonProperty("displayText")
+  @JsonProperty("displaytext")
   public String displayText;
   
   /** .*/
