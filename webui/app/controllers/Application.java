@@ -201,7 +201,6 @@ public class Application extends Controller {
     GroupDAO.INSTANCE.create(system);
     RoleDAO.INSTANCE.create(administration);
     
-    //initMockData(root, system);
     createVMFeature(root, system);
     
     //login
@@ -238,96 +237,5 @@ public class Application extends Controller {
     
     UserDAO.INSTANCE.update(rootUser);
     GroupDAO.INSTANCE.update(systemGroup);
-  }
-  
-  private static void initMockData(User rootUser, Group rootGroup) throws UserManagementException {
-    Feature foo = new Feature("Foo Feature");
-    foo.put("desc", "This is dummy feature");
-    
-    Operation of1 = new Operation("Foo Action 1");
-    of1.put("desc", "This is dummy operation");
-    Operation of2 = new Operation("Foo Action 2");
-    of2.put("desc", "This is dummy operation");
-    Operation of3 = new Operation("Foo Action 3");
-    of3.put("desc", "This is dummy operation");
-    
-    foo.addOperation(of1);
-    foo.addOperation(of2);
-    foo.addOperation(of3);
-    
-    Feature bar = new Feature("Bar Feature");
-    bar.put("desc", "This is dummy feature");
-    
-    Operation ob1 = new Operation("Bar Action 1");
-    ob1.put("desc", "This is dummy operation");
-    Operation ob2 = new Operation("Bar Action 2");
-    ob2.put("desc", "This is dummy operation");
-    Operation ob3 = new Operation("Bar Action 3");
-    ob3.put("desc", "This is dummy operation");
-    
-    bar.addOperation(ob1);
-    bar.addOperation(ob2);
-    bar.addOperation(ob3);
-    
-    Feature juu  = new Feature("Juu Feature");
-    juu.put("desc", "This is dummy feature");
-    
-    Operation oj1 = new Operation("Juu Action 1");
-    oj1.put("desc", "This is dummy operation");
-    Operation oj2 = new Operation("Juu Action 2");
-    oj2.put("desc", "This is dummy operation");
-    Operation oj3 = new Operation("Juu Action 3");
-    oj3.put("desc", "This is dummy operation");
-    
-    juu.addOperation(oj1);
-    juu.addOperation(oj2);
-    juu.addOperation(oj3);
-    
-    FeatureDAO.INSTANCE.create(foo, bar, juu);
-    OperationDAO.INSANCE.create(of1, of2, of3, ob1, ob2, ob3, oj1, oj2, oj3);
-    
-    rootGroup.addFeature(foo);
-    rootGroup.addFeature(bar);
-    rootGroup.addFeature(juu);
-    
-    Role fooRole = new Role("Foo Role", rootGroup.getId());
-    fooRole.put("desc", "This is dummy role");
-    fooRole.addPermission(new Permission(foo.getId(), of1.getId()));
-    fooRole.addPermission(new Permission(foo.getId(), of2.getId()));
-    fooRole.addPermission(new Permission(foo.getId(), of3.getId()));
-    
-    Role barRole = new Role("Bar Role", rootGroup.getId());
-    barRole.put("desc", "This is dummy role");
-    barRole.addPermission(new Permission(bar.getId(), ob1.getId()));
-    barRole.addPermission(new Permission(bar.getId(), ob2.getId()));
-    barRole.addPermission(new Permission(bar.getId(), ob3.getId()));
-    
-    Role juuRole = new Role("Juu Role", rootGroup.getId());
-    juuRole.put("desc", "This is dummy role");
-    juuRole.addPermission(new Permission(juu.getId(), oj1.getId()));
-    juuRole.addPermission(new Permission(juu.getId(), oj2.getId()));
-    juuRole.addPermission(new Permission(juu.getId(), oj3.getId()));
-    
-    Role mixRole = new Role("Mix Role", rootGroup.getId());
-    mixRole.put("desc", "This is dummy role");
-    mixRole.addPermission(new Permission(foo.getId(), of1.getId()));
-    mixRole.addPermission(new Permission(bar.getId(), ob2.getId()));
-    mixRole.addPermission(new Permission(juu.getId(), oj3.getId()));
-    
-    
-    rootGroup.addRole(fooRole);
-    rootGroup.addRole(barRole);
-    rootGroup.addRole(juuRole);
-    rootGroup.addRole(mixRole);
-
-    rootUser.addRole(fooRole);
-    fooRole.addUser(rootUser);
-    
-    rootUser.addRole(barRole);
-    barRole.addUser(rootUser);
-    
-    RoleDAO.INSTANCE.create(fooRole, barRole, juuRole, mixRole);
-    GroupDAO.INSTANCE.update(rootGroup);
-    UserDAO.INSTANCE.update(rootUser);
   }
 }
