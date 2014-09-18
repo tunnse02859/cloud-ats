@@ -64,6 +64,10 @@ public class EventExecutor {
     }
   }
   
+  public void addListener(EventListener listener) {
+    this.listeners.add(listener);
+  }
+  
   public LinkedBlockingQueue<Event> getQueue() {
     return eventQueue;
   }
