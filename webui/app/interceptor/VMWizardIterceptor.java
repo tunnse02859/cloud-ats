@@ -24,6 +24,7 @@ public class VMWizardIterceptor extends Simple {
   @Override
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
     User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+    if (currentUser == null) return Promise.<SimpleResult>pure(redirect("/"));
     
     if (VMHelper.vmCount() == 0) {
       return currentUser.getBoolean("system") ? Promise.<SimpleResult>pure(ok(index.render(wizard.render()))) : Promise.<SimpleResult>pure(forbidden(views.html.forbidden.render()));

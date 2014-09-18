@@ -204,7 +204,13 @@ public class Application extends Controller {
     //initMockData(root, system);
     createVMFeature(root, system);
     
-    return redirect(controllers.routes.Application.index());
+    //login
+    session().clear();
+    session().put("email", root.getEmail());
+    session().put("user_id", root.getId());
+    session().put("group_id", system.getId());
+    
+    return redirect(controllers.vm.routes.VMController.index());
   }
   
   private static void createVMFeature(User rootUser, Group systemGroup) throws UserManagementException {
