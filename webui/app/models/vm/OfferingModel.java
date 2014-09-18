@@ -38,16 +38,16 @@ public class OfferingModel extends BasicDBObject {
     return this.getString("name");
   }
   
-  public String getNumberOfCpu() {
-    return this.getString("cpu_number");
+  public int getNumberOfCpu() {
+    return this.getInt("cpu_number");
   }
   
-  public String getCpuSpeed() {
-    return this.getString("cpu_speed");
+  public int getCpuSpeed() {
+    return this.getInt("cpu_speed");
   }
   
-  public String getMemory() {
-    return this.getString("memory");
+  public int getMemory() {
+    return this.getInt("memory");
   }
 
   public OfferingModel from(DBObject source) {

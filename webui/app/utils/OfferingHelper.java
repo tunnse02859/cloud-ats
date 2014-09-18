@@ -22,7 +22,14 @@ import com.mongodb.WriteResult;
  * Sep 18, 2014
  */
 public class OfferingHelper extends AbstractHelper {
-
+  
+  public static void addOfferingGroup(String groupId, OfferingModel offering) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(groupOfferingColumn);
+    offering.put("group_id", groupId);
+    col.insert(offering, WriteConcern.ACKNOWLEDGED);
+  }
+  
   public static boolean createOffering(OfferingModel... offerings) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(offeringColumn);

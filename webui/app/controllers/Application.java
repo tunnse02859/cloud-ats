@@ -6,8 +6,22 @@ package controllers;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
+import models.vm.OfferingModel;
+import models.vm.VMModel;
+
+import org.apache.cloudstack.api.ApiConstants.VMDetails;
+import org.apache.cloudstack.jobs.JobInfo.Status;
+import org.ats.cloudstack.AsyncJobAPI;
+import org.ats.cloudstack.CloudStackClient;
+import org.ats.cloudstack.VirtualMachineAPI;
+import org.ats.cloudstack.model.Job;
+import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
@@ -23,11 +37,14 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
+import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import utils.OfferingHelper;
+import utils.VMHelper;
 import views.html.*;
 
 /**
@@ -46,7 +63,7 @@ public class Application extends Controller {
     return ok(signup.render(group));
   }
   
-  public static Result doSignup() throws UserManagementException {
+  public static Result doSignup() throws UserManagementException, IOException {
     DynamicForm form = Form.form().bindFromRequest();
     boolean group = Boolean.parseBoolean(form.get("group"));
     
@@ -81,6 +98,8 @@ public class Application extends Controller {
       admin.addRole(administration);
       
       Feature vmFeature = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
+      company.addFeature(vmFeature);
+      
       Operation sysMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage System VM")).iterator().next();
       Operation normalMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage Normal VM")).iterator().next();
       
@@ -97,6 +116,9 @@ public class Application extends Controller {
       UserDAO.INSTANCE.create(admin);
       RoleDAO.INSTANCE.create(administration, vmRole);
       
+      //Create system vm 
+      createCompanyVM(company);
+      
       session().clear();
       session().put("email", admin.getEmail());
       session().put("user_id", admin.getId());
@@ -112,6 +134,40 @@ public class Application extends Controller {
       session().put("user_id", user.getId());
     }
     return redirect(controllers.routes.Application.dashboard());
+  }
+  
+  private static void createCompanyVM(Group company) throws IOException {
+    CloudStackClient client = VMHelper.getCloudStackClient();
+    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, company.getString("name") + "-jenkins", "gitlab-jenkins", "Large Instance", null);
+    String vmId = response[0];
+    String jobId = response[1];
+    Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+    while (!job.getStatus().done()) {
+      job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+    }
+    
+    if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
+      VirtualMachine vm = VirtualMachineAPI.findVMById(client, vmId, null);
+      VMModel vmModel = new VMModel(vm.id, vm.name, company.getId(), vm.templateName, vm.templateId, vm.nic[0].ipAddress, "ubuntu", "ubuntu");
+      vmModel.put("system", true);
+      vmModel.put("offering_id", vm.serviceOfferingId);
+      VMHelper.createVM(vmModel);
+      
+      List<OfferingModel> list = OfferingHelper.getEnableOfferings();
+      Collections.sort(list, new Comparator<OfferingModel>() {
+        @Override
+        public int compare(OfferingModel o1, OfferingModel o2) {
+          return o1.getMemory() - o2.getMemory();
+        }
+      });
+      
+      OfferingModel defaultOffering = list.get(0);
+      OfferingHelper.addOfferingGroup(company.getId(), defaultOffering);
+      
+    } else {
+      Logger.error("Could not create system vm for company " + company.getString("name"));
+      createCompanyVM(company);
+    }
   }
   
   public static Result signin() {
