@@ -173,13 +173,12 @@ public class Application extends Controller {
         //sudo
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         String command = "sed 's/127.0.1.1/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts";
-        channel.setCommand("sed 's/127.0.1.1/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts");
+        channel.setCommand(command);
         channel.connect();
         LogBuilder.log(sb, "Execute command: " + command);
         channel.disconnect();
         
-        
-        
+        //replace hosts
         channel = (ChannelExec) session.openChannel("exec");
         command = "sudo -S -p '' cp /tmp/hosts /etc/hosts";
         channel.setCommand(command);
@@ -192,14 +191,30 @@ public class Application extends Controller {
         LinkedList<String> queue = new LinkedList<String>();
         int exitCode = SSHClient.printOut(queue, channel);
         LogBuilder.log(sb, "Execute command: " + command);
-        session.disconnect();
         
         for (String s : queue) {
           LogBuilder.log(sb, s);
         }
-        
         LogBuilder.log(sb, "exit code: " + exitCode);
+        channel.disconnect();
         
+        //start jenkins
+        channel = (ChannelExec) session.openChannel("exec");
+        command = "/home/ubuntu/java/jdk1.7.0_51/bin/java -jar jenkins.war > log.txt &";
+        channel.setCommand(command);
+        channel.connect();
+        LogBuilder.log(sb, "Execute command: " + command);
+        
+        exitCode = SSHClient.printOut(queue, channel);
+        
+        for (String s : queue) {
+          LogBuilder.log(sb, s);
+        }
+        LogBuilder.log(sb, "exit code: " + exitCode);
+        channel.disconnect();
+        
+        //disconnect session
+        session.disconnect();
       } else {
         LogBuilder.log(sb, "Cloud not establish connection in 120s");
       }
