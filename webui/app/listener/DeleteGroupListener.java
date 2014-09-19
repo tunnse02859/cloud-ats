@@ -36,8 +36,7 @@ public class DeleteGroupListener implements EventListener {
           VirtualMachineAPI.destroyVM(VMHelper.getCloudStackClient(), vm.getId(), true);
         }
         
-        OfferingModel offering = OfferingHelper.getDefaultOfferingOfGroup(group.getId());
-        OfferingHelper.removeOffering(offering);
+        OfferingHelper.removeDefaultOfferingOfGroup(group.getId());
       }
     } catch (Exception e) {
       e.printStackTrace();

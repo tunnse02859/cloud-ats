@@ -73,6 +73,12 @@ public class OfferingHelper extends AbstractHelper {
     return source == null ? new OfferingModel() : new OfferingModel().from(source);
   }
   
+  public static void removeDefaultOfferingOfGroup(String groupId) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(groupOfferingColumn);
+    col.remove(new BasicDBObject("group_id", groupId));
+  }
+  
   public static List<OfferingModel> getOfferings(BasicDBObject filter) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(offeringColumn);
