@@ -38,10 +38,6 @@ public class GroupEventListener implements EventListener {
     }
   }
   
-  private void processLeaveGroup(Event event) throws UserManagementException {
-    Group group = new Group(event.getSource());
-  }
-
   private void processDeleteGroupInUser(Event event) throws UserManagementException {
     Group group = new Group(event.getSource());
     Pattern p = Pattern.compile(group.getId());

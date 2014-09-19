@@ -227,7 +227,7 @@ public class Application extends Controller {
       Collections.sort(list, new Comparator<OfferingModel>() {
         @Override
         public int compare(OfferingModel o1, OfferingModel o2) {
-          return o1.getMemory() - o2.getMemory();
+          return o2.getMemory() - o1.getMemory();
         }
       });
       

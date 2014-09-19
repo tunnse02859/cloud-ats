@@ -1,4 +1,6 @@
 
+import listener.DeleteGroupListener;
+
 import org.ats.component.usersmgt.EventExecutor;
 
 import play.Application;
@@ -18,6 +20,7 @@ public class Global extends GlobalSettings {
 
   @Override
   public void onStart(Application app) {
+    EventExecutor.INSTANCE.addListener(new DeleteGroupListener());
     EventExecutor.INSTANCE.start();
     Logger.info("Application has started...");
   }

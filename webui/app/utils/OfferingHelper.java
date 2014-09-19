@@ -59,7 +59,7 @@ public class OfferingHelper extends AbstractHelper {
   }
   
   public static List<OfferingModel> getEnableOfferings() {
-    return getOfferings(new BasicDBObject("disabled", true));
+    return getOfferings(new BasicDBObject("disabled", false));
   }
   
   public static List<OfferingModel> getOfferings() {
