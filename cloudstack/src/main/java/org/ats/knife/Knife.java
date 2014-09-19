@@ -33,19 +33,18 @@ public class Knife {
   /** .*/
   String password;
 
+  @Deprecated
   private Knife() throws IOException {
     InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("knife.properties");
     Properties properties = new Properties();
     properties.load(is);
     this.workstation = properties.getProperty("chef-workstation");
-    this.server = properties.getProperty("chef-server");
     this.username = properties.getProperty("username");
     this.password = properties.getProperty("password");
   }
   
-  public Knife(String workstation, String server, String username, String password) {
+  public Knife(String workstation, String username, String password) {
     this.workstation = workstation;
-    this.server = server;
     this.username = username;
     this.password = password;
   }
@@ -91,6 +90,7 @@ public class Knife {
     return exitCode == 0;
   }
 
+  @Deprecated
   public static Knife getInstance() throws IOException {
     return  new Knife();
   }
