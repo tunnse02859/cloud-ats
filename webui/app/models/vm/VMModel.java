@@ -89,6 +89,7 @@ public class VMModel extends BasicDBObject {
     this.put("template", source.get("template"));
     this.put("template_id", source.get("template_id"));
     this.put("system", source.get("system"));
+    this.put("jenkins", source.get("jenkins"));
     this.put("offering_id", source.get("offering_id"));
     this.put("log", source.get("log"));
     return this;
