@@ -1,5 +1,8 @@
-@(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, vms: List[models.vm.VMModel])
+@(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, vms: List[models.vm.VMModel],
+  normal: Boolean = false
+)
 @import controllers.vm._
+@import utils._
 
 <script type="text/javascript">
 
@@ -16,13 +19,13 @@ $(document).ready(function() {
        if(this.status === "Running") {
          $(span).removeClass();
          $(span).addClass("badge badge-green");
-         $(tr).find(".btn.stop,.btn.restore").show();
+         $(tr).find(".btn.stop,.btn.restore,.btn.destroy").show();
        } else if(this.status === "Stopped") {
          $(span).removeClass();
          $(span).addClass("badge badge-red");
-         $(tr).find(".btn.start,.btn.restore").show();
+         $(tr).find(".btn.start,.btn.restore,.btn.destroy").show();
        } else {
-         $(tr).find(".btn.stop,.btn.start,.btn.restore").hide();
+         $(tr).find(".btn.stop,.btn.start,.btn.restore,.btn.destroy").hide();
          $(span).removeClass();
          $(span).addClass("badge");
        }
@@ -65,17 +68,17 @@ $(document).ready(function() {
 
       <div class="span3">
       <ul class="nav nav-tabs nav-stacked">
-        @if(VMController.hasPermission("Manage System VM")) {
-        <li class="active">
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
+        <li @if(!normal) { class="active" }>
           <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
-        @if(!system && VMController.hasPermission("Manage Normal VM")) {
-        <li>
-          <a href="#"><i class="icon-cog"></i> Normal VMs</a>
+        @if(!system && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
+        <li @if(normal) { class="active" }>
+          <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
         </li>          
         }
-        @if(VMController.hasPermission("Manage System VM")) {
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li>
           <a href="@routes.VMController.offeringView()"><i class="icon-random"></i> Offering</a>
         </li>
@@ -89,7 +92,22 @@ $(document).ready(function() {
       </div>
       
       <div class="span9">
-        
+        @if(normal) {
+          @defining(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId())) { offering =>
+          <div style="margin-bottom: 10px;">
+          <a class="btn btn-mini btn-blue create-vm"
+          href="@routes.VMController.createrNormalVM(rootGroup.getId(), true)" 
+          rel="tooltip"
+          title="CPU(@offering.getNumberOfCpu()) @offering.getCpuSpeed() MHz @offering.getMemory() MB">
+          Create Ubuntu Desktop</a>
+          <a class="btn btn-mini btn-cyan create-vm"
+          href="@routes.VMController.createrNormalVM(rootGroup.getId(), false)" 
+          rel="tooltip" 
+          title="CPU(@offering.getNumberOfCpu()) @offering.getCpuSpeed() MHz @offering.getMemory() MB">
+          Create Ubuntu Server</a>
+          </div>            
+          }
+        }
         <table class="table vm-list">
           <tr>
             <th></th>

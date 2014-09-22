@@ -28,17 +28,17 @@
 
       <div class="span3">
       <ul class="nav nav-tabs nav-stacked">
-        @if(VMController.hasPermission("Manage System VM")) {
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li>
           <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
-        @if(!system) {
+        @if(!system && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
         <li>
-          <a href="#"><i class="icon-cog"></i> Normal VMs</a>
+          <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
         </li>          
         }
-        @if(VMController.hasPermission("Manage System VM")) {
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li  class="active">
           <a href="@routes.VMController.offeringView()"><i class="icon-random"></i> Offering</a>
         </li>

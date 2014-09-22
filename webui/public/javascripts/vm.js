@@ -144,18 +144,40 @@ $(document).ready(function() {
   });
   
   /* start vm */
-  $("body").on("click", ".cloud-vm .vm-list .btn.stop,.btn.start,.btn.restore", function() {
+  $("body").on("click", ".cloud-vm .vm-list .btn.stop,.btn.start,.btn.restore, .btn.destroy", function() {
     var href = $(this).attr("href");
+    var destroy = $(this).hasClass("destroy");
+    var id = $(this).attr("data-target");
+    var status = $(".vm-status-" + id);
+    var properties = $(".vm-status-" + id);
     $.ajax({
       url: href,
       dataType: "html",
       success: function(data) {
         console.log("success");
+        if (destroy) {
+          $(status).remove();
+          $(properties).remove();
+        }
       },
       error: function(error) {
         console.log(error);
       }
     });
+    return false;
+  });
+  
+  /* create vm */
+  $("body").on("click", ".cloud-vm a.create-vm", function() {
+    var href = $(this).attr("href");
+    var table = $(".cloud-vm .vm-list")
+    $.ajax({
+      url: href,
+      dataType: "html",
+      success: function(data) {
+        $(table).append(data);
+      }
+    })
     return false;
   });
   

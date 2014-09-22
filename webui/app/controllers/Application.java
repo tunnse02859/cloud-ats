@@ -6,26 +6,10 @@ package controllers;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 
-import models.vm.OfferingModel;
 import models.vm.VMModel;
 
-import org.apache.cloudstack.api.ApiConstants.VMDetails;
-import org.apache.cloudstack.jobs.JobInfo.Status;
-import org.ats.cloudstack.AsyncJobAPI;
-import org.ats.cloudstack.CloudStackClient;
-import org.ats.cloudstack.VirtualMachineAPI;
-import org.ats.cloudstack.model.Job;
-import org.ats.cloudstack.model.VirtualMachine;
-import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
@@ -39,22 +23,21 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.mongodb.BasicDBObject;
-
-import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.libs.F.Function;
+import play.libs.F.Function0;
+import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import utils.LogBuilder;
-import utils.OfferingHelper;
-import utils.VMHelper;
-import views.html.*;
+import views.html.index;
+import views.html.signin;
+import views.html.signup;
+
+import com.mongodb.BasicDBObject;
+
+import controllers.vm.VMCreator;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -72,14 +55,14 @@ public class Application extends Controller {
     return ok(signup.render(group));
   }
   
-  public static Result doSignup() throws UserManagementException, IOException, JSchException {
+  public static Promise<Result> doSignup() throws Exception {
     DynamicForm form = Form.form().bindFromRequest();
     boolean group = Boolean.parseBoolean(form.get("group"));
     
     if (group) {
       String companyName = form.get("company");
       String companyHost = form.get("host");
-      Group company = new Group(companyName);
+      final Group company = new Group(companyName);
       company.put("host", companyHost);
       company.put("level", 1);
       
@@ -125,13 +108,25 @@ public class Application extends Controller {
       UserDAO.INSTANCE.create(admin);
       RoleDAO.INSTANCE.create(administration, vmRole);
       
-      //Create system vm 
-      createCompanyVM(company);
+      //Create system vm
+      Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
+        @Override
+        public VMModel apply() throws Throwable {
+          return VMCreator.createCompanySystemVM(company);
+        }
+      });
       
       session().clear();
       session().put("email", admin.getEmail());
       session().put("user_id", admin.getId());
       session().put("group_id", company.getId());
+      
+      return result.map(new Function<VMModel, Result>() {
+        @Override
+        public Result apply(VMModel a) throws Throwable {
+          return redirect(controllers.routes.Application.dashboard());
+        }
+      });
     } else {
       String email = form.get("email");
       String password = form.get("password");
@@ -141,102 +136,8 @@ public class Application extends Controller {
       
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
-    }
-    return redirect(controllers.routes.Application.dashboard());
-  }
-  
-  private static void createCompanyVM(Group company) throws IOException, JSchException {
-    CloudStackClient client = VMHelper.getCloudStackClient();
-    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, company.getString("name") + "-jenkins", "gitlab-jenkins", "Large Instance", null);
-    String vmId = response[0];
-    String jobId = response[1];
-    Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    while (!job.getStatus().done()) {
-      job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    }
-    
-    if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
       
-      VirtualMachine vm = VirtualMachineAPI.findVMById(client, vmId, null);
-      VMModel vmModel = new VMModel(vm.id, vm.name, company.getId(), vm.templateName, vm.templateId, vm.nic[0].ipAddress, "ubuntu", "ubuntu");
-      vmModel.put("system", true);
-      vmModel.put("offering_id", vm.serviceOfferingId);
-
-      //edit `/etc/hosts` file
-      StringBuilder sb = new StringBuilder();
-      LogBuilder.log(sb, "Checking SSHD on " + vmModel.getPublicIP());
-      if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 120)) {
-        LogBuilder.log(sb, "Connection is established");
-        
-        Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
-        
-        //sudo
-        ChannelExec channel = (ChannelExec) session.openChannel("exec");
-        String command = "sed 's/127.0.1.1/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts";
-        channel.setCommand(command);
-        channel.connect();
-        LogBuilder.log(sb, "Execute command: " + command);
-        channel.disconnect();
-        
-        //replace hosts
-        channel = (ChannelExec) session.openChannel("exec");
-        command = "sudo -S -p '' cp /tmp/hosts /etc/hosts";
-        channel.setCommand(command);
-        OutputStream out = channel.getOutputStream();
-        channel.connect();
-        
-        out.write((vmModel.getPassword() + "\n").getBytes());
-        out.flush();
-        
-        LinkedList<String> queue = new LinkedList<String>();
-        int exitCode = SSHClient.printOut(queue, channel);
-        LogBuilder.log(sb, "Execute command: " + command);
-        
-        for (String s : queue) {
-          LogBuilder.log(sb, s);
-        }
-        LogBuilder.log(sb, "exit code: " + exitCode);
-        channel.disconnect();
-        
-        //start jenkins
-        channel = (ChannelExec) session.openChannel("exec");
-        command = "/home/ubuntu/java/jdk1.7.0_51/bin/java -jar jenkins.war > log.txt &";
-        channel.setCommand(command);
-        channel.connect();
-        LogBuilder.log(sb, "Execute command: " + command);
-        
-        exitCode = SSHClient.printOut(queue, channel);
-        
-        for (String s : queue) {
-          LogBuilder.log(sb, s);
-        }
-        LogBuilder.log(sb, "exit code: " + exitCode);
-        channel.disconnect();
-        
-        //disconnect session
-        session.disconnect();
-      } else {
-        LogBuilder.log(sb, "Cloud not establish connection in 120s");
-      }
-      
-      vmModel.put("log", sb.toString());
-      
-      VMHelper.createVM(vmModel);
-      
-      List<OfferingModel> list = OfferingHelper.getEnableOfferings();
-      Collections.sort(list, new Comparator<OfferingModel>() {
-        @Override
-        public int compare(OfferingModel o1, OfferingModel o2) {
-          return o2.getMemory() - o1.getMemory();
-        }
-      });
-      
-      OfferingModel defaultOffering = list.get(0);
-      OfferingHelper.addOfferingGroup(company.getId(), defaultOffering);
-      
-    } else {
-      Logger.error("Could not create system vm for company " + company.getString("name"));
-      createCompanyVM(company);
+      return Promise.<Result>pure(redirect(controllers.routes.Application.dashboard()));
     }
   }
   

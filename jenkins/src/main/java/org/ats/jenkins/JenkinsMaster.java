@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,6 +38,22 @@ public class JenkinsMaster {
     this.masterHost = masterHost;
     this.scheme = scheme;
     this.port = port;
+  }
+  
+  public boolean isReady() throws IOException {
+    DefaultHttpClient client = HttpClientFactory.getInstance();
+    String url = buildURL("api/json");
+    HttpResponse response = HttpClientUtil.execute(client, url);
+    return response.getStatusLine().getStatusCode() == 200;
+  }
+  
+  public boolean isReady(long timeout) throws IOException {
+    long start = System.currentTimeMillis();
+    while (true) {
+      if (this.isReady()) return true;
+      if ((System.currentTimeMillis() - start) < timeout) continue;
+      return false;
+    }
   }
   
   public List<String> listSlaves() throws IOException {

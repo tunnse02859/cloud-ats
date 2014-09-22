@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import models.vm.OfferingModel;
 import models.vm.VMModel;
 
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.component.usersmgt.DataFactory;
+import org.ats.knife.Knife;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -139,5 +139,13 @@ public class VMHelper extends AbstractHelper {
     String cloudstackApiKey = properties.get("cloudstack-api-key");
     String cloudstackApiSecret = properties.get("cloudstack-api-secret");
     return new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
+  }
+  
+  public static Knife getKnife() {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(vmColumn);
+    VMModel chefWorkstation = new VMModel().from(col.findOne(BasicDBObjectBuilder.start("system", true).add("name", "chef-workstation").get()));
+    Knife knife = new Knife(chefWorkstation.getPublicIP(), chefWorkstation.getUsername(), chefWorkstation.getPassword());
+    return knife;
   }
 }

@@ -38,7 +38,7 @@ public class VMStatusActor extends UntypedActor {
   
   static ActorRef actor = Akka.system().actorOf(Props.create(VMStatusActor.class));
   
-  final static Cancellable canceler = Akka.system().scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(3, SECONDS),
+  final static Cancellable canceler = Akka.system().scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
       actor,
       "Check",
       Akka.system().dispatcher(),

@@ -79,7 +79,9 @@ GET     /portal/vm/c/:i            controllers.vm.VMController.viewConsoleURL(i)
 POST    /portal/vm/u               controllers.vm.VMController.updateVMProperties()
 GET     /portal/vm/a/:a/:i         controllers.vm.VMController.vmAction(a, i)
 GET     /portal/vm/so              controllers.vm.VMController.getOfferings()
-GET     /portal/vm/o               controllers.vm.VMController.offeringView()        
+GET     /portal/vm/o               controllers.vm.VMController.offeringView()
+GET     /portal/vm/n/:g            controllers.vm.VMController.normalVMView(g)
+GET     /portal/vm/cr/:b/:g        controllers.vm.VMController.createrNormalVM(g, b: Boolean)        
 
 ############################# Mock #######################################
 

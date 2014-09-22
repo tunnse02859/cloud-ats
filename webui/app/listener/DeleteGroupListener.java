@@ -5,7 +5,6 @@ package listener;
 
 import java.util.List;
 
-import models.vm.OfferingModel;
 import models.vm.VMModel;
 
 import org.ats.cloudstack.VirtualMachineAPI;
@@ -13,10 +12,14 @@ import org.ats.component.usersmgt.Event;
 import org.ats.component.usersmgt.EventExecutedException;
 import org.ats.component.usersmgt.EventListener;
 import org.ats.component.usersmgt.group.Group;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsSlave;
 
 import play.Logger;
 import utils.OfferingHelper;
 import utils.VMHelper;
+
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -30,10 +33,15 @@ public class DeleteGroupListener implements EventListener {
     try {
       if ("delete-group".equals(event.getType())) {
         Group group = new Group(event.getSource());
+        VMModel jenkins = VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("jenkins", true)).get(0);
         List<VMModel> vms = VMHelper.getVMsByGroupID(group.getId());
         for (VMModel vm : vms) {
           VMHelper.removeVM(vm);
           VirtualMachineAPI.destroyVM(VMHelper.getCloudStackClient(), vm.getId(), true);
+          if (!vm.getBoolean("system")) {
+            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+            VMHelper.getKnife().deleteNode(vm.getName());
+          }
         }
         
         OfferingHelper.removeDefaultOfferingOfGroup(group.getId());
