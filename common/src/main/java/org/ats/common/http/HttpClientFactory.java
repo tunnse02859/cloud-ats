@@ -47,15 +47,8 @@ public class HttpClientFactory {
   /** . */
   public static int MAX_HTTP_CONNECTION = 3000;
 
-  /** . */
-  private static DefaultHttpClient httpclient;
-
   public static DefaultHttpClient getInstance() {
-    if (httpclient == null) {
-      httpclient = createNewDefaultHttpClient();
-    }
-
-    return httpclient;
+      return createNewDefaultHttpClient();
   }
 
   public static DefaultHttpClient createNewDefaultHttpClient() {
