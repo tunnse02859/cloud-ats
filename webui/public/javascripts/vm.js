@@ -149,7 +149,10 @@ $(document).ready(function() {
     var destroy = $(this).hasClass("destroy");
     var id = $(this).attr("data-target");
     var status = $(".vm-status-" + id);
-    var properties = $(".vm-status-" + id);
+    var properties = $(".vm-properties-" + id);
+    if (destroy) {
+      $("#pleaseWaitDialog").modal();
+    }
     $.ajax({
       url: href,
       dataType: "html",
@@ -158,6 +161,7 @@ $(document).ready(function() {
         if (destroy) {
           $(status).remove();
           $(properties).remove();
+          $("#pleaseWaitDialog").modal('hide');
         }
       },
       error: function(error) {
@@ -171,11 +175,16 @@ $(document).ready(function() {
   $("body").on("click", ".cloud-vm a.create-vm", function() {
     var href = $(this).attr("href");
     var table = $(".cloud-vm .vm-list")
+    var button = $(this);
+    $(button).addClass("disabled");
+    $("#pleaseWaitDialog").modal();
     $.ajax({
       url: href,
       dataType: "html",
       success: function(data) {
+        $(button).removeClass("disabled");
         $(table).append(data);
+        $("#pleaseWaitDialog").modal('hide');
       }
     })
     return false;

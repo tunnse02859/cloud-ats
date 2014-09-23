@@ -72,7 +72,7 @@
        </div>
        
        <div id="vm-logs-@vm.getId()" class="vm-logs tab-pane @if(!system){ active in }">
-        <pre width="100%">
+        <pre width="100%" style="max-height: 500px; overflow-y: scroll;">
           <code>@vm.getString("log")</code>
         </pre>
        </div>

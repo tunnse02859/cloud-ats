@@ -105,6 +105,16 @@ public class VMHelper extends AbstractHelper {
     return cursor.hasNext() ? new VMModel().from(cursor.next()) : null;
   }
   
+  public static List<VMModel> getVMs(DBObject filter) {
+    DB vmDB = getDatabase();
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(filter);
+    List<VMModel> list = new ArrayList<VMModel>();
+    while (cursor.hasNext()) {
+      list.add(new VMModel().from(cursor.next()));
+    }
+    return list;
+  }
+  
   public static void setSystemProperties(Map<String, String> properties) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(propertiesColumn);

@@ -44,7 +44,7 @@ public class VMCreator {
   
   public static void startJenkins(VMModel jenkins) throws Exception {
     
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(jenkins.getString("log"));
     
     if (SSHClient.checkEstablished(jenkins.getPublicIP(), 22, 120)) {
       Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
@@ -237,7 +237,9 @@ public class VMCreator {
     CloudStackClient client = VMHelper.getCloudStackClient();
     String name = prefix + "-" + indent;
     List<VirtualMachine> list = VirtualMachineAPI.listVirtualMachines(client, null, name, null, null, null);
-    if (list.size() == 0) return name;
+    if (list.size() == 0 && VMHelper.getVMs(new BasicDBObject("name", name)).size() == 0) {
+      return name;
+    }
     return getAvailableName(prefix, indent + 1);
   }
 }

@@ -10,7 +10,7 @@ $(document).ready(function() {
   var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
   var vmStatus = new WS("@routes.VMController.vmStatus(rootGroup.getId(), session().get("uuid")).webSocketURL(request)");
 
-   vmStatus.onmessage = function(event) {
+  vmStatus.onmessage = function(event) {
    var data = JSON.parse(event.data);
    $(data.vms).each(function() {
      var tr = $("tr.vm-status-" + this.id);
@@ -32,13 +32,28 @@ $(document).ready(function() {
      }
    });
   }
+  
+  var vmLog = new WS("@routes.VMController.vmLog(rootGroup.getId(), session().get("uuid")).webSocketURL(request)");
+  
+  vmLog.onmessage = function(event) {
+    var data = JSON.parse(event.data);
+    $(data.vms).each(function() {
+      var holder = $("div#vm-logs-" + this.id + " pre code");
+      console.log(this.msg);
+      $(holder).append(this.msg).append("\n");
+
+      var pre = $(holder).parent();
+      if (pre.scrollTop() + 1500 >= $(holder).height()) pre.scrollTop($(holder).height());
+    });
+  }
 
   window.onbeforeunload = function() {
-    vmStatus.onclose = function () {
-    };
-    vmStatus.close()
+    vmStatus.onclose = function () {};
+    vmStatus.close();
+    vmLog.onclouse = function(){};
+    vmLog.close();
   };
-  
+  //console.log($("div#vm-logs-1400ec46-26fc-4b7a-929c-098dcec2aa39 pre code"))
 });
 </script>
 

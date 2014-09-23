@@ -132,6 +132,9 @@ public class JenkinsSlave {
   }
   
   public boolean release() throws IOException {
+    
+    if (!master.listSlaves().contains(this.slaveAddress)) return true;
+    
     String url = master.buildURL(new StringBuilder("computer/").append(slaveAddress).append("/doDelete").toString());
     DefaultHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();

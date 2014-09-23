@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -51,7 +50,6 @@ import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
-import org.ats.knife.Knife;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -87,7 +85,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import controllers.organization.Organization;
-import controllers.vm.VMStatusActor.VMChannel;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -131,6 +128,20 @@ public class VMController extends Controller {
       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
         try {
           Await.result(ask(VMStatusActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+  }
+  
+  @With(VMWizardIterceptor.class)
+  public static WebSocket<JsonNode> vmLog(final String groupId, final String sessionId) {
+    return new WebSocket<JsonNode>() {
+      @Override
+      public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+        try {
+          Await.result(ask(VMLogActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -302,10 +313,13 @@ public class VMController extends Controller {
           }
 
           if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
+            VMHelper.removeVM(vm);
+            
             VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
             VMHelper.getKnife().deleteNode(vm.getName());
-            return VMHelper.removeVM(vm);
+            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+            
+            return true;
           }
           return false;
         }
@@ -442,7 +456,7 @@ public class VMController extends Controller {
       public VMModel apply() throws Throwable {
         VMModel vm = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
         JenkinsMaster jenkins = new JenkinsMaster(vm.getPublicIP(), "http", 8080);
-        if (jenkins.isReady(10 * 1000)) {
+        if (jenkins.isReady()) {
           return gui  ? VMCreator.createNormalGuiVM(company): VMCreator.createNormalNonGuiVM(company);
         }
         return null;
@@ -452,17 +466,6 @@ public class VMController extends Controller {
     return result.map(new Function<VMModel, Result>() {
       @Override
       public Result apply(VMModel vm) throws Throwable {
-        ConcurrentLinkedQueue<String> queue = VMCreator.QueueHolder.get(vm.getName());
-        System.out.println(queue);
-        while(true) {
-          String msg = queue.poll();
-          if (msg == null) System.out.print('.');
-          else {
-            System.out.println(msg);
-          }
-          if ("log.exit".equals(msg)) break;
-          Thread.sleep(1000);
-        }
         scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
         sb.append(vmstatus.render(vm, false));
         sb.append(vmproperties.render(vm, checkCurrentSystem(), null, false));

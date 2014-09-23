@@ -15,11 +15,9 @@ import org.ats.cloudstack.model.VirtualMachine;
 
 import play.libs.Akka;
 import play.libs.Json;
-import play.mvc.WebSocket;
 import scala.concurrent.duration.Duration;
 import utils.VMHelper;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -68,21 +66,5 @@ public class VMStatusActor extends UntypedActor {
     } else {
       unhandled(msg);
     }
-  }
-
-  public static class VMChannel {
-    
-    final String sessionId;
-    
-    final String groupId;
-    
-    final WebSocket.Out<JsonNode> out;
-    
-    public VMChannel(String sessionId, String groupId, WebSocket.Out<JsonNode> channel) {
-      this.sessionId = sessionId;
-      this.groupId = groupId;
-      this.out = channel;
-    }
-    
   }
 }
