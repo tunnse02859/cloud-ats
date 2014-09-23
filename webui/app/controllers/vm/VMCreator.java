@@ -44,7 +44,7 @@ public class VMCreator {
   
   public static void startJenkins(VMModel jenkins) throws Exception {
     
-    StringBuilder sb = new StringBuilder(jenkins.getString("log"));
+    StringBuilder sb = jenkins.getString("log") == null ? new StringBuilder() : new StringBuilder(jenkins.getString("log"));
     
     if (SSHClient.checkEstablished(jenkins.getPublicIP(), 22, 120)) {
       Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
