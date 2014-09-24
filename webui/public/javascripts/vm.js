@@ -190,6 +190,24 @@ $(document).ready(function() {
     return false;
   });
   
+  /* save offering */
+  $("body").on("click", ".cloud-offering a.save-offering", function() {
+    console.log(this);
+    var href = $(this).attr("href");
+    var form = $(this).parent().parent();
+    var formData = $(form).serialize();
+    $.ajax({
+      url: href,
+      method: "POST",
+      data: formData,
+      dataType: "html",
+      success: function(data) {
+        location.reload();
+      }
+    });
+    return false;
+  });
+  
   /* Validation
   =====================================================
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation({

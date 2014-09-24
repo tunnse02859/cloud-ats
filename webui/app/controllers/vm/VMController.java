@@ -473,6 +473,21 @@ public class VMController extends Controller {
       }
     });
   }
+  
+  @With(VMWizardIterceptor.class)
+  @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
+  public static Result saveOffering(String groupId) throws Exception {
+    DynamicForm form = Form.form().bindFromRequest();
+    if (checkCurrentSystem()) {
+      //TODO
+    } else {
+      String offeringId = form.get("offering");
+      OfferingHelper.removeDefaultOfferingOfGroup(groupId);
+      OfferingModel newOffering = OfferingHelper.getOffering(offeringId);
+      OfferingHelper.addOfferingGroup(groupId, newOffering);
+    }
+    return ok();
+  }
 
   public static boolean checkCurrentSystem() throws UserManagementException {
     return Organization.isSystem(UserDAO.INSTANCE.findOne(session("user_id")));
