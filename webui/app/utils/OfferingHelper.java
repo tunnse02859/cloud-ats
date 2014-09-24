@@ -6,6 +6,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.vm.DefaultOfferingModel;
 import models.vm.OfferingModel;
 
 import com.mongodb.BasicDBObject;
@@ -23,10 +24,10 @@ import com.mongodb.WriteResult;
  */
 public class OfferingHelper extends AbstractHelper {
   
-  public static void addOfferingGroup(String groupId, OfferingModel offering) {
+  public static void addDefaultOfferingForGroup(String groupId, String offeringId) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(groupOfferingColumn);
-    offering.put("group_id", groupId);
+    DefaultOfferingModel offering = new DefaultOfferingModel(groupId, offeringId);
     col.insert(offering, WriteConcern.ACKNOWLEDGED);
   }
   
@@ -66,17 +67,17 @@ public class OfferingHelper extends AbstractHelper {
     return getOfferings(new BasicDBObject());
   }
   
-  public static OfferingModel getDefaultOfferingOfGroup(String groupId) {
+  public static DefaultOfferingModel getDefaultOfferingOfGroup(String groupId) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(groupOfferingColumn);
-    DBObject source = col.findOne(new BasicDBObject("group_id", groupId));
-    return source == null ? new OfferingModel() : new OfferingModel().from(source);
+    DBObject source = col.findOne(new BasicDBObject("_id", groupId));
+    return source == null ? null : new DefaultOfferingModel().from(source);
   }
   
   public static void removeDefaultOfferingOfGroup(String groupId) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(groupOfferingColumn);
-    col.remove(new BasicDBObject("group_id", groupId));
+    col.remove(new BasicDBObject("_id", groupId));
   }
   
   public static List<OfferingModel> getOfferings(BasicDBObject filter) {

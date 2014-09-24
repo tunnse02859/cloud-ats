@@ -23,6 +23,8 @@ import org.ats.cloudstack.model.Job;
 import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.group.Group;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsSlave;
 import org.ats.knife.Knife;
 
 import play.Logger;
@@ -148,7 +150,7 @@ public class VMCreator {
       });
       
       OfferingModel defaultOffering = list.get(0);
-      OfferingHelper.addOfferingGroup(company.getId(), defaultOffering);
+      OfferingHelper.addDefaultOfferingForGroup(company.getId(), defaultOffering.getId());
       return vmModel;
     } else {
       Logger.error("Could not create system vm for company " + company.getString("name"));
@@ -168,11 +170,11 @@ public class VMCreator {
 
   public static VMModel createNormalVM(Group company, String subfix, String template, final String ...recipes) throws IOException, JSchException {
     CloudStackClient client = VMHelper.getCloudStackClient();
-    OfferingModel offering = OfferingHelper.getDefaultOfferingOfGroup(company.getId());
+    OfferingModel offering = OfferingHelper.getDefaultOfferingOfGroup(company.getId()).getOffering();
     final VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("system", true).append("jenkins", true)).get(0);
     
     //create instance
-    final String name = getAvailableName(company.getString("name") + "-" + subfix, 0);
+    final String name = getAvailableName(company, subfix, 0);
     QueueHolder.put(name, new ConcurrentLinkedQueue<String>());
     
     String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, template, offering.getName(), null);
@@ -233,13 +235,24 @@ public class VMCreator {
     return null;
   }
   
-  public static String getAvailableName(String prefix, int indent) throws IOException {
+  public static String getAvailableName(Group company, String subfix, int indent) throws IOException, JSchException {
     CloudStackClient client = VMHelper.getCloudStackClient();
-    String name = prefix + "-" + indent;
-    List<VirtualMachine> list = VirtualMachineAPI.listVirtualMachines(client, null, name, null, null, null);
-    if (list.size() == 0 && VMHelper.getVMs(new BasicDBObject("name", name)).size() == 0) {
-      return name;
+    String name = company.getString("name") + "-" + subfix + "-" + indent;
+    
+    //remove legacy vm
+    List<VMModel> vms = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("system", false));
+    VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
+    
+    for (VMModel vm : vms) {
+      if (VirtualMachineAPI.findVMById(client, vm.getId(), null) == null) {
+        VMHelper.removeVM(vm);
+        VMHelper.getKnife().deleteNode(vm.getName());
+        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      }
     }
-    return getAvailableName(prefix, indent + 1);
+    
+    List<VirtualMachine> list = VirtualMachineAPI.listVirtualMachines(client, null, name, null, null, null);
+    if (list.size() == 0) return name;
+    return getAvailableName(company, subfix, indent + 1);
   }
 }

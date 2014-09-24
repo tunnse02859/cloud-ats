@@ -108,7 +108,7 @@ $(document).ready(function() {
       
       <div class="span9">
         @if(normal) {
-          @defining(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId())) { offering =>
+          @defining(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getOffering()) { offering =>
           <div style="margin-bottom: 10px;">
           <a class="btn btn-mini btn-blue create-vm"
           href="@routes.VMController.createrNormalVM(rootGroup.getId(), true)" 

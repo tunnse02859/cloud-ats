@@ -483,8 +483,7 @@ public class VMController extends Controller {
     } else {
       String offeringId = form.get("offering");
       OfferingHelper.removeDefaultOfferingOfGroup(groupId);
-      OfferingModel newOffering = OfferingHelper.getOffering(offeringId);
-      OfferingHelper.addOfferingGroup(groupId, newOffering);
+      OfferingHelper.addDefaultOfferingForGroup(groupId, offeringId);
     }
     return ok();
   }

@@ -78,7 +78,7 @@
 				    @if(!system) {
 				    <label class="radio">
               <input type="radio" name="offering" value="@offering.getId()"
-              @if(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getId().equals(offering.getId())) {
+              @if(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getOffering().getId().equals(offering.getId())) {
                 checked="checked"
               }
               >
