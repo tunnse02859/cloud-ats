@@ -150,9 +150,7 @@ $(document).ready(function() {
     var id = $(this).attr("data-target");
     var status = $(".vm-status-" + id);
     var properties = $(".vm-properties-" + id);
-    if (destroy) {
-      $("#pleaseWaitDialog").modal();
-    }
+    $("#pleaseWaitDialog").modal();
     $.ajax({
       url: href,
       dataType: "html",
@@ -161,8 +159,8 @@ $(document).ready(function() {
         if (destroy) {
           $(status).remove();
           $(properties).remove();
-          $("#pleaseWaitDialog").modal('hide');
         }
+        $("#pleaseWaitDialog").modal('hide');
       },
       error: function(error) {
         console.log(error);
