@@ -138,7 +138,7 @@ public class UserAction extends Controller {
               BasicDBObject query = new BasicDBObject("name", "Administration");
               query.append("system", true);
               query.append("group_id", g.getId());
-              query.append("user_ids", Pattern.compile(user_.getId()));
+              query.append("user_ids", Pattern.compile(currentUser.getId()));
               
               if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
                 role_.removeUser(user_);
