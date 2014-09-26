@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
 )     
 
 resolvers += (
-	"Local Maven Repository" at "file:///home/public/java/dependencies/repository"		
+	"Local Maven Repository" at "file://" + Path.userHome.absolutePath  + "/java/dependencies/repository"		
 )
 
 play.Project.playJavaSettings
