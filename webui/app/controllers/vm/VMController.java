@@ -123,6 +123,14 @@ public class VMController extends Controller {
       return redirect(routes.VMController.normalVMView(group.getId()));
     }
   }
+  
+  @With(VMWizardIterceptor.class)
+  @WithSystem
+  public static Result changeGroup(String groupId) throws Exception {
+    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Html html = vmbody.render(checkCurrentSystem(), group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)), false);
+    return ok(index.render(html));
+  }
 
   @With(VMWizardIterceptor.class)
   public static WebSocket<JsonNode> vmStatus(final String groupId, final String sessionId) {
@@ -154,18 +162,9 @@ public class VMController extends Controller {
 
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
-  public static Result offeringView() throws Exception {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    boolean system = Organization.isSystem(currentUser);
-
-    Group group = null;
-    if (system) {
-      group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
-    } else {
-      BasicDBObject query = new BasicDBObject("level", 1);
-      query.append("user_ids", Pattern.compile(currentUser.getId()));
-      group = GroupDAO.INSTANCE.find(query).iterator().next();
-    }
+  public static Result offeringView(String groupId) throws Exception {
+    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    boolean system = group.getBoolean("system");
     List<OfferingModel> list = system ? OfferingHelper.getOfferings() : OfferingHelper.getEnableOfferings();
     Html html = offeringbody.render(system, group, list);
     return ok(index.render(html));

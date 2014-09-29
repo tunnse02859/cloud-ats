@@ -42,7 +42,7 @@
         }
         @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li>
-          <a href="@routes.VMController.offeringView()"><i class="icon-random"></i> Offering</a>
+          <a href="@routes.VMController.offeringView(rootGroup.getId())"><i class="icon-random"></i> Offering</a>
         </li>
         }
         <li class="active">
