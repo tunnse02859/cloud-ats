@@ -1,6 +1,7 @@
 @(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, offerings: List[models.vm.OfferingModel])
 @import controllers.vm._
 @import utils._
+@import org.ats.component.usersmgt.group._
 
 <section class="cloud-offering">
   <ul class="nav nav-tabs">
@@ -14,9 +15,13 @@
         <b class="caret"></b>
       </a>
       <ul class="dropdown-menu">
-        <li>
-        <a class="group" href="javascript:void(0);">Neopost</a>
-        </li>
+        @defining(GroupDAO.INSTANCE.find(new com.mongodb.BasicDBObject("level",1))) { groups =>
+          @for(group <- groups) {
+            <li>
+            <a class="group" href="@routes.VMController.changeGroup(group.getId())">@group.getString("name")</a>
+            </li>            
+          }
+        }
       </ul>
     </li>
     }
@@ -33,17 +38,17 @@
           <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
-        @if(!system && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
+        @if(!rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
         <li>
           <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
         </li>          
         }
         @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
-        <li  class="active">
+        <li class="active">
           <a href="@routes.VMController.offeringView(rootGroup.getId())"><i class="icon-random"></i> Offering</a>
         </li>
         }
-        @if(system) {
+        @if(system && rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li>
           <a href="@routes.VMController.propertiesView()"><i class="icon-list"></i> Properties</a>
         </li>
@@ -55,7 +60,7 @@
         <form class="form form-horizontal">
           
           <legend>
-          @if(system) {
+          @if(rootGroup.getBoolean("system")) {
             Service Offering Configuration
           } else {
             Default Service Offering
@@ -64,7 +69,7 @@
         
           @for(offering <- offerings) {
 				  <div class="controls">
-				    @if(system) {
+				    @if(rootGroup.getBoolean("system")) {
             <label class="checkbox">
               <input @if(!offering.getBoolean("disabled")) { checked="checked" } type="checkbox" name="offering-@offering.getId()" value="@offering.getId()">
               <label class="label label-blue">@offering.getName()</label>
@@ -75,7 +80,7 @@
               <li>RAM: @offering.getMemory() MB</li>
             </ul>          				      
 				    }
-				    @if(!system) {
+				    @if(!rootGroup.getBoolean("system")) {
 				    <label class="radio">
               <input type="radio" name="offering" value="@offering.getId()"
               @if(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getOffering().getId().equals(offering.getId())) {

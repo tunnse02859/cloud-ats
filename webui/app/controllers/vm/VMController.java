@@ -164,8 +164,8 @@ public class VMController extends Controller {
   @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
   public static Result offeringView(String groupId) throws Exception {
     Group group = GroupDAO.INSTANCE.findOne(groupId);
-    boolean system = group.getBoolean("system");
-    List<OfferingModel> list = system ? OfferingHelper.getOfferings() : OfferingHelper.getEnableOfferings();
+    boolean system = checkCurrentSystem();
+    List<OfferingModel> list = group.getBoolean("system") ? OfferingHelper.getOfferings() : OfferingHelper.getEnableOfferings();
     Html html = offeringbody.render(system, group, list);
     return ok(index.render(html));
   }

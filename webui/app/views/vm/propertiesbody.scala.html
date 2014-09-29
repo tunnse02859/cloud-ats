@@ -3,6 +3,7 @@
 )
 @import controllers.vm._
 @import utils._
+@import org.ats.component.usersmgt.group._
 
 <section class="cloud-offering">
   <ul class="nav nav-tabs">
@@ -16,9 +17,13 @@
         <b class="caret"></b>
       </a>
       <ul class="dropdown-menu">
-        <li>
-        <a class="group" href="javascript:void(0);">Neopost</a>
-        </li>
+        @defining(GroupDAO.INSTANCE.find(new com.mongodb.BasicDBObject("level",1))) { groups =>
+          @for(group <- groups) {
+            <li>
+            <a class="group" href="@routes.VMController.changeGroup(group.getId())">@group.getString("name")</a>
+            </li>            
+          }
+        }
       </ul>
     </li>
     }
@@ -35,7 +40,7 @@
           <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
-        @if(!system && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
+        @if(!rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
         <li>
           <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
         </li>          
@@ -45,9 +50,11 @@
           <a href="@routes.VMController.offeringView(rootGroup.getId())"><i class="icon-random"></i> Offering</a>
         </li>
         }
+        @if(system && rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li class="active">
           <a href="@routes.VMController.propertiesView()"><i class="icon-list"></i> Properties</a>
         </li>
+        }
       </ul>
       </div>
       
