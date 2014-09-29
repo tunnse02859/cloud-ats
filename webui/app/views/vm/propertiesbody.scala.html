@@ -1,0 +1,103 @@
+@(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group,
+  properties: Map[String, String]
+)
+@import controllers.vm._
+@import utils._
+
+<section class="cloud-offering">
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a data-toggle="tab" href="#list">@rootGroup.get("name")</a>
+    </li>
+    @if(system){
+    <li class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        Select Group
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+        <li>
+        <a class="group" href="javascript:void(0);">Neopost</a>
+        </li>
+      </ul>
+    </li>
+    }
+  </ul>
+  
+  <div class="tab-content">
+    <div id="home" class="tab-pane fade active in">
+      <section class="row-fluid">
+
+      <div class="span3">
+      <ul class="nav nav-tabs nav-stacked">
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
+        <li>
+          <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
+        </li>
+        }
+        @if(!system && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
+        <li>
+          <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
+        </li>          
+        }
+        @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
+        <li>
+          <a href="@routes.VMController.offeringView()"><i class="icon-random"></i> Offering</a>
+        </li>
+        }
+        <li class="active">
+          <a href="@routes.VMController.propertiesView()"><i class="icon-list"></i> Properties</a>
+        </li>
+      </ul>
+      </div>
+      
+      <div class="span9">
+        <form class="form form-horizontal" method="post" action="@routes.VMController.saveProperties()">
+          <legend>CloudStack Properties</legend>
+					 
+				  <div class="control-group">
+		        <label class="control-label">CloudStack User</label>
+		        <div class="controls">
+		          <input required="" type="text" name="cloudstack-username" placeholder="Username" value="@properties.get("cloudstack-username")">
+		        </div>
+		      </div>
+		      
+		      <div class="control-group">
+		        <label class="control-label">CloudStack Password</label>
+		        <div class="controls">
+		          <input required="" type="password" name="cloudstack-password" placeholder="Password" value="@properties.get("cloudstack-password")">
+		        </div>
+		      </div>
+		      
+		      <div class="control-group">
+		        <label class="control-label">CloudStack API</label>
+		        <div class="controls">
+		          <input required="" type="text" name="cloudstack-api-url" placeholder="URL" value="@properties.get("cloudstack-api-url")">
+		        </div>
+		      </div>
+		      
+		      <div class="control-group">
+		        <label class="control-label">API Key</label>
+		        <div class="controls">
+		          <input required="" type="text" name="cloudstack-api-key" placeholder="Api Key" value="@properties.get("cloudstack-api-key")">
+		        </div>
+		      </div>
+		      
+		      <div class="control-group">
+		        <label class="control-label">Secret Key</label>
+		        <div class="controls">
+		          <input required="" type="text" name="cloudstack-api-secret" placeholder="Secret Key" value="@properties.get("cloudstack-api-secret")">
+		        </div>
+		      </div>
+			    
+          <div class="form-actions">
+            <button type="submit" class="btn btn-blue save-offering" href=""><i class="icon-save"></i> Update</button>
+          </div>
+        </form>
+      </div>
+      
+      </section>
+      
+    </div>
+  </div>
+</section>

@@ -45,7 +45,7 @@
         }
         @if(system) {
         <li>
-          <a href="#"><i class="icon-list"></i> Properties</a>
+          <a href="@routes.VMController.propertiesView()"><i class="icon-list"></i> Properties</a>
         </li>
         }
       </ul>
@@ -94,9 +94,6 @@
 				  }
 				  <div class="form-actions">
 				    <a class="btn save-offering" href="@routes.VMController.saveOffering(rootGroup.getId())"><i class="icon-save"></i> Save</a>
-				    @if(system) {
-				    <a class="btn"><i class="icon-refresh"></i> Refresh</a>
-				    }
 				  </div>
         </form>
       </div>

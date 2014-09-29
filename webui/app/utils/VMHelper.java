@@ -123,6 +123,14 @@ public class VMHelper extends AbstractHelper {
     }
   }
   
+  public static void updateSystemProperties(Map<String, String> properties) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(propertiesColumn);
+    for (Map.Entry<String, String> entry : properties.entrySet()) {
+      col.save(BasicDBObjectBuilder.start("_id", entry.getKey()).append("value", entry.getValue()).append("system_property", true).get());
+    }
+  }
+  
   public static Map<String, String> getSystemProperties() {
     DB db = getDatabase();
     DBCollection col = db.getCollection(propertiesColumn);

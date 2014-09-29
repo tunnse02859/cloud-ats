@@ -42,7 +42,7 @@ public class DefaultOfferingModel extends BasicDBObject {
   }
   
   public DefaultOfferingModel from(DBObject source) {
-    this.put("_id", source.get("group_id"));
+    this.put("_id", source.get("_id"));
     this.put("offering_id", source.get("offering_id"));
     return this;
   }

@@ -11,6 +11,7 @@ import interceptor.WithSystem;
 import interceptor.WizardInterceptor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathConstants;
 
+import models.vm.DefaultOfferingModel;
 import models.vm.OfferingModel;
 import models.vm.VMModel;
 
@@ -73,6 +75,7 @@ import views.html.vm.alert;
 import views.html.vm.index;
 import views.html.vm.offering;
 import views.html.vm.offeringbody;
+import views.html.vm.propertiesbody;
 import views.html.vm.terminal;
 import views.html.vm.vmbody;
 import views.html.vm.vmproperties;
@@ -177,6 +180,36 @@ public class VMController extends Controller {
 
     List<ServiceOffering> list = ServiceOfferingAPI.listServiceOfferings(client, null, null);
     return ok(offering.render(list));
+  }
+
+  @WithSystem
+  @With(VMWizardIterceptor.class)
+  @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
+  public static Result propertiesView() throws Exception {
+    Group group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    return ok(index.render(propertiesbody.render(checkCurrentSystem(), group, VMHelper.getSystemProperties())));
+  }
+  
+  @WithSystem
+  @With(VMWizardIterceptor.class)
+  @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
+  public static Result saveProperties() throws Exception {
+    DynamicForm form = Form.form().bindFromRequest();
+    String cloudstackApiUrl = form.get("cloudstack-api-url");
+    String cloudstackApiKey = form.get("cloudstack-api-key");
+    String cloudstackApiSecret = form.get("cloudstack-api-secret");
+    String cloudstackUsername = form.get("cloudstack-username");
+    String cloudstackPassword = form.get("cloudstack-password");
+    
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("cloudstack-api-url", cloudstackApiUrl);
+    properties.put("cloudstack-api-key", cloudstackApiKey);
+    properties.put("cloudstack-api-secret", cloudstackApiSecret);
+    properties.put("cloudstack-username", cloudstackUsername);
+    properties.put("cloudstack-password", cloudstackPassword);
+
+    VMHelper.updateSystemProperties(properties);
+    return redirect(routes.VMController.propertiesView());
   }
 
   @WithSystem
@@ -479,7 +512,33 @@ public class VMController extends Controller {
   public static Result saveOffering(String groupId) throws Exception {
     DynamicForm form = Form.form().bindFromRequest();
     if (checkCurrentSystem()) {
-      //TODO
+      List<OfferingModel> offerings = OfferingHelper.getOfferings();
+      List<OfferingModel> disabledOfferings = new ArrayList<OfferingModel>();
+      boolean blank = true;
+      for (OfferingModel offering : offerings) {
+        if (form.get("offering-" + offering.getId()) != null) {
+          blank = false;
+          offering.put("disabled", false);
+          //OfferingHelper.updateOffering(offering);
+        } else {
+          offering.put("disabled",true);
+          disabledOfferings.add(offering);
+        }
+      }
+      if (!blank) {
+        for (OfferingModel offering : offerings) {
+          OfferingHelper.updateOffering(offering);
+        }
+        //check if has only one offering
+        List<OfferingModel> enabledOfferings = OfferingHelper.getEnableOfferings();
+        if (enabledOfferings.size() == 1) {
+          List<DefaultOfferingModel> groups = OfferingHelper.getInvalidDefaultOffering();
+          for (DefaultOfferingModel groupOffering : groups) {
+            groupOffering.put("offering_id", enabledOfferings.get(0).getId());
+            OfferingHelper.updateDefaultOfferingOfGroup(groupOffering);
+          }
+        }
+      }
     } else {
       String offeringId = form.get("offering");
       OfferingHelper.removeDefaultOfferingOfGroup(groupId);

@@ -200,7 +200,7 @@ $(document).ready(function() {
       data: formData,
       dataType: "html",
       success: function(data) {
-        location.reload();
+        window.location = "/portal/vm/o";
       }
     });
     return false;

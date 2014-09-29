@@ -84,6 +84,8 @@ GET     /portal/vm/n/:g            controllers.vm.VMController.normalVMView(g)
 GET     /portal/vm/cr/:b/:g        controllers.vm.VMController.createrNormalVM(g, b: Boolean)  
 GET     /portal/vm/l/:g/:s         controllers.vm.VMController.vmLog(g, s)
 POST    /portal/vm/o/c/:g          controllers.vm.VMController.saveOffering(g)      
+GET     /portal/vm/p               controllers.vm.VMController.propertiesView()
+POST    /portal/vm/p/s             controllers.vm.VMController.saveProperties()
 
 ############################# Mock #######################################
 

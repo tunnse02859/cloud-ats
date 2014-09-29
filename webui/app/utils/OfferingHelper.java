@@ -45,6 +45,22 @@ public class OfferingHelper extends AbstractHelper {
     return offering;
   }
   
+  public static List<DefaultOfferingModel> getInvalidDefaultOffering() {
+    List<DefaultOfferingModel> list = new ArrayList<DefaultOfferingModel>();
+    List<OfferingModel> disabledOffering = getDisableOfferings();
+    
+    DB db = getDatabase();
+    DBCollection colDefault = db.getCollection(groupOfferingColumn);
+    
+    for (OfferingModel offering : disabledOffering) {
+      DBCursor cursor = colDefault.find(new BasicDBObject("offering_id", offering.getId()));
+      while (cursor.hasNext()) {
+        list.add(new DefaultOfferingModel().from(cursor.next()));
+      }
+    }
+    return list;
+  }
+  
   public static boolean removeOffering(OfferingModel offering) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(offeringColumn);
@@ -63,6 +79,10 @@ public class OfferingHelper extends AbstractHelper {
     return getOfferings(new BasicDBObject("disabled", false));
   }
   
+  public static List<OfferingModel> getDisableOfferings() {
+    return getOfferings(new BasicDBObject("disabled", true));
+  }
+  
   public static List<OfferingModel> getOfferings() {
     return getOfferings(new BasicDBObject());
   }
@@ -72,6 +92,12 @@ public class OfferingHelper extends AbstractHelper {
     DBCollection col = db.getCollection(groupOfferingColumn);
     DBObject source = col.findOne(new BasicDBObject("_id", groupId));
     return source == null ? null : new DefaultOfferingModel().from(source);
+  }
+  
+  public static void updateDefaultOfferingOfGroup(DefaultOfferingModel offering) {
+    DB db = getDatabase();
+    DBCollection col = db.getCollection(groupOfferingColumn);
+    col.save(offering);
   }
   
   public static void removeDefaultOfferingOfGroup(String groupId) {
