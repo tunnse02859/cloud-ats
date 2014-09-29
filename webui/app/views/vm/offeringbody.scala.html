@@ -35,7 +35,7 @@
       <ul class="nav nav-tabs nav-stacked">
         @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
         <li>
-          <a href="@routes.VMController.index()"><i class="icon-cogs"></i> System VMs</a>
+          <a href="@routes.VMController.systemVmView(rootGroup.getId())"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
         @if(!rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage Normal VM")) {

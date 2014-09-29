@@ -73,6 +73,7 @@ GET     /portal/dashboard/profile  controllers.Dashboard.updateProfile()
 ############################# Virtual Machine ############################
 
 GET     /portal/vm                 controllers.vm.VMController.index()
+GET     /portal/vm/sys/:g          controllers.vm.VMController.systemVmView(g)
 GET     /portal/vm/c/g/:g          controllers.vm.VMController.changeGroup(g)
 POST    /portal/vm/wizard          controllers.vm.VMController.doWizard()
 GET     /portal/vm/s/:g/:s         controllers.vm.VMController.vmStatus(g, s)

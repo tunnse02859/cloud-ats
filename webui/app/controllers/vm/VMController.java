@@ -106,7 +106,7 @@ public class VMController extends Controller {
       return currentUser.getBoolean("system") ? ok(index.render(wizard.render())) : forbidden(views.html.forbidden.render());
     }
 
-    boolean system = Organization.isSystem(currentUser);
+    boolean system = checkCurrentSystem();
     Group group = null;
     if (system) {
       group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
@@ -115,13 +115,20 @@ public class VMController extends Controller {
       query.append("user_ids", Pattern.compile(currentUser.getId()));
       group = GroupDAO.INSTANCE.find(query).iterator().next();
     }
-    session("group_id", group.getId());
+    
     if (hasPermission(group, "Manage System VM")) {
-      Html html = vmbody.render(system, group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)), false);
-      return ok(index.render(html));
+      return redirect(routes.VMController.systemVmView(group.getId()));
     } else {
       return redirect(routes.VMController.normalVMView(group.getId()));
     }
+  }
+  
+  @With(VMWizardIterceptor.class)
+  @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
+  public static Result systemVmView(String groupId) throws Exception {
+    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Html html = vmbody.render(checkCurrentSystem(), group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)), false);
+    return ok(index.render(html));
   }
   
   @With(VMWizardIterceptor.class)
