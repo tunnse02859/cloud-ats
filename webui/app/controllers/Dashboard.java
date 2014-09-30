@@ -3,7 +3,6 @@
  */
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -16,7 +15,6 @@ import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
@@ -70,14 +68,7 @@ public class Dashboard extends Controller {
     User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
     Group group = GroupDAO.INSTANCE.findOne(g);
     if (group.getUsers().contains(currentUser)) {
-      
-      String referer = request().getHeader("referer");
-      if (referer.indexOf("&group") != -1) {
-        referer = referer.substring(0, referer.indexOf("&group"));
-      }
       session("group_id", group.getId());
-      //
-      return redirect(referer);
     }
     return redirect(controllers.routes.Application.dashboard());
   }
