@@ -336,7 +336,16 @@ public class VMController extends Controller {
     } else if ("stop".equals(action)) {
       VirtualMachineAPI.stopVM(client, vmId, false);
     } else if ("restore".equals(action)) {
-      VirtualMachineAPI.restoreVM(client, vmId, null);
+      String jobId = VirtualMachineAPI.restoreVM(client, vmId, null);
+      Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+      while (!job.getStatus().done()) {
+        job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+      }
+
+      if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
+        VMModel vm = VMHelper.getVMByID(vmId);
+        if (vm.getBoolean("jenkins")) VMCreator.startJenkins(vm);
+      }
     } else if ("destroy".equals(action)) {
       final VMModel vm = VMHelper.getVMByID(vmId);
 
