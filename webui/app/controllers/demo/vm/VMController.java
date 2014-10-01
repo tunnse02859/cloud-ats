@@ -169,7 +169,7 @@ public class VMController extends Controller {
       DBObject obj = cursor.next();
       collection.remove(obj, WriteConcern.JOURNAL_SAFE);
       VirtualMachineAPI.destroyVM(obj.get("vmid").toString(), true);
-      new JenkinsSlave(new JenkinsMaster("git.sme.org", "http", 8080), (String) obj.get("ip")).release();
+      new JenkinsSlave(new JenkinsMaster("172.27.4.77", "http", 8080), (String) obj.get("ip")).release();
       Knife.getInstance().deleteNode(name);
     } 
     return ok("OK");

@@ -72,7 +72,7 @@ public class JobController extends Controller {
     DBCollection collection = DBFactory.getDatabase().getCollection("job");
     DBObject obj = collection.findOne(new BasicDBObject("name", jobName));
     collection.remove(obj);
-    JenkinsMaster jmaster = new JenkinsMaster("git.sme.org", "http", 8080);
+    JenkinsMaster jmaster = new JenkinsMaster("172.27.4.77", "http", 8080);
     JenkinsMavenJob job = new JenkinsMavenJob(jmaster, jobName, null, null, null, null);
     job.delete();
     return ok("OK");
@@ -170,7 +170,7 @@ public class JobController extends Controller {
         DBObject jobData = DBFactory.getDatabase().getCollection("job").findOne(new BasicDBObject("name", jobName));
         DBObject vmData = DBFactory.getDatabase().getCollection("vm").findOne(new BasicDBObject("name", jobData.get("vm")));
         
-        JenkinsMaster master = new JenkinsMaster("git.sme.org", "http", 8080);
+        JenkinsMaster master = new JenkinsMaster("172.27.4.77", "http", 8080);
         JenkinsMavenJob job = new JenkinsMavenJob(master, 
             (String)jobData.get("name"), 
             "selenium".equals(jobData.get("type")) ? (String)vmData.get("ip") : "master", 
