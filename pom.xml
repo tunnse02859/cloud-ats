@@ -125,6 +125,14 @@
 			</dependency>
 			<!-- End Jenkins dependencies -->
 
+
+			<!-- GitLab -->
+			<dependency>
+				<groupId>org.gitlab</groupId>
+				<artifactId>java-gitlab-api</artifactId>
+				<version>1.1.4</version>
+			</dependency>
+
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
