@@ -44,6 +44,18 @@
 			</dependency>
 
 			<dependency>
+			  <groupId>org.ats</groupId>
+				<artifactId>cloud-gitlab</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+			  <groupId>org.ats</groupId>
+				<artifactId>cloud-jmeter</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.jclouds</groupId>
 				<artifactId>jclouds-all</artifactId>
 				<version>1.7.2</version>
@@ -77,6 +89,12 @@
 				<groupId>com.jcraft</groupId>
 				<artifactId>jsch</artifactId>
 				<version>0.1.51</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.rythmengine</groupId>
+				<artifactId>rythm-engine</artifactId>
+				<version>1.0.1</version>
 			</dependency>
 
 			<dependency>
