@@ -30,18 +30,15 @@ import org.apache.http.message.BasicNameValuePair;
  *
  */
 public class HttpClientUtil {
-  public static String fetch(HttpClient httpclient, String uri) throws IOException
-  {
+  public static String fetch(HttpClient httpclient, String uri) throws IOException {
     return getContentBodyAsString(execute(httpclient, uri));
   }
-  
+
   public static HttpResponse post(HttpClient httpclient, String uri, Map<String, String> parameters) throws IOException {
-    if(httpclient == null) 
-    {
+    if (httpclient == null) {
       throw new NullPointerException();
     }
-    if(uri == null)
-    {
+    if (uri == null) {
       throw new NullPointerException();
     }
     HttpPost post = new HttpPost(uri);
@@ -52,59 +49,51 @@ public class HttpClientUtil {
     post.setEntity(new UrlEncodedFormEntity(list));
     return httpclient.execute(post);
   }
-  
+
   public static HttpResponse execute(HttpClient httpclient, String uri) throws IOException {
-    if(httpclient == null) 
-    {
+    if (httpclient == null) {
       throw new NullPointerException();
     }
-    if(uri == null)
-    {
+    if (uri == null) {
       throw new NullPointerException();
     }
     HttpGet get = new HttpGet(uri);
     return httpclient.execute(get);
   }
-  
-  public static Cookie addCookie(HttpClient httpclient, String name, String value) 
-  {
-    if(httpclient == null)
-    {
+
+  public static Cookie addCookie(HttpClient httpclient, String name, String value) {
+    if (httpclient == null) {
       throw new NullPointerException();
     }
     BasicClientCookie cookie = new BasicClientCookie(name, value);
     ((AbstractHttpClient) httpclient).getCookieStore().addCookie(cookie);
     return cookie;
   }
-  
-  public static void setProxy(HttpClient httpclient, String proxy, int port)
-  {
+
+  public static void setProxy(HttpClient httpclient, String proxy, int port) {
     HttpHost host = new HttpHost(proxy, port, "http");
-    ((AbstractHttpClient) httpclient).getParams().setParameter(ConnRouteParams.DEFAULT_PROXY, host);
+    ((AbstractHttpClient) httpclient).getParams().setParameter(
+        ConnRouteParams.DEFAULT_PROXY, host);
   }
-  
+
   public static byte[] getContentBodyAsByteArray(HttpResponse res) throws IOException {
     InputStream is = res.getEntity().getContent();
     BufferedInputStream bis = new BufferedInputStream(is);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     byte[] buff = new byte[1024];
-    for(int l = bis.read(buff); l != -1; l = bis.read(buff))
-    {
+    for (int l = bis.read(buff); l != -1; l = bis.read(buff)) {
       baos.write(buff, 0, l);
     }
     return baos.toByteArray();
   }
-  
-  public static String getContentBodyAsString(HttpResponse res) throws IOException 
-  {
+
+  public static String getContentBodyAsString(HttpResponse res) throws IOException {
     return new String(getContentBodyAsByteArray(res), "UTF-8");
   }
 
-  public static String getContentType(HttpResponse res) 
-  {
+  public static String getContentType(HttpResponse res) {
     Header header = res.getFirstHeader("Content-Type");
-    if(header == null) 
-    {
+    if (header == null) {
       return "unknown/unknown";
     }
     String value = header.getValue();
