@@ -131,10 +131,14 @@ public class JmeterFactory {
     if("GET".equals(method)) {
       return Rythm.render(this.sampleGet, builder.build());
     } else if ("POST".equals(method)) {
-      return Rythm.render(this.samplePost, builder.build());
+      builder.put("method", "POST");
+    } else if ("PUT".equals(method)) {
+      builder.put("method", "PUT");
+    } else if ("DELETE".equals(method)) {
+      builder.put("method", "DELETE");
     }
     
-    return null;
+    return Rythm.render(this.samplePost, builder.build());
   }
   
   private String asString(InputStream is) throws IOException {

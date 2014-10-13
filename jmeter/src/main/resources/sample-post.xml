@@ -12,7 +12,7 @@
 	<stringProp name="HTTPSampler.protocol">@protocol</stringProp> <!-- https -->
 	<stringProp name="HTTPSampler.contentEncoding">utf-8</stringProp>
 	<stringProp name="HTTPSampler.path">@path</stringProp> <!-- /login -->
-	<stringProp name="HTTPSampler.method">POST</stringProp> <!-- POST -->
+	<stringProp name="HTTPSampler.method">@method</stringProp> <!-- POST -->
 	<boolProp name="HTTPSampler.follow_redirects">true</boolProp>
 	<boolProp name="HTTPSampler.auto_redirects">false</boolProp>
 	<boolProp name="HTTPSampler.use_keepalive">true</boolProp>
