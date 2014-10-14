@@ -3,13 +3,13 @@
  */
 package org.ats.jenkins;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,9 +20,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.ats.common.StringUtil;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
 import org.json.JSONObject;
+import org.rythmengine.Rythm;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -32,22 +34,29 @@ import org.json.JSONObject;
 public class JenkinsMavenJob {
   
   /** .*/
-  private String name;
+  private final String name;
   
   /** .*/
-  private String assigned;
+  private final String assigned;
   
   /** .*/
-  private String gitURL;
+  private final String gitURL;
   
   /** .*/
-  private String goals;
+  private final String ref;
   
   /** .*/
-  private String mavenOpts;
+  private final String goals;
   
   /** .*/
-  JenkinsMaster master;
+  private final String mavenOpts;
+  
+  /** .*/
+  private final JenkinsMaster master;
+  
+  private final String jobTmpl;
+  
+  private final String jobJsonTmpl;
   
   /**
    * 
@@ -56,18 +65,35 @@ public class JenkinsMavenJob {
    * @param gitURL the http url of git project
    * @param goals empty string for not specified.
    * @param mavenOpts empty string for not specified.
+   * @throws IOException 
    */
-  public JenkinsMavenJob(JenkinsMaster master, String name, String assigned, String gitURL, String goals, String mavenOpts) {
+  public JenkinsMavenJob(JenkinsMaster master, String name, String assigned, String gitURL, String ref, String goals, String mavenOpts) throws IOException {
     this.name = name;
     this.assigned = assigned;
     this.gitURL = gitURL;
+    this.ref = ref;
     this.goals = goals;
     this.mavenOpts = mavenOpts;
     this.master = master;
+    
+    String jobTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-template"));
+    this.jobTmpl = Rythm.render(jobTmpl, this.ref);
+    
+    String jobJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-json-template"));
+    
+    Map<String, String> params = new HashMap<String, String>();
+    params.put("name", this.name);
+    params.put("signed", this.assigned);
+    params.put("gitUrl", this.gitURL);
+    params.put("ref", this.ref);
+    params.put("goals", this.goals);
+    params.put("mavenOpts", this.mavenOpts);
+    
+    this.jobJsonTmpl = Rythm.render(jobJsonTmpl, params);
   }
   
   public byte[] getConsoleOutput(int buildNumber, int start) throws IOException {
-    String url = master.buildURL("job/" + name + "/" + buildNumber + "/logText/progressiveHtml");
+    String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/logText/progressiveHtml");
     DefaultHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
@@ -77,8 +103,8 @@ public class JenkinsMavenJob {
     return HttpClientUtil.getContentBodyAsByteArray(res);
   }
   
-  public boolean isBuilding(int buildNumber)  {
-    String url = master.buildURL("job/" + name + "/" + buildNumber + "/api/json");
+  public boolean isBuilding(int buildNumber) throws UnsupportedEncodingException  {
+    String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
     DefaultHttpClient client = HttpClientFactory.getInstance();
     String response = null;
     try {
@@ -92,7 +118,7 @@ public class JenkinsMavenJob {
   }
   
   public String getStatus(int buildNumber) throws IOException {
-    String url = master.buildURL("job/" + name + "/" + buildNumber + "/api/json");
+    String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
     DefaultHttpClient client = HttpClientFactory.getInstance();
     String response = HttpClientUtil.fetch(client, url);
     JSONObject json = new JSONObject(response);
@@ -100,7 +126,7 @@ public class JenkinsMavenJob {
   }
   
   public boolean delete() throws IOException {
-    String url = master.buildURL("job/" + name + "/doDelete");
+    String url = master.buildURL("job/" + encodeURIComponent(name) + "/doDelete");
     DefaultHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
@@ -133,7 +159,7 @@ public class JenkinsMavenJob {
     HttpResponse res = client.execute(post, httpContext);
     String body = HttpClientUtil.getContentBodyAsString(res);
     if (body.length() == 0) {
-      url = master.buildURL("job/" + this.name + "/configSubmit");
+      url = master.buildURL("job/" + encodeURIComponent(this.name) + "/configSubmit");
       post = new HttpPost(url);
       post.setEntity(this.buildFormData());
       res = client.execute(post, httpContext);
@@ -148,11 +174,11 @@ public class JenkinsMavenJob {
   
   public int build() throws IOException {
     DefaultHttpClient client = HttpClientFactory.getInstance();
-    String url = master.buildURL("job/" + this.name + "/build?delay=0sec");
+    String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/build?delay=0sec");
     String body = HttpClientUtil.fetch(client, url);
     
     if (body.length() == 0) {
-      url = master.buildURL("job/" + this.name + "/api/json");
+      url = master.buildURL("job/" + encodeURIComponent(this.name) + "/api/json");
       body = HttpClientUtil.fetch(client, url);
       JSONObject json = new JSONObject(body);
       int nextBuildNumber = json.getInt("nextBuildNumber");
@@ -164,9 +190,7 @@ public class JenkinsMavenJob {
   
   private HttpEntity buildFormData() throws IOException {
     List<NameValuePair> list = new ArrayList<NameValuePair>();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-template")));
-    String line = null;
-    while ((line = reader.readLine()) != null) {
+    for (String line : jobTmpl.split("\n")) {
       String[] arrays = line.split("\t");
       if (arrays.length == 2) {
         String key = arrays[0].trim();
@@ -188,16 +212,24 @@ public class JenkinsMavenJob {
     list.add(new BasicNameValuePair("_.url", gitURL));
     list.add(new BasicNameValuePair("goals", goals));
     list.add(new BasicNameValuePair("mavenOpts", mavenOpts));
-    BufferedInputStream is = new BufferedInputStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-json-template"));
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    byte[] buff = new byte[1024];
-    for (int i = is.read(buff); i != -1; i = is.read(buff)) {
-      bos.write(buff, 0, i);
-    }
-    String json = new String(bos.toByteArray());
-    json = String.format(json, name, assigned, gitURL, goals);
-    list.add(new BasicNameValuePair("json", json));
+    list.add(new BasicNameValuePair("json", jobJsonTmpl));
+
     return new UrlEncodedFormEntity(list);
+  }
+  
+  private String encodeURIComponent(String s) {
+    String result;
+
+    try {
+      result = URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20")
+          .replaceAll("\\%21", "!").replaceAll("\\%27", "'")
+          .replaceAll("\\%28", "(").replaceAll("\\%29", ")")
+          .replaceAll("\\%7E", "~");
+    } catch (UnsupportedEncodingException e) {
+      result = s;
+    }
+
+    return result;
   }
   
   public String getName() {

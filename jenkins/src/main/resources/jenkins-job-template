@@ -5,7 +5,7 @@ _.compressionLevel -1
 _.compressionLevel -1
 _.credentialsId 0cc6ff73-d0ef-44c5-82c4-bfb5e9d597d2
 _.local .
-_.name */master
+_.name @ref
 _.notifyEveryUnstableBuild on
 _.perModuleEmail on
 _.pruneEmptyDirectories on

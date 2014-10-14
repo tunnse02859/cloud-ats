@@ -24,6 +24,10 @@
 			<artifactId>cloud-cloudstack</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.rythmengine</groupId>
+			<artifactId>rythm-engine</artifactId>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.ats</groupId>

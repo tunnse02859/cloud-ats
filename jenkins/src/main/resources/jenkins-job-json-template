@@ -1,29 +1,29 @@
 {
-  "name": "%s", 
+  "name": "@name", 
   "description": "", 
   "logrotate": false, 
   "": ["0", "0", "0", "0"], 
   "buildDiscarder": {"stapler-class": "hudson.tasks.LogRotator", "daysToKeepStr": "", "numToKeepStr": "", "artifactDaysToKeepStr": "", "artifactNumToKeepStr": ""}, 
   "properties": {"stapler-class-bag": "true", "hudson-model-ParametersDefinitionProperty": {}}, 
-  "hasSlaveAffinity": {"assignedLabelString": "%s"}, 
+  "hasSlaveAffinity": {"assignedLabelString": "@signed"}, 
   "displayNameOrNull": "", 
   "scm": {
     "value": "2", 
     "userRemoteConfigs": {
-      "url": "%s", 
+      "url": "@gitUrl", 
       "credentialsId": "0cc6ff73-d0ef-44c5-82c4-bfb5e9d597d2", 
       "name": "", 
       "refspec": ""
      }, 
      "branches": {
-       "name": "*/master"
+       "name": "@ref"
      }, 
      "": "auto"
   }, 
   "triggerByDependency": {}, 
   "rootPOM": "pom.xml", 
-  "goals": "%s", 
-  "mavenOpts": "", 
+  "goals": "@goals", 
+  "mavenOpts": "@mavenOpts", 
   "usePrivateRepository": false, 
   "explicitLocalRepository": {"stapler-class": "hudson.maven.local_repo.DefaultLocalRepositoryLocator"}, 
   "validationLevel": "-1", 

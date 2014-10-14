@@ -8,19 +8,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
 import play.Routes;
 import play.api.templates.Html;
@@ -33,9 +24,18 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import scala.collection.mutable.StringBuilder;
 import utils.DBFactory;
-import views.html.demo.job.*;
+import views.html.demo.job.job;
+import views.html.demo.job.modal;
 import views.html.demo.vm.vm;
 import views.html.demo.vm.vmlist;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -73,7 +73,7 @@ public class JobController extends Controller {
     DBObject obj = collection.findOne(new BasicDBObject("name", jobName));
     collection.remove(obj);
     JenkinsMaster jmaster = new JenkinsMaster("172.27.4.77", "http", 8080);
-    JenkinsMavenJob job = new JenkinsMavenJob(jmaster, jobName, null, null, null, null);
+    JenkinsMavenJob job = new JenkinsMavenJob(jmaster, jobName, null, null, null, null, null);
     job.delete();
     return ok("OK");
   }
@@ -175,6 +175,7 @@ public class JobController extends Controller {
             (String)jobData.get("name"), 
             "selenium".equals(jobData.get("type")) ? (String)vmData.get("ip") : "master", 
             (String)jobData.get("git"), 
+            "master",
             (String)jobData.get("goals"), "");
         
         int buildNumber = again ? job.build() : job.submit();

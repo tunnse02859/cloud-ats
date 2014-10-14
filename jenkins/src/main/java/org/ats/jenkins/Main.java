@@ -55,24 +55,22 @@ public class Main {
     Enumeration<InetAddress> inets = eth0.getInetAddresses();
     while (inets.hasMoreElements()) {
       String inetAddress = inets.nextElement().getHostAddress();
-      if (inetAddress.startsWith("172.27.4.")) {
-        
-        JenkinsSlave slave = null;
-        Map<String, String> env = null;
-        
-        if (gui) {
-          env = new HashMap<String, String>();
-          env.put("DISPLAY", ":0");
-        } 
-        
-        slave = new JenkinsSlave(master, inetAddress, env);
-        if (slave.join()) {
-          System.out.println("Create slave " + inetAddress + " sucessfully");
-        } else {
-          System.out.println("Can not create slave" + inetAddress);
-        }
-        return;
+
+      JenkinsSlave slave = null;
+      Map<String, String> env = null;
+
+      if (gui) {
+        env = new HashMap<String, String>();
+        env.put("DISPLAY", ":0");
+      } 
+
+      slave = new JenkinsSlave(master, inetAddress, env);
+      if (slave.join()) {
+        System.out.println("Create slave " + inetAddress + " sucessfully");
+      } else {
+        System.out.println("Can not create slave" + inetAddress);
       }
+      return;
     }
   }
   

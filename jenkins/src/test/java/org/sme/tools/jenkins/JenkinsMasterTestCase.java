@@ -74,7 +74,7 @@ public class JenkinsMasterTestCase extends AbstractVMTestCase {
       System.out.println("creating slave " + ipAddress);
       Assert.assertTrue(slave1.join());
       
-      JenkinsMavenJob job = new JenkinsMavenJob(master, "job-" + System.currentTimeMillis(), slave1.getSlaveAddress(), "http://git.sme.org/root/simple-nlp.git", "clean install", "");
+      JenkinsMavenJob job = new JenkinsMavenJob(master, "job-" + System.currentTimeMillis(), slave1.getSlaveAddress(), "http://git.sme.org/root/simple-nlp.git", "master", "clean install", "");
       int buildNumber = job.submit();
       Assert.assertEquals(1, buildNumber);
       
@@ -126,7 +126,7 @@ public class JenkinsMasterTestCase extends AbstractVMTestCase {
       JenkinsMavenJob job = new JenkinsMavenJob(
           master, 
           "job-" + System.currentTimeMillis(), slave1.getSlaveAddress(), 
-          "http://git.sme.org/root/lms.git", "clean install", "");
+          "http://git.sme.org/root/lms.git", "master", "clean install", "");
       int buildNumber = job.submit();
       Assert.assertEquals(1, buildNumber);
       

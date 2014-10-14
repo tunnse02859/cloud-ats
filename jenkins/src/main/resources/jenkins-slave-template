@@ -3,8 +3,6 @@ _.credentialsId	eff1bd7f-5d1c-46c8-9e4e-df214ff5e304
 _.numExecutors	1
 _.port	22
 _.remoteFS	/home/ubuntu/.jenkins
-#env.key DISPLAY
-#env.value :0
 hudson-tools-ToolLocationNodeProperty	on
 locations.home	/usr/bin/git
 locations.home	/home/ubuntu/java/jdk1.7.0_51
