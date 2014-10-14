@@ -139,7 +139,7 @@
 							</execution>
 						</executions>
 						<configuration>
-							<inputFile>${project.build.directory}/jmeter/results/LMS.jtl</inputFile>
+							<inputFile>${project.build.directory}/jmeter/results/script.jtl</inputFile>
 							<graphs>
 								<graph>
 									<pluginType>ThreadsStateOverTime</pluginType>
