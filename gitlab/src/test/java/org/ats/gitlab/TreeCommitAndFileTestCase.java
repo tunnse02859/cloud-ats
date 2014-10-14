@@ -22,16 +22,14 @@ import org.junit.Test;
  *
  * Oct 6, 2014
  */
-public class GitlabAPITestCase {
+public class TreeCommitAndFileTestCase extends AbstractGitlabTestCase {
 
-  private GitlabAPI api;
-  
   private GitlabProject project;
   
   @Before
+  @Override
   public void setUp() throws IOException {
-    GitlabAPI api = new GitlabAPI(org.gitlab.api.GitlabAPI.connect("http://172.27.4.77", "uvL17u8Fo7zTKmcA4NsK"));
-    this.api = api;
+    super.setUp();
     GitlabProject project = api.getAPI().getProject(1);
     this.project = project;
   }

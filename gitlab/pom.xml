@@ -25,6 +25,21 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-jmeter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-jenkins</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.rythmengine</groupId>
+			<artifactId>rythm-engine</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>

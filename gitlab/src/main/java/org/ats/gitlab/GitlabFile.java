@@ -3,6 +3,9 @@
  */
 package org.ats.gitlab;
 
+import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 
@@ -68,7 +71,9 @@ public class GitlabFile {
     this.encoding = encoding;
   }
 
-  public String getContent() {
+  public String getContent() throws UnsupportedEncodingException {
+    byte[] bytes = Base64.decodeBase64(content);
+    String content = new String(bytes, "UTF-8");
     return content;
   }
 

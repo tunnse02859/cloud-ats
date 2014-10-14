@@ -28,12 +28,69 @@ public class GitlabAPI {
   /** .*/
   private final org.gitlab.api.GitlabAPI api;
   
-  public GitlabAPI(org.gitlab.api.GitlabAPI api) {
+  /** .*/
+  private final String host;
+  
+  public GitlabAPI(String hostUrl, String apiToken) {
+   this.api = org.gitlab.api.GitlabAPI.connect(hostUrl, apiToken);
+   this.host = hostUrl.substring(hostUrl.indexOf("://") + 3);
+  }
+  
+  public GitlabAPI(org.gitlab.api.GitlabAPI api) throws IOException {
     this.api = api;
+    String hostUrl = api.getUrl("").toString();
+    this.host = hostUrl.substring(hostUrl.indexOf("://") + 3, hostUrl.lastIndexOf('/'));
+  }
+  
+  public String getHost() {
+    return this.host;
   }
   
   public org.gitlab.api.GitlabAPI getAPI() {
     return api;
+  }
+  
+  public void createFile(GitlabProject project, String filePath, String branchName, String content, String commitMsg) throws IOException {
+    this.createFile(project.getId(), filePath, branchName, content, commitMsg);
+  }
+  
+  public void createFile(Integer projectId, String filePath, String branchName, String content, String commitMsg) throws IOException {
+    String tailUrl = GitlabProject.URL + "/" + projectId + GitlabFile.URL;
+    api.dispatch()
+      .with("file_path", filePath)
+      .with("branch_name", branchName)
+      .with("content", content)
+      .with("commit_message", commitMsg)
+      .to(tailUrl,Void.class);
+  }
+
+  public void updateFile(GitlabProject project, String filePath, String branchName, String content, String commitMsg) throws IOException {
+    this.updateFile(project.getId(), filePath, branchName, content, commitMsg);
+  }
+  
+  public void updateFile(Integer projectId, String filePath, String branchName, String content, String commitMsg) throws IOException {
+    String tailUrl = GitlabProject.URL + "/" + projectId + GitlabFile.URL;
+    api.retrieve().method("PUT")
+      .with("file_path", filePath)
+      .with("branch_name", branchName)
+      .with("content", content)
+      .with("commit_message", commitMsg)
+      .to(tailUrl,Void.class);
+  }
+  
+  public List<GitlabProject> searchProjects(String query) throws IOException {
+    String tailUrl = GitlabProject.URL + "/search/" + query;
+    GitlabProject[] projects = api.retrieve().to(tailUrl, GitlabProject[].class);
+    return Arrays.asList(projects);
+  }
+  
+  public void deleteProject(GitlabProject project) throws IOException {
+    this.deleteProject(project.getId());
+  }
+  
+  public void deleteProject(Integer projectId) throws IOException {
+    String tailUrl = GitlabProject.URL + "/" + projectId;
+    api.retrieve().method("DELETE").to(tailUrl, Void.class);
   }
   
   public List<GitlabTree> getTree(GitlabProject project, GitlabTree tree, String branch) throws IOException {
