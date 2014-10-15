@@ -349,7 +349,7 @@ public class VMController extends Controller {
     } else if ("destroy".equals(action)) {
       final VMModel vm = VMHelper.getVMByID(vmId);
 
-      if (!hasPermission(vm.getGroup(), "Manage Normal VM")) return Promise.<Result>pure(forbidden(views.html.forbidden.render()));
+      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return Promise.<Result>pure(forbidden(views.html.forbidden.render()));
 
       Promise<Boolean> result = Promise.promise(new Function0<Boolean>() {
         @Override
@@ -447,7 +447,7 @@ public class VMController extends Controller {
       if (vmModel.getBoolean("system")) {
         return hasPermission(group, "Manage System VM");
       } else {
-        return hasPermission(group, "Manage Normal VM");
+        return hasPermission(group, "Manage Test VM");
       }
     }
 
@@ -484,11 +484,11 @@ public class VMController extends Controller {
   }
 
   @With(VMWizardIterceptor.class)
-  @Authorization(feature = "Virtual Machine", operation = "Manage Normal VM")
+  @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
   public static Result normalVMView(String groupId) throws Exception {
     Group group = GroupDAO.INSTANCE.findOne(groupId);
 
-    if (! hasPermission(group, "Manage Normal VM")) return forbidden(views.html.forbidden.render());
+    if (! hasPermission(group, "Manage Test VM")) return forbidden(views.html.forbidden.render());
 
     List<VMModel> list = VMHelper.getVMsByGroupID(groupId, new BasicDBObject("system", false));
     Html html = vmbody.render(checkCurrentSystem(), group, list, true);
@@ -496,7 +496,7 @@ public class VMController extends Controller {
   }
 
   @With(VMWizardIterceptor.class)
-  @Authorization(feature = "Virtual Machine", operation = "Manage Normal VM")
+  @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
   public static Promise<Result> createrNormalVM(String groupId, final boolean gui) throws Exception {
     final Group company = GroupDAO.INSTANCE.findOne(groupId);
     Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {

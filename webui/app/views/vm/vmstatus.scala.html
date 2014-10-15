@@ -22,7 +22,7 @@
   <td>
     <a data-target="@vm.getId()" style="display: none;" class="start btn btn-mini btn-blue" href="@routes.VMController.vmAction("start", vm.getId())">Start</a>
     <a data-target="@vm.getId()" style="display: none;" class="stop btn btn-mini btn-orange" href="@routes.VMController.vmAction("stop", vm.getId())">Stop</a>
-    @if(VMController.hasPermission(vm.getGroup(), "Manage Normal VM") && !vm.getBoolean("system")) {
+    @if(VMController.hasPermission(vm.getGroup(), "Manage Test VM") && !vm.getBoolean("system")) {
       <a data-target="@vm.getId()" style="display: none;" class="destroy btn btn-mini btn-red" href="@routes.VMController.vmAction("destroy", vm.getId())">Destroy</a>
     }
     @if(VMController.checkCurrentSystem() && vm.getBoolean("system")){

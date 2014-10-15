@@ -93,7 +93,7 @@ public class Application extends Controller {
       company.addFeature(vmFeature);
       
       Operation sysMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage System VM")).iterator().next();
-      Operation normalMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage Normal VM")).iterator().next();
+      Operation normalMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage Test VM")).iterator().next();
       
       Role vmRole = new Role("VM Management", company.getId());
       
@@ -192,43 +192,15 @@ public class Application extends Controller {
     String email = form.get("email");
     String password = form.get("password");
     
-    Feature organization = new Feature("Organization");
-    organization.put("desc", "This is organization management feature");
-    organization.put("system", true);
+    //Initialize Organization feature
+    FeatureInitializer.createOrganizationFeature(email, password);
     
-    Operation ad = new Operation("Administration");
-    organization.addOperation(ad);
     
-    Group system = new Group("System Admin");
-    system.put("desc", "This is group of system");
-    system.put("system", true);
-    system.put("level", 0);
-    system.addFeature(organization);
+    User root = UserDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    Group system = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
     
-    User root = new User(email, email);
-    root.put("system", true);
-    root.put("password", password);
-    root.joinGroup(system);
-    root.put("joined", true);
-    
-    system.addUser(root);
-    
-    Role administration = new Role("Administration", system.getId());
-    administration.put("desc", "This is administration role for organization management");
-    administration.put("system", true);
-    administration.addPermission(new Permission(organization.getId(), ad.getId()));
-    administration.addUser(root);
-    root.addRole(administration);
-    system.addRole(administration);
-
-    //persist
-    FeatureDAO.INSTANCE.create(organization);
-    OperationDAO.INSANCE.create(ad);
-    UserDAO.INSTANCE.create(root);
-    GroupDAO.INSTANCE.create(system);
-    RoleDAO.INSTANCE.create(administration);
-    
-    createVMFeature(root, system);
+    //Initialize VM Management feature
+    FeatureInitializer.createVMFeature(root, system);
     
     //login
     session().clear();
@@ -237,32 +209,5 @@ public class Application extends Controller {
     session().put("group_id", system.getId());
     
     return redirect(controllers.vm.routes.VMController.index());
-  }
-  
-  private static void createVMFeature(User rootUser, Group systemGroup) throws UserManagementException {
-    Feature feature = new Feature("Virtual Machine");
-    
-    Operation o1 = new Operation("Manage System VM");
-    Operation o2 = new Operation("Manage Normal VM");
-    
-    feature.addOperation(o1);
-    feature.addOperation(o2);
-    
-    Role vmRole = new Role("VM Management", systemGroup.getId());
-    vmRole.addPermission(new Permission(feature.getId(), o1.getId()));
-    vmRole.addPermission(new Permission(feature.getId(), o2.getId()));
-    vmRole.addUser(rootUser);
-    
-    rootUser.addRole(vmRole);
-    
-    systemGroup.addFeature(feature);
-    systemGroup.addRole(vmRole);
-    
-    FeatureDAO.INSTANCE.create(feature);
-    OperationDAO.INSANCE.create(o1, o2);
-    RoleDAO.INSTANCE.create(vmRole);
-    
-    UserDAO.INSTANCE.update(rootUser);
-    GroupDAO.INSTANCE.update(systemGroup);
   }
 }

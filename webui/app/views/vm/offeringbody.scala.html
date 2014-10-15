@@ -38,9 +38,9 @@
           <a href="@routes.VMController.systemVmView(rootGroup.getId())"><i class="icon-cogs"></i> System VMs</a>
         </li>
         }
-        @if(!rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage Normal VM")) {
+        @if(!rootGroup.getBoolean("system") && VMController.hasPermission(rootGroup, "Manage Test VM")) {
         <li>
-          <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Normal VMs</a>
+          <a href="@routes.VMController.normalVMView(rootGroup.getId())"><i class="icon-cog"></i> Test VMs</a>
         </li>          
         }
         @if(VMController.hasPermission(rootGroup, "Manage System VM")) {
