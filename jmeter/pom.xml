@@ -25,6 +25,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-gitlab</artifactId>
+			<classifier>tests</classifier>
+		</dependency>
+
+		<dependency>
 			<groupId>org.rythmengine</groupId>
 			<artifactId>rythm-engine</artifactId>
 		</dependency>

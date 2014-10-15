@@ -51,6 +51,13 @@
 
 			<dependency>
 			  <groupId>org.ats</groupId>
+				<artifactId>cloud-gitlab</artifactId>
+				<classifier>tests</classifier>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+			  <groupId>org.ats</groupId>
 				<artifactId>cloud-jmeter</artifactId>
 				<version>0.1-SNAPSHOT</version>
 			</dependency>
@@ -164,8 +171,10 @@
 	<modules>
 		<module>common</module>
 		<module>jenkins</module>
-		<module>cloudstack</module>
 		<module>components</module>
+		<module>cloudstack</module>
+		<module>jmeter</module>
+		<module>gitlab</module>
 	</modules>
 
 	<repositories>
@@ -184,6 +193,17 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>

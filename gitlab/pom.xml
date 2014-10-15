@@ -26,11 +26,6 @@
 
 		<dependency>
 			<groupId>org.ats</groupId>
-			<artifactId>cloud-jmeter</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ats</groupId>
 			<artifactId>cloud-jenkins</artifactId>
 		</dependency>
 
@@ -48,6 +43,16 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>

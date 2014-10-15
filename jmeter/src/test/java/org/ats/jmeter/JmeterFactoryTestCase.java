@@ -54,10 +54,10 @@ public class JmeterFactoryTestCase {
     String param1 = factory.createArgument("username", "admin");
     String param2 = factory.createArgument("password", "admin.password");
     
-    String sampleGet1 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin", param1, param2);
+    String sampleGet1 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin", null, 0, param1, param2);
     System.out.println(sampleGet1);
     
-    String sampleGet2 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin?username=admin&password=admin.password");
+    String sampleGet2 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin?username=admin&password=admin.password", null, 0);
 //    System.out.println(sampleGet2);
     Assert.assertEquals(sampleGet1, sampleGet2);
   }
@@ -68,21 +68,22 @@ public class JmeterFactoryTestCase {
     String param1 = factory.createArgument("username", "admin");
     String param2 = factory.createArgument("password", "admin.password");
     
-    String samplePost = factory.createHttpPost("login", "http://172.27.4.48:8080/signin", param1, param2);
+    String samplePost = factory.createHttpPost("login", "http://172.27.4.48:8080/signin", null, 0, param1, param2);
     System.out.println(samplePost);
   }
   
   @Test
   public void testCreateJmeterScript() throws Exception {
     JmeterFactory factory = new JmeterFactory();
-    String signinRequest = factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin");
-    String loginPost = factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", 
+    String signinRequest = factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0);
+    String loginPost = factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0,
         factory.createArgument("email", "root@system.com"),
         factory.createArgument("password", "admin"));
     
-    String oRequest = factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o?nav=group&group=40d4edcd-ff1b-483f-9b69-50aff29f49f6");
+    String oRequest = factory.createHttpGet("Organization Page", 
+        "http://172.27.4.48:9000/portal/o?nav=group&group=40d4edcd-ff1b-483f-9b69-50aff29f49f6", null, 0);
     
-    String signoutRequest = factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout");
+    String signoutRequest = factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0);
     
     String jmeter = factory.createJmeterScript(
         1, 100, 5, false, 0,

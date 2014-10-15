@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.gitlab.jmeter;
+package org.ats.jmeter;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,23 +24,22 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
 
   @Test
   public void testJMeter() throws Exception {
-    GitlabJMeter jmeter = new GitlabJMeter();
-    GitlabProject project = jmeter.createProject(api, "com.test", "jmeter");
     JmeterFactory factory = new JmeterFactory();
+    GitlabProject project = factory.createProject(api, "com.test", "jmeter");
 
     String jmeterScript = factory.createJmeterScript(1, 100, 5, false, 0, 
-        factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin"),
-        factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
-        factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o?nav=group&group=40d4edcd-ff1b-483f-9b69-50aff29f49f6"),
-        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout"));
+        factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0),
+        factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0, factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
+        factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o", null, 0),
+        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0));
     
     api.createFile(project, "src/test/jmeter/script.jmx", "master", jmeterScript, "Snapshot 1");
     
     jmeterScript = factory.createJmeterScript(1, 200, 5, false, 0, 
-        factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin"),
-        factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
-        factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o?nav=group&group=40d4edcd-ff1b-483f-9b69-50aff29f49f6"),
-        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout"));
+        factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0),
+        factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0, factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
+        factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o", null, 0),
+        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0));
     
     api.updateFile(project, "src/test/jmeter/script.jmx", "master", jmeterScript, "Snapshot 2");
 
