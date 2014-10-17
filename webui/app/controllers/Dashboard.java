@@ -3,6 +3,9 @@
  */
 package controllers;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.WizardInterceptor;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -14,17 +17,14 @@ import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import interceptor.AuthenticationInterceptor;
-import interceptor.WizardInterceptor;
-import play.Play;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

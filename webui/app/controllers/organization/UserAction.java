@@ -3,18 +3,18 @@
  */
 package controllers.organization;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WithSystem;
+import interceptor.WithoutSystem;
+import interceptor.WizardInterceptor;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import interceptor.AuthenticationInterceptor;
-import interceptor.Authorization;
-import interceptor.WithSystem;
-import interceptor.WithoutSystem;
-import interceptor.WizardInterceptor;
 
 import org.ats.component.usersmgt.Event;
 import org.ats.component.usersmgt.EventExecutor;
@@ -26,19 +26,19 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.mongodb.BasicDBObject;
-
-import controllers.Application;
-import controllers.organization.routes;
-import play.Play;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import views.html.organization.*;
-import views.html.organization.user.*;
+import views.html.organization.index;
+import views.html.organization.user.editrole;
+import views.html.organization.user.systemuser;
+
+import com.mongodb.BasicDBObject;
+
+import controllers.Application;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

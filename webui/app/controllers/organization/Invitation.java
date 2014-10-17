@@ -11,11 +11,10 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import controllers.Application;
-import controllers.routes;
-import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
+import controllers.Application;
+import controllers.routes;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

@@ -6,13 +6,12 @@ package interceptor;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import controllers.Application;
-import controllers.organization.Organization;
-import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.SimpleResult;
+import controllers.Application;
+import controllers.organization.Organization;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

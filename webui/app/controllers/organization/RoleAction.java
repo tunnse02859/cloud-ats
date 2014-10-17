@@ -3,6 +3,10 @@
  */
 package controllers.organization;
 
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WizardInterceptor;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,20 +24,17 @@ import org.ats.component.usersmgt.role.PermissionDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 
-import com.mongodb.BasicDBObject;
-
-import controllers.Application;
-import controllers.organization.routes;
-import interceptor.AuthenticationInterceptor;
-import interceptor.Authorization;
-import interceptor.WizardInterceptor;
-import play.Play;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import views.html.organization.*;
-import views.html.organization.role.*;
+import views.html.organization.index;
+import views.html.organization.role.addrole;
+import views.html.organization.role.editrole;
+
+import com.mongodb.BasicDBObject;
+
+import controllers.Application;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

@@ -22,7 +22,6 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -31,7 +30,6 @@ import views.html.leftmenu;
 import com.mongodb.BasicDBObject;
 
 import controllers.Application;
-import controllers.organization.routes;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

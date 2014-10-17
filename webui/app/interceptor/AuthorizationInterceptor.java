@@ -12,7 +12,6 @@ import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;

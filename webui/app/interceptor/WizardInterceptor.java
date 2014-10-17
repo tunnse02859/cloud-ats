@@ -1,14 +1,14 @@
 package interceptor;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.mongodb.BasicDBObject;
-
-import controllers.Application;
-import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action.Simple;
 import play.mvc.Http.Context;
 import play.mvc.SimpleResult;
+
+import com.mongodb.BasicDBObject;
+
+import controllers.Application;
 
 /**
  * 

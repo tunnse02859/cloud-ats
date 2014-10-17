@@ -56,7 +56,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import play.Play;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;

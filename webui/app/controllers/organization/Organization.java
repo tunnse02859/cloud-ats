@@ -29,24 +29,29 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
-import scala.collection.mutable.StringBuilder;
-import play.Play;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import views.html.organization.*;
-import views.html.organization.group.*;
-import views.html.organization.user.*;
-import views.html.organization.role.*;
-import views.html.organization.feature.*;
+import scala.collection.mutable.StringBuilder;
+import views.html.organization.index;
+import views.html.organization.indexajax;
+import views.html.organization.leftmenu;
+import views.html.organization.feature.feature;
+import views.html.organization.feature.features;
+import views.html.organization.group.group;
+import views.html.organization.group.groups;
+import views.html.organization.role.role;
+import views.html.organization.role.roles;
+import views.html.organization.user.user;
+import views.html.organization.user.users;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+
 import controllers.Application;
-import controllers.organization.routes;
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
