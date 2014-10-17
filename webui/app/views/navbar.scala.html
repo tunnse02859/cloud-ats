@@ -12,10 +12,10 @@
         <ul class="nav">
           <li class="divider-vertical"></li>
           @if(session().get("group_id") != null) {
-            @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { group =>
+            @defining(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id"))) { group =>
               @if(group != null) {
               <li class="active"><a class="current-group" href="#">
-                @for(g <- group.buildParentTree()) {
+                @for(g <- GroupDAO.getInstance(controllers.Application.dbName).buildParentTree(group)) {
                   / @g.get("name")
                 }
                 / @group.get("name")

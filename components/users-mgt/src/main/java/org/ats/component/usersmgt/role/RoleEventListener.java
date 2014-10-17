@@ -37,30 +37,30 @@ public class RoleEventListener implements EventListener {
   }
   
   private void processDeletePermisisonInRole(Event event) throws UserManagementException {
-    Role role = new Role(event.getSource());
+    Role role = new Role().from(event.getSource());
     Collection<Permission> perms = role.getPermissions();
     for (Permission perm : perms) {
-      PermissionDAO.INSTANCE.delete(perm);
+      PermissionDAO.getInstance(event.getDbName()).delete(perm);
     }
   }
 
   private void processDeleteRoleInGroup(Event event) throws UserManagementException {
-    Role role = new Role(event.getSource());
+    Role role = new Role().from(event.getSource());
     Pattern p = Pattern.compile(role.getId());
-    Collection<Group> groups = GroupDAO.INSTANCE.find(new BasicDBObject("role_ids", p));
+    Collection<Group> groups = GroupDAO.getInstance(event.getDbName()).find(new BasicDBObject("role_ids", p));
     for (Group group : groups) {
       group.removeRole(role);
-      GroupDAO.INSTANCE.update(group);
+      GroupDAO.getInstance(event.getDbName()).update(group);
     }
   }
   
   private void processDeleteRoleInUser(Event event) throws UserManagementException {
-    Role role = new Role(event.getSource());
+    Role role = new Role().from(event.getSource());
     Pattern p = Pattern.compile(role.getId());
-    Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("role_ids", p));
+    Collection<User> users = UserDAO.getInstance(event.getDbName()).find(new BasicDBObject("role_ids", p));
     for (User user : users) {
       user.removeRole(role);
-      UserDAO.INSTANCE.update(user);
+      UserDAO.getInstance(event.getDbName()).update(user);
     }
   }
 }

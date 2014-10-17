@@ -1,5 +1,6 @@
 @(group: org.ats.component.usersmgt.group.Group)
 @import controllers.organization._
+@import org.ats.component.usersmgt.group._
 
 <tr class="group" id="group-@group.getId()">
   <td class='group-name'>
@@ -9,7 +10,7 @@
     @group.getString("name")</a>
   </td>
   <td class="group-ancestor">
-    @for(g <- group.buildParentTree()) {
+    @for(g <- GroupDAO.getInstance(controllers.Application.dbName).buildParentTree(group)) {
       / 
       <a href="@routes.Organization.index()?nav=group&group=@g.getId()"
         ajax-url="@routes.Organization.body()?nav=group&group=@g.getId()">

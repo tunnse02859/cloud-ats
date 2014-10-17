@@ -32,7 +32,7 @@ public class DeleteGroupListener implements EventListener {
   public void execute(Event event) throws EventExecutedException {
     try {
       if ("delete-group".equals(event.getType())) {
-        Group group = new Group(event.getSource());
+        Group group = new Group().from(event.getSource());
         if (group.getInt("level") > 1) return;
         
         VMModel jenkins = VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("jenkins", true)).get(0);

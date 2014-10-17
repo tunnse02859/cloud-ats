@@ -6,6 +6,8 @@ package interceptor;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import controllers.Application;
+import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action.Simple;
 import play.mvc.Http.Context;
@@ -20,10 +22,10 @@ import views.html.vm.wizard;
  * Sep 18, 2014
  */
 public class VMWizardIterceptor extends Simple {
-
+  
   @Override
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
-    User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(ctx.session().get("user_id"));
     if (currentUser == null) return Promise.<SimpleResult>pure(redirect("/"));
     
     if (VMHelper.vmCount() == 0) {

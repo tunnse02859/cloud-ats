@@ -12,6 +12,8 @@ import utils.OfferingHelper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
+import controllers.Application;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -34,7 +36,7 @@ public class DefaultOfferingModel extends BasicDBObject {
   }
   
   public Group getGroup() throws UserManagementException {
-    return GroupDAO.INSTANCE.findOne(this.getString("_id"));
+    return GroupDAO.getInstance(Application.dbName).findOne(this.getString("_id"));
   }
   
   public OfferingModel getOffering() {

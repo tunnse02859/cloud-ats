@@ -11,7 +11,9 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import controllers.Application;
 import controllers.routes;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -23,19 +25,19 @@ import play.mvc.Result;
 public class Invitation extends Controller {
 
   public static Result index(String u, String r, String g) throws UserManagementException {
-    User user = UserDAO.INSTANCE.findOne(u);
-    Role role = RoleDAO.INSTANCE.findOne(r);
-    Group group = GroupDAO.INSTANCE.findOne(g);
+    User user = UserDAO.getInstance(Application.dbName).findOne(u);
+    Role role = RoleDAO.getInstance(Application.dbName).findOne(r);
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(g);
     
     if (verify(user, role, group)) {
-      User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+      User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
       
       if (!currentUser.getBoolean("joined") && currentUser.getGroups().isEmpty()) {
         currentUser.joinGroup(group);
         group.addUser(currentUser);
         
-        GroupDAO.INSTANCE.update(group);
-        UserDAO.INSTANCE.update(currentUser);
+        GroupDAO.getInstance(Application.dbName).update(group);
+        UserDAO.getInstance(Application.dbName).update(currentUser);
       }
     }
     

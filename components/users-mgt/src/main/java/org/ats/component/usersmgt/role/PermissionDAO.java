@@ -15,15 +15,17 @@ import com.mongodb.DBObject;
  */
 public class PermissionDAO extends ManagementDAO<Permission> {
 
-  public static final PermissionDAO INSTANCE = new PermissionDAO();
+  private PermissionDAO(String dbName) {
+    super(dbName, "permission");
+  }
   
-  public PermissionDAO() {
-    super("permission");
+  public static PermissionDAO getInstance(String dbName) {
+    return new PermissionDAO(dbName);
   }
   
   @Override
   public Permission transform(DBObject obj) throws UserManagementException {
-    return obj == null ? null : new Permission(obj);
+    return obj == null ? null : new Permission().from(obj);
   }
 
 }

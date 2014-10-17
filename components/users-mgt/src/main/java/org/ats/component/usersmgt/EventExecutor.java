@@ -5,6 +5,7 @@ package org.ats.component.usersmgt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,15 +28,21 @@ import com.mongodb.DBObject;
  */
 public class EventExecutor {
 
+  /** .*/
   private List<EventListener> listeners;
   
-  public static final EventExecutor INSTANCE = new EventExecutor();
-  
+  /** .*/
   private ScheduledExecutorService service = null;
   
+  /** .*/
   private final LinkedBlockingQueue<Event> eventQueue = new LinkedBlockingQueue<Event>();
   
-  private EventExecutor() {
+  /** .*/
+  private static final ConcurrentHashMap<String, EventExecutor> executors = new ConcurrentHashMap<String, EventExecutor>();
+  
+  private final String dbName;
+  
+  private EventExecutor(String dbName) {
     this.listeners = new ArrayList<EventListener>();
     this.listeners.add(new OperationEventListener());
     this.listeners.add(new FeatureEventListener());
@@ -44,8 +51,10 @@ public class EventExecutor {
     this.listeners.add(new GroupEventListener());
     this.listeners.add(new UserEventListener());
     
+    this.dbName = dbName;
+    
     //
-    DBCursor cursor = DataFactory.getDatabase("cloud-ats").getCollection("event").find();
+    DBCursor cursor = DataFactory.getDatabase(dbName).getCollection("event").find();
     while (cursor.hasNext()) {
       final DBObject obj = cursor.next();
       Event event = new Event(obj) {
@@ -62,6 +71,8 @@ public class EventExecutor {
         throw new RuntimeException(e);
       }
     }
+    
+    EventExecutor.executors.put(dbName, this);
   }
   
   public void addListener(EventListener listener) {
@@ -104,10 +115,14 @@ public class EventExecutor {
   }
   
   public long eventCount() {
-    return DataFactory.getDatabase("cloud-ats").getCollection("event").count();
+    return DataFactory.getDatabase(dbName).getCollection("event").count();
   }
   
   public boolean isInProgress() {
     return eventCount() != 0;
+  }
+  
+  public static EventExecutor getInstance(String dbName) {
+    return EventExecutor.executors.get(dbName) == null ? new EventExecutor(dbName) : EventExecutor.executors.get(dbName);
   }
 }

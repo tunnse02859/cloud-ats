@@ -6,6 +6,7 @@ import org.ats.component.usersmgt.EventExecutor;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.Play;
 
 /**
  * 
@@ -20,14 +21,16 @@ public class Global extends GlobalSettings {
 
   @Override
   public void onStart(Application app) {
-    EventExecutor.INSTANCE.addListener(new DeleteGroupListener());
-    EventExecutor.INSTANCE.start();
+    String dbName = Play.application().configuration().getString("dbName");
+    EventExecutor.getInstance(dbName).addListener(new DeleteGroupListener());
+    EventExecutor.getInstance(dbName).start();
     Logger.info("Application has started...");
   }
   
   @Override
   public void onStop(Application app) {
-    EventExecutor.INSTANCE.stop();
+    String dbName = Play.application().configuration().getString("dbName");
+    EventExecutor.getInstance(dbName).stop();
     Logger.info("Application shutdown...");
   }
 

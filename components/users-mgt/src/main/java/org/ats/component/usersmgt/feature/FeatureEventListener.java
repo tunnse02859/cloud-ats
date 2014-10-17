@@ -36,20 +36,20 @@ public class FeatureEventListener implements EventListener{
   }
   
   private void processDeleteFeatureInGroup(Event event) throws UserManagementException {
-    Feature feature = new Feature(event.getSource());
+    Feature feature = new Feature().from(event.getSource());
     Pattern p = Pattern.compile(feature.getId());
-    Collection<Group> groups = GroupDAO.INSTANCE.find(new BasicDBObject("feature_ids", p));
+    Collection<Group> groups = GroupDAO.getInstance(event.getDbName()).find(new BasicDBObject("feature_ids", p));
     for (Group group : groups) {
       group.removeFeature(feature);
-      GroupDAO.INSTANCE.update(group);
+      GroupDAO.getInstance(event.getDbName()).update(group);
     }
   }
   
   private void processDeleteFeatureInPermission(Event event) throws UserManagementException {
-    Feature feature = new Feature(event.getSource());
-    Collection<Permission> perms = PermissionDAO.INSTANCE.find(new BasicDBObject("feature_id", feature.getId()));
+    Feature feature = new Feature().from(event.getSource());
+    Collection<Permission> perms = PermissionDAO.getInstance(event.getDbName()).find(new BasicDBObject("feature_id", feature.getId()));
     for (Permission perm : perms) {
-      PermissionDAO.INSTANCE.delete(perm);
+      PermissionDAO.getInstance(event.getDbName()).delete(perm);
     }
   }
 }

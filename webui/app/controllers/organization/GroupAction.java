@@ -32,7 +32,9 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
 import controllers.organization.routes;
+import play.Play;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -49,7 +51,7 @@ import views.html.organization.group.*;
 @Authorization(feature = "Organization", operation = "Administration")
 
 public class GroupAction extends Controller {
-
+  
   @WithoutSystem
   public static Result newGroup() throws UserManagementException {
     Group current = Organization.setCurrentGroup(null);
@@ -63,41 +65,41 @@ public class GroupAction extends Controller {
   
   @WithoutSystem
   public static Result newGroupBody() throws UserManagementException {
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     return ok(newgroup.render(current.getFeatures()));
   }
   
   @WithoutSystem
   public static Result doCreate() throws UserManagementException {
     String name = request().getQueryString("name");
-    Group group = new Group(name);
+    Group group = new Group(Application.dbName, name);
     group.put("desc", request().getQueryString("desc"));
     String[] features = request().queryString().get("feature");
     for (String f : features) {
-      group.addFeature(FeatureDAO.INSTANCE.findOne(f));
+      group.addFeature(FeatureDAO.getInstance(Application.dbName).findOne(f));
     }
     
     
-    Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
+    Feature organization = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Organization")).iterator().next();
     group.addFeature(organization);
     
-    Role administration = new Role("Administration", group.getId());
+    Role administration = new Role(Application.dbName, "Administration", group.getId());
     administration.put("desc", "This is administration role for organization management");
     administration.put("system", true);
     group.addRole(administration);
     
     for (Operation operation : organization.getOperations()) {
-      administration.addPermission(new Permission(organization.getId(), operation.getId()));
+      administration.addPermission(new Permission(Application.dbName, organization.getId(), operation.getId()));
     }
     
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     int level = current.getInt("level");
     group.put("level", level + 1);
     current.addGroupChild(group);
     
-    GroupDAO.INSTANCE.create(group);
-    GroupDAO.INSTANCE.update(current);
-    RoleDAO.INSTANCE.create(administration);
+    GroupDAO.getInstance(Application.dbName).create(group);
+    GroupDAO.getInstance(Application.dbName).update(current);
+    RoleDAO.getInstance(Application.dbName).create(administration);
     
     session().put("group_id", group.getId());
     
@@ -106,18 +108,18 @@ public class GroupAction extends Controller {
   
   @WithoutSystem
   public static Result invite() throws UserManagementException {
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     
     if (currentGroup.getInt("level") == 1) {
       BasicDBObject query = new BasicDBObject("group_id", currentGroup.getId());
       query.put("name", "Administration");
       query.put("user_ids", Pattern.compile(currentUser.getId()));
       
-      Role adRole = RoleDAO.INSTANCE.find(query).iterator().next();
+      Role adRole = RoleDAO.getInstance(Application.dbName).find(query).iterator().next();
       
       StringBuilder sb = new StringBuilder();
-      for (Group g : currentGroup.buildParentTree()) {
+      for (Group g : GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup)) {
         sb.append("/").append(g.get("name"));
       }
       sb.append("/").append(currentGroup.getString("name"));
@@ -131,7 +133,7 @@ public class GroupAction extends Controller {
       return ok(index.render("group" , body, currentGroup.getId()));
     } else if (currentGroup.getInt("level") > 1) {
       
-      Html body = adduser.render(getAvailableUser(currentGroup), currentGroup.buildParentTree().getLast(), currentGroup);
+      Html body = adduser.render(getAvailableUser(currentGroup), GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup).getLast(), currentGroup);
       return ok(index.render("group" , body, currentGroup.getId()));
     } else {
       return forbidden(views.html.forbidden.render());
@@ -139,25 +141,25 @@ public class GroupAction extends Controller {
   }
   
   public static Result addUser() throws UserManagementException {
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     if (request().getQueryString("user") != null) {
       String[] users = request().queryString().get("user");
       for (String u : users) {
-        User user = UserDAO.INSTANCE.findOne(u);
+        User user = UserDAO.getInstance(Application.dbName).findOne(u);
         user.joinGroup(currentGroup);
         currentGroup.addUser(user);
 
-        UserDAO.INSTANCE.update(user);
-        GroupDAO.INSTANCE.update(currentGroup);
+        UserDAO.getInstance(Application.dbName).update(user);
+        GroupDAO.getInstance(Application.dbName).update(currentGroup);
       }
     }
     return redirect(routes.Organization.index() + "?nav=user&group=" + currentGroup.getId());
   }
   
   public static Result editGroup(String g) throws UserManagementException {
-    Group group_ = GroupDAO.INSTANCE.findOne(g);
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group group_ = GroupDAO.getInstance(Application.dbName).findOne(g);
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     //Prevent edit system group or group level 1
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
@@ -172,16 +174,16 @@ public class GroupAction extends Controller {
       return forbidden(views.html.forbidden.render());
     }
     
-    LinkedList<Group> parents = group_.buildParentTree();
+    LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(group_);
     
-    Html body = editgroup.render(group_, parents.isEmpty() ? new ArrayList<Feature>(FeatureDAO.INSTANCE.find(new BasicDBObject())) : parents.getLast().getFeatures());
+    Html body = editgroup.render(group_, parents.isEmpty() ? new ArrayList<Feature>(FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject())) : parents.getLast().getFeatures());
     return ok(index.render("group", body, group_.getId()));
   }
   
   public static Result doEditGroup(String g) throws UserManagementException {
-    Group group_ = GroupDAO.INSTANCE.findOne(g);
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group group_ = GroupDAO.getInstance(Application.dbName).findOne(g);
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     //Prevent edit system group
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
@@ -206,7 +208,7 @@ public class GroupAction extends Controller {
     //Add new feature
     for (String f : actualFeature) {
       if (!currentFeature.contains(f)) {
-        Feature feature = FeatureDAO.INSTANCE.findOne(f);
+        Feature feature = FeatureDAO.getInstance(Application.dbName).findOne(f);
         group_.addFeature(feature);
       }
     }
@@ -214,21 +216,21 @@ public class GroupAction extends Controller {
     //Remove no longer feature
     for (String f : currentFeature) {
       if (!actualFeature.contains(f)) {
-        Feature feature = FeatureDAO.INSTANCE.findOne(f);
+        Feature feature = FeatureDAO.getInstance(Application.dbName).findOne(f);
         if (feature.getBoolean("system")) continue;
         group_.removeFeature(feature);
         
         //remove in children
         for (Group child : group_.getAllChildren()) {
           child.removeFeature(feature);
-          GroupDAO.INSTANCE.update(child);
+          GroupDAO.getInstance(Application.dbName).update(child);
         }
       }
     }
     
     if (request().getQueryString("name") != null) group_.put("name", request().getQueryString("name"));
     group_.put("desc", request().getQueryString("desc"));
-    GroupDAO.INSTANCE.update(group_);
+    GroupDAO.getInstance(Application.dbName).update(group_);
     
     return redirect(routes.Organization.index() + "?nav=group&group=" + currentGroup.getId());
   }
@@ -240,9 +242,9 @@ public class GroupAction extends Controller {
    * @throws UserManagementException
    */
   public static Result deleteGroup(String g) throws UserManagementException {
-    Group group_   = GroupDAO.INSTANCE.findOne(g);
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group group_   = GroupDAO.getInstance(Application.dbName).findOne(g);
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     //Prevent delete system group or group level 1
     if (group_.getBoolean("system")) return forbidden(views.html.forbidden.render());
@@ -257,18 +259,18 @@ public class GroupAction extends Controller {
     
     BasicDBObject query = new BasicDBObject("joined", true);
     query.put("group_ids", Pattern.compile(group_.getId()));
-    Collection<User> users_ = UserDAO.INSTANCE.find(query);
+    Collection<User> users_ = UserDAO.getInstance(Application.dbName).find(query);
 
-    GroupDAO.INSTANCE.delete(group_);
+    GroupDAO.getInstance(Application.dbName).delete(group_);
     
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(Application.dbName).isInProgress()) {
     }
     
     if (group_.getInt("level") == 1) {
       for (User u : users_) {
-        u = UserDAO.INSTANCE.findOne(u.getId());
+        u = UserDAO.getInstance(Application.dbName).findOne(u.getId());
         u.put("joined", false);
-        UserDAO.INSTANCE.update(u);
+        UserDAO.getInstance(Application.dbName).update(u);
       }
     }
     
@@ -276,8 +278,8 @@ public class GroupAction extends Controller {
   }
   
   private static List<User> getAvailableUser(Group groupInvitation) throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    LinkedList<Group> parents = groupInvitation.buildParentTree();
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(groupInvitation);
     Group parent = parents.getLast();
     
     for (Group g : parents) {
@@ -285,7 +287,7 @@ public class GroupAction extends Controller {
       query.put("system", true);
       query.put("group_id", g.getId());
       query.put("user_ids", Pattern.compile(currentUser.getId()));
-      if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
+      if (!RoleDAO.getInstance(Application.dbName).find(query).isEmpty()) {
         List<User> users = parent.getUsers();
         users.removeAll(groupInvitation.getUsers());
         return users;

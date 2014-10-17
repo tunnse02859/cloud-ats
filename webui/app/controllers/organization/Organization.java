@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import scala.collection.mutable.StringBuilder;
+import play.Play;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -44,7 +45,7 @@ import views.html.organization.group.*;
 import views.html.organization.user.*;
 import views.html.organization.role.*;
 import views.html.organization.feature.*;
-
+import controllers.Application;
 import controllers.organization.routes;
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -64,27 +65,27 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Group setCurrentGroup(String requestGroupId) throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     
     //Check right permission on group pass through query string
     if (requestGroupId != null) {
       
       if (isSystem(currentUser)) {
-        return GroupDAO.INSTANCE.findOne(requestGroupId);
+        return GroupDAO.getInstance(Application.dbName).findOne(requestGroupId);
       }
       
       //Check have right administration permission on exactly group
       BasicDBObject query = new BasicDBObject("group_id", requestGroupId);
       query.put("name", "Administration");
       query.put("user_ids", Pattern.compile(currentUser.getId()));
-      Collection<Role> administration = RoleDAO.INSTANCE.find(query);
+      Collection<Role> administration = RoleDAO.getInstance(Application.dbName).find(query);
       
       if (!administration.isEmpty()) {
-        return GroupDAO.INSTANCE.findOne(requestGroupId);
+        return GroupDAO.getInstance(Application.dbName).findOne(requestGroupId);
       }
       
       //Or on parent group
-      Group requestGroup = GroupDAO.INSTANCE.findOne(requestGroupId);
+      Group requestGroup = GroupDAO.getInstance(Application.dbName).findOne(requestGroupId);
       for (Group g : getAministrationGroup(currentUser)) {
         if (g.getAllChildren().contains(requestGroup)) return requestGroup;
       }
@@ -96,7 +97,7 @@ public class Organization extends Controller {
       return adGroups.isEmpty() ? null : adGroups.iterator().next();
     }
     
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     if (currentGroup == null) {
       session().remove("group_id");
       currentGroup = setCurrentGroup(null);
@@ -106,11 +107,11 @@ public class Organization extends Controller {
       query.put("system", true);
       query.put("user_ids", Pattern.compile(currentUser.getId()));
       query.put("group_id", currentGroup.getId());
-      if (RoleDAO.INSTANCE.find(query).isEmpty()) {
-        LinkedList<Group> parents = currentGroup.buildParentTree();
+      if (RoleDAO.getInstance(Application.dbName).find(query).isEmpty()) {
+        LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup);
         for (Group group : parents) {
           query.put("group_id", group.getId());
-          if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
+          if (!RoleDAO.getInstance(Application.dbName).find(query).isEmpty()) {
             return currentGroup;
           }
         }
@@ -166,7 +167,7 @@ public class Organization extends Controller {
     Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     StringBuilder sb = new StringBuilder();
-    LinkedList<Group> parents = currentGroup.buildParentTree();
+    LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup);
     for (Group parent : parents) {
       sb.append(" / ").append(parent.getString("name"));
     }
@@ -190,8 +191,8 @@ public class Organization extends Controller {
   private static Html bodyComposite(Map<String, String[]> parameters) throws UserManagementException {
     
     String nav = parameters.containsKey("nav") ? parameters.get("nav")[0] : "group";
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     if ("group".equals(nav)) {
       
@@ -254,11 +255,11 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   private static List<Group> listGroupVisible() throws UserManagementException {
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     List<Group> all = null;
     if (current.getBoolean("system")) {
-      all = new ArrayList<Group>(GroupDAO.INSTANCE.find(new BasicDBObject()));
+      all = new ArrayList<Group>(GroupDAO.getInstance(Application.dbName).find(new BasicDBObject()));
     }  else {
       all = new ArrayList<Group>(current.getAllChildren());
     }
@@ -275,13 +276,13 @@ public class Organization extends Controller {
   }
   
   private static List<User> listUserVisible() throws UserManagementException {
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     List<User> all = null;
     if (current.getBoolean("system")) {
-      all = new ArrayList<User>(UserDAO.INSTANCE.find(new BasicDBObject()));
+      all = new ArrayList<User>(UserDAO.getInstance(Application.dbName).find(new BasicDBObject()));
     } else {
       Pattern p = Pattern.compile(current.getId());
-      Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("group_ids", p));
+      Collection<User> users = UserDAO.getInstance(Application.dbName).find(new BasicDBObject("group_ids", p));
       all = new ArrayList<User>(users);
     }
     return all;
@@ -293,10 +294,10 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   static Collection<Group> getAdministrationGroup() throws UserManagementException {
-    User user = UserDAO.INSTANCE.findOne(session("user_id"));
+    User user = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     
     if (user.getBoolean("system")) {
-      return GroupDAO.INSTANCE.find(new BasicDBObject("system", true));
+      return GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true));
     }
     
     return getAministrationGroup(user);
@@ -316,7 +317,7 @@ public class Organization extends Controller {
       query.put("system", true);
       query.put("group_id", g.getId());
       query.put("user_ids", Pattern.compile(user.getId()));
-      if (!RoleDAO.INSTANCE.find(query).isEmpty()) {
+      if (!RoleDAO.getInstance(Application.dbName).find(query).isEmpty()) {
         list.add(g);
       }
     }
@@ -339,7 +340,7 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static Html groupBreadcrumb(String nav, String group_id) throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     Group currentGroup = setCurrentGroup(group_id);
     session().put("group_id", currentGroup.getId());
     
@@ -348,13 +349,13 @@ public class Organization extends Controller {
       sb.append("<li class='active'>").append(currentGroup.get("name")).append("</li>");
       return new Html(sb);
     } else if (isSystem(currentUser)) {
-      Group sys = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+      Group sys = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
       String href = routes.Organization.index().toString() + "?nav=" + nav + "&group=" + sys.getId();
       String ajax = routes.Organization.body().toString() + "?nav=" + nav + "&group=" + sys.getId();
       sb.append("<li>").append("<a href='").append(href).append("' ajax-url='").append(ajax).append("'>").append(sys.get("name")).append("</a> <span class='divider'>/</span></li>");
     }
     
-    LinkedList<Group> parents = currentGroup.buildParentTree();
+    LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup);
     
     if (!isSystem(currentUser)) {
       //Prevent current user lookup parent group with no right permission
@@ -394,20 +395,20 @@ public class Organization extends Controller {
    * @throws UserManagementException
    */
   public static long count(String nav) throws UserManagementException {
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     if ("role".equals(nav))
       return current.getRoles().size();
     else if ("feature".equals(nav))
       return current.getFeatures().size();
     else if ("group".equals(nav)) {
       if (current.getBoolean("system")) {
-        return GroupDAO.INSTANCE.count();
+        return GroupDAO.getInstance(Application.dbName).count();
       }
       return current.getAllChildren().size();
     } 
     else if ("user".equals(nav)) {
       if (current.getBoolean("system")) {
-        return UserDAO.INSTANCE.count();
+        return UserDAO.getInstance(Application.dbName).count();
       }
       return current.getUsers().size();
     }
@@ -423,7 +424,7 @@ public class Organization extends Controller {
     
     Map<String, String[]> parameters = request().queryString();
     
-    Group current = GroupDAO.INSTANCE.findOne(session("group_id"));
+    Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     if ("group".equals(nav)) {
 
@@ -442,7 +443,7 @@ public class Organization extends Controller {
           query.put("level", level);
         }
         
-        filter.addAll(GroupDAO.INSTANCE.find(query));
+        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
         
         ObjectNode json = Json.newObject();
         ArrayNode array = json.putArray("groups");
@@ -474,7 +475,7 @@ public class Organization extends Controller {
           return ok(json);
         }
         
-        filter.addAll(GroupDAO.INSTANCE.find(query));
+        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
         for (Group g : all) {
           if (filter.contains(g)) array.add(g.getId());
         }
@@ -490,7 +491,7 @@ public class Organization extends Controller {
         query.put("$text", new BasicDBObject("$search", name));
       }
       
-      filter.addAll(UserDAO.INSTANCE.find(query));
+      filter.addAll(UserDAO.getInstance(Application.dbName).find(query));
       
       ObjectNode json = Json.newObject();
       ArrayNode array = json.putArray("users");
@@ -519,7 +520,7 @@ public class Organization extends Controller {
           array.add(r.getId());
         }
       }
-      filter.addAll(RoleDAO.INSTANCE.find(query));
+      filter.addAll(RoleDAO.getInstance(Application.dbName).find(query));
       for (Role r : current.getRoles()) {
         if (filter.contains(r)) array.add(r.getId());
       }
@@ -538,7 +539,7 @@ public class Organization extends Controller {
           array.add(f.getId());
         }
       }
-      filter.addAll(FeatureDAO.INSTANCE.find(query));
+      filter.addAll(FeatureDAO.getInstance(Application.dbName).find(query));
       for (Feature f : current.getFeatures()) {
         if (filter.contains(f)) array.add(f.getId());
       }
@@ -549,7 +550,7 @@ public class Organization extends Controller {
   }
   
   public static boolean isSystem(User user) throws UserManagementException {
-    Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    Group systemGroup = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
     return systemGroup.getUsers().contains(user);
   }
   

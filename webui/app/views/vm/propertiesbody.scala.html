@@ -17,7 +17,7 @@
         <b class="caret"></b>
       </a>
       <ul class="dropdown-menu">
-        @defining(GroupDAO.INSTANCE.find(new com.mongodb.BasicDBObject("level",1))) { groups =>
+        @defining(GroupDAO.getInstance(controllers.Application.dbName).find(new com.mongodb.BasicDBObject("level",1))) { groups =>
           @for(group <- groups) {
             <li>
             <a class="group" href="@routes.VMController.changeGroup(group.getId())">@group.getString("name")</a>

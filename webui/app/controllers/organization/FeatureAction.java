@@ -22,6 +22,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -29,6 +30,7 @@ import views.html.leftmenu;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
 import controllers.organization.routes;
 
 /**
@@ -44,8 +46,8 @@ public class FeatureAction extends Controller {
   }
 
   public static boolean hasPermissionOnFeature(Feature feature) throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     
     if (currentGroup == null) return false;
     
@@ -56,13 +58,13 @@ public class FeatureAction extends Controller {
     //check for Organization feature
     if (feature.getBoolean("system") && feature.getName().equals("Organization")) {
       if (currentUser.getBoolean("system")) return true;
-      LinkedList<Group> parents = currentGroup.buildParentTree();
+      LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(currentGroup);
       for (Group parent : parents) {
         BasicDBObject query = new BasicDBObject("name", "Administration");
         query.append("system", true);
         query.append("group_id", parent.getId());
         query.append("user_ids", Pattern.compile(currentUser.getId()));
-        if (!RoleDAO.INSTANCE.find(query).isEmpty()) return true;
+        if (!RoleDAO.getInstance(Application.dbName).find(query).isEmpty()) return true;
       }
     }
     
@@ -81,10 +83,10 @@ public class FeatureAction extends Controller {
   @WithSystem
   @Authorization(feature = "Organization", operation = "Administration")
   public static Result disableFeature(String f) throws UserManagementException {
-    Feature feature = FeatureDAO.INSTANCE.findOne(f);
+    Feature feature = FeatureDAO.getInstance(Application.dbName).findOne(f);
     if (feature != null && !feature.getBoolean("system") && !feature.getBoolean("disable")) {
       feature.put("disable", true);
-      FeatureDAO.INSTANCE.update(feature);
+      FeatureDAO.getInstance(Application.dbName).update(feature);
     }
     return redirect(routes.Organization.index() + "?nav=feature");
   }
@@ -92,10 +94,10 @@ public class FeatureAction extends Controller {
   @WithSystem
   @Authorization(feature = "Organization", operation = "Administration")
   public static Result enableFeature(String f) throws UserManagementException {
-    Feature feature = FeatureDAO.INSTANCE.findOne(f);
+    Feature feature = FeatureDAO.getInstance(Application.dbName).findOne(f);
     if (feature != null && !feature.getBoolean("system") && feature.getBoolean("disable")) {
       feature.put("disable", false);
-      FeatureDAO.INSTANCE.update(feature);
+      FeatureDAO.getInstance(Application.dbName).update(feature);
     }
     return redirect(routes.Organization.index() + "?nav=feature");
   }

@@ -39,10 +39,10 @@ public class UserEventListener implements EventListener {
   }
   
   private void processLeaveUserInGroup(Event event) throws UserManagementException {
-    User user = new User(event.getSource());
+    User user = new User().from(event.getSource());
     List<Group> currentGroup = user.getGroups();
     
-    User actual = UserDAO.INSTANCE.findOne(user.getId());
+    User actual = UserDAO.getInstance(event.getDbName()).findOne(user.getId());
     List<Group> actualGroup = actual.getGroups();
     
     Group leaveGroup = null;
@@ -53,7 +53,7 @@ public class UserEventListener implements EventListener {
       }
     }
     leaveGroup.removeUser(user.getId());
-    GroupDAO.INSTANCE.update(leaveGroup);
+    GroupDAO.getInstance(event.getDbName()).update(leaveGroup);
     
     //remove role of current group
     List<Role> roles = user.getRoles();
@@ -61,7 +61,7 @@ public class UserEventListener implements EventListener {
       if (roles.contains(r)) {
         user.removeRole(r);
         r.removeUser(user);
-        RoleDAO.INSTANCE.update(r);
+        RoleDAO.getInstance(event.getDbName()).update(r);
       }
     }
     
@@ -77,28 +77,28 @@ public class UserEventListener implements EventListener {
           if (roles.contains(r)) {
             user.removeRole(r);
             r.removeUser(user);
-            RoleDAO.INSTANCE.update(r);
+            RoleDAO.getInstance(event.getDbName()).update(r);
           }
         }
         
-        GroupDAO.INSTANCE.update(child);
+        GroupDAO.getInstance(event.getDbName()).update(child);
       }
     }
     
-    UserDAO.INSTANCE.update(user);
+    UserDAO.getInstance(event.getDbName()).update(user);
   }
   
   private void processDeleteUserInGroup(Event event) throws UserManagementException {
-    User user = new User(event.getSource());
+    User user = new User().from(event.getSource());
     Pattern p = Pattern.compile(user.getId());
-    Collection<Group> groups = GroupDAO.INSTANCE.find(new BasicDBObject("user_ids", p));
+    Collection<Group> groups = GroupDAO.getInstance(event.getDbName()).find(new BasicDBObject("user_ids", p));
     for (Group group : groups) {
       group.removeUser(user);
-      GroupDAO.INSTANCE.update(group);
+      GroupDAO.getInstance(event.getDbName()).update(group);
     }
     for (Role role : user.getRoles()) {
       role.removeUser(user);
-      RoleDAO.INSTANCE.update(role);
+      RoleDAO.getInstance(event.getDbName()).update(role);
     }
   }
 }

@@ -23,6 +23,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import play.Play;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.libs.F.Function;
@@ -47,6 +48,12 @@ import controllers.vm.VMCreator;
 @With(WizardInterceptor.class)
 public class Application extends Controller {
 
+  public static String dbName;
+  
+  static {
+    dbName = Play.application().configuration().getString("dbName");
+  }
+  
   public static Result index() {
     return ok(index.render());
   }
@@ -62,51 +69,51 @@ public class Application extends Controller {
     if (group) {
       String companyName = form.get("company");
       String companyHost = form.get("host");
-      final Group company = new Group(companyName);
+      final Group company = new Group(dbName, companyName);
       company.put("host", companyHost);
       company.put("level", 1);
       
       String adminEmail = form.get("email");
       String adminPassword = form.get("password");
       
-      User admin = new User(adminEmail, adminEmail);
+      User admin = new User(dbName, adminEmail, adminEmail);
       admin.put("password", adminPassword);
       company.addUser(admin.getId());
       admin.joinGroup(company);
       admin.put("joined", true);
       
-      Feature organization = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Organization")).iterator().next();
+      Feature organization = FeatureDAO.getInstance(dbName).find(new BasicDBObject("name", "Organization")).iterator().next();
       company.addFeature(organization);  
       
-      Role administration = new Role("Administration", company.getId());
+      Role administration = new Role(dbName, "Administration", company.getId());
       administration.put("desc", "This is administration role for organization management");
       administration.put("system", true);
       company.addRole(administration);
       
       for (Operation operation : organization.getOperations()) {
-        administration.addPermission(new Permission(organization.getId(), operation.getId()));
+        administration.addPermission(new Permission(dbName, organization.getId(), operation.getId()));
       }
       administration.addUser(admin);
       admin.addRole(administration);
       
-      Feature vmFeature = FeatureDAO.INSTANCE.find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
+      Feature vmFeature = FeatureDAO.getInstance(dbName).find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
       company.addFeature(vmFeature);
       
-      Operation sysMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage System VM")).iterator().next();
-      Operation normalMgt = OperationDAO.INSANCE.find(new BasicDBObject("name", "Manage Test VM")).iterator().next();
+      Operation sysMgt = OperationDAO.getInstance(dbName).find(new BasicDBObject("name", "Manage System VM")).iterator().next();
+      Operation normalMgt = OperationDAO.getInstance(dbName).find(new BasicDBObject("name", "Manage Test VM")).iterator().next();
       
-      Role vmRole = new Role("VM Management", company.getId());
+      Role vmRole = new Role(dbName, "VM Management", company.getId());
       
-      vmRole.addPermission(new Permission(vmFeature.getId(), sysMgt.getId()));
-      vmRole.addPermission(new Permission(vmFeature.getId(), normalMgt.getId()));
+      vmRole.addPermission(new Permission(dbName, vmFeature.getId(), sysMgt.getId()));
+      vmRole.addPermission(new Permission(dbName, vmFeature.getId(), normalMgt.getId()));
 
       vmRole.addUser(admin);
       admin.addRole(vmRole);
       company.addRole(vmRole);
       
-      GroupDAO.INSTANCE.create(company);
-      UserDAO.INSTANCE.create(admin);
-      RoleDAO.INSTANCE.create(administration, vmRole);
+      GroupDAO.getInstance(dbName).create(company);
+      UserDAO.getInstance(dbName).create(admin);
+      RoleDAO.getInstance(dbName).create(administration, vmRole);
       
       //Create system vm
       Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
@@ -130,9 +137,9 @@ public class Application extends Controller {
     } else {
       String email = form.get("email");
       String password = form.get("password");
-      User user = new User(email, email);
+      User user = new User(dbName, email, email);
       user.put("password", password);
-      UserDAO.INSTANCE.create(user);
+      UserDAO.getInstance(dbName).create(user);
       
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
@@ -149,7 +156,7 @@ public class Application extends Controller {
     DynamicForm form = Form.form().bindFromRequest();
     String email = form.get("email");
     String password = form.get("password");
-    Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("email", email));
+    Collection<User> users = UserDAO.getInstance(dbName).find(new BasicDBObject("email", email));
     
     if (users.isEmpty() || users.size() > 1) {
       flash().put("signin-faild", "true");
@@ -196,8 +203,8 @@ public class Application extends Controller {
     FeatureInitializer.createOrganizationFeature(email, password);
     
     
-    User root = UserDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
-    Group system = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    User root = UserDAO.getInstance(dbName).find(new BasicDBObject("system", true)).iterator().next();
+    Group system = GroupDAO.getInstance(dbName).find(new BasicDBObject("system", true)).iterator().next();
     
     //Initialize VM Management feature
     FeatureInitializer.createVMFeature(root, system);

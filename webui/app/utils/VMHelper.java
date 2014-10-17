@@ -25,6 +25,8 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 
+import controllers.Application;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -33,7 +35,7 @@ import com.mongodb.WriteResult;
 public class VMHelper extends AbstractHelper {
 
   public static long vmCount() {
-    DB vmDB = DataFactory.getDatabase(databaseName);
+    DB vmDB = DataFactory.getDatabase(Application.dbName);
     return vmDB.getCollection(vmColumn).count();
   }
   

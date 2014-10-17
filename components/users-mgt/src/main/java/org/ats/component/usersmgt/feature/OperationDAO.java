@@ -15,15 +15,17 @@ import com.mongodb.DBObject;
  */
 public class OperationDAO extends ManagementDAO<Operation> {
   
-  public static final OperationDAO INSANCE = new OperationDAO();
+  private OperationDAO(String dbName) {
+    super(dbName, "operation");
+  }
   
-  private OperationDAO() {
-    super("operation");
+  public static OperationDAO getInstance(String dbName) {
+    return new OperationDAO(dbName);
   }
   
   @Override
   public Operation transform(DBObject obj) throws UserManagementException {
-    return obj == null ? null : new Operation(obj);
+    return obj == null ? null : new Operation().from(obj);
   }
 
 }

@@ -35,51 +35,56 @@ import com.mongodb.BasicDBObject;
  */
 public class UserDAOTest {
   
+  /** .*/
+  private static final String dbName = "cloud-ats-test";
+  
+  /** .*/
   protected User user;
   
+  /** .*/
   protected Group group;
   
   @BeforeClass
   public static void initialize() {
-    EventExecutor.INSTANCE.start();
+    EventExecutor.getInstance(dbName).start();
   }
 
   @Before
   public void setUp() throws UserManagementException {
-    Feature f = new Feature("Automation Test");
-    Operation o1 = new Operation("create");
+    Feature f = new Feature(dbName, "Automation Test");
+    Operation o1 = new Operation(dbName, "create");
     f.addOperation(o1);
-    Operation o2 = new Operation("delete");
+    Operation o2 = new Operation(dbName, "delete");
     f.addOperation(o2);
-    Operation o3 = new Operation("view");
+    Operation o3 = new Operation(dbName, "view");
     f.addOperation(o3);
     
-    FeatureDAO.INSTANCE.create(f);
-    OperationDAO.INSANCE.create(o1);
-    OperationDAO.INSANCE.create(o2);
-    OperationDAO.INSANCE.create(o3);
+    FeatureDAO.getInstance(dbName).create(f);
+    OperationDAO.getInstance(dbName).create(o1);
+    OperationDAO.getInstance(dbName).create(o2);
+    OperationDAO.getInstance(dbName).create(o3);
     
-    Group sme = new Group("SME");
-    Role role = new Role("Readonly", sme.getId());
-    role.addPermission(new Permission(f.getId(), o3.getId()));
+    Group sme = new Group(dbName, "SME");
+    Role role = new Role(dbName, "Readonly", sme.getId());
+    role.addPermission(new Permission(dbName, f.getId(), o3.getId()));
     
-    Group cloud = new Group("Cloud");
+    Group cloud = new Group(dbName, "Cloud");
     sme.addGroupChild(cloud);
     
-    Group mobile = new Group("Mobile");
+    Group mobile = new Group(dbName, "Mobile");
     sme.addGroupChild(mobile);
     
-    Group manual = new Group("Manual");
-    Role role1 = new Role("Testing", manual.getId());
+    Group manual = new Group(dbName, "Manual");
+    Role role1 = new Role(dbName, "Testing", manual.getId());
     manual.addRole(role1);
     
     sme.addFeature(f);
     sme.addRole(role);
     
 
-    RoleDAO.INSTANCE.create(role, role1);
+    RoleDAO.getInstance(dbName).create(role, role1);
     
-    User user = new User("HaiNT", "haint21@fsoft.com");
+    User user = new User(dbName, "HaiNT", "haint21@fsoft.com");
     
     user.addRole(role);
     role.addUser(user);
@@ -96,8 +101,8 @@ public class UserDAOTest {
     user.joinGroup(manual);
     manual.addUser(user);
     
-    UserDAO.INSTANCE.create(user);
-    GroupDAO.INSTANCE.create(sme, cloud, mobile, manual);
+    UserDAO.getInstance(dbName).create(user);
+    GroupDAO.getInstance(dbName).create(sme, cloud, mobile, manual);
 
     this.group = sme;
     this.user = user;
@@ -105,14 +110,14 @@ public class UserDAOTest {
   
   @Test
   public void testUserLeaveGroup() throws UserManagementException {
-    Group cloud = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Cloud")).iterator().next();
-    Group manual = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Manual")).iterator().next();
+    Group cloud = GroupDAO.getInstance(dbName).find(new BasicDBObject("name", "Cloud")).iterator().next();
+    Group manual = GroupDAO.getInstance(dbName).find(new BasicDBObject("name", "Manual")).iterator().next();
     
     Assert.assertTrue(cloud.getUsers().contains(this.user));
     Assert.assertTrue(this.group.getUsers().contains(this.user));
     
     this.user.leaveGroup(this.group);
-    Event event = new Event(this.user) {
+    Event event = new Event(this.user, dbName) {
       @Override
       public String getType() {
         return "leave-group";
@@ -120,58 +125,58 @@ public class UserDAOTest {
     };
     event.broadcast();
     
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
     
-    this.user = UserDAO.INSTANCE.findOne(this.user.getId());
-    this.group = GroupDAO.INSTANCE.findOne(this.group.getId());
-    cloud = GroupDAO.INSTANCE.findOne(cloud.getId());
+    this.user = UserDAO.getInstance(dbName).findOne(this.user.getId());
+    this.group = GroupDAO.getInstance(dbName).findOne(this.group.getId());
+    cloud = GroupDAO.getInstance(dbName).findOne(cloud.getId());
     
     Assert.assertEquals(manual, this.user.getGroups().iterator().next()); 
     Assert.assertTrue(!cloud.getUsers().contains(this.user));
     Assert.assertTrue(!this.group.getUsers().contains(this.user));
     
-    Role role = RoleDAO.INSTANCE.find(new BasicDBObject("name", "Readonly")).iterator().next();
+    Role role = RoleDAO.getInstance(dbName).find(new BasicDBObject("name", "Readonly")).iterator().next();
     Assert.assertTrue(!role.getUsers().contains(this.user));
     
-    role = RoleDAO.INSTANCE.find(new BasicDBObject("name", "Testing")).iterator().next();
+    role = RoleDAO.getInstance(dbName).find(new BasicDBObject("name", "Testing")).iterator().next();
     Assert.assertEquals(role, this.user.getRoles().iterator().next());
   }
   
   @Test
   public void tetRemoveUser() throws UserManagementException {
     Role role = this.user.getRoles().get(0);
-    UserDAO.INSTANCE.delete(this.user);
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    UserDAO.getInstance(dbName).delete(this.user);
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
-    role = RoleDAO.INSTANCE.findOne(role.getId());
+    role = RoleDAO.getInstance(dbName).findOne(role.getId());
     Assert.assertTrue(role.getUsers().isEmpty());
   }
 
   @Test
   public void testFindUser() throws UserManagementException {
-    User user = new User("HaiNT fake", "fake@mail.com");
-    UserDAO.INSTANCE.create(user);
+    User user = new User(dbName, "HaiNT fake", "fake@mail.com");
+    UserDAO.getInstance(dbName).create(user);
     
-    Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("name", "HaiNT"));
+    Collection<User> users = UserDAO.getInstance(dbName).find(new BasicDBObject("name", "HaiNT"));
     Assert.assertEquals(1, users.size());
     Assert.assertEquals(this.user, users.iterator().next());
 
     user.put("name", "HaiNTfake");
-    UserDAO.INSTANCE.update(user);
+    UserDAO.getInstance(dbName).update(user);
     
-    users = UserDAO.INSTANCE.find(new BasicDBObject("name", "HaiNT"));
+    users = UserDAO.getInstance(dbName).find(new BasicDBObject("name", "HaiNT"));
     Assert.assertEquals(1, users.size());
     Assert.assertEquals(this.user, users.iterator().next());
   }
   
   @After
   public void tearDown() {
-    DataFactory.dropDatabase("cloud-ats");
+    DataFactory.dropDatabase(dbName);
   }
   
   @AfterClass
   public static void destroy() {
-    EventExecutor.INSTANCE.stop();
+    EventExecutor.getInstance(dbName).stop();
   }
 }

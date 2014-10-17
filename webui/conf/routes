@@ -89,24 +89,6 @@ POST    /portal/vm/o/c/:g          controllers.vm.VMController.saveOffering(g)
 GET     /portal/vm/p               controllers.vm.VMController.propertiesView()
 POST    /portal/vm/p/s             controllers.vm.VMController.saveProperties()
 
-############################# Mock #######################################
-
-GET     /portal/foo                controllers.mock.FooFeature.index()
-GET     /portal/foo/a1             controllers.mock.FooFeature.doAction1()
-GET     /portal/foo/a2             controllers.mock.FooFeature.doAction2()   
-GET     /portal/foo/a3             controllers.mock.FooFeature.doAction3()
-
-GET     /portal/bar                controllers.mock.BarFeature.index()
-GET     /portal/bar/a1             controllers.mock.BarFeature.doAction1()
-GET     /portal/bar/a2             controllers.mock.BarFeature.doAction2()   
-GET     /portal/bar/a3             controllers.mock.BarFeature.doAction3()
-
-GET     /portal/juu                controllers.mock.JuuFeature.index()
-GET     /portal/juu/a1             controllers.mock.JuuFeature.doAction1()
-GET     /portal/juu/a2             controllers.mock.JuuFeature.doAction2()   
-GET     /portal/juu/a3             controllers.mock.JuuFeature.doAction3()
-
-
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()
 GET     /demo/signin                     controllers.demo.Application.signin()

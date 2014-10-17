@@ -12,6 +12,7 @@ import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
@@ -19,16 +20,18 @@ import play.mvc.SimpleResult;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Aug 13, 2014
  */
 public class AuthorizationInterceptor extends Action<Authorization> {
-
+  
   @Override
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
-    User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(ctx.session().get("user_id"));
     if (currentUser == null) return Promise.<SimpleResult>pure(redirect("/"));
     
     if (!currentUser.getBoolean("joined")) {
@@ -37,7 +40,7 @@ public class AuthorizationInterceptor extends Action<Authorization> {
       ));
     }
     
-    Group currentGroup = GroupDAO.INSTANCE.findOne(ctx.session().get("group_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(ctx.session().get("group_id"));
     if (currentGroup == null)
       return Promise.<SimpleResult>pure(forbidden(
           views.html.forbidden.render()
@@ -45,7 +48,7 @@ public class AuthorizationInterceptor extends Action<Authorization> {
 
     
       
-    Feature feature = FeatureDAO.INSTANCE.find(new BasicDBObject("name", configuration.feature())).iterator().next();
+    Feature feature = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", configuration.feature())).iterator().next();
     
     if (feature == null || feature.getBoolean("disable")) 
       return Promise.<SimpleResult>pure(forbidden(

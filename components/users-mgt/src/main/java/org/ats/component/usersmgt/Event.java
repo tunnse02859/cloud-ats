@@ -18,24 +18,38 @@ import com.mongodb.DBObject;
 public abstract class Event extends BasicDBObject {
 
   static final long serialVersionUID = 1L;
+
+  /** .*/
+  private final String dbName;
+
+  /** .*/
+  protected BaseObject<?> source;
   
-  protected DBObject source;
-  
-  public Event(BaseObject<?> source) {
+  public Event(BaseObject<?> source, String dbName) {
     this.source = source;
+    this.dbName = dbName;
+    
     this.put("_id", UUID.randomUUID().toString());
     this.put("source", source);
+    this.put("dbName", dbName);
   }
   
   public Event(DBObject obj) {
-    this.source = (DBObject) obj.get("source");
-    this.put("_source", obj.get("source"));
+    this.source = (BaseObject<?>) obj.get("source");
+    this.dbName = (String) obj.get("dbName");
+    
     this.put("_id", obj.get("_id"));
+    this.put("source", this.source);
     this.put("type", obj.get("type"));
+    this.put("dbName", obj.get("dbName"));
   }
   
-  public DBObject getSource() {
+  public BaseObject<?> getSource() {
     return source;
+  }
+  
+  public String getDbName() {
+    return dbName;
   }
   
   public String getId() {
@@ -47,8 +61,8 @@ public abstract class Event extends BasicDBObject {
   public void broadcast() {
     this.put("type", getType());
     try {
-      EventExecutor.INSTANCE.getQueue().put(this);
-      DB db = DataFactory.getDatabase("cloud-ats");
+      EventExecutor.getInstance(dbName).getQueue().put(this);
+      DB db = DataFactory.getDatabase(dbName);
       DBCollection col = db.getCollection("event");
       col.insert(this);
     } catch (InterruptedException e) {
@@ -58,7 +72,7 @@ public abstract class Event extends BasicDBObject {
   }
   
   public void dequeue() {
-    DB db = DataFactory.getDatabase("cloud-ats");
+    DB db = DataFactory.getDatabase(dbName);
     DBCollection col = db.getCollection("event");
     col.remove(new BasicDBObject("_id", this.get("_id")));
   }

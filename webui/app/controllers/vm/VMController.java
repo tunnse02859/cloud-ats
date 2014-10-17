@@ -56,6 +56,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import play.Play;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -87,6 +88,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
 import controllers.organization.Organization;
 
 /**
@@ -100,7 +102,7 @@ public class VMController extends Controller {
 
   @With(VMWizardIterceptor.class)
   public static Result index() throws Exception {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
 
     if (VMHelper.vmCount() == 0) {
       return currentUser.getBoolean("system") ? ok(index.render(wizard.render())) : forbidden(views.html.forbidden.render());
@@ -109,11 +111,11 @@ public class VMController extends Controller {
     boolean system = checkCurrentSystem();
     Group group = null;
     if (system) {
-      group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+      group = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
     } else {
       BasicDBObject query = new BasicDBObject("level", 1);
       query.append("user_ids", Pattern.compile(currentUser.getId()));
-      group = GroupDAO.INSTANCE.find(query).iterator().next();
+      group = GroupDAO.getInstance(Application.dbName).find(query).iterator().next();
     }
     
     if (hasPermission(group, "Manage System VM")) {
@@ -126,7 +128,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
   public static Result systemVmView(String groupId) throws Exception {
-    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(groupId);
     Html html = vmbody.render(checkCurrentSystem(), group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)), false);
     return ok(index.render(html));
   }
@@ -134,7 +136,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @WithSystem
   public static Result changeGroup(String groupId) throws Exception {
-    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(groupId);
     Html html = vmbody.render(checkCurrentSystem(), group, VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("system", true)), false);
     return ok(index.render(html));
   }
@@ -170,7 +172,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
   public static Result offeringView(String groupId) throws Exception {
-    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(groupId);
     boolean system = checkCurrentSystem();
     List<OfferingModel> list = group.getBoolean("system") ? OfferingHelper.getOfferings() : OfferingHelper.getEnableOfferings();
     Html html = offeringbody.render(system, group, list);
@@ -192,7 +194,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage System VM")
   public static Result propertiesView() throws Exception {
-    Group group = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    Group group = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
     return ok(index.render(propertiesbody.render(checkCurrentSystem(), group, VMHelper.getSystemProperties())));
   }
   
@@ -222,7 +224,7 @@ public class VMController extends Controller {
   public static Result doWizard() throws UserManagementException, IOException {
     DynamicForm form = Form.form().bindFromRequest();
 
-    Group systemGroup = GroupDAO.INSTANCE.find(new BasicDBObject("system", true)).iterator().next();
+    Group systemGroup = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
 
     String cloudstackApiUrl = form.get("cloudstack-api-url");
     String cloudstackApiKey = form.get("cloudstack-api-key");
@@ -437,7 +439,7 @@ public class VMController extends Controller {
 
   private static boolean hasRightPermission(String vmId) throws Exception {
 
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     VMModel vmModel = VMHelper.getVMByID(vmId);
     Group group = vmModel.getGroup();
 
@@ -457,14 +459,14 @@ public class VMController extends Controller {
   public static boolean hasPermission(Group group, String operation) throws Exception {
     if (!checkCurrentSystem()) {
 
-      User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+      User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
 
       //check user ACL
       if (group.getInt("level") != 1 || !group.getUsers().contains(currentUser)) {
         return false;
       }
 
-      Collection<Role> roles = RoleDAO.INSTANCE.find(new BasicDBObject("group_id", group.getId()).append("user_ids", Pattern.compile(currentUser.getId())));
+      Collection<Role> roles = RoleDAO.getInstance(Application.dbName).find(new BasicDBObject("group_id", group.getId()).append("user_ids", Pattern.compile(currentUser.getId())));
 
       for (Role role : roles) {
         for (Permission per : role.getPermissions()) {
@@ -486,7 +488,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
   public static Result normalVMView(String groupId) throws Exception {
-    Group group = GroupDAO.INSTANCE.findOne(groupId);
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(groupId);
 
     if (! hasPermission(group, "Manage Test VM")) return forbidden(views.html.forbidden.render());
 
@@ -498,7 +500,7 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
   public static Promise<Result> createrNormalVM(String groupId, final boolean gui) throws Exception {
-    final Group company = GroupDAO.INSTANCE.findOne(groupId);
+    final Group company = GroupDAO.getInstance(Application.dbName).findOne(groupId);
     Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
       @Override
       public VMModel apply() throws Throwable {
@@ -563,6 +565,6 @@ public class VMController extends Controller {
   }
 
   public static boolean checkCurrentSystem() throws UserManagementException {
-    return Organization.isSystem(UserDAO.INSTANCE.findOne(session("user_id")));
+    return Organization.isSystem(UserDAO.getInstance(Application.dbName).findOne(session("user_id")));
   }
 }

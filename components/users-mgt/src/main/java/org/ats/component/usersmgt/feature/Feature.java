@@ -3,16 +3,10 @@
  */
 package org.ats.component.usersmgt.feature;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.ats.component.usersmgt.BaseObject;
-import org.ats.component.usersmgt.UserManagementException;
-import org.ats.component.usersmgt.role.Role;
 
 import com.mongodb.DBObject;
 
@@ -25,15 +19,13 @@ public class Feature extends BaseObject<Feature> {
 
   private static final long serialVersionUID = 1L;
   
-  public Feature(String name) {
-    super();
+  public Feature() {}
+  
+  public Feature(String dbName, String name) {
+    super(dbName);
     this.put("name", name);
   }
-  
-  public Feature(DBObject obj) {
-    this.from(obj);
-  }
-  
+
   public void addOperation(String operation_id) {
     if (this.get("operation_ids") != null) {
       
@@ -72,31 +64,7 @@ public class Feature extends BaseObject<Feature> {
   }
   
   public List<Operation> getOperations() {
-    
-    if (this.get("operation_ids") == null) {
-      return Collections.emptyList();
-    }
-     
-    String[] op_ids = this.getString("operation_ids").split("::");
-    Set<Operation> operations = new HashSet<Operation>();
-
-    try {
-      for (String op_id : op_ids) {
-        Operation operation = OperationDAO.INSANCE.findOne(op_id);
-        operations.add(operation);
-      }
-    } catch (UserManagementException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-    
-    List<Operation> list = new ArrayList<Operation>(operations);
-    Collections.sort(list, new Comparator<Operation>() {
-      public int compare(Operation o1, Operation o2) {
-        return o1.getString("name").compareTo(o2.getString("name"));
-      }
-    });
-    return list;
+    return FeatureDAO.getInstance(getDbName()).getOperations(this);
   }
   
   public void setName(String name) {
@@ -106,7 +74,7 @@ public class Feature extends BaseObject<Feature> {
   public String getName() {
     return (String) this.get("name");
   }
-  
+
   @Override
   public Feature from(DBObject obj) {
     this.putAll(obj);

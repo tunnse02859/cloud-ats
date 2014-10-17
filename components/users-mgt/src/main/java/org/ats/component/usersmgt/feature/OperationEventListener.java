@@ -39,21 +39,21 @@ public class OperationEventListener implements EventListener {
    * @throws UserManagementException 
    */
   private void processDeleteOperationInFeature(Event event) throws UserManagementException {
-    Operation op = new Operation(event.getSource());
+    Operation op = new Operation().from(event.getSource());
     Pattern p = Pattern.compile(op.getId());
     
-    Collection<Feature> features = FeatureDAO.INSTANCE.find(new BasicDBObject("operation_ids", p));
+    Collection<Feature> features = FeatureDAO.getInstance(event.getDbName()).find(new BasicDBObject("operation_ids", p));
     for (Feature f : features) {
       f.removeOperation(op);
-      FeatureDAO.INSTANCE.update(f);
+      FeatureDAO.getInstance(event.getDbName()).update(f);
     }
   }
   
   private void processDeleteOperationInPermission(Event event) throws UserManagementException {
-    Operation op = new Operation(event.getSource());
-    Collection<Permission> perms = PermissionDAO.INSTANCE.find(new BasicDBObject("operation_id", op.getId()));
+    Operation op = new Operation().from(event.getSource());
+    Collection<Permission> perms = PermissionDAO.getInstance(event.getDbName()).find(new BasicDBObject("operation_id", op.getId()));
     for (Permission perm : perms) {
-      PermissionDAO.INSTANCE.delete(perm);
+      PermissionDAO.getInstance(event.getDbName()).delete(perm);
     }
   }
   

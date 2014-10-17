@@ -39,37 +39,37 @@ public class GroupEventListener implements EventListener {
   }
   
   private void processDeleteGroupInUser(Event event) throws UserManagementException {
-    Group group = new Group(event.getSource());
+    Group group = new Group().from(event.getSource());
     Pattern p = Pattern.compile(group.getId());
-    Collection<User> users = UserDAO.INSTANCE.find(new BasicDBObject("group_ids", p));
+    Collection<User> users = UserDAO.getInstance(event.getDbName()).find(new BasicDBObject("group_ids", p));
     for (User user : users) {
       user.leaveGroup(group);
-      UserDAO.INSTANCE.update(user);
+      UserDAO.getInstance(event.getDbName()).update(user);
     }
   }
   
   private void processDeleteGroupInRole(Event event) throws UserManagementException {
-    Group group = new Group(event.getSource());
-    Collection<Role> roles = RoleDAO.INSTANCE.find(new BasicDBObject("group_id", group.getId()));
+    Group group = new Group().from(event.getSource());
+    Collection<Role> roles = RoleDAO.getInstance(event.getDbName()).find(new BasicDBObject("group_id", group.getId()));
     for (Role role : roles) {
-      RoleDAO.INSTANCE.delete(role);
+      RoleDAO.getInstance(event.getDbName()).delete(role);
     }
   }
   
   private void processDeleteGroupChildren(Event event) throws UserManagementException {
-    Group group = new Group(event.getSource());
+    Group group = new Group().from(event.getSource());
     Set<Group> children = group.getGroupChildren();
     for (Group child : children) {
-      GroupDAO.INSTANCE.delete(child);
+      GroupDAO.getInstance(event.getDbName()).delete(child);
     }
   }
   
   private void processDeleteGroupInParent(Event event) throws UserManagementException {
-    Group group = new Group(event.getSource());
-    Collection<Group> parents = GroupDAO.INSTANCE.find(new BasicDBObject("group_children_ids", Pattern.compile(group.getId())));
+    Group group = new Group().from(event.getSource());
+    Collection<Group> parents = GroupDAO.getInstance(event.getDbName()).find(new BasicDBObject("group_children_ids", Pattern.compile(group.getId())));
     for (Group parent : parents) {
       parent.removeGroupChild(group);
-      GroupDAO.INSTANCE.update(parent);
+      GroupDAO.getInstance(event.getDbName()).update(parent);
     }
   }
 }

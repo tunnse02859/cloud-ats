@@ -21,8 +21,8 @@
     @leftmenu("Dashboard")
     
     <section id="main" class="main container">
-    @defining(UserDAO.INSTANCE.findOne(session().get("user_id"))) { currentUser =>
-      @defining(GroupDAO.INSTANCE.findOne(session().get("group_id"))) { currentGroup =>
+    @defining(UserDAO.getInstance(controllers.Application.dbName).findOne(session().get("user_id"))) { currentUser =>
+      @defining(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id"))) { currentGroup =>
         @body(currentUser, currentGroup)      
       }
     }

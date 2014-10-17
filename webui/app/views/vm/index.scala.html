@@ -29,7 +29,7 @@
               <span class="icon-dashboard"></span>Dashboard
             </a>
           </li>
-          @defining(FeatureDAO.INSTANCE.find(new BasicDBObject())) { features =>
+          @defining(FeatureDAO.getInstance(controllers.Application.dbName).find(new BasicDBObject())) { features =>
             @for(feature <- features) {
               @if(FeatureAction.hasPermissionOnFeature(feature)) {
                 

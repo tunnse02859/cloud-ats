@@ -25,37 +25,41 @@ import org.junit.Test;
  */
 public class RoleDAOTest {
   
+  /** .*/
+  private final static String dbName = "cloud-ats-test";
+  
+  /** .*/
   private Role role;
   
   @BeforeClass
   public static void initialize() {
-    EventExecutor.INSTANCE.start();
+    EventExecutor.getInstance(dbName).start();
   }
 
   @Before
   public void setUp() throws UserManagementException {
-    Feature f = new Feature("Automation Test");
-    Operation o1 = new Operation("create");
+    Feature f = new Feature(dbName, "Automation Test");
+    Operation o1 = new Operation(dbName, "create");
     f.addOperation(o1);
-    Operation o2 = new Operation("delete");
+    Operation o2 = new Operation(dbName, "delete");
     f.addOperation(o2);
-    Operation o3 = new Operation("view");
+    Operation o3 = new Operation(dbName, "view");
     f.addOperation(o3);
     
-    FeatureDAO.INSTANCE.create(f);
-    OperationDAO.INSANCE.create(o1);
-    OperationDAO.INSANCE.create(o2);
-    OperationDAO.INSANCE.create(o3);
+    FeatureDAO.getInstance(dbName).create(f);
+    OperationDAO.getInstance(dbName).create(o1);
+    OperationDAO.getInstance(dbName).create(o2);
+    OperationDAO.getInstance(dbName).create(o3);
     
-    role = new Role("Readonly", "fake");
-    role.addPermission(new Permission(f.getId(), o3.getId()));
-    RoleDAO.INSTANCE.create(role);
+    role = new Role(dbName, "Readonly", "fake");
+    role.addPermission(new Permission(dbName, f.getId(), o3.getId()));
+    RoleDAO.getInstance(dbName).create(role);
   }
   
   @Test
   public void testRole() throws UserManagementException {
     
-    Role actual = RoleDAO.INSTANCE.findOne(role.getId());
+    Role actual = RoleDAO.getInstance(dbName).findOne(role.getId());
     Assert.assertEquals(role, actual);
     
     Assert.assertEquals(1, actual.getPermissions().size());
@@ -68,24 +72,24 @@ public class RoleDAOTest {
   
   @Test
   public void testDeleteOperation() throws UserManagementException {
-    Role actual = RoleDAO.INSTANCE.findOne(role.getId());
+    Role actual = RoleDAO.getInstance(dbName).findOne(role.getId());
     Assert.assertEquals(1, actual.getPermissions().size());
     
     Permission perm = role.getPermissions().iterator().next();
     String operation_id = perm.getString("operation_id");
-    OperationDAO.INSANCE.delete(operation_id);
+    OperationDAO.getInstance(dbName).delete(operation_id);
     
   //wait until process whole events
-    while (EventExecutor.INSTANCE.isInProgress()) {
+    while (EventExecutor.getInstance(dbName).isInProgress()) {
     }
     
-    long eventCount = EventExecutor.INSTANCE.getQueue().size();
+    long eventCount = EventExecutor.getInstance(dbName).getQueue().size();
     Assert.assertEquals(0, eventCount);
     
-    eventCount = DataFactory.getDatabase("cloud-ats").getCollection("event").count();
+    eventCount = DataFactory.getDatabase(dbName).getCollection("event").count();
     Assert.assertEquals(0, eventCount);
     
-    actual = RoleDAO.INSTANCE.findOne(role.getId());
+    actual = RoleDAO.getInstance(dbName).findOne(role.getId());
     Assert.assertTrue(actual.getPermissions().isEmpty());
   }
   
@@ -95,34 +99,34 @@ public class RoleDAOTest {
     
     Permission perm = role.getPermissions().iterator().next();
     String feature_id = perm.getString("feature_id");
-    FeatureDAO.INSTANCE.delete(feature_id);
+    FeatureDAO.getInstance(dbName).delete(feature_id);
     
   //wait until process whole events
-    while (EventExecutor.INSTANCE.isInProgress()) {
+    while (EventExecutor.getInstance(dbName).isInProgress()) {
     }
 
-    Role actual = RoleDAO.INSTANCE.findOne(role.getId());
+    Role actual = RoleDAO.getInstance(dbName).findOne(role.getId());
     Assert.assertTrue(actual.getPermissions().isEmpty());
   }
   
   @Test
   public void testDeleteRole() throws UserManagementException {
     Permission perm = role.getPermissions().iterator().next();
-    RoleDAO.INSTANCE.delete(role);
+    RoleDAO.getInstance(dbName).delete(role);
     
   //wait until process whole events
-    while (EventExecutor.INSTANCE.isInProgress()) {
+    while (EventExecutor.getInstance(dbName).isInProgress()) {
     }
-    Assert.assertNull(PermissionDAO.INSTANCE.findOne(perm.getId()));
+    Assert.assertNull(PermissionDAO.getInstance(dbName).findOne(perm.getId()));
   }
   
   @After
   public void tearDown() {
-    DataFactory.dropDatabase("cloud-ats");
+    DataFactory.dropDatabase(dbName);
   }
   
   @AfterClass
   public static void destroy() {
-    EventExecutor.INSTANCE.stop();
+    EventExecutor.getInstance(dbName).stop();
   }
 }

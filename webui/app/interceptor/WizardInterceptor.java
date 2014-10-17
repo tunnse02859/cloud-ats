@@ -3,6 +3,8 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
+import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action.Simple;
 import play.mvc.Http.Context;
@@ -21,13 +23,13 @@ public class WizardInterceptor extends Simple {
 
   @Override
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
-    if (UserDAO.INSTANCE.find(new BasicDBObject("system", true)).isEmpty()
+    if (UserDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).isEmpty()
         && !ctx._requestHeader().path().equals("/wizard")) {
       
       return Promise.<SimpleResult>pure(redirect("/wizard"));
     } 
     
-    if (!UserDAO.INSTANCE.find(new BasicDBObject("system", true)).isEmpty() 
+    if (!UserDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).isEmpty() 
         && ctx._requestHeader().path().equals("/wizard")){
       
       return Promise.<SimpleResult>pure(redirect("/"));

@@ -16,7 +16,7 @@
     <a href="@routes.GroupAction.newGroup()" ajax-url="@routes.GroupAction.newGroupBody()" 
       class="btn btn-primary pull-right creategroup">
     <i class="icon-plus"></i> Create Group</a>
-      @if(GroupDAO.INSTANCE.findOne(session().get("group_id")).getInt("level") > 1) {
+      @if(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id")).getInt("level") > 1) {
         <a href="@routes.GroupAction.invite()" class="btn pull-right" style="margin-right: 5px;">
         <i class="icon-plus"></i> 
         Add User

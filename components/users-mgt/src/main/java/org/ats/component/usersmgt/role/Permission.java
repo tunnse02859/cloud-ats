@@ -21,22 +21,20 @@ public class Permission extends BaseObject<Permission>{
 
   private static final long serialVersionUID = 1L;
   
-  public Permission(String featureId, String operationId) {
-    super();
+  public Permission() {}
+  
+  public Permission(String dbName, String featureId, String operationId) {
+    super(dbName);
     this.put("feature_id", featureId);
     this.put("operation_id", operationId);
   }
-  
-  public Permission(DBObject obj) {
-    this.from(obj);
-  }
-  
+
   public Feature getFeature() throws UserManagementException {
-    return FeatureDAO.INSTANCE.findOne(this.getString("feature_id"));
+    return FeatureDAO.getInstance(getDbName()).findOne(this.getString("feature_id"));
   }
   
   public Operation getOpertion() throws UserManagementException {
-    return OperationDAO.INSANCE.findOne(this.getString("operation_id"));
+    return OperationDAO.getInstance(getDbName()).findOne(this.getString("operation_id"));
   }
 
   @Override

@@ -3,19 +3,12 @@
  */
 package org.ats.component.usersmgt.user;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.ats.component.usersmgt.BaseObject;
-import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
-import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.role.Role;
-import org.ats.component.usersmgt.role.RoleDAO;
 
 import com.mongodb.DBObject;
 
@@ -27,18 +20,16 @@ import com.mongodb.DBObject;
 public class User extends BaseObject<User> {
 
   private static final long serialVersionUID = 1L;
+
+  public User() {}
   
-  public User(String name, String email) {
-    super();
+  public User(String dbName, String name, String email) {
+    super(dbName);
     this.put("name", name);
     this.put("email", email);
     this.put("active", true);
   }
   
-  public User(DBObject obj) {
-    this.from(obj);
-  }
-
   public String getName() {
     return (String) this.get("name");
   }
@@ -90,26 +81,7 @@ public class User extends BaseObject<User> {
   }
   
   public List<Group> getGroups() {
-    if (this.get("group_ids") == null) return Collections.emptyList();
-    
-    Set<String> group_ids = this.stringIDtoSet(this.getString("group_ids"));
-    Set<Group> groups = new HashSet<Group>();
-    for (String group_id : group_ids) {
-      try {
-        Group group = GroupDAO.INSTANCE.findOne(group_id);
-        groups.add(group);
-      } catch (UserManagementException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
-    }
-    List<Group> list = new ArrayList<Group>(groups);
-    Collections.sort(list, new Comparator<Group>() {
-      public int compare(Group o1, Group o2) {
-        return o1.getString("name").compareTo(o2.getString("name"));
-      }
-    });
-    return list;
+    return UserDAO.getInstance(getDbName()).getGroups(this);
   }
   
   public void addRole(Role role) {
@@ -141,28 +113,7 @@ public class User extends BaseObject<User> {
   }
   
   public List<Role> getRoles() {
-    if (this.get("role_ids") == null) return Collections.emptyList();
-    
-    Set<String> role_ids = this.stringIDtoSet(this.getString("role_ids"));
-    Set<Role> roles = new HashSet<Role>();
-    
-    for (String role_id : role_ids) {
-      try {
-        Role role = RoleDAO.INSTANCE.findOne(role_id);
-        roles.add(role);
-      } catch (UserManagementException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
-    }
-    
-    List<Role> list = new ArrayList<Role>(roles);
-    Collections.sort(list, new Comparator<Role>() {
-      public int compare(Role o1, Role o2) {
-        return o1.getString("name").compareTo(o2.getString("name"));
-      }
-    });
-    return list;
+    return UserDAO.getInstance(getDbName()).getRoles(this);
   }
 
   @Override

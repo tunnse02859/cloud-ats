@@ -13,13 +13,13 @@
      
     <a href="javascript:void(0);" ajax-url="@routes.Organization.filter("user")" class="filter btn btn-cyan"><i class="icon-search"></i></a>
     @if(system) {
-      @if(GroupDAO.INSTANCE.findOne(session().get("group_id")).getBoolean("system")) {
+      @if(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id")).getBoolean("system")) {
       <a href="@routes.UserAction.createUserSystem()" class="pull-right btn btn-primary"><i class="icon icon-plus"></i> System User</a>
       } 
     }
     
     @if(!system){
-      @if(GroupDAO.INSTANCE.findOne(session().get("group_id")).getInt("level") > 1) {
+      @if(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id")).getInt("level") > 1) {
         <a href="@routes.GroupAction.invite()" class="btn pull-right" style="margin-right: 5px;">
         <i class="icon-plus"></i> 
         Add User

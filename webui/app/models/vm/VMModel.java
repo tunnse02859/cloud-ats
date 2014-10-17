@@ -12,6 +12,8 @@ import utils.OfferingHelper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
+import controllers.Application;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -49,7 +51,7 @@ public class VMModel extends BasicDBObject {
   
   public Group getGroup() {
     try {
-      return GroupDAO.INSTANCE.findOne(this.getString("group_id"));
+      return GroupDAO.getInstance(Application.dbName).findOne(this.getString("group_id"));
     } catch (UserManagementException e) {
       throw new RuntimeException(e);
     }

@@ -22,14 +22,15 @@ import com.mongodb.WriteResult;
  */
 public abstract class ManagementDAO<T extends BaseObject<T>> {
 
-  protected final String dbName = "cloud-ats";
+  protected final String dbName;
 
   protected final String colName;
 
-  public ManagementDAO(String colName) {
+  public ManagementDAO(String dbName, String colName) {
+    this.dbName = dbName;
     this.colName = colName;
   }
-
+  
   protected DBCollection getColumn() {
     DB db = DataFactory.getDatabase(dbName);
     DBCollection col = db.getCollection(colName);
@@ -64,7 +65,7 @@ public abstract class ManagementDAO<T extends BaseObject<T>> {
     WriteResult result = col.remove(obj);
 
     if (result.getError() == null) {
-      Event event = new Event(obj) {
+      Event event = new Event(obj, dbName) {
         @Override
         public String getType() {
           return "delete-" + colName;
@@ -82,7 +83,7 @@ public abstract class ManagementDAO<T extends BaseObject<T>> {
     WriteResult result = col.remove(obj);
 
     if (result.getError() == null) {
-      Event event = new Event(obj) {
+      Event event = new Event(obj, dbName) {
         @Override
         public String getType() {
           return "delete-" + colName;

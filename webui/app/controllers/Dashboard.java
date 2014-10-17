@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
+import play.Play;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -33,16 +34,16 @@ import scala.collection.mutable.StringBuilder;
 
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class Dashboard extends Controller {
-
+  
   public static Result body() throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group currentGroup = GroupDAO.INSTANCE.findOne(session("group_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
     return ok(views.html.dashboard.body.render(currentUser, currentGroup));
   }
   
   public static Html groupMenuList() throws UserManagementException {
     StringBuilder sb = new StringBuilder();
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     
     List<Group> groups = currentUser.getGroups();
     Collections.sort(groups, new Comparator<Group>() {
@@ -54,7 +55,7 @@ public class Dashboard extends Controller {
     for (Group group : groups) {
       sb.append("<li><a href='");
       sb.append(controllers.routes.Dashboard.changeGroup(group.getId())).append("'>");
-      LinkedList<Group> parents = group.buildParentTree();
+      LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(group);
       for (Group p : parents) {
         sb.append(" / ").append(p.getString("name"));
       }
@@ -65,8 +66,8 @@ public class Dashboard extends Controller {
   }
   
   public static Result changeGroup(String g) throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
-    Group group = GroupDAO.INSTANCE.findOne(g);
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group group = GroupDAO.getInstance(Application.dbName).findOne(g);
     if (group.getUsers().contains(currentUser)) {
       session("group_id", group.getId());
     }
@@ -74,12 +75,12 @@ public class Dashboard extends Controller {
   }
   
   public static Result updateProfile() throws UserManagementException {
-    User currentUser = UserDAO.INSTANCE.findOne(session("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     currentUser.put("firstname", request().getQueryString("firstname"));
     currentUser.put("lastname", request().getQueryString("lastname"));
     currentUser.put("im", request().getQueryString("im"));
     currentUser.put("tel", request().getQueryString("tel"));
-    UserDAO.INSTANCE.update(currentUser);
+    UserDAO.getInstance(Application.dbName).update(currentUser);
     
     ObjectNode json = Json.newObject();
     json.put("firstname", currentUser.getString("firstname"));

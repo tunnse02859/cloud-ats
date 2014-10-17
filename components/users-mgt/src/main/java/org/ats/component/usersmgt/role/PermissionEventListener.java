@@ -31,12 +31,12 @@ public class PermissionEventListener implements EventListener {
   }
 
   private void processDeletePermissionInRole(Event event) throws UserManagementException {
-    Permission permission = new Permission(event.getSource());
+    Permission permission = new Permission().from(event.getSource());
     Pattern p = Pattern.compile(permission.getId());
-    Collection<Role> roles = RoleDAO.INSTANCE.find(new BasicDBObject("permission_ids", p));
+    Collection<Role> roles = RoleDAO.getInstance(event.getDbName()).find(new BasicDBObject("permission_ids", p));
     for (Role role : roles) {
       role.removePermission(permission);
-      RoleDAO.INSTANCE.update(role);
+      RoleDAO.getInstance(event.getDbName()).update(role);
     }
   }
 }

@@ -12,6 +12,8 @@ import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import controllers.Application;
+import play.Play;
 import play.libs.F.Promise;
 import play.mvc.Action.Simple;
 import play.mvc.Http.Context;
@@ -28,11 +30,11 @@ public class AuthenticationInterceptor extends Simple {
   public Promise<SimpleResult> call(Context ctx) throws Throwable {
     if (ctx.session().get("user_id") == null) return Promise.<SimpleResult>pure(redirect(controllers.routes.Application.signin()));
     else {
-      User user = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+      User user = UserDAO.getInstance(Application.dbName).findOne(ctx.session().get("user_id"));
       if (user == null || !user.isActive()) return Promise.<SimpleResult>pure(redirect(controllers.routes.Application.signout()));
     }
     //put group id to session if non-exist
-    User currentUser = UserDAO.INSTANCE.findOne(ctx.session().get("user_id"));
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(ctx.session().get("user_id"));
     List<Group> groups = currentUser.getGroups();
     if (!ctx.session().containsKey("group_id") && !groups.isEmpty()) {
       Collections.sort(groups, new Comparator<Group>() {

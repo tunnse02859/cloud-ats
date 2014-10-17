@@ -22,10 +22,12 @@ import org.ats.component.usersmgt.role.RoleDAO;
 
 import com.mongodb.BasicDBObject;
 
+import controllers.Application;
 import controllers.organization.routes;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.WizardInterceptor;
+import play.Play;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -59,16 +61,16 @@ public class RoleAction extends Controller {
       String desc = request().getQueryString("desc");
       
       String[] op_ids = request().queryString().get("operation");
-      Role role_ = new Role(name, currentGroup.getId());
+      Role role_ = new Role(Application.dbName, name, currentGroup.getId());
       role_.put("desc", desc);
       
       for (String op_id : op_ids) {
-        Feature f = FeatureDAO.INSTANCE.find(new BasicDBObject("operation_ids", Pattern.compile(op_id))).iterator().next();
-        role_.addPermission(new Permission(f.getId(), op_id));
+        Feature f = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("operation_ids", Pattern.compile(op_id))).iterator().next();
+        role_.addPermission(new Permission(Application.dbName, f.getId(), op_id));
       }
-      RoleDAO.INSTANCE.create(role_);
+      RoleDAO.getInstance(Application.dbName).create(role_);
       currentGroup.addRole(role_);
-      GroupDAO.INSTANCE.update(currentGroup);
+      GroupDAO.getInstance(Application.dbName).update(currentGroup);
     }
     return redirect(routes.Organization.index() + "?nav=role");
   }
@@ -77,7 +79,7 @@ public class RoleAction extends Controller {
     Group currentGroup = Organization.setCurrentGroup(null);
     session().put("group_id", currentGroup.getId());
     
-    Role role_ = RoleDAO.INSTANCE.findOne(r);
+    Role role_ = RoleDAO.getInstance(Application.dbName).findOne(r);
     
     //Prevent system role or no right permission
     if (role_.getBoolean("system") || !currentGroup.getRoles().contains(role_)) return forbidden(views.html.forbidden.render()); 
@@ -90,7 +92,7 @@ public class RoleAction extends Controller {
     Group currentGroup = Organization.setCurrentGroup(null);
     session().put("group_id", currentGroup.getId());
     
-    Role role_ = RoleDAO.INSTANCE.findOne(r);
+    Role role_ = RoleDAO.getInstance(Application.dbName).findOne(r);
     
     //Prevent system role or no right permission
     if (role_.getBoolean("system") || !currentGroup.getRoles().contains(role_)) return forbidden(views.html.forbidden.render()); 
@@ -106,8 +108,8 @@ public class RoleAction extends Controller {
       //Add more permission if not existed
       for (String op_id : op_ids) {
         if (!pers.contains(op_id)) {
-          Feature f = FeatureDAO.INSTANCE.find(new BasicDBObject("operation_ids", Pattern.compile(op_id))).iterator().next();
-          role_.addPermission(new Permission(f.getId(), op_id));
+          Feature f = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("operation_ids", Pattern.compile(op_id))).iterator().next();
+          role_.addPermission(new Permission(Application.dbName, f.getId(), op_id));
         }
       }
       
@@ -115,11 +117,11 @@ public class RoleAction extends Controller {
       for (String per : pers) {
         if (!op_ids.contains(per)) {
            role_.removePermission(per);
-           PermissionDAO.INSTANCE.delete(per);
+           PermissionDAO.getInstance(Application.dbName).delete(per);
         }
       }
       
-      RoleDAO.INSTANCE.update(role_);
+      RoleDAO.getInstance(Application.dbName).update(role_);
     }
     
     return redirect(routes.Organization.index() + "?nav=role");
@@ -129,14 +131,14 @@ public class RoleAction extends Controller {
     Group currentGroup = Organization.setCurrentGroup(null);
     session().put("group_id", currentGroup.getId());
     
-    Role role_ = RoleDAO.INSTANCE.findOne(r);
+    Role role_ = RoleDAO.getInstance(Application.dbName).findOne(r);
     
     //Prevent system role or no right permission
     if (role_.getBoolean("system") || !currentGroup.getRoles().contains(role_)) return forbidden(views.html.forbidden.render());
     
-    RoleDAO.INSTANCE.delete(role_);
+    RoleDAO.getInstance(Application.dbName).delete(role_);
     
-    while (EventExecutor.INSTANCE.isInProgress()) {
+    while (EventExecutor.getInstance(Application.dbName).isInProgress()) {
     }
     
     return redirect(routes.Organization.index() + "?nav=role");
@@ -146,8 +148,8 @@ public class RoleAction extends Controller {
     Group currentGroup = Organization.setCurrentGroup(null);
     session().put("group_id", currentGroup.getId());
     
-    Role role_ = RoleDAO.INSTANCE.findOne(r);
-    Permission per = PermissionDAO.INSTANCE.findOne(p);
+    Role role_ = RoleDAO.getInstance(Application.dbName).findOne(r);
+    Permission per = PermissionDAO.getInstance(Application.dbName).findOne(p);
     
     //Prevent system role or no right permission
     if (role_.getBoolean("system") 
@@ -156,12 +158,12 @@ public class RoleAction extends Controller {
       return forbidden(views.html.forbidden.render());
     
     role_.removePermission(per);
-    PermissionDAO.INSTANCE.delete(per);
+    PermissionDAO.getInstance(Application.dbName).delete(per);
     
-    while (EventExecutor.INSTANCE.isInProgress()) {
+    while (EventExecutor.getInstance(Application.dbName).isInProgress()) {
     }
     
-    RoleDAO.INSTANCE.update(role_);
+    RoleDAO.getInstance(Application.dbName).update(role_);
     
     return redirect(routes.Organization.index() + "?nav=role");
   }

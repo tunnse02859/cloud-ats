@@ -21,15 +21,24 @@ public abstract class BaseObject<E extends BaseObject<E>> extends BasicDBObject 
   private static final long serialVersionUID = 1L;
 
   public BaseObject() {
-    this(UUID.randomUUID().toString());
+    //Default constructor
   }
   
-  public BaseObject(String _id) {
+  public BaseObject(String dbName) {
+    this(UUID.randomUUID().toString(), dbName);
+  }
+  
+  public BaseObject(String _id, String dbName) {
     this.put("_id", _id);
+    this.put("dbName", dbName);
   }
   
   public String getId() {
     return (String)this.get("_id");
+  }
+  
+  public String getDbName() {
+    return this.getString("dbName");
   }
   
   public abstract E from(DBObject obj);

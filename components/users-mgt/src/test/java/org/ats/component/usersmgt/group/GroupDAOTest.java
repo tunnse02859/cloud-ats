@@ -15,7 +15,6 @@ import org.ats.component.usersmgt.feature.FeatureDAO;
 import org.ats.component.usersmgt.feature.Operation;
 import org.ats.component.usersmgt.feature.OperationDAO;
 import org.ats.component.usersmgt.role.Permission;
-import org.ats.component.usersmgt.role.PermissionDAO;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.role.RoleDAO;
 import org.junit.After;
@@ -33,44 +32,48 @@ import com.mongodb.BasicDBObject;
  */
 public class GroupDAOTest {
 
+  /** .*/
+  private final static String dbName = "cloud-ats-test";
+  
+  /** .*/
   protected Group group;
   
   @BeforeClass
   public static void initialize() {
-    EventExecutor.INSTANCE.start();
+    EventExecutor.getInstance(dbName).start();
   }
 
   @Before
   public void setUp() throws UserManagementException {
-    Feature f = new Feature("Automation Test");
-    Operation o1 = new Operation("create");
+    Feature f = new Feature(dbName, "Automation Test");
+    Operation o1 = new Operation(dbName, "create");
     f.addOperation(o1);
-    Operation o2 = new Operation("delete");
+    Operation o2 = new Operation(dbName, "delete");
     f.addOperation(o2);
-    Operation o3 = new Operation("view");
+    Operation o3 = new Operation(dbName, "view");
     f.addOperation(o3);
     
-    FeatureDAO.INSTANCE.create(f);
-    OperationDAO.INSANCE.create(o1);
-    OperationDAO.INSANCE.create(o2);
-    OperationDAO.INSANCE.create(o3);
+    FeatureDAO.getInstance(dbName).create(f);
+    OperationDAO.getInstance(dbName).create(o1);
+    OperationDAO.getInstance(dbName).create(o2);
+    OperationDAO.getInstance(dbName).create(o3);
     
-    Group sme = new Group("SME");
+    Group sme = new Group(dbName, "SME");
 
-    Role role = new Role("Readonly", sme.getId());
-    role.addPermission(new Permission(f.getId(), o3.getId()));
+    Role role = new Role(dbName, "Readonly", sme.getId());
+    role.addPermission(new Permission(dbName, f.getId(), o3.getId()));
     
-    Group cloud = new Group("Cloud");
+    Group cloud = new Group(dbName, "Cloud");
     sme.addGroupChild(cloud);
     
-    Group mobile = new Group("Mobile");
+    Group mobile = new Group(dbName, "Mobile");
     sme.addGroupChild(mobile);
     
     sme.addFeature(f);
     sme.addRole(role);
     
-    RoleDAO.INSTANCE.create(role);
-    GroupDAO.INSTANCE.create(sme, cloud, mobile);
+    RoleDAO.getInstance(dbName).create(role);
+    GroupDAO.getInstance(dbName).create(sme, cloud, mobile);
     this.group = sme;
   }
   
@@ -85,26 +88,26 @@ public class GroupDAOTest {
   @Test
   public void testDeleteRole() throws UserManagementException {
     Role role = this.group.getRoles().iterator().next();
-    RoleDAO.INSTANCE.delete(role);
+    RoleDAO.getInstance(dbName).delete(role);
 
     //Wait until finish processing whole events
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
     
-    Group actual = GroupDAO.INSTANCE.findOne(this.group.getId());
+    Group actual = GroupDAO.getInstance(dbName).findOne(this.group.getId());
     Assert.assertTrue(actual.getRoles().isEmpty());
   }
   
   @Test
   public void testDeleteFeature() throws UserManagementException {
     Feature feature = this.group.getFeatures().iterator().next();
-    FeatureDAO.INSTANCE.delete(feature);
+    FeatureDAO.getInstance(dbName).delete(feature);
     
     //Wait until finish processing whole events
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
     
-    Group actual = GroupDAO.INSTANCE.findOne(this.group.getId());
+    Group actual = GroupDAO.getInstance(dbName).findOne(this.group.getId());
     Assert.assertTrue(actual.getFeatures().isEmpty());
     
     Role role = this.group.getRoles().iterator().next();
@@ -114,76 +117,76 @@ public class GroupDAOTest {
   @Test
   public void testDeleteGroup() throws UserManagementException {
     
-    Group cloud = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Cloud")).iterator().next();
-    Role role1 = new Role("Role1", cloud.getId());
-    RoleDAO.INSTANCE.create(role1);
+    Group cloud = GroupDAO.getInstance(dbName).find(new BasicDBObject("name", "Cloud")).iterator().next();
+    Role role1 = new Role(dbName, "Role1", cloud.getId());
+    RoleDAO.getInstance(dbName).create(role1);
     cloud.addRole(role1);
-    GroupDAO.INSTANCE.update(cloud);
+    GroupDAO.getInstance(dbName).update(cloud);
     
-    Group mobile = GroupDAO.INSTANCE.find(new BasicDBObject("name", "Mobile")).iterator().next();
-    Role role2 = new Role("Role2", mobile.getId());
-    RoleDAO.INSTANCE.create(role2);
+    Group mobile = GroupDAO.getInstance(dbName).find(new BasicDBObject("name", "Mobile")).iterator().next();
+    Role role2 = new Role(dbName, "Role2", mobile.getId());
+    RoleDAO.getInstance(dbName).create(role2);
     mobile.addRole(role2);
-    GroupDAO.INSTANCE.update(mobile);
+    GroupDAO.getInstance(dbName).update(mobile);
     
     //Delete child
-    GroupDAO.INSTANCE.delete(mobile);
+    GroupDAO.getInstance(dbName).delete(mobile);
     //Wait until finish processing whole events
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
-    this.group = GroupDAO.INSTANCE.findOne(this.group.getId());
+    this.group = GroupDAO.getInstance(dbName).findOne(this.group.getId());
     
     Assert.assertEquals(1, this.group.getAllChildren().size());
     
     //Delete group parent
-    GroupDAO.INSTANCE.delete(this.group);
+    GroupDAO.getInstance(dbName).delete(this.group);
   
     //Wait until finish processing whole events
-    while(EventExecutor.INSTANCE.isInProgress()) {
+    while(EventExecutor.getInstance(dbName).isInProgress()) {
     }
     
-    Group actual = GroupDAO.INSTANCE.findOne(this.group.getId());
+    Group actual = GroupDAO.getInstance(dbName).findOne(this.group.getId());
     Assert.assertNull(actual);
     
-    Assert.assertNull(GroupDAO.INSTANCE.findOne(cloud.getId()));
-    Assert.assertNull(RoleDAO.INSTANCE.findOne(role1.getId()));
+    Assert.assertNull(GroupDAO.getInstance(dbName).findOne(cloud.getId()));
+    Assert.assertNull(RoleDAO.getInstance(dbName).findOne(role1.getId()));
     
-    Assert.assertNull(GroupDAO.INSTANCE.findOne(mobile.getId()));
-    Assert.assertNull(RoleDAO.INSTANCE.findOne(role2.getId()));
+    Assert.assertNull(GroupDAO.getInstance(dbName).findOne(mobile.getId()));
+    Assert.assertNull(RoleDAO.getInstance(dbName).findOne(role2.getId()));
   }
   
   @Test
   public void testParentTree() throws UserManagementException {
-    Group g1  = new Group("g1");
+    Group g1  = new Group(dbName, "g1");
     
-    Group g1_1 = new Group("g1_1");
-    Group g1_2 = new Group("g1_2");
-    Group g1_3 = new Group("g1_3");
+    Group g1_1 = new Group(dbName, "g1_1");
+    Group g1_2 = new Group(dbName, "g1_2");
+    Group g1_3 = new Group(dbName, "g1_3");
     
     g1.addGroupChild(g1_1);
     g1.addGroupChild(g1_2);
     g1.addGroupChild(g1_3);
     
-    Group g1_1_1 = new Group("g1_1_1");
+    Group g1_1_1 = new Group(dbName, "g1_1_1");
     g1_1.addGroupChild(g1_1_1);
     
-    Group g1_2_1 = new Group("g1_2_1");
+    Group g1_2_1 = new Group(dbName, "g1_2_1");
     g1_2.addGroupChild(g1_2_1);
     
-    Group g1_3_1 = new Group("g1_3_1");
+    Group g1_3_1 = new Group(dbName, "g1_3_1");
     g1_3.addGroupChild(g1_3_1);
     
-    GroupDAO.INSTANCE.create(g1, g1_1, g1_1_1, g1_2, g1_2_1, g1_3, g1_3_1);
+    GroupDAO.getInstance(dbName).create(g1, g1_1, g1_1_1, g1_2, g1_2_1, g1_3, g1_3_1);
 
-    LinkedList<Group> tree = g1_1_1.buildParentTree();
+    LinkedList<Group> tree = GroupDAO.getInstance(dbName).buildParentTree(g1_1_1);
     Assert.assertEquals(g1, tree.get(0));
     Assert.assertEquals(g1_1, tree.get(1));
     
-    tree = g1_2_1.buildParentTree();
+    tree = GroupDAO.getInstance(dbName).buildParentTree(g1_2_1);
     Assert.assertEquals(g1, tree.get(0));
     Assert.assertEquals(g1_2, tree.get(1));
     
-    tree = g1_3_1.buildParentTree();
+    tree = GroupDAO.getInstance(dbName).buildParentTree(g1_3_1);
     Assert.assertEquals(g1, tree.get(0));
     Assert.assertEquals(g1_3, tree.get(1));
     
@@ -192,11 +195,11 @@ public class GroupDAOTest {
   
   @After
   public void tearDown() {
-    DataFactory.dropDatabase("cloud-ats");
+    DataFactory.dropDatabase(dbName);
   }
   
   @AfterClass
   public static void destroy() {
-    EventExecutor.INSTANCE.stop();
+    EventExecutor.getInstance(dbName).stop();
   }
 }

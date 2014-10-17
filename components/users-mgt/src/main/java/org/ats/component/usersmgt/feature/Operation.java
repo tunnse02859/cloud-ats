@@ -16,13 +16,11 @@ public class Operation extends BaseObject<Operation> {
 
   private static final long serialVersionUID = 1L;
 
-  public Operation(String name) {
-    super();
-    this.put("name", name);
-  }
+  public Operation() {}
   
-  public Operation(DBObject obj) {
-    this.from(obj);
+  public Operation(String dbName, String name) {
+    super(dbName);
+    this.put("name", name);
   }
   
   public void setName(String name) {
