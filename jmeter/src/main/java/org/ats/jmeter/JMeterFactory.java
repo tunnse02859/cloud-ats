@@ -32,7 +32,7 @@ import com.jcraft.jsch.Session;
 public class JMeterFactory {
 
   public static enum Template {
-    ARGUMENT, ARGUMENTS, JMETER, POM, SAMPLE_GET, SAMPLE_POST;
+    ARGUMENT, ARGUMENTS, JMETER, POM, SAMPLE_GET, SAMPLE_POST, ASSERTION_TEXT, CONTANT_TIME;
   }
   
   private Map<Template, String> templates = new HashMap<JMeterFactory.Template, String>();
@@ -72,6 +72,10 @@ public class JMeterFactory {
     return project;
   }
   
+  public JMeterParser createJMeterParser(String source) throws Exception {
+    return new JMeterParser(source, this.templates);
+  }
+  
   public JMeterFactory(String templateSource) throws IOException {
     this.templates.put(Template.ARGUMENT, templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/argument.xml")) :  
@@ -96,6 +100,14 @@ public class JMeterFactory {
     this.templates.put(Template.SAMPLE_POST, templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/sample-post.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("sample-post.xml")));
+    
+    this.templates.put(Template.ASSERTION_TEXT, templateSource != null ?
+        StringUtil.readStream(new FileInputStream(templateSource + "/assertion-text.xml")) :
+          StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("assertion-text.xml")));
+    
+    this.templates.put(Template.CONTANT_TIME, templateSource != null ?
+        StringUtil.readStream(new FileInputStream(templateSource + "/contant-time.xml")) :
+          StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("contant-time.xml")));
   }
   
   public Map<Template, String> getTemplates() {

@@ -164,9 +164,9 @@ public class JMeterSampler implements Serializable {
     String s = createArguments();
     builder.put("arguments", s);
     
-    if (assertionText != null && !assertionText.trim().isEmpty()) builder.put("assertionText", assertionText);
+    if (assertionText != null && !assertionText.trim().isEmpty()) builder.put("assertionText", Rythm.render(this.templates.get(Template.ASSERTION_TEXT), assertionText));
     
-    if (contantTime > 0) builder.put("contantTime", contantTime);
+    if (contantTime > 0) builder.put("contantTime", Rythm.render(this.templates.get(Template.CONTANT_TIME), contantTime));
     
     switch (method) {
     case GET:
