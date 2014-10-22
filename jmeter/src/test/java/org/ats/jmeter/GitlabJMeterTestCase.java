@@ -3,13 +3,12 @@
  */
 package org.ats.jmeter;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import org.ats.gitlab.AbstractGitlabTestCase;
-import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
-import org.ats.jmeter.JmeterFactory;
 import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabProject;
 import org.junit.Assert;
@@ -24,22 +23,26 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
 
   @Test
   public void testJMeter() throws Exception {
-    JmeterFactory factory = new JmeterFactory();
+    JMeterFactory factory = new JMeterFactory();
     GitlabProject project = factory.createProject(api, "com.test", "jmeter");
 
-    String jmeterScript = factory.createJmeterScript(1, 100, 5, false, 0, 
+    String jmeterScript = factory.createJmeterScript("Cloud-ATS Login", 1, 100, 5, false, 0, 
         factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0),
         factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0, factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
         factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o", null, 0),
-        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0));
+        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0)).toString();
     
     api.createFile(project, "src/test/jmeter/script.jmx", "master", jmeterScript, "Snapshot 1");
     
-    jmeterScript = factory.createJmeterScript(1, 200, 5, false, 0, 
+    jmeterScript = factory.createJmeterScript("Cloud-ATS Login", 1, 200, 5, false, 0, 
         factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0),
         factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0, factory.createArgument("email", "root@system.com"), factory.createArgument("password", "admin")),
         factory.createHttpGet("Organization Page", "http://172.27.4.48:9000/portal/o", null, 0),
-        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0));
+        factory.createHttpGet("Signout", "http://172.27.4.48:9000/signout", null, 0)).toString();
+    
+    FileOutputStream fos = new FileOutputStream("target/test.jmx");
+    fos.write(jmeterScript.getBytes("UTF-8"));
+    fos.close();
     
     api.updateFile(project, "src/test/jmeter/script.jmx", "master", jmeterScript, "Snapshot 2");
 
@@ -51,7 +54,7 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
     
     Assert.assertNotNull(snapshot1);
     
-    String gitUrl = project.getHttpUrl().replace("git.sme.org", "172.27.4.77");
+    /*String gitUrl = project.getHttpUrl().replace("git.sme.org", "172.27.4.77");
     JenkinsMaster master = new JenkinsMaster("172.27.4.77", "http", 8080);
 
     JenkinsMavenJob job1 = new JenkinsMavenJob(master, "jmeter master", "master", gitUrl, "master","clean verify -Pperformance -Dtest.server=172.27.4.83", null);
@@ -62,7 +65,7 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
     build(job2);
     
     job1.delete();
-    job2.delete();
+    job2.delete();*/
 
     api.deleteProject(project);
   }
