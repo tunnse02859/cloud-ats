@@ -6,7 +6,7 @@
   <div class="cloud wizard">
     <ul class="steps">
       <li class="active" data-target="#step1">
-        <span class="badge badge-info">1</span>GitLab - Jenkins
+        <span class="badge badge-info">1</span>GitLab
       </li>
       <li data-target="#step2"><span class="badge">2</span>Chef</li>
       <li data-target="#step3"><span class="badge">3</span>Cloud API</li>
@@ -19,35 +19,15 @@
     <div id="step1" class="step-pane active" style="margin-top: 20px;">
       
       <div class="control-group">
-        <label class="control-label">Public IP</label>
+        <label class="control-label">Gitlab API Token</label>
         <div class="controls">
-          <input required="" type="text" name="jenkins-ip" placeholder="Public IP">
+          <input required="" type="text" name="gitlab-token" placeholder="Gitlab API Token">
         </div>
       </div>
       
-      <div class="control-group">
-        <label class="control-label">Username</label>
-        <div class="controls">
-          <input required="" type="text" name="jenkins-username" placeholder="Username">
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">Password</label>
-        <div class="controls">
-          <input required="" type="password" name="jenkins-password" placeholder="Password">
-        </div>
-      </div>
     </div>
     
     <div id="step2" class="step-pane" style="margin-top: 20px;">
-      
-      <div class="control-group">
-        <label class="control-label">Chef Server</label>
-        <div class="controls">
-          <input required="" type="text" name="chef-server-ip" placeholder="Server IP">
-        </div>
-      </div>
       
       <div class="control-group">
         <label class="control-label">Chef Workstation</label>

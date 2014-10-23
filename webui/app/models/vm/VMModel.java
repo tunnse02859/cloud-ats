@@ -3,11 +3,11 @@
  */
 package models.vm;
 
+import helpervm.OfferingHelper;
+
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
-
-import utils.OfferingHelper;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -90,6 +90,8 @@ public class VMModel extends BasicDBObject {
     this.put("password", source.get("password"));
     this.put("template", source.get("template"));
     this.put("template_id", source.get("template_id"));
+    
+    //Additional
     this.put("system", source.get("system"));
     this.put("jenkins", source.get("jenkins"));
     this.put("gui", source.get("gui"));

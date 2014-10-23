@@ -1,14 +1,15 @@
 @(system: Boolean, rootGroup: org.ats.component.usersmgt.group.Group, offerings: List[models.vm.OfferingModel])
 @import controllers.vm._
-@import utils._
+@import helpervm._
 @import org.ats.component.usersmgt.group._
 
 <section class="cloud-offering">
+  @if(system){
   <ul class="nav nav-tabs">
     <li class="active">
       <a data-toggle="tab" href="#list">@rootGroup.get("name")</a>
     </li>
-    @if(system){
+    
     <li class="dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
         Select Group
@@ -24,8 +25,8 @@
         }
       </ul>
     </li>
-    }
   </ul>
+  }
   
   <div class="tab-content">
     <div id="home" class="tab-pane fade active in">
@@ -83,7 +84,7 @@
 				    @if(!rootGroup.getBoolean("system")) {
 				    <label class="radio">
               <input type="radio" name="offering" value="@offering.getId()"
-              @if(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getOffering().getId().equals(offering.getId())) {
+        utils      @if(OfferingHelper.getDefaultOfferingOfGroup(rootGroup.getId()).getOffering().getId().equals(offering.getId())) {
                 checked="checked"
               }
               >

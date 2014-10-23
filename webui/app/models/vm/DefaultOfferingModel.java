@@ -3,11 +3,11 @@
  */
 package models.vm;
 
+import helpervm.OfferingHelper;
+
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
-
-import utils.OfferingHelper;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;

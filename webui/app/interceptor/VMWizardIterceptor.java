@@ -3,6 +3,8 @@
  */
 package interceptor;
 
+import helpervm.VMHelper;
+
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
@@ -10,7 +12,6 @@ import play.libs.F.Promise;
 import play.mvc.Action.Simple;
 import play.mvc.Http.Context;
 import play.mvc.SimpleResult;
-import utils.VMHelper;
 import views.html.vm.index;
 import views.html.vm.wizard;
 import controllers.Application;

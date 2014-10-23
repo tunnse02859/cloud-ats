@@ -3,6 +3,9 @@
  */
 package listener;
 
+import helpervm.OfferingHelper;
+import helpervm.VMHelper;
+
 import java.util.List;
 
 import models.vm.VMModel;
@@ -16,8 +19,6 @@ import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
 
 import play.Logger;
-import utils.OfferingHelper;
-import utils.VMHelper;
 
 import com.mongodb.BasicDBObject;
 

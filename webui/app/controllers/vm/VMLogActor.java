@@ -3,6 +3,8 @@
  */
 package controllers.vm;
 
+import helpervm.VMHelper;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +22,6 @@ import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
 import utils.LogBuilder;
-import utils.VMHelper;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;

@@ -60,7 +60,7 @@
       
       <div class="span9">
         <form class="form form-horizontal" method="post" action="@routes.VMController.saveProperties()">
-          <legend>CloudStack Properties</legend>
+          <legend>Cloud Properties</legend>
 					 
 				  <div class="control-group">
 		        <label class="control-label">CloudStack User</label>
@@ -84,18 +84,25 @@
 		      </div>
 		      
 		      <div class="control-group">
-		        <label class="control-label">API Key</label>
+		        <label class="control-label">CloudStack API Key</label>
 		        <div class="controls">
 		          <input required="" type="text" name="cloudstack-api-key" placeholder="Api Key" value="@properties.get("cloudstack-api-key")">
 		        </div>
 		      </div>
 		      
 		      <div class="control-group">
-		        <label class="control-label">Secret Key</label>
+		        <label class="control-label">CloudStack Secret Key</label>
 		        <div class="controls">
 		          <input required="" type="text" name="cloudstack-api-secret" placeholder="Secret Key" value="@properties.get("cloudstack-api-secret")">
 		        </div>
 		      </div>
+		      
+		      <div class="control-group">
+            <label class="control-label">GitLab API Token</label>
+            <div class="controls">
+              <input required="" type="text" name="cloudstack-api-secret" placeholder="GitLab API Token" value="@properties.get("gitlab-api-token")">
+            </div>
+          </div>
 			    
           <div class="form-actions">
             <button type="submit" class="btn btn-blue save-offering" href=""><i class="icon-save"></i> Update</button>

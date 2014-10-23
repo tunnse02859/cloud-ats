@@ -3,6 +3,8 @@
  */
 package controllers.vm;
 
+import helpervm.VMHelper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +18,6 @@ import org.ats.cloudstack.model.VirtualMachine;
 import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
-import utils.VMHelper;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

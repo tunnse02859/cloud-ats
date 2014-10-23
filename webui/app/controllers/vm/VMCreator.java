@@ -3,6 +3,9 @@
  */
 package controllers.vm;
 
+import helpervm.OfferingHelper;
+import helpervm.VMHelper;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -29,8 +32,6 @@ import org.ats.knife.Knife;
 
 import play.Logger;
 import utils.LogBuilder;
-import utils.OfferingHelper;
-import utils.VMHelper;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;

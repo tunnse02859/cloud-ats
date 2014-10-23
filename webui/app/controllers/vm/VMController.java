@@ -4,6 +4,8 @@
 package controllers.vm;
 
 import static akka.pattern.Patterns.ask;
+import helpervm.OfferingHelper;
+import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.VMWizardIterceptor;
@@ -69,8 +71,6 @@ import play.mvc.WebSocket;
 import play.mvc.With;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
-import utils.OfferingHelper;
-import utils.VMHelper;
 import views.html.vm.alert;
 import views.html.vm.index;
 import views.html.vm.offering;
@@ -233,30 +233,14 @@ public class VMController extends Controller {
 
     CloudStackClient client = new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
 
-    String jenkinsIP = form.get("jenkins-ip");
-    String jenkinsUsername = form.get("jenkins-username");
-    String jenkinsPassword = form.get("jenkins-password");
+    String gitlabToken = form.get("gitlab-token");
 
-    Template template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "gitlab-jenkins",  null).get(0);
-    VirtualMachine vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
-    VMModel jenkinsVM = new VMModel(vm.id, "system-jenkins", systemGroup.getId(), vm.templateName, vm.templateId, jenkinsIP, jenkinsUsername, jenkinsPassword);
-    jenkinsVM.put("system", true);
-    jenkinsVM.put("jenkins", true);
-    jenkinsVM.put("offering_id", vm.serviceOfferingId);
-
-    String chefServerIp = form.get("chef-server-ip");
     String chefWorkstationIp = form.get("chef-workstation-ip");
     String chefUsername = form.get("chef-username");
     String chefPassword = form.get("chef-password");
 
-    template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-server",  null).get(0);
-    vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
-    VMModel chefServerVM = new VMModel(vm.id, "chef-server", systemGroup.getId(), vm.templateName, vm.templateId, chefServerIp, chefUsername, chefPassword);
-    chefServerVM.put("system", true);
-    chefServerVM.put("offering_id", vm.serviceOfferingId);
-
-    template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-workstation",  null).get(0);
-    vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
+    Template template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-workstation",  null).get(0);
+    VirtualMachine vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
     VMModel chefWorkstationVM = new VMModel(vm.id, "chef-workstation", systemGroup.getId(), vm.templateName, vm.templateId, chefWorkstationIp, chefUsername, chefPassword);
     chefWorkstationVM.put("system", true);
     chefWorkstationVM.put("offering_id", vm.serviceOfferingId);
@@ -267,9 +251,10 @@ public class VMController extends Controller {
     properties.put("cloudstack-api-secret", cloudstackApiSecret);
     properties.put("cloudstack-username", cloudstackUsername);
     properties.put("cloudstack-password", cloudstackPassword);
+    properties.put("gitlab-api-token", gitlabToken);
 
     VMHelper.setSystemProperties(properties);
-    VMHelper.createVM(jenkinsVM, chefServerVM, chefWorkstationVM);
+    VMHelper.createVM(chefWorkstationVM);
 
     createOffering(form, client);
 

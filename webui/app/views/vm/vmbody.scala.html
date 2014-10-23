@@ -2,7 +2,7 @@
   normal: Boolean = false
 )
 @import controllers.vm._
-@import utils._
+@import helpervm._
 @import org.ats.component.usersmgt.group._
 
 <script type="text/javascript">
@@ -59,11 +59,12 @@ $(document).ready(function() {
 </script>
 
 <section class="cloud-vm">
+  @if(system){
   <ul class="nav nav-tabs">
     <li class="active">
       <a data-toggle="tab" href="#list">@rootGroup.get("name")</a>
     </li>
-    @if(system){
+    
     <li class="dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
         Select Group
@@ -79,9 +80,9 @@ $(document).ready(function() {
         }
       </ul>
     </li>
-    }
   </ul>
-  
+  }
+    
   <div class="tab-content">
     <div id="home" class="tab-pane fade active in">
       <section class="row-fluid">
