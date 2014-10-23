@@ -97,6 +97,14 @@ public class JenkinsSlave {
     return new UrlEncodedFormEntity(list);
   }
   
+  public boolean isOffline() throws IOException {
+    DefaultHttpClient client = HttpClientFactory.getInstance();
+    
+    String body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
+    JSONObject json = new JSONObject(body);
+    return json.getBoolean("offline");
+  }
+  
   public boolean join() throws IOException {
     DefaultHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
