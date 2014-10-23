@@ -122,6 +122,8 @@ public class RoleAction extends Controller {
         }
       }
       
+      if (request().getQueryString("desc") != null) role_.put("desc", request().getQueryString("desc"));
+      
       RoleDAO.getInstance(Application.dbName).update(role_);
     }
     
