@@ -21,7 +21,7 @@ import org.junit.Test;
  */
 public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
 
-  @Test
+  //@Test
   public void testJMeter() throws Exception {
     JMeterFactory factory = new JMeterFactory();
     GitlabProject project = factory.createProject(api, "com.test", "jmeter");

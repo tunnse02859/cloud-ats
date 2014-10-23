@@ -3,137 +3,117 @@
  */
 package org.ats.jmeter.models;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.ats.jmeter.JMeterFactory.Template;
 import org.ats.jmeter.ParamBuilder;
 import org.rythmengine.Rythm;
 
+import com.mongodb.BasicDBObject;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Oct 22, 2014
  */
-public class JMeterScript implements Serializable {
+public class JMeterScript extends BasicDBObject {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
 
-  public JMeterScript() {}
-  
-  /** .*/
-  private String testName;
-  
-  /** .*/
-  private int loops;
-  
-  /** .*/
-  private int numberThreads;
-  
-  /** .*/
-  private int ramUp;
-  
-  /** .*/
-  private boolean scheduler;
-  
-  /** .*/
-  private int duration;
-  
-  /** .*/
-  private List<JMeterSampler> samplers;
-  
-  private Map<Template, String> templates;
-  
-  public JMeterScript(Map<Template, String> templates, String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, JMeterSampler ... samplers) {
-    this.testName = testName;
-    this.loops = loops;
-    this.numberThreads = numberThreads;
-    this.ramUp = ramUp;
-    this.scheduler = scheduler;
-    this.duration = duration;
-    
-    this.templates = templates;
-    
-    if (samplers != null && samplers.length != 0) {
-      this.samplers = Arrays.asList(samplers);
-    } else {
-      this.samplers = new ArrayList<JMeterSampler>();
-    }
+  public JMeterScript(Map<String, String> templates, String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, JMeterSampler ... samplers) {
+    this.put("name", testName);
+    this.put("loops", loops);
+    this.put("number_threads", numberThreads);
+    this.put("ram_up", ramUp);
+    this.put("scheduler", scheduler);
+    this.put("duration", duration);
+    this.put("templates", templates);
+    this.put("samplers", samplers);
   }
   
-  public Map<Template, String> getTemplates() {
-    return Collections.unmodifiableMap(this.templates);
+  public Map<String, String> getTemplates() {
+    return Collections.unmodifiableMap((Map<String, String>)this.get("templates"));
   }
   
   public void setName(String testName) {
-    this.testName = testName;
+    this.put("name", testName);
   }
   
   public String getName() {
-    return this.testName;
+    return this.getString("name");
   }
 
   public int getLoops() {
-    return loops;
+    return this.getInt("loops");
   }
 
   public void setLoops(int loops) {
-    this.loops = loops;
+    this.put("loops", loops);
   }
 
   public int getNumberThreads() {
-    return numberThreads;
+    return this.getInt("number_threads");
   }
 
   public void setNumberThreads(int numberThreads) {
-    this.numberThreads = numberThreads;
+    this.put("number_threads", numberThreads);
   }
 
   public int getRamUp() {
-    return ramUp;
+    return this.getInt("ram_up");
   }
 
   public void setRamUp(int ramUp) {
-    this.ramUp = ramUp;
+    this.put("ram_up", ramUp);
   }
 
   public boolean isScheduler() {
-    return scheduler;
+    return this.getBoolean("scheduler");
   }
 
   public void setScheduler(boolean scheduler) {
-    this.scheduler = scheduler;
+    this.put("scheduler", scheduler);
   }
 
   public int getDuration() {
-    return duration;
+    return this.getInt("duration");
   }
 
   public void setDuration(int duration) {
-    this.duration = duration;
+    this.put("duration", duration);
   }
 
-  public List<JMeterSampler> getSamplers() {
-    return Collections.unmodifiableList(samplers);
+  public JMeterSampler[] getSamplers() {
+    return (JMeterSampler[]) this.get("samplers");
   }
 
-  public List<JMeterSampler> addSampler(JMeterSampler sampler) {
-    this.samplers.add(sampler);
-    return this.samplers;
+  public JMeterScript addSampler(JMeterSampler sampler) {
+    JMeterSampler[] current = getSamplers();
+    JMeterSampler[]  newArray = Arrays.copyOf(current, current.length + 1);
+    newArray[current.length] = sampler;
+    this.put("samplers", newArray);
+    return this;
   }
   
   @Override
   public boolean equals(Object obj) {
+    if(obj == this) return true;
+    
     if (obj instanceof JMeterScript) {
       JMeterScript that = (JMeterScript) obj;
-      return this.toString().equals(that.toString());
+      return this.getName().equals(that.getName())
+          && this.getTemplates().equals(that.getTemplates())
+          && this.getNumberThreads() == that.getNumberThreads()
+          && this.isScheduler() == that.isScheduler()
+          && this.getLoops() == that.getLoops()
+          && this.getRamUp() == that.getRamUp()
+          && this.getDuration() == that.getDuration()
+          && Arrays.equals(this.getSamplers(), that.getSamplers());
     }
     return false;
   }
@@ -141,20 +121,20 @@ public class JMeterScript implements Serializable {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    for (JMeterSampler sampler : samplers) {
+    for (JMeterSampler sampler : getSamplers()) {
       sb.append(sampler.toString()).append('\n');
     }
     
     ParamBuilder params = ParamBuilder.start()
-      .put("name", testName)
-      .put("loops", loops)
-      .put("numberThreads", numberThreads)
-      .put("ramUp", ramUp)
-      .put("scheduler", scheduler)
-      .put("duration", duration)
+      .put("name", getName())
+      .put("loops", getLoops())
+      .put("numberThreads", getNumberThreads())
+      .put("ramUp", getRamUp())
+      .put("scheduler", isScheduler())
+      .put("duration", getDuration())
       .put("samplers", sb.toString());
     
-    return Rythm.render(this.templates.get(Template.JMETER), params.build());
+    return Rythm.render(getTemplates().get(Template.JMETER.toString()), params.build());
   }
   
 }

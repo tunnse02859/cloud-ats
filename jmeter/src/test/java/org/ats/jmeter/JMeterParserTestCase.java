@@ -61,50 +61,50 @@ public class JMeterParserTestCase {
     Assert.assertFalse(script.isScheduler());
     Assert.assertEquals(0, script.getDuration());
     
-    Assert.assertEquals(4, script.getSamplers().size());
+    Assert.assertEquals(4, script.getSamplers().length);
     
-    JMeterSampler signinRequest = script.getSamplers().get(0);
+    JMeterSampler signinRequest = script.getSamplers()[0];
     Assert.assertEquals("Signin Page", signinRequest.getName());
     Assert.assertEquals("http://172.27.4.48:9000/signin", signinRequest.getUrl());
     Assert.assertEquals(Method.GET, signinRequest.getMethod());
     Assert.assertEquals("this is assertion text", signinRequest.getAssertionText());
     Assert.assertEquals(1000, signinRequest.getContantTime());
     
-    JMeterSampler loginPost = script.getSamplers().get(1);
+    JMeterSampler loginPost = script.getSamplers()[1];
     Assert.assertEquals("Login", loginPost.getName());
     Assert.assertEquals("http://172.27.4.48:9000/signin", loginPost.getUrl());
     Assert.assertEquals(Method.POST, loginPost.getMethod());
     Assert.assertNull(loginPost.getAssertionText());
     Assert.assertEquals(0, loginPost.getContantTime());
     
-    Assert.assertEquals(2, loginPost.getArguments().size());
+    Assert.assertEquals(2, loginPost.getArguments().length);
     
-    JMeterArgument email = loginPost.getArguments().get(0);
+    JMeterArgument email = loginPost.getArguments()[0];
     Assert.assertEquals("email", email.getParamName());
     Assert.assertEquals("root@system.com", email.getParamValue());
     
-    JMeterArgument password = loginPost.getArguments().get(1);
+    JMeterArgument password = loginPost.getArguments()[1];
     Assert.assertEquals("password", password.getParamName());
     Assert.assertEquals("admin", password.getParamValue());
     
-    JMeterSampler oRequest = script.getSamplers().get(2);
+    JMeterSampler oRequest = script.getSamplers()[2];
     Assert.assertEquals("Organization Page", oRequest.getName());
     Assert.assertEquals("http://172.27.4.48:9000/portal/o", oRequest.getUrl());
     Assert.assertEquals(Method.GET, oRequest.getMethod());
     Assert.assertNull(oRequest.getAssertionText());
     Assert.assertEquals(0, oRequest.getContantTime());
     
-    Assert.assertEquals(2, oRequest.getArguments().size());
+    Assert.assertEquals(2, oRequest.getArguments().length);
     
-    JMeterArgument nav = oRequest.getArguments().get(0);
+    JMeterArgument nav = oRequest.getArguments()[0];
     Assert.assertEquals("nav", nav.getParamName());
     Assert.assertEquals("group", nav.getParamValue());
     
-    JMeterArgument group = oRequest.getArguments().get(1);
+    JMeterArgument group = oRequest.getArguments()[1];
     Assert.assertEquals("group", group.getParamName());
     Assert.assertEquals("40d4edcd-ff1b-483f-9b69-50aff29f49f6", group.getParamValue());
     
-    JMeterSampler signoutRequest = script.getSamplers().get(3);
+    JMeterSampler signoutRequest = script.getSamplers()[3];
     Assert.assertEquals("Signout", signoutRequest.getName());
     Assert.assertEquals("http://172.27.4.48:9000/signout", signoutRequest.getUrl());
     Assert.assertEquals(Method.GET, signoutRequest.getMethod());

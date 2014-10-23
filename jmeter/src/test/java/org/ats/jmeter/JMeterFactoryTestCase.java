@@ -60,7 +60,8 @@ public class JMeterFactoryTestCase {
     JMeterSampler sampleGet1 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin", null, 0, param1, param2);
     
     JMeterSampler sampleGet2 = factory.createHttpGet("login", "http://172.27.4.48:8080/signin?username=admin&password=admin.password", null, 0);
-    Assert.assertEquals(sampleGet1, sampleGet2);
+    Assert.assertNotSame(sampleGet1, sampleGet2);
+    Assert.assertEquals(sampleGet1.toString(), sampleGet2.toString());
   }
   
   @Test

@@ -10,7 +10,6 @@ import javax.xml.xpath.XPathConstants;
 
 import org.ats.common.html.HtmlParser;
 import org.ats.common.html.XPathUtil;
-import org.ats.jmeter.JMeterFactory.Template;
 import org.ats.jmeter.models.JMeterArgument;
 import org.ats.jmeter.models.JMeterSampler;
 import org.ats.jmeter.models.JMeterSampler.Method;
@@ -31,9 +30,9 @@ public class JMeterParser {
   private final String source;
   
   /** .*/
-  private Map<Template, String> templates;
+  private Map<String, String> templates;
   
-  JMeterParser(String source, Map<Template, String> templates) throws Exception {
+  JMeterParser(String source, Map<String, String> templates) throws Exception {
     this.source = source;
     this.templates = templates;
   }
@@ -42,7 +41,7 @@ public class JMeterParser {
     return source;
   }
   
-  public Map<Template, String> getTemplates() {
+  public Map<String, String> getTemplates() {
     return Collections.unmodifiableMap(this.templates);
   }
   

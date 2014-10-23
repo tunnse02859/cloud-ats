@@ -35,7 +35,7 @@ public class JMeterFactory {
     ARGUMENT, ARGUMENTS, JMETER, POM, SAMPLE_GET, SAMPLE_POST, ASSERTION_TEXT, CONTANT_TIME;
   }
   
-  private Map<Template, String> templates = new HashMap<JMeterFactory.Template, String>();
+  private Map<String, String> templates = new HashMap<String, String>();
   
   public JMeterFactory() throws IOException {
     this(null);
@@ -43,6 +43,8 @@ public class JMeterFactory {
   
   public GitlabProject createProject(GitlabAPI api, String companyName, String projectName) throws IOException, JSchException {
     GitlabProject project = api.getAPI().createProject(projectName);
+    
+    String url = project.getSshUrl().replace("git.sme.org", api.getHost());
     
     StringBuilder sb = new StringBuilder("ssh-keyscan -H ").append(api.getHost()).append(" >> ~/.ssh/known_hosts").append(" && ");
     sb.append("git config --global user.name 'Administrator'").append(" && ");
@@ -54,7 +56,7 @@ public class JMeterFactory {
     sb.append("touch README").append(" && ");
     sb.append("git add README").append(" && ");
     sb.append("git commit -m 'first commit'").append(" && ");
-    sb.append("git remote add origin git@").append(api.getHost()).append(":root/").append(projectName).append(".git").append(" && ");
+    sb.append("git remote add origin ").append(url).append(" && ");
     sb.append("git push -u origin master");
   
     Session session = SSHClient.getSession(api.getHost(), 22, "ubuntu", "ubuntu");
@@ -77,46 +79,46 @@ public class JMeterFactory {
   }
   
   public JMeterFactory(String templateSource) throws IOException {
-    this.templates.put(Template.ARGUMENT, templateSource != null ?
+    this.templates.put(Template.ARGUMENT.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/argument.xml")) :  
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("argument.xml")));
         
-    this.templates.put(Template.ARGUMENTS, templateSource != null ?
+    this.templates.put(Template.ARGUMENTS.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/arguments.xml")) : 
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("arguments.xml")));
         
-    this.templates.put(Template.JMETER, templateSource != null ?
+    this.templates.put(Template.JMETER.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/jmeter.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter.xml")));
         
-    this.templates.put(Template.POM, templateSource != null ?
+    this.templates.put(Template.POM.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/pom.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("pom.xml")));
         
-    this.templates.put(Template.SAMPLE_GET, templateSource != null ?
+    this.templates.put(Template.SAMPLE_GET.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/sample-get.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("sample-get.xml")));
         
-    this.templates.put(Template.SAMPLE_POST, templateSource != null ?
+    this.templates.put(Template.SAMPLE_POST.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/sample-post.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("sample-post.xml")));
     
-    this.templates.put(Template.ASSERTION_TEXT, templateSource != null ?
+    this.templates.put(Template.ASSERTION_TEXT.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/assertion-text.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("assertion-text.xml")));
     
-    this.templates.put(Template.CONTANT_TIME, templateSource != null ?
+    this.templates.put(Template.CONTANT_TIME.toString(), templateSource != null ?
         StringUtil.readStream(new FileInputStream(templateSource + "/contant-time.xml")) :
           StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("contant-time.xml")));
   }
   
-  public Map<Template, String> getTemplates() {
+  public Map<String, String> getTemplates() {
     return Collections.unmodifiableMap(this.templates);
   }
   
   public String createPom(String groupId, String artifactId) {
     Map<String, Object> params = ParamBuilder.start().put("groupId", groupId).put("artifactId", artifactId).build();
-    return Rythm.render(this.templates.get(Template.POM), params);
+    return Rythm.render(this.templates.get(Template.POM.toString()), params);
   }
   
   public JMeterScript createJmeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, JMeterSampler... samplers) {
@@ -128,7 +130,7 @@ public class JMeterFactory {
     for (JMeterArgument argument : arguments) {
       sb.append(argument.toString()).append('\n');
     }
-    return Rythm.render(this.templates.get(Template.ARGUMENTS), sb.toString());
+    return Rythm.render(this.templates.get(Template.ARGUMENTS.toString()), sb.toString());
   }
   
   public JMeterArgument createArgument(String paramName, String paramValue) {

@@ -3,12 +3,9 @@
  */
 package org.ats.jmeter.models;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.ats.common.http.HttpURL;
@@ -16,127 +13,107 @@ import org.ats.jmeter.JMeterFactory.Template;
 import org.ats.jmeter.ParamBuilder;
 import org.rythmengine.Rythm;
 
+import com.mongodb.BasicDBObject;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Oct 22, 2014
  */
-public class JMeterSampler implements Serializable {
+public class JMeterSampler extends BasicDBObject {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
   
-  /** 
-   * Default contructor for serializable.
-   *  
-   *  */
-  public JMeterSampler() {}
-  
-  /** .*/
-  private Method method;
-  
-  /** .*/
-  private String name;
-  
-  /** .*/
-  private String url;
-  
-  /** .*/
-  private String assertionText;
-  
-  /** .*/
-  private long contantTime;
-  
-  /** .*/
-  private List<JMeterArgument> arguments;
-  
-  /** .*/
-  private Map<Template, String> templates;
-  
-  public JMeterSampler(Map<Template, String> templates, Method method, String name, String url, String assertionText, long contantTime, JMeterArgument ... arguments) {
-    this.method = method;
-    this.name = name;
-    this.url = url;
-    this.assertionText = assertionText;
-    this.contantTime = contantTime;
-    
-    this.templates = templates;
-    
-    if (arguments != null && arguments.length != 0) {
-      this.arguments = Arrays.asList(arguments);
-    } else {
-      this.arguments = new ArrayList<JMeterArgument>();
-    }
+  public JMeterSampler(Map<String, String> templates, Method method, String name, String url, String assertionText, long contantTime, JMeterArgument ... arguments) {
+    this.put("method", method.toString());
+    this.put("name", name);
+    this.put("url", url);
+    this.put("assertion_text", assertionText);
+    this.put("contant_time", contantTime);
+    this.put("templates", templates);
+    this.put("arguments", arguments);
   }
   
-  public Map<Template, String> getTemplates() {
-    return Collections.unmodifiableMap(this.templates);
+  public Map<String, String> getTemplates() {
+    return Collections.unmodifiableMap((Map<String, String>)this.get("templates"));
   }
   
   public Method getMethod() {
-    return method;
+    return Method.valueOf(this.getString("method"));
   }
   
   public void setMethod(Method method) {
-    this.method = method;
+    this.put("method", method.toString());
   }
 
   public String getName() {
-    return name;
+    return this.getString("name");
   }
 
   public void setName(String name) {
-    this.name = name;
+    this.put("name", name);
   }
 
   public String getUrl() {
-    return url;
+    return this.getString("url");
   }
 
   public void setUrl(String url) {
-    this.url = url;
+    this.put("url", url);
   }
 
   public String getAssertionText() {
-    return assertionText;
+    return this.getString("assertion_text");
   }
 
   public void setAssertionText(String assertionText) {
-    this.assertionText = assertionText;
+    this.put("assertion_text", assertionText);
   }
 
   public long getContantTime() {
-    return contantTime;
+    return this.getLong("contant_time");
   }
 
   public void setContantTime(long contantTime) {
-    this.contantTime = contantTime;
+    this.put("contant_time", contantTime);
   }
 
-  public List<JMeterArgument> getArguments() {
-    return Collections.unmodifiableList(arguments);
+  public JMeterArgument[] getArguments() {
+    return (JMeterArgument[]) this.get("arguments");
   }
 
-  public List<JMeterArgument> addArgument(JMeterArgument argument) {
-    this.arguments.add(argument);
-    return this.arguments;
+  public JMeterSampler addArgument(JMeterArgument argument) {
+    JMeterArgument[] current = getArguments();
+    JMeterArgument[]  newArray = Arrays.copyOf(current, current.length + 1);
+    newArray[current.length] = argument;
+    this.put("arguments", newArray);
+    return this;
   }
   
   public String createArguments() {
     StringBuilder sb = new StringBuilder();
-    for (JMeterArgument argument : arguments) {
+    for (JMeterArgument argument : getArguments()) {
       sb.append(argument.toString()).append('\n');
     }
-    return Rythm.render(this.templates.get(Template.ARGUMENTS), sb.toString());
+    return Rythm.render(getTemplates().get(Template.ARGUMENTS.toString()), sb.toString());
   }
   
   @Override
   public boolean equals(Object obj) {
+    if (obj == this) return true;
+    
     if(obj instanceof JMeterSampler) {
       JMeterSampler that = (JMeterSampler) obj;
-      return this.toString().equals(that.toString());
+      return  this.getName().equals(that.getName())
+          && this.getUrl().equals(that.getUrl())
+          && this.getTemplates().equals(that.getTemplates())
+          && this.getMethod().equals(that.getMethod())
+          && this.getContantTime() == that.getContantTime()
+          && this.getAssertionText().equals(that.getAssertionText())
+          && Arrays.equals(this.getArguments(), that.getArguments());
     }
     return false;
   }
@@ -145,12 +122,12 @@ public class JMeterSampler implements Serializable {
   public String toString() {
     HttpURL httpUrl = null;
     try {
-      httpUrl = new HttpURL(url);
+      httpUrl = new HttpURL(getUrl());
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
     ParamBuilder builder = ParamBuilder.start()
-        .put("name", name)
+        .put("name", getName())
         .put("host", httpUrl.getHost())
         .put("port", httpUrl.getPort())
         .put("protocol", httpUrl.getProtocol())
@@ -158,24 +135,24 @@ public class JMeterSampler implements Serializable {
     
     if (!httpUrl.getQueryParameters().isEmpty()) {
       for (Map.Entry<String, String> entry : httpUrl.getQueryParameters().entrySet()) {
-        arguments.add(new JMeterArgument(this.templates, entry.getKey(), entry.getValue()));
+        addArgument(new JMeterArgument(getTemplates(), entry.getKey(), entry.getValue()));
       }
     }
     String s = createArguments();
     builder.put("arguments", s);
     
-    if (assertionText != null && !assertionText.trim().isEmpty()) builder.put("assertionText", Rythm.render(this.templates.get(Template.ASSERTION_TEXT), assertionText));
+    if (getAssertionText() != null && !getAssertionText().trim().isEmpty()) builder.put("assertionText", Rythm.render(getTemplates().get(Template.ASSERTION_TEXT.toString()), getAssertionText()));
     
-    if (contantTime > 0) builder.put("contantTime", Rythm.render(this.templates.get(Template.CONTANT_TIME), contantTime));
+    if (getContantTime() > 0) builder.put("contantTime", Rythm.render(getTemplates().get(Template.CONTANT_TIME.toString()), getContantTime()));
     
-    switch (method) {
+    switch (getMethod()) {
     case GET:
-      return Rythm.render(this.templates.get(Template.SAMPLE_GET), builder.build());
+      return Rythm.render(getTemplates().get(Template.SAMPLE_GET.toString()), builder.build());
     case POST:
     case PUT:
     case DELETE:
-      builder.put("method", method);
-      return Rythm.render(this.templates.get(Template.SAMPLE_POST), builder.build());
+      builder.put("method", getMethod());
+      return Rythm.render(getTemplates().get(Template.SAMPLE_POST.toString()), builder.build());
     default:
       return null;
     }
