@@ -87,4 +87,16 @@ public class FeatureInitializer {
     UserDAO.getInstance(Application.dbName).update(rootUser);
     GroupDAO.getInstance(Application.dbName).update(systemGroup);
   }
+  
+  public static void createPerformanceTestFeature() throws UserManagementException {
+    Feature feature = new Feature(Application.dbName, "Performance");
+    
+    Operation o1 = new Operation(Application.dbName, "Administration");
+    Operation o2 = new Operation(Application.dbName, "Test");
+    feature.addOperation(o1);
+    feature.addOperation(o2);
+    
+    FeatureDAO.getInstance(Application.dbName).create(feature);
+    OperationDAO.getInstance(Application.dbName).create(o1, o2);
+  }
 }

@@ -89,6 +89,11 @@ POST    /portal/vm/o/c/:g          controllers.vm.VMController.saveOffering(g)
 GET     /portal/vm/p               controllers.vm.VMController.propertiesView()
 POST    /portal/vm/p/s             controllers.vm.VMController.saveProperties()
 
+############################# Performance Test ################################
+
+GET    /portal/test/p             controllers.test.PerformanceController.index()
+POST   /portal/test/p/upload      controllers.test.PerformanceController.createProjectByUpload()
+
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()
 GET     /demo/signin                     controllers.demo.Application.signin()

@@ -29,7 +29,13 @@
               </a>
             </li>
             }
-            
+            @if(feature.getName() == "Performance") {
+            <li @if(active == "Performance") { class="active" }>
+              <a href="@controllers.test.routes.PerformanceController.index()">
+              <span class="icon-bolt"></span>@feature.getName()
+              </a>
+            </li>
+            }
           }
         }
       }

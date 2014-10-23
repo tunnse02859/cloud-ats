@@ -20,41 +20,7 @@
     
     @navbar()
     
-		<nav id="left-panel" style="height: 100%; position: fixed; top: 0px; left: 0px;">
-		  <div id="left-panel-content" style="overflow: hidden;">
-		    <ul>
-		      <li>
-		        <a href="@controllers.routes.Application.dashboard()" ajax-url="@controllers.routes.Dashboard.body()">
-		          <span class="icon-dashboard"></span>Dashboard
-		        </a>
-		      </li>
-		      @defining(FeatureDAO.getInstance(controllers.Application.dbName).find(new BasicDBObject())) { features =>
-		        @for(feature <- features) {
-		          @if(FeatureAction.hasPermissionOnFeature(feature)) {
-		            @if(feature.getName() == "Organization") {
-		            <li class="active">
-		              <a href="@routes.Organization.index()" ajax-url="@routes.Organization.indexAjax()">
-		              <span class="icon-group"></span>@feature.getName()
-		              </a>
-		            </li>
-		            } 
-		            @if(feature.getName() == "Virtual Machine") {
-                <li>
-                  <a href="@controllers.vm.routes.VMController.index()">
-                  <span class="icon-desktop"></span>@feature.getName()
-                  </a>
-                </li>
-                }
-		          }
-		        }
-		      }
-		    </ul>
-		  </div>
-		
-		  <div class="icon-caret-down"></div>
-		  <div class="icon-caret-up"></div>
-		
-		</nav>
+		@views.html.leftmenu("Organization")
     
     <section id="main" class="main container">
 

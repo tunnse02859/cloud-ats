@@ -1,0 +1,103 @@
+@(t: String)
+
+@import org.ats.component.usersmgt.group._
+@import controllers.test._
+
+<section class="test-filter row-fluid">
+  <div class="span12">
+  <form class="form-search form-inline">
+    
+    <a class="btn btn-primary pull-right create-new-test" href="javascript:void(0);">
+    <i class="icon-plus"></i> @if("p" == t) { Add New Performance Test } @if("f" == t) { Add New Functional Test }</a>
+    
+    <div class="btn-group">
+      <button class="btn status">All Status</button>
+      <button data-toggle="dropdown" class="btn dropdown-toggle"><span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:void(0);" data-val="1">Ready</a></li>
+        <li><a href="javascript:void(0);" data-val="2">Running</a></li>
+        <li><a href="javascript:void(0);" data-val="3">Completed</a></li>
+        <li><a href="javascript:void(0);" data-val="4">Cancelled</a></li>
+        <li class="divider"></li>
+        <li><a href="javascript:void(0);" data-val="0">All Status</a></li>
+      </ul>
+    </div>
+    
+    <div class="btn-group">
+      <button class="btn current-group">All Groups</button>
+      <button data-toggle="dropdown" class="btn dropdown-toggle"><span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        @if(session().get("group_id") != null) {
+          @TestController.groupMenuList()
+        }
+      </ul>
+    </div>
+   
+    <input type="text" class="span2" placeholder="Test Name">
+     
+    <input type="text" class="span2" placeholder="Creator">
+  </form>  
+  </div>
+</section>
+
+<section class="test-list row-fluid">
+  <div class="span12">
+    <table class="table">
+      <tr>
+        <th>Test Name</th>
+        <th>Created Date</th>
+        <th>Last Updated Date</th>
+        <th>Creator</th>
+        <th>Status</th>
+        <th>Report</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<div class="modal hide" id="createNewTestDialog">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  @if("p" == t) {
+    <h3>Create New Performance Test</h3>
+  }
+  @if("f" == t) {
+    <h3>Create New Functional Test</h3>
+  }
+  </div>
+  <div class="modal-body">
+    <div class="row-fluid">
+      <div class="@if("p" == t){ span5 }else{ span12 }" @if("p" == t){style="text-align: center;"}>
+        @if("p" == t) {
+        <h5>Upload Your JMX Script</h5>
+        }
+        @if("f" == t) {
+        <h5>Upload Your Maven Project</h5>  
+        }
+        <legend></legend>
+        <form class="form-horizontal" action="@if("p" == t){ @routes.PerformanceController.createProjectByUpload() }" method="post" enctype="multipart/form-data">
+          <div class="control-group">
+            <input type="text" required="" name="name" placeholder="Test Name">
+          </div>
+          <div class="control-group">
+            <input type="file" required="" name="uploaded">
+          </div>
+          <div>
+            <button class="btn btn-primary" type="submit">Create Test</button>
+          </div>
+        </form>
+      </div>
+      @if("p" == t) {
+      <div class="span2" style="text-align: center; margin: 0px;"> 
+        <span class="badge badge-green">OR</span> 
+      </div>
+      <div class="span5" style="text-align: center;">
+        <h5>Using Wizard</h5>
+        <legend></legend>
+        <a class="btn btn-large btn-primary">Wizard</a>
+      </div>
+      }
+    </div>
+  </div>
+</div>

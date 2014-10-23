@@ -96,6 +96,8 @@ public class Application extends Controller {
       administration.addUser(admin);
       admin.addRole(administration);
       
+      
+      //Configure VM feature
       Feature vmFeature = FeatureDAO.getInstance(dbName).find(new BasicDBObject("name", "Virtual Machine")).iterator().next();
       company.addFeature(vmFeature);
       
@@ -111,9 +113,26 @@ public class Application extends Controller {
       admin.addRole(vmRole);
       company.addRole(vmRole);
       
+      //Configure Performance feature
+      Feature perf = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Performance")).iterator().next();
+      company.addFeature(perf);
+      
+      Operation perfAdmin = null;
+      for (Operation op : perf.getOperations()) {
+        if (op.getName().equals("Administration")) perfAdmin = op;
+      }
+      Role perfRole = new Role(dbName, "Perf Administration", company.getId());
+      perfRole.put("desc", "The Performance Administration Role");
+      
+      perfRole.addPermission(new Permission(dbName, perf.getId(), perfAdmin.getId()));
+
+      perfRole.addUser(admin);
+      admin.addRole(perfRole);
+      company.addRole(perfRole);
+      
       GroupDAO.getInstance(dbName).create(company);
       UserDAO.getInstance(dbName).create(admin);
-      RoleDAO.getInstance(dbName).create(administration, vmRole);
+      RoleDAO.getInstance(dbName).create(administration, vmRole, perfRole);
       
       //Create system vm
       Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
@@ -208,6 +227,9 @@ public class Application extends Controller {
     
     //Initialize VM Management feature
     FeatureInitializer.createVMFeature(root, system);
+    
+    //Initialize Performance
+    FeatureInitializer.createPerformanceTestFeature();
     
     //login
     session().clear();
