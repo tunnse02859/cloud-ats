@@ -81,6 +81,14 @@ public class VMModel extends BasicDBObject {
     return this.getString("password");
   }
   
+  public void setStatus(VMStatus status) {
+    this.put("status", status.toString());
+  }
+  
+  public VMStatus getStatus() {
+    return VMStatus.valueOf(this.getString("status"));
+  }
+  
   public VMModel from(DBObject source) {
     this.put("_id", source.get("_id"));
     this.put("name", source.get("name"));
@@ -97,6 +105,11 @@ public class VMModel extends BasicDBObject {
     this.put("gui", source.get("gui"));
     this.put("offering_id", source.get("offering_id"));
     this.put("log", source.get("log"));
+    this.put("status", source.get("status"));
     return this;
+  }
+  
+  public static enum VMStatus {
+    Initializing, Ready, Running, Error
   }
 }

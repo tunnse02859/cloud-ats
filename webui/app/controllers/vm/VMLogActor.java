@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -65,6 +66,8 @@ public class VMLogActor extends UntypedActor {
             StringBuilder sb = vm.getString("log") == null ? new StringBuilder() : new StringBuilder(vm.getString("log"));
             LogBuilder.log(sb, s);
             vm.put("log", sb.toString());
+            
+            if ("setup.vm.error".equals(s)) vm.setStatus(VMStatus.Error);
             VMHelper.updateVM(vm);
             
             array.add(Json.newObject().put("id", vm.getId()).put("msg", s));
@@ -72,6 +75,10 @@ public class VMLogActor extends UntypedActor {
           }
           if ("log.exit".equals(s)) {
             VMCreator.QueueHolder.remove(vm.getName());
+            if (!"Error".equals(vm.getString("status"))) {
+              vm.setStatus(VMStatus.Ready);
+              VMHelper.updateVM(vm);
+            }
           }
         }
         if (array.size() != 0) {

@@ -169,7 +169,7 @@ public class JobController extends Controller {
       try {
         DBObject jobData = DBFactory.getDatabase().getCollection("job").findOne(new BasicDBObject("name", jobName));
         DBObject vmData = DBFactory.getDatabase().getCollection("vm").findOne(new BasicDBObject("name", jobData.get("vm")));
-        
+//TODO:submit job        
         JenkinsMaster master = new JenkinsMaster("172.27.4.77", "http", 8080);
         JenkinsMavenJob job = new JenkinsMavenJob(master, 
             (String)jobData.get("name"), 

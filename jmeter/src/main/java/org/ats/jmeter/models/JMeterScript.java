@@ -3,8 +3,10 @@
  */
 package org.ats.jmeter.models;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 import org.ats.jmeter.JMeterFactory.Template;
@@ -12,6 +14,7 @@ import org.ats.jmeter.ParamBuilder;
 import org.rythmengine.Rythm;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -24,7 +27,14 @@ public class JMeterScript extends BasicDBObject {
    * 
    */
   private static final long serialVersionUID = 1L;
+  
+  /** .*/
+  private final SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
+  public JMeterScript() {
+    this(null, null, 0, 0, 0, false, 0);
+  }
+  
   public JMeterScript(Map<String, String> templates, String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, JMeterSampler ... samplers) {
     this.put("name", testName);
     this.put("loops", loops);
@@ -137,4 +147,29 @@ public class JMeterScript extends BasicDBObject {
     return Rythm.render(getTemplates().get(Template.JMETER.toString()), params.build());
   }
   
+  public JMeterScript from(DBObject source) {
+    this.put("name", source.get("name"));
+    this.put("loops", source.get("loops"));
+    this.put("number_threads", source.get("number_threads"));
+    this.put("ram_up", source.get("ram_up"));
+    this.put("scheduler", source.get("scheduler"));
+    this.put("duration", source.get("duration"));
+    this.put("templates", source.get("templates"));
+    this.put("samplers", source.get("samplers"));
+    
+    //Additional
+    this.put("_id", source.get("_id"));
+    this.put("project_id", source.get("project_id"));
+    this.put("commit", source.get("commit"));
+    this.put("index", source.get("index"));
+    this.put("status", source.get("status"));
+    this.put("last_build", source.get("last_build"));
+    return this;
+  }
+  
+  public String getLastBuildDate() {
+    if (this.get("last_build") == null) return "";
+    Date time = new Date(this.getLong("last_build"));
+    return dateFormater.format(time);
+  }
 }

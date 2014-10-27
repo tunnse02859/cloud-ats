@@ -3,11 +3,23 @@
  */
 package controllers.test;
 
+import static akka.pattern.Patterns.ask;
+import helpertest.TestHelper;
+import interceptor.AuthenticationInterceptor;
+import interceptor.WizardInterceptor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import models.test.JenkinsJobStatus;
+import models.test.TestProjectModel;
+import models.test.TestProjectModel.TestProjectType;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
@@ -22,22 +34,117 @@ import org.ats.component.usersmgt.user.UserDAO;
 
 import play.api.templates.Html;
 import play.mvc.Controller;
-import scala.collection.mutable.StringBuilder;
+import play.mvc.Result;
+import play.mvc.WebSocket;
+import play.mvc.With;
+import scala.concurrent.Await;
+import scala.concurrent.duration.Duration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 
 import controllers.Application;
+import views.html.test.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Oct 21, 2014
  */
-public class TestController extends Controller {
 
+@With({WizardInterceptor.class, AuthenticationInterceptor.class})
+public class TestController extends Controller {
+  
+  public static WebSocket<JsonNode> projectStatus(final String type, final String sessionId, final String currentUserId) {
+    return new WebSocket<JsonNode>() {
+      @Override
+      public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
+        try {
+          Await.result(ask(ProjectStatusActor.actor, new ProjectChannel(sessionId, currentUserId, type, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+  }
+  
+  public static String getColorByStatus(String status) {
+    JenkinsJobStatus _status = JenkinsJobStatus.valueOf(status);
+    switch (_status) {
+    case Ready:
+    case Completed:  
+      return "green";
+    case Running:
+      return "cyan";
+    case Aborted:
+      return "orange";
+    case Errors:
+      return "red";
+    case Initializing:
+      return "blue";
+    default:
+      return "";
+    }
+  }
+  
   public static Html groupMenuList() throws UserManagementException {
-    StringBuilder sb = new StringBuilder();
-    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
+    List<Group> groups = getAvailableGroups();
+    
+    for (Group group : groups) {
+      buildGroupPath(sb, group);
+    }
+    
+    return new Html(sb);
+  }
+  
+  public static Result getProjectList() throws UserManagementException {
+    TestProjectType type = TestProjectType.performance ;
+    if (request().getQueryString("type") != null)
+      type = TestProjectType.valueOf(request().getQueryString("type"));
+
+    String group_id = null;
+    if (request().getQueryString("group") != null) 
+      group_id = request().getQueryString("group");
+    
+    String userText = null;
+    if (request().getQueryString("user") != null) {
+      userText = request().getQueryString("user");
+    }
+    return ok(getProjectListHtml(type.toString(), group_id, userText));
+  }
+  
+  public static Html getProjectListHtml(String type, String group_id, String userText) throws UserManagementException {
+    scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
+    
+    Set<TestProjectModel> set = new HashSet<TestProjectModel>();
+    if (group_id == null) {
+      for (Group group : getAvailableGroups()) {
+        set.addAll(TestHelper.getProject(TestProjectType.valueOf(type), new BasicDBObject("group_id", group.getId())));
+      }
+    }
+    
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(set);
+    Collections.sort(projects, new Comparator<TestProjectModel>() {
+      @Override
+      public int compare(TestProjectModel o1, TestProjectModel o2) {
+        return o2.getIndex() - o1.getIndex();
+      }
+    });
+    
+    for (TestProjectModel p : projects) {
+      sb.append(project.render(p));
+    }
+    return new Html(sb);
+  }
+  
+  public static List<Group> getAvailableGroups() throws UserManagementException {
+    return getAvailableGroups(session("user_id"));
+  }
+  
+  public static List<Group> getAvailableGroups(String currentUserId) throws UserManagementException {
+    
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(currentUserId);
     
     Feature perfFeature = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Performance")).iterator().next();
     Operation perfAdOperation = null;
@@ -68,33 +175,27 @@ public class TestController extends Controller {
     }
     
     List<Group> adminGroups = getGroupsHasPermission(currentUser, perfAdRoles);
-    Collections.sort(adminGroups, new Comparator<Group>() {
-      @Override
-      public int compare(Group o1, Group o2) {
-        return o1.getInt("level") - o2.getInt("level");
-      }
-    });
+    List<Group> testGroups = getGroupsHasPermission(currentUser, perfTestRoles);
+    Set<Group> set = new HashSet<Group>();
     
     for (Group group : adminGroups) {
-      buildGroupPath(sb, group, true);
+      set.add(group);
+      set.addAll(group.getAllChildren());
     }
+    set.addAll(testGroups);
+    List<Group> groups = new ArrayList<Group>(set);
     
-    List<Group> testGroups = getGroupsHasPermission(currentUser, perfTestRoles);
-    Collections.sort(testGroups, new Comparator<Group>() {
+    Collections.sort(groups, new Comparator<Group>() {
       @Override
       public int compare(Group o1, Group o2) {
         return o1.getInt("level") - o2.getInt("level");
       }
     });
     
-    for (Group group : testGroups) {
-      buildGroupPath(sb, group, false);
-    }
-    
-    return new Html(sb);
+    return groups;
   }
   
-  private static void buildGroupPath(StringBuilder sb, Group group, boolean admin) throws UserManagementException {
+  private static void buildGroupPath(scala.collection.mutable.StringBuilder sb, Group group) throws UserManagementException {
     sb.append("<li><a href='javascript:void(0);'>");
     LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(group);
     for (Group p : parents) {
@@ -102,12 +203,6 @@ public class TestController extends Controller {
     }
     sb.append(" / ").append(group.getString("name"));
     sb.append("</a></li>");
-    
-    if (admin) {
-      for (Group g : group.getGroupChildren()) {
-        buildGroupPath(sb, g, true);
-      }
-    }
   }
   
   private static List<Group> getGroupsHasPermission(User currentUser, List<Role> adRoles) {
@@ -120,5 +215,15 @@ public class TestController extends Controller {
     }
     
     return holder;
+  }
+  
+  public static Group getCompany() throws UserManagementException {
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    List<Group> groups = currentUser.getGroups();
+    for (Group group : groups) {
+      if (group.getInt("level") == 1) return group;
+    }
+    
+    return null;
   }
 }

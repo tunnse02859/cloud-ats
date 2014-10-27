@@ -117,6 +117,9 @@ public class JMeterFactory {
   }
   
   public String createPom(String groupId, String artifactId) {
+    if (groupId.indexOf(' ') != -1) groupId = groupId.replaceAll(" ", "-");
+    if (artifactId.indexOf(' ') != -1) artifactId = artifactId.replaceAll(" ", "-");
+    
     Map<String, Object> params = ParamBuilder.start().put("groupId", groupId).put("artifactId", artifactId).build();
     return Rythm.render(this.templates.get(Template.POM.toString()), params);
   }

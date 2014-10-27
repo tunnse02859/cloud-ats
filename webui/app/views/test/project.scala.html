@@ -1,0 +1,78 @@
+@(project: models.test.TestProjectModel)
+@import org.ats.component.usersmgt.group._
+@import controllers.test._
+@*
+<tr>
+  <th></th>
+  <th>Test Name</th>
+  <th>Group</th>
+  <th>Creator</th>
+  <th>Created Date</th>
+  <th>Last Updated</th>
+  <th>Last Build</th>
+  <th>Status</th>
+  <th>Report</th>
+  <th>Action</th>
+</tr>
+*@
+<tr class="project-@project.getId()">
+  <td>
+    <a class="plus btn btn-mini"><i class="icon icon-plus"></i></a>
+  </td>
+  <td><a class="badge badge-blue">@project.getName()</a></td>
+  <td>
+  <a>
+  @for(g <- GroupDAO.getInstance(controllers.Application.dbName).buildParentTree(project.getGroupOwner())) {
+     / @g.get("name")
+   }
+   / @project.getGroupOwner().get("name")
+   </a>
+  </td>
+  <td><a>@project.getCreator().getName()</a></td>
+  <td><span class="badge">@project.getCreatedDate()</span></td>
+  <td><span class="badge">@project.getModifiedDate()</span></td>
+  <td><span class="badge badge-blue last-build">@project.getLastBuildDate()</span></td>
+  <td><span class="badge status badge-@TestController.getColorByStatus(project.getStatus())">@project.getStatus()</span></td>
+  <td>
+    <a class="btn btn-mini disabled" title="View Report" rel="tooltip"><i class="icon-bar-chart icon-2x"></i></a>
+  </td>
+  <td>
+    <a class="btn btn-mini run
+     @if(project.getStatus().equals("Running") || project.getStatus().equals("Initializing")){ disabled }" 
+     href="@routes.PerformanceController.runProject(project.getId())" rel="tooltip" title="Run">
+     <i class="icon-play-circle icon-2x"></i> Run
+    </a>
+     
+    <a class="btn btn-mini" rel="tooltip" title="Edit"><i class="icon-edit icon-2x"></i> Edit</a>
+    
+    <a class="btn btn-mini stop @if("Running" != project.getStatus()){disabled}" rel="tooltip" title="Stop">
+    <i class="icon-stop icon-2x"></i> Stop
+    </a>
+    
+    <a class="btn btn-mini" href="@routes.PerformanceController.deleteProject(project.getId())" rel="tooltip" title="Delete">
+    <i class="icon-trash icon-2x"></i> Delete
+    </a>
+  </td>
+</tr>
+@if(project.getType().toString() == "performance") {
+<tr>
+  <td colspan="10" style="padding: 0px; border: none;">
+    <div style="display: none;">
+    <table class="table">
+      <tr>
+        <th>Snapshot</th>
+        <th>Concurrent Users</th>
+        <th>Ram Up</th>
+        <th>Loops</th>
+        <th>Duration</th>
+        <th>Last Build</th>
+        <th>Status</th>
+        <th>Report</th>
+        <th>Action</th>
+      </tr>
+      @PerformanceController.getSnapshotHtml(project)
+    </table>
+    </div>
+  </td>
+</tr>
+}

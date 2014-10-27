@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.component.usersmgt.DataFactory;
@@ -81,6 +82,18 @@ public class VMHelper extends AbstractHelper {
         return o1.getName().compareTo(o2.getName());
       }
     });
+    return vms;
+  }
+  
+  public static List<VMModel> getReadyVMs(String groupId) {
+    BasicDBObject filter = new BasicDBObject("group_id", groupId).append("status", VMStatus.Ready.toString());
+    
+    DB vmDB = getDatabase();
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(filter);
+    List<VMModel> vms = new ArrayList<VMModel>();
+    while (cursor.hasNext()) {
+      vms.add(new VMModel().from(cursor.next()));
+    }
     return vms;
   }
   

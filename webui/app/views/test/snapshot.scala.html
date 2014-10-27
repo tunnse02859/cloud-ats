@@ -1,0 +1,40 @@
+@(script: org.ats.jmeter.models.JMeterScript)
+@import controllers.test._
+@**
+<tr>
+  <th>Snapshot</th>
+  <th>Concurrent Users</th>
+  <th>Ram Up</th>
+  <th>Loops</th>
+  <th>Duration</th>
+  <th>Last Build</th>
+  <th>Status</th>
+  <th>Report</th>
+  <th>Action</th>
+</tr>
+**@
+<tr class="project-snapshot-@script.getString("_id")">
+  <td><a class="badge badge-blue">@script.getString("commit")</a></td>
+  <td><span class="badge badge-orange">@script.getNumberThreads()</span></td>
+  <td><span class="badge badge-orange">@script.getRamUp()</span></td>
+  <td><span class="badge badge-orange">@script.getLoops()</span></td>
+  <td><span class="badge badge-orange">@script.getDuration()</span></td>
+  <td><span class="badge badge-blue last-build">@script.getLastBuildDate()</span></td>
+  <td><span class="badge status badge-@TestController.getColorByStatus(script.getString("status"))">@script.getString("status")</span></td>
+  <td>
+    <a class="btn btn-mini disabled" rel="tooltip" title="View Report"><i class="icon-bar-chart icon-2x"></i></a>
+    <a class="btn btn-mini" rel="tooltip" title="View Log"><i class="icon-terminal icon-2x"></i></a>
+  </td>
+  <td>
+    <a class="btn btn-mini run
+     @if(script.getString("status").equals("Running") || script.getString("status").equals("Initializing")){ disabled }"
+     rel="tooltip" title="Run"
+     href="@routes.PerformanceController.runSnapshot(script.getString("_id"))"
+     >
+     <i class="icon-play-circle icon-2x"></i> Run</a>
+     
+     <a class="btn btn-mini stop @if("Running" != script.getString("status")){disabled}" rel="tooltip" title="Stop">
+     <i class="icon-stop icon-2x"></i> Stop
+     </a>
+  </td>
+</tr>

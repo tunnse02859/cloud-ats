@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import models.vm.OfferingModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.ats.cloudstack.AsyncJobAPI;
 import org.ats.cloudstack.CloudStackClient;
@@ -189,9 +190,10 @@ public class VMCreator {
     if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
       VirtualMachine guiVM = VirtualMachineAPI.findVMById(client, vmId, null);
       final VMModel vmModel = new VMModel(guiVM.id, guiVM.name, company.getId(), guiVM.templateName, guiVM.templateId, guiVM.nic[0].ipAddress, "ubuntu", "ubuntu");
-      vmModel.put("gui", true);
+      vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
       vmModel.put("system", false);
       vmModel.put("offering_id", guiVM.serviceOfferingId);
+      vmModel.setStatus(VMStatus.Initializing);
       VMHelper.createVM(vmModel);
 
       //Run recipes
@@ -223,6 +225,7 @@ public class VMCreator {
           } catch (Exception e) {
             e.printStackTrace();
             Logger.error(null, e);
+            queue.add("setup.vm.error");
           } finally {
             queue.add("log.exit");
           }

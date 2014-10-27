@@ -1,7 +1,7 @@
 @(t : String)
 @import org.ats.component.usersmgt.feature._
 @import com.mongodb._
-@import controllers.organization._
+@import controllers.test._
 
 <!DOCTYPE html>
 <html>
@@ -17,6 +17,7 @@
     <script type="text/javascript" src="@controllers.routes.Assets.at("/public", "javascripts/test.js")"></script>
     <script type="text/javascript" src="@controllers.routes.Assets.at("/public", "javascripts/bootstrap-slider.min.js")"></script>
     <link rel="stylesheet" type="text/css" media="all" href="@controllers.routes.Assets.at("/public", "stylesheets/bootstrap-slider.min.css")">
+    
   </head>
   
   <body class=" fluid-layout">
@@ -33,6 +34,113 @@
 
     </section>
 
+    <script type="text/javascript">
+    $(document).ready(function() {
+      var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+      var projectStatus = new WS("@routes.TestController.projectStatus(t, session().get("uuid"), session().get("user_id")).webSocketURL(request)");
+      
+      projectStatus.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        $(data.projects).each(function() {
+          var projectId = this.id;
+          $("tr.project-" + projectId + " td span.last-build").text(this.last_build);
+          var status = $("tr.project-" + projectId + " td span.status");
+          
+          var projectRun = $("tr.project-" + projectId + " a.btn.run");
+          var projectStop = $("tr.project-" + projectId + " a.btn.stop");
+          
+          var color;
+			    switch (this.status) {
+			    case "Ready":
+			    case "Completed":  
+			      color = "green";
+			      $(projectRun).removeClass("disabled");
+			      $(projectStop).addClass("disabled");
+			      break;
+			    case "Running":
+			      color = "cyan";
+			      $(projectRun).addClass("disabled");
+            $(projectStop).removeClass("disabled");
+			      break;
+			    case "Aborted":
+			      color = "orange";
+			      $(projectRun).addClass("disabled");
+            $(projectStop).removeClass("disabled");
+			      break;
+			    case "Errors":
+			      color = "red";
+			      $(projectRun).removeClass("disabled");
+            $(projectStop).addClass("disabled");
+			      break;
+			    case "Initializing":
+			      color = "blue";
+			      $(projectRun).addClass("disabled");
+            $(projectStop).removeClass("disabled");
+			      break;
+			    default:
+			      color = "";
+			      break;
+			    }
+			    
+			    $(status).text(this.status);
+			    $(status).removeAttr('class');
+			    $(status).attr('class', 'badge status badge-' + color);
+			    
+			    $(this.snapshots).each(function(){
+			      var snapshotId = this.id;
+			      $("tr.project-snapshot-" + snapshotId + " td span.last-build").text(this.last_build);
+	          
+	          var status = $("tr.project-snapshot-" + snapshotId + " td span.status");
+	          var snapshotRun = $("tr.project-snapshot-" + snapshotId + " a.btn.run");
+	          var snapshotStop = $("tr.project-snapshot-" + snapshotId + " a.btn.stop");
+	          
+	          var color;
+	          switch (this.status) {
+	          case "Ready":
+	          case "Completed":  
+	            color = "green";
+	            $(snapshotRun).removeClass("disabled");
+	            $(snapshotStop).addClass("disabled");
+	            break;
+	          case "Running":
+	            color = "cyan";
+	            $(snapshotRun).addClass("disabled");
+	            $(snapshotStop).removeClass("disabled");
+	            break;
+	          case "Aborted":
+	            color = "orange";
+	            $(snapshotRun).addClass("disabled");
+	            $(snapshotStop).removeClass("disabled");
+	            break;
+	          case "Errors":
+	            color = "red";
+	            $(snapshotRun).removeClass("disabled");
+	            $(snapshotStop).addClass("disabled");
+	            break;
+	          case "Initializing":
+	            color = "blue";
+	            $(snapshotRun).addClass("disabled");
+	            $(snapshotStop).removeClass("disabled");
+	            break;
+	          default:
+	            color = "";
+	            break;
+	          }
+	          
+	          $(status).text(this.status);
+	          $(status).removeAttr('class');
+	          $(status).attr('class', 'badge status badge-' + color);
+			    });
+        });
+      };
+      
+      window.onbeforeunload = function() {
+        projectStatus.onclose = function () {};
+        projectStatus.close();
+      };
+    });
+    </script>
+    
   </body>
   
 </html>

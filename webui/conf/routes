@@ -92,7 +92,12 @@ POST    /portal/vm/p/s             controllers.vm.VMController.saveProperties()
 ############################# Performance Test ################################
 
 GET    /portal/test/p             controllers.test.PerformanceController.index()
-POST   /portal/test/p/upload      controllers.test.PerformanceController.createProjectByUpload()
+POST   /portal/test/p/upload/:r   controllers.test.PerformanceController.createProjectByUpload(r: Boolean)
+GET    /portal/test/filter        controllers.test.TestController.getProjectList()
+GET    /portal/test/p/d/:id       controllers.test.PerformanceController.deleteProject(id)
+GET    /portal/test/p/r/:id       controllers.test.PerformanceController.runProject(id)
+GET    /portal/test/p/s/r/:id     controllers.test.PerformanceController.runSnapshot(id)
+GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(t, s, u)
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

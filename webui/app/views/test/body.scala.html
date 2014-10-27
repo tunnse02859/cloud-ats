@@ -8,7 +8,7 @@
   <form class="form-search form-inline">
     
     <a class="btn btn-primary pull-right create-new-test" href="javascript:void(0);">
-    <i class="icon-plus"></i> @if("p" == t) { Add New Performance Test } @if("f" == t) { Add New Functional Test }</a>
+    <i class="icon-plus"></i> @if("performance" == t) { Add New Performance Test } @if("functional" == t) { Add New Functional Test }</a>
     
     <div class="btn-group">
       <button class="btn status">All Status</button>
@@ -42,16 +42,20 @@
 
 <section class="test-list row-fluid">
   <div class="span12">
-    <table class="table">
-      <tr>
+    <table class="table project">
+      <tr class="header">
+        <th></th>
         <th>Test Name</th>
-        <th>Created Date</th>
-        <th>Last Updated Date</th>
+        <th>Group</th>
         <th>Creator</th>
+        <th>Created Date</th>
+        <th>Last Updated</th>
+        <th>Last Run</th>
         <th>Status</th>
         <th>Report</th>
         <th>Action</th>
       </tr>
+      @TestController.getProjectListHtml(t, null, null)
     </table>
   </div>
 </section>
@@ -59,36 +63,38 @@
 <div class="modal hide" id="createNewTestDialog">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  @if("p" == t) {
+  @if("performance" == t) {
     <h3>Create New Performance Test</h3>
   }
-  @if("f" == t) {
+  @if("functional" == t) {
     <h3>Create New Functional Test</h3>
   }
   </div>
   <div class="modal-body">
     <div class="row-fluid">
-      <div class="@if("p" == t){ span5 }else{ span12 }" @if("p" == t){style="text-align: center;"}>
-        @if("p" == t) {
+      <div class="@if("performance" == t){ span5 }else{ span12 }" @if("performance" == t){style="text-align: center;"}>
+        @if("performance" == t) {
         <h5>Upload Your JMX Script</h5>
         }
-        @if("f" == t) {
+        @if("functional" == t) {
         <h5>Upload Your Maven Project</h5>  
         }
         <legend></legend>
-        <form class="form-horizontal" action="@if("p" == t){ @routes.PerformanceController.createProjectByUpload() }" method="post" enctype="multipart/form-data">
+        <form class="form-horizontal upload" action="" method="post" enctype="multipart/form-data">
           <div class="control-group">
             <input type="text" required="" name="name" placeholder="Test Name">
           </div>
           <div class="control-group">
             <input type="file" required="" name="uploaded">
           </div>
+          <legend></legend>
           <div>
-            <button class="btn btn-primary" type="submit">Create Test</button>
+            <a class="btn btn-primary start" data-action="@if("performance" == t){ @routes.PerformanceController.createProjectByUpload(true) }" title="Create and Run" >Start</a>
+            <a class="btn btn-orange save" data-action="@if("performance" == t){ @routes.PerformanceController.createProjectByUpload(false) }" title="Create Only">Save</a>
           </div>
         </form>
       </div>
-      @if("p" == t) {
+      @if("performance" == t) {
       <div class="span2" style="text-align: center; margin: 0px;"> 
         <span class="badge badge-green">OR</span> 
       </div>
