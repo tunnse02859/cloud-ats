@@ -98,6 +98,7 @@ public class JenkinsJobExecutor {
               project.put("status", JenkinsJobStatus.Completed.toString());
               project.put("last_build", time);
               TestHelper.updateProject(project);
+              
             } else if ("FAILURE".equals(job.getStatus(buildNumber))) {
               jobModel.put("status", JenkinsJobStatus.Errors.toString());
               JenkinsJobHelper.updateJenkinsJob(jobModel);
@@ -133,7 +134,10 @@ public class JenkinsJobExecutor {
       }
     }, 0, 1000, TimeUnit.MILLISECONDS);
   }
-
+  
+  private void updateResult(TestProjectType type, JenkinsJobModel job, JenkinsMaster jenkinsMaster) {
+  }
+  
   public void stop() {
     this.service.shutdown();
   }

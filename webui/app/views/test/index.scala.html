@@ -48,6 +48,7 @@
           
           var projectRun = $("tr.project-" + projectId + " a.btn.run");
           var projectStop = $("tr.project-" + projectId + " a.btn.stop");
+          var projectReport = $("tr.project-" + projectId + " a.btn.report");
           
           var color;
 			    switch (this.status) {
@@ -56,26 +57,31 @@
 			      color = "green";
 			      $(projectRun).removeClass("disabled");
 			      $(projectStop).addClass("disabled");
+			      $(projectReport).removeClass("disabled");
 			      break;
 			    case "Running":
 			      color = "cyan";
 			      $(projectRun).addClass("disabled");
             $(projectStop).removeClass("disabled");
+            $(projectReport).addClass("disabled");
 			      break;
 			    case "Aborted":
 			      color = "orange";
 			      $(projectRun).addClass("disabled");
             $(projectStop).removeClass("disabled");
+            $(projectReport).addClass("disabled");
 			      break;
 			    case "Errors":
 			      color = "red";
 			      $(projectRun).removeClass("disabled");
             $(projectStop).addClass("disabled");
+            $(projectReport).addClass("disabled");
 			      break;
 			    case "Initializing":
 			      color = "blue";
 			      $(projectRun).addClass("disabled");
             $(projectStop).removeClass("disabled");
+            $(projectReport).addClass("disabled");
 			      break;
 			    default:
 			      color = "";
@@ -93,6 +99,7 @@
 	          var status = $("tr.project-snapshot-" + snapshotId + " td span.status");
 	          var snapshotRun = $("tr.project-snapshot-" + snapshotId + " a.btn.run");
 	          var snapshotStop = $("tr.project-snapshot-" + snapshotId + " a.btn.stop");
+	          var snapshotReport = $("tr.project-snapshot-" + snapshotId + " a.btn.report");
 	          
 	          var color;
 	          switch (this.status) {
@@ -101,26 +108,31 @@
 	            color = "green";
 	            $(snapshotRun).removeClass("disabled");
 	            $(snapshotStop).addClass("disabled");
+	            $(snapshotReport).removeClass("disabled");
 	            break;
 	          case "Running":
 	            color = "cyan";
 	            $(snapshotRun).addClass("disabled");
 	            $(snapshotStop).removeClass("disabled");
+	            $(snapshotReport).addClass("disabled");
 	            break;
 	          case "Aborted":
 	            color = "orange";
 	            $(snapshotRun).addClass("disabled");
 	            $(snapshotStop).removeClass("disabled");
+	            $(snapshotReport).addClass("disabled");
 	            break;
 	          case "Errors":
 	            color = "red";
 	            $(snapshotRun).removeClass("disabled");
 	            $(snapshotStop).addClass("disabled");
+	            $(snapshotReport).addClass("disabled");
 	            break;
 	          case "Initializing":
 	            color = "blue";
 	            $(snapshotRun).addClass("disabled");
 	            $(snapshotStop).removeClass("disabled");
+	            $(snapshotReport).addClass("disabled");
 	            break;
 	          default:
 	            color = "";

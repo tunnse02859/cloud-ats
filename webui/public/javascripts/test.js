@@ -36,4 +36,21 @@ $(document).ready(function() {
       $(icon).addClass("icon-plus");
     }
   });
+  
+  //Run project and snapshot by ajax
+  $("body").on("click", ".table.project a.btn.run", function() {
+    var href = $(this).attr("href");
+    $(this).addClass("disabled");
+    $.ajax({
+      url: href,
+      dataType: "html",
+      success: function(data) {
+        console.log("run a job successfully");
+      },
+      error: function(e) {
+        console.log(e);
+      }
+    });
+    return false;
+  });
 });

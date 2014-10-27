@@ -108,7 +108,8 @@ public class JenkinsJobHelper {
   public static int getCurrentBuildIndex(String projectId) throws IOException {
     DBCollection col  = getCollection();
     DBCursor cursor = col.find(new BasicDBObject("project_id", projectId)).sort(new BasicDBObject("index", -1)).limit(1);
-    
-    return cursor.hasNext() ? (int)cursor.next().get("index") : 0;
+    if (cursor.hasNext()) return 0;
+    DBObject obj = cursor.next();
+    return obj.get("index") != null ? (Integer) obj.get("index") : 0;
   }
 }
