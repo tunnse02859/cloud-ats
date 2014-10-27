@@ -88,7 +88,7 @@ public class TestHelper {
     DBCollection col = db.getCollection(type.toString());    
     DBCursor cursor = col.find().sort(new BasicDBObject("index", -1)).limit(1);
     
-    if (cursor.hasNext()) return 0;
+    if (!cursor.hasNext()) return 0;
     DBObject obj = cursor.next();
     return obj.get("index") != null ?  (Integer) obj.get("index") : 0;
   }

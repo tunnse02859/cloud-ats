@@ -60,7 +60,7 @@ import controllers.vm.VMCreator;
 public class PerformanceController extends TestController {
 
   public static Result index() {
-    return ok(index.render("performance"));
+    return ok(index.render(TestProjectType.performance.toString()));
   }
   
   public static Html getSnapshotHtml(TestProjectModel project) {

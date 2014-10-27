@@ -99,6 +99,10 @@ GET    /portal/test/p/r/:id       controllers.test.PerformanceController.runProj
 GET    /portal/test/p/s/r/:id     controllers.test.PerformanceController.runSnapshot(id)
 GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(t, s, u)
 
+############################# Functional Test #################################
+
+GET    /portal/test/f             controllers.test.FunctionalController.index()
+
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()
 GET     /demo/signin                     controllers.demo.Application.signin()

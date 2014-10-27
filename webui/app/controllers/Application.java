@@ -8,6 +8,7 @@ import interceptor.WizardInterceptor;
 
 import java.util.Collection;
 
+import models.test.TestProjectModel.TestProjectType;
 import models.vm.VMModel;
 
 import org.ats.component.usersmgt.UserManagementException;
@@ -115,24 +116,15 @@ public class Application extends Controller {
       
       //Configure Performance feature
       Feature perf = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Performance")).iterator().next();
-      company.addFeature(perf);
+      Role perfRole = configureTestFeature(company, perf, admin);
       
-      Operation perfAdmin = null;
-      for (Operation op : perf.getOperations()) {
-        if (op.getName().equals("Administration")) perfAdmin = op;
-      }
-      Role perfRole = new Role(dbName, "Perf Administration", company.getId());
-      perfRole.put("desc", "The Performance Administration Role");
-      
-      perfRole.addPermission(new Permission(dbName, perf.getId(), perfAdmin.getId()));
-
-      perfRole.addUser(admin);
-      admin.addRole(perfRole);
-      company.addRole(perfRole);
+      //Configure Functional feature
+      Feature func = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Functional")).iterator().next();
+      Role funcRole = configureTestFeature(company, func, admin);
       
       GroupDAO.getInstance(dbName).create(company);
       UserDAO.getInstance(dbName).create(admin);
-      RoleDAO.getInstance(dbName).create(administration, vmRole, perfRole);
+      RoleDAO.getInstance(dbName).create(administration, vmRole, perfRole, funcRole);
       
       //Create system vm
       Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
@@ -165,6 +157,25 @@ public class Application extends Controller {
       
       return Promise.<Result>pure(redirect(controllers.routes.Application.dashboard()));
     }
+  }
+  
+  private static Role configureTestFeature(Group company, Feature testFeature, User admin) {
+    company.addFeature(testFeature);
+    
+    Operation testAdminOperation = null;
+    for (Operation op : testFeature.getOperations()) {
+      if (op.getName().equals("Administration")) testAdminOperation = op;
+    }
+    Role testAdminRole = new Role(dbName, testFeature.getName() + " Administration", company.getId());
+    testAdminRole.put("desc", "The " + testFeature.getName() + " Administration Role");
+    
+    testAdminRole.addPermission(new Permission(dbName, testFeature.getId(), testAdminOperation.getId()));
+
+    testAdminRole.addUser(admin);
+    admin.addRole(testAdminRole);
+    company.addRole(testAdminRole);
+    
+    return testAdminRole;
   }
   
   public static Result signin() {
@@ -229,7 +240,10 @@ public class Application extends Controller {
     FeatureInitializer.createVMFeature(root, system);
     
     //Initialize Performance
-    FeatureInitializer.createPerformanceTestFeature();
+    FeatureInitializer.createTestFeature(TestProjectType.performance);
+    
+    //Initialize Functional
+    FeatureInitializer.createTestFeature(TestProjectType.functional);
     
     //login
     session().clear();
