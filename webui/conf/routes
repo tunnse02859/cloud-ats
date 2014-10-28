@@ -102,6 +102,8 @@ GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(
 ############################# Functional Test #################################
 
 GET    /portal/test/f             controllers.test.FunctionalController.index()
+POST   /portal/test/f/upload/:r   controllers.test.FunctionalController.createProjectByUpload(r: Boolean)
+GET    /portal/test/f/r/:id       controllers.test.FunctionalController.runProject(id)
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

@@ -92,7 +92,7 @@ public class PerformanceController extends TestController {
     
     final Group company = getCompany();
     
-    List<VMModel> list = VMHelper.getReadyVMs(company.getId());
+    List<VMModel> list = VMHelper.getReadyVMs(company.getId(), new BasicDBObject("gui", false));
     
     //remove last build
     JenkinsJobHelper.deleteBuildOfSnapshot(snapshot.getString("_id"));

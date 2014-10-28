@@ -48,7 +48,7 @@
         <th>Test Name</th>
         <th>Group</th>
         <th>Creator</th>
-        <th>Created Date</th>
+        <!-- <th>Created Date</th>  -->
         <th>Last Updated</th>
         <th>Last Run</th>
         <th>Status</th>
@@ -89,8 +89,14 @@
           </div>
           <legend></legend>
           <div>
-            <a class="btn btn-primary start" data-action="@if("performance" == t){ @routes.PerformanceController.createProjectByUpload(true) }" title="Create and Run" >Start</a>
-            <a class="btn btn-orange save" data-action="@if("performance" == t){ @routes.PerformanceController.createProjectByUpload(false) }" title="Create Only">Save</a>
+            <a class="btn btn-primary start" 
+            @if("performance" == t){ data-action="@routes.PerformanceController.createProjectByUpload(true)" }
+            @if("functional" == t){ data-action="@routes.FunctionalController.createProjectByUpload(true)" }
+            title="Create and Run" >Start</a>
+            <a class="btn btn-orange save"
+            @if("performance" == t){ data-action="@routes.PerformanceController.createProjectByUpload(false)" }
+            @if("functional" == t){ data-action="@routes.FunctionalController.createProjectByUpload(false)" } 
+            title="Create Only">Save</a>
           </div>
         </form>
       </div>

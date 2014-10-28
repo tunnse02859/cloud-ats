@@ -85,8 +85,9 @@ public class VMHelper extends AbstractHelper {
     return vms;
   }
   
-  public static List<VMModel> getReadyVMs(String groupId) {
-    BasicDBObject filter = new BasicDBObject("group_id", groupId).append("status", VMStatus.Ready.toString());
+  public static List<VMModel> getReadyVMs(String groupId, DBObject filter) {
+    filter.put("group_id", groupId);
+    filter.put("status", VMStatus.Ready.toString());
     
     DB vmDB = getDatabase();
     DBCursor cursor = vmDB.getCollection(vmColumn).find(filter);
