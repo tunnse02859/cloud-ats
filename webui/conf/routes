@@ -98,6 +98,9 @@ GET    /portal/test/p/d/:id       controllers.test.PerformanceController.deleteP
 GET    /portal/test/p/r/:id       controllers.test.PerformanceController.runProject(id)
 GET    /portal/test/p/s/r/:id     controllers.test.PerformanceController.runSnapshot(id)
 GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(t, s, u)
+GET    /portal/test/p/report/:id  controllers.test.PerformanceController.report(id)
+#GET    /portal/test/p/report2/:id  controllers.test.PerformanceController.report2(id)
+#GET    /portal/test/p/report3/:id  controllers.test.PerformanceController.report3(id)
 
 ############################# Functional Test #################################
 

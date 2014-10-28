@@ -3,12 +3,22 @@
  */
 package controllers.test;
 
-import java.io.BufferedInputStream;
+import helpertest.TestHelper;
+import helpervm.VMHelper;
+import interceptor.AuthenticationInterceptor;
+import interceptor.Authorization;
+import interceptor.WizardInterceptor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import models.test.JenkinsJobStatus;
+import models.test.TestProjectModel;
+import models.test.TestProjectModel.TestProjectType;
+import models.vm.VMModel;
 
 import org.ats.common.StringUtil;
 import org.ats.common.ssh.SSHClient;
@@ -17,31 +27,21 @@ import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.gitlab.GitlabAPI;
-import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabProject;
+
+import play.data.DynamicForm;
+import play.mvc.Controller;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
+import play.mvc.Result;
+import play.mvc.With;
+import views.html.test.index;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 
 import controllers.Application;
-import models.test.JenkinsJobStatus;
-import models.test.TestProjectModel;
-import models.test.TestProjectModel.TestProjectType;
-import models.vm.VMModel;
-import helpertest.JMeterScriptHelper;
-import helpertest.TestHelper;
-import helpervm.VMHelper;
-import interceptor.AuthenticationInterceptor;
-import interceptor.Authorization;
-import interceptor.WizardInterceptor;
-import play.data.DynamicForm;
-import play.mvc.Controller;
-import play.mvc.Result;
-import play.mvc.With;
-import play.mvc.Http.MultipartFormData;
-import play.mvc.Http.MultipartFormData.FilePart;
-import views.html.test.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

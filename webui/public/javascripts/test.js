@@ -10,8 +10,20 @@ $(document).ready(function() {
     $("#createNewTestDialog").modal();
   });
   
+  //clear wizard form
   $("#createNewTestDialog").on("hide", function() {
     $(this).find("form")[0].reset();
+  });
+  
+  //clear report
+  $("body").on("click", "a.btn.report", function(ev) {
+    ev.preventDefault();
+    var target = $(this).attr("data-target");
+    var modal = $(target);
+    var remote = $(modal).attr("data-remote");
+    $(modal).load(remote, function() {
+      $(modal).modal('show');
+    })
   });
   
   $("body").on("click", "form.upload .btn.start,.btn.save", function() {
@@ -23,7 +35,7 @@ $(document).ready(function() {
   
   //project plus
   $("body").on("click", ".table.project a.plus", function() {
-    var div = $(this).closest("tr").next("tr").find("div");
+    var div = $(this).closest("tr").next("tr").find("div.snapshots");
     var icon = $(this).find("i.icon");
     
     if ($(div).css('display') == 'none') {

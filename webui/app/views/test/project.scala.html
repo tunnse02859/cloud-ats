@@ -1,6 +1,7 @@
 @(project: models.test.TestProjectModel)
 @import org.ats.component.usersmgt.group._
 @import controllers.test._
+@import helpertest._
 @*
 <tr>
   <th></th>
@@ -34,7 +35,9 @@
   <td><span class="badge badge-blue last-build">@project.getLastBuildDate()</span></td>
   <td><span class="badge status badge-@TestController.getColorByStatus(project.getStatus())">@project.getStatus()</span></td>
   <td>
-    <a class="btn btn-mini report disabled" title="View Report" rel="tooltip"><i class="icon-bar-chart icon-2x"></i></a>
+    <a class="btn btn-mini report disabled" title="View Report" rel="tooltip" data-toggle="modal"
+     data-target="#report-project-@project.getId()">
+    <i class="icon-bar-chart icon-2x"></i></a>
   </td>
   <td>
     <a class="btn btn-mini run
@@ -57,7 +60,7 @@
 @if(project.getType().toString() == "performance") {
 <tr>
   <td colspan="10" style="padding: 0px; border: none;">
-    <div style="display: none;">
+    <div class="snapshots" style="display: none;">
     <table class="table">
       <tr>
         <th>Snapshot</th>
@@ -75,4 +78,8 @@
     </div>
   </td>
 </tr>
+<!-- Modal performance report -->
+<div class="modal hide" id="report-project-@project.getId()" style="width: 750px;" 
+data-remote="@routes.PerformanceController.report(JMeterScriptHelper.getLastestCommit(project.getId()).getString("_id"))">
+</div>
 }

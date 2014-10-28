@@ -23,6 +23,8 @@ import models.test.TestProjectModel.TestProjectType;
 import models.vm.VMModel;
 
 import org.ats.common.StringUtil;
+import org.ats.common.http.HttpClientFactory;
+import org.ats.common.http.HttpClientUtil;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
@@ -42,6 +44,7 @@ import play.mvc.Result;
 import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
 import views.html.test.index;
+import views.html.test.report_perf;
 import views.html.test.snapshot;
 
 import com.mongodb.BasicDBObject;
@@ -61,6 +64,15 @@ public class PerformanceController extends TestController {
 
   public static Result index() {
     return ok(index.render(TestProjectType.performance.toString()));
+  }
+  
+  public static Result report(String snapshotId) throws Exception {
+    JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("snapshot_id", snapshotId)).iterator().next();
+    VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
+    String report1 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ResponseTimesOverTime.png" ;
+    String report2 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ThreadsStateOverTime.png" ;
+    String report3 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/TransactionsPerSecond.png" ;
+    return ok(report_perf.render(report1, report2, report3));
   }
   
   public static Html getSnapshotHtml(TestProjectModel project) {
