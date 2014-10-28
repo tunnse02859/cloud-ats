@@ -3,6 +3,8 @@
  */
 package org.ats.common.ssh;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,6 +24,51 @@ import com.jcraft.jsch.Session;
  * Apr 24, 2014
  */
 public class SSHClient {
+  
+  public static void sendFile(String host, int port, String username, String password, String folderDest, String fileDest, InputStream source)
+      throws Exception {
+    Session session = getSession(host, port, username, password);
+
+    Channel channel = session.openChannel("exec");
+    ((ChannelExec) channel).setCommand("mkdir -p " + folderDest);
+    channel.connect();
+    channel.disconnect();
+
+    // exec 'scp -t rfile' remotely
+    String command = "scp -t " + folderDest + "/" + fileDest;
+    channel = session.openChannel("exec");
+    ((ChannelExec) channel).setCommand(command);
+
+    // get I/O streams for remote scp
+    OutputStream out = channel.getOutputStream();
+    channel.connect();
+
+    // send "C0644 filesize filename", where filename should not include '/'
+    BufferedInputStream bis = new BufferedInputStream(source);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] buff = new byte[1024];
+    for (int l = bis.read(buff); l != -1; l = bis.read(buff)) {
+      baos.write(buff, 0, l);
+    }
+    bis.close();
+    
+    long filesize = baos.size();
+    command = "C0644 " + filesize + " ";
+    command += fileDest;
+    command += "\n";
+    out.write(command.getBytes());
+    out.flush();
+
+    // send a content of lfile
+    out.write(baos.toByteArray());
+    // send '\0'
+    out.write(new byte[] { 0 }, 0, 1);
+    out.flush();
+    out.close();
+
+    channel.disconnect();
+    session.disconnect();
+  }
   
   /**
    * 
