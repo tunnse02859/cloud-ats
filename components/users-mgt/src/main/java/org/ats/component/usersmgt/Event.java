@@ -23,7 +23,7 @@ public abstract class Event extends BasicDBObject {
   private final String dbName;
 
   /** .*/
-  protected BaseObject<?> source;
+  protected BasicDBObject source;
   
   public Event(BaseObject<?> source, String dbName) {
     this.source = source;
@@ -35,7 +35,11 @@ public abstract class Event extends BasicDBObject {
   }
   
   public Event(DBObject obj) {
-    this.source = (BaseObject<?>) obj.get("source");
+    if (obj instanceof BaseObject) {
+      this.source = (BasicDBObject) obj;
+    } else {
+      this.source = (BasicDBObject) obj.get("source");
+    }
     this.dbName = (String) obj.get("dbName");
     
     this.put("_id", obj.get("_id"));
@@ -44,7 +48,7 @@ public abstract class Event extends BasicDBObject {
     this.put("dbName", obj.get("dbName"));
   }
   
-  public BaseObject<?> getSource() {
+  public BasicDBObject getSource() {
     return source;
   }
   
