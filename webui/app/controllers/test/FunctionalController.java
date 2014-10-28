@@ -3,6 +3,8 @@
  */
 package controllers.test;
 
+import helpertest.JMeterScriptHelper;
+import helpertest.JenkinsJobHelper;
 import helpertest.TestHelper;
 import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
@@ -11,10 +13,13 @@ import interceptor.WizardInterceptor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.test.TestProjectModel.TestProjectType;
@@ -42,6 +47,7 @@ import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 
 import controllers.Application;
+import controllers.vm.VMCreator;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -50,7 +56,7 @@ import controllers.Application;
  */
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 @Authorization(feature = "Functional", operation = "")
-public class FunctionalController extends Controller {
+public class FunctionalController extends TestController {
 
   public static Result index() {
     return ok(index.render(TestProjectType.functional.toString()));
@@ -106,6 +112,7 @@ public class FunctionalController extends Controller {
         while(entries.hasMoreElements()){
             ZipEntry entry = entries.nextElement();
             System.out.println(entry.getName());
+            if (entry.isDirectory()) continue;
             gitlabAPI.createFile(gitProject, entry.getName(), "master", StringUtil.readStream(zip.getInputStream(entry)), "Snapshot 1");
         }
         
@@ -114,11 +121,61 @@ public class FunctionalController extends Controller {
       return redirect(routes.FunctionalController.index());
     } catch (Exception e) {
       e.printStackTrace();
-      return forbidden(views.html.forbidden.render());
+     throw new RuntimeException(e);
     }
   }
   
   public static Result runProject(String projectId) throws Exception {
+    final TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
+    final VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+    
+    final Group company = getCompany();
+    
+    List<VMModel> list = VMHelper.getReadyVMs(company.getId(), new BasicDBObject("gui", true));
+    
+    //remove last build
+    JenkinsJobHelper.deleteBuildOfSnapshot(project.getId());
+    
+    if (list.isEmpty()) {
+      Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            VMModel vm = VMCreator.createNormalNonGuiVM(company);
+            JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectType.functional);
+            JenkinsJobHelper.createJenkinsJob(job);
+            
+            project.put("status", job.getStatus().toString());
+            TestHelper.updateProject(project);
+            
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      });
+      thread.start();
+    } else {
+      VMModel vm = list.get(0);
+      JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectType.functional);
+      JenkinsJobHelper.createJenkinsJob(job);
+
+      project.put("status", job.getStatus().toString());
+      TestHelper.updateProject(project);
+    }
+    return redirect(routes.FunctionalController.index());
+  }
+  
+  public static Result deleteProject(String projectId) throws IOException {
+    TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
+    
+    TestHelper.removeProject(project);
+    JenkinsJobHelper.deleteBuildOfProject(project.getId());
+    
+    VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+    String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    gitlabAPI.deleteProject(project.getGitlabProjectId());
+    
     return redirect(routes.FunctionalController.index());
   }
   

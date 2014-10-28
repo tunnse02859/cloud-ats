@@ -217,6 +217,28 @@ public class VMCreator {
               queue.add("Execute command: " + command);
               channel.disconnect();
               
+              //TODO:Workaround for unclean vm template
+              channel = (ChannelExec) session.openChannel("exec");
+              command = "sudo -S -p '' rm /etc/chef/client.rb";
+              channel.setCommand(command);
+              OutputStream out = channel.getOutputStream();
+              channel.connect();
+              
+              out.write((vmModel.getPassword() + "\n").getBytes());
+              out.flush();
+              channel.disconnect();
+              
+              channel = (ChannelExec) session.openChannel("exec");
+              command = "sudo -S -p '' rm /etc/chef/client.pem";
+              channel.setCommand(command);
+              out = channel.getOutputStream();
+              channel.connect();
+              
+              out.write((vmModel.getPassword() + "\n").getBytes());
+              out.flush();
+              channel.disconnect();
+              //End
+              
               Knife knife = VMHelper.getKnife();
               knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), queue, recipes);
               

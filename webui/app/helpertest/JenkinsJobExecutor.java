@@ -5,7 +5,6 @@ package helpertest;
 
 import helpervm.VMHelper;
 
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -128,6 +127,9 @@ public class JenkinsJobExecutor {
             Logger.debug("An error occurs when dequeue a jenkins maven job", e);
           }
           break;
+        case functional:
+          runTest(project, jenkinsMaster, jobModel, vm);
+          break;
         default:
           break;
         }
@@ -135,7 +137,51 @@ public class JenkinsJobExecutor {
     }, 0, 1000, TimeUnit.MILLISECONDS);
   }
   
-  private void updateResult(TestProjectType type, JenkinsJobModel job, JenkinsMaster jenkinsMaster) {
+  //TODO: using for same Functional and Performance
+  private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
+    try {
+      JenkinsMavenJob job = new JenkinsMavenJob(jenkinsMaster, jobModel.getString("_id") , vm.getPublicIP(), 
+          project.geGitHttpUrl(), "master", "clean install", null);
+
+      int buildNumber = job.submit();
+      
+      project.put("status", JenkinsJobStatus.Running.toString());
+      TestHelper.updateProject(project);
+      while (job.isBuilding(buildNumber)) {
+        Thread.sleep(1000);
+      }
+      
+      long time = System.currentTimeMillis();
+      
+      if ("SUCCESS".equals(job.getStatus(buildNumber))) {
+        jobModel.put("status", JenkinsJobStatus.Completed.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        project.put("status", JenkinsJobStatus.Completed.toString());
+        project.put("last_build", time);
+        TestHelper.updateProject(project);
+        
+      } else if ("FAILURE".equals(job.getStatus(buildNumber))) {
+        jobModel.put("status", JenkinsJobStatus.Errors.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        project.put("status", JenkinsJobStatus.Errors.toString());
+        project.put("time", time);
+        TestHelper.updateProject(project);
+      } else if ("UNSTABLE".equals(job.getStatus(buildNumber))) {
+        //TODO
+      }
+      
+    } catch (Exception e) {
+      jobModel.put("status", JenkinsJobStatus.Errors.toString());
+      JenkinsJobHelper.updateJenkinsJob(jobModel);
+      
+      project.put("status", JenkinsJobStatus.Errors.toString());
+      TestHelper.updateProject(project);
+      
+      e.printStackTrace();
+      Logger.debug("An error occurs when dequeue a jenkins maven job", e);
+    }
   }
   
   public void stop() {

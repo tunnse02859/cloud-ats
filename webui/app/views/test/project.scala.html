@@ -2,6 +2,7 @@
 @import org.ats.component.usersmgt.group._
 @import controllers.test._
 @import helpertest._
+@import models.test.TestProjectModel._
 @*
 <tr>
   <th></th>
@@ -42,7 +43,9 @@
   <td>
     <a class="btn btn-mini run
      @if(project.getStatus().equals("Running") || project.getStatus().equals("Initializing")){ disabled }" 
-     href="@routes.PerformanceController.runProject(project.getId())" rel="tooltip" title="Run">
+     @if(project.getType() == TestProjectType.performance) { href="@routes.PerformanceController.runProject(project.getId())" } 
+     @if(project.getType() == TestProjectType.functional) { href="@routes.FunctionalController.runProject(project.getId())" }
+     rel="tooltip" title="Run">
      <i class="icon-play-circle icon-2x"></i> Run
     </a>
      
@@ -52,7 +55,10 @@
     <i class="icon-stop icon-2x"></i> Stop
     </a>
     
-    <a class="btn btn-mini" href="@routes.PerformanceController.deleteProject(project.getId())" rel="tooltip" title="Delete">
+    <a class="btn btn-mini" 
+    @if(project.getType() == TestProjectType.performance) { href="@routes.PerformanceController.deleteProject(project.getId())" } 
+    @if(project.getType() == TestProjectType.functional) { href="@routes.FunctionalController.deleteProject(project.getId())" }
+    rel="tooltip" title="Delete">
     <i class="icon-trash icon-2x"></i> Delete
     </a>
   </td>

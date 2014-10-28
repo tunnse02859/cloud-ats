@@ -107,6 +107,7 @@ GET    /portal/test/p/report/:id  controllers.test.PerformanceController.report(
 GET    /portal/test/f             controllers.test.FunctionalController.index()
 POST   /portal/test/f/upload/:r   controllers.test.FunctionalController.createProjectByUpload(r: Boolean)
 GET    /portal/test/f/r/:id       controllers.test.FunctionalController.runProject(id)
+GET    /portal/test/f/d/:id       controllers.test.FunctionalController.deleteProject(id)
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()
