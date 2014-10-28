@@ -23,8 +23,6 @@ import models.test.TestProjectModel.TestProjectType;
 import models.vm.VMModel;
 
 import org.ats.common.StringUtil;
-import org.ats.common.http.HttpClientFactory;
-import org.ats.common.http.HttpClientUtil;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.component.usersmgt.group.GroupDAO;
 import org.ats.component.usersmgt.user.User;
@@ -43,6 +41,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
+import views.html.test.body;
 import views.html.test.index;
 import views.html.test.report_perf;
 import views.html.test.snapshot;
@@ -63,16 +62,21 @@ import controllers.vm.VMCreator;
 public class PerformanceController extends TestController {
 
   public static Result index() {
-    return ok(index.render(TestProjectType.performance.toString()));
+    String type = TestProjectType.performance.toString();
+    return ok(index.render(type, body.render(type)));
   }
   
   public static Result report(String snapshotId) throws Exception {
+    JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapshotId);
+    TestProjectModel project = TestHelper.getProjectById(TestProjectType.performance, snapshot.getString("project_id"));
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("snapshot_id", snapshotId)).iterator().next();
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
     String report1 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ResponseTimesOverTime.png" ;
     String report2 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ThreadsStateOverTime.png" ;
     String report3 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/TransactionsPerSecond.png" ;
-    return ok(report_perf.render(report1, report2, report3));
+    
+    String name = project.getName() + " / " + snapshot.getString("commit");
+    return ok(report_perf.render(name, report1, report2, report3));
   }
   
   public static Html getSnapshotHtml(TestProjectModel project) {

@@ -1,18 +1,21 @@
-@(report1 : String, report2 : String, report3 : String)
+@(name: String, report1 : String, report2 : String, report3 : String)
 
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h3>Performance Report</h3>
+  <h3>@name Report</h3>
 </div>
-<div class="modal-body">
+<div class="modal-body" style="max-height: 450px;">
   
   
 <div class="row-fuild">
   <h5>Response Time</h5>
+  <legend></legend>
   <img alt="" src="@report1">
   <h5>Concurrent Users</h5>
+  <legend></legend>
   <img alt="" src="@report2">
   <h5>Transaction</h5>
+  <legend></legend>
   <img alt="" src="@report3">
 </div>
 

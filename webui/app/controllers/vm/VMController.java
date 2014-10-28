@@ -337,6 +337,12 @@ public class VMController extends Controller {
 
       if (!hasPermission(vm.getGroup(), "Manage Test VM")) return Promise.<Result>pure(forbidden(views.html.forbidden.render()));
 
+      VMHelper.removeVM(vm);
+      
+      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+      VMHelper.getKnife().deleteNode(vm.getName());
+      new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      
       Promise<Boolean> result = Promise.promise(new Function0<Boolean>() {
         @Override
         public Boolean apply() throws Throwable {
@@ -347,12 +353,6 @@ public class VMController extends Controller {
           }
 
           if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-            VMHelper.removeVM(vm);
-            
-            VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-            VMHelper.getKnife().deleteNode(vm.getName());
-            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-            
             return true;
           }
           return false;

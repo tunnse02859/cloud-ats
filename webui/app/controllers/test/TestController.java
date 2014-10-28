@@ -55,6 +55,10 @@ import views.html.test.*;
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class TestController extends Controller {
   
+  public static Result createNewProject(String type) {
+    return ok(index.render(type, newproject.render(type)));
+  }
+  
   public static WebSocket<JsonNode> projectStatus(final String type, final String sessionId, final String currentUserId) {
     return new WebSocket<JsonNode>() {
       @Override

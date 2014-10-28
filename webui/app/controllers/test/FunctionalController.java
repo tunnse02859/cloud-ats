@@ -3,7 +3,6 @@
  */
 package controllers.test;
 
-import helpertest.JMeterScriptHelper;
 import helpertest.JenkinsJobHelper;
 import helpertest.TestHelper;
 import helpervm.VMHelper;
@@ -14,10 +13,7 @@ import interceptor.WizardInterceptor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
@@ -35,12 +31,13 @@ import org.ats.gitlab.GitlabAPI;
 import org.gitlab.api.models.GitlabProject;
 
 import play.data.DynamicForm;
-import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.mvc.With;
+import views.html.test.body;
 import views.html.test.index;
+import views.html.test.report_func;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
@@ -59,7 +56,14 @@ import controllers.vm.VMCreator;
 public class FunctionalController extends TestController {
 
   public static Result index() {
-    return ok(index.render(TestProjectType.functional.toString()));
+    String type = TestProjectType.functional.toString();
+    return ok(index.render(type, body.render(type)));
+  }
+  
+  public static Result report(String projectId) {
+    JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("project_id", projectId)).iterator().next();
+    TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
+    return ok(report_func.render(project.getName(), "http://172.27.4.85:8080/job/" + job.getId() + "/ws/target/surefire-reports/html/index.html"));
   }
   
   public static Result createProjectByUpload(boolean run) {
@@ -91,7 +95,7 @@ public class FunctionalController extends TestController {
         String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
         
         TestProjectModel project = new TestProjectModel(
-            TestHelper.getCurrentProjectIndex(TestProjectType.performance) + 1,
+            TestHelper.getCurrentProjectIndex(TestProjectType.functional) + 1,
             gitProject.getId(),
             testName, 
             currentGroup.getId(), 
@@ -107,14 +111,24 @@ public class FunctionalController extends TestController {
         
         TestHelper.createProject(TestProjectType.functional, project);
         
-        ZipFile zip = new ZipFile(file);
-        Enumeration<? extends ZipEntry> entries = zip.entries();
-        while(entries.hasMoreElements()){
-            ZipEntry entry = entries.nextElement();
-            System.out.println(entry.getName());
-            if (entry.isDirectory()) continue;
-            gitlabAPI.createFile(gitProject, entry.getName(), "master", StringUtil.readStream(zip.getInputStream(entry)), "Snapshot 1");
-        }
+        SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
+            "/tmp/" + testName, uploaded.getFilename(), new FileInputStream(file));
+        
+//      make commit
+        Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, "ubuntu", "ubuntu");
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+
+        StringBuilder sb = new StringBuilder("cd /tmp/").append(testName).append(" && ");
+        sb.append("tar xvf ").append(uploaded.getFilename()).append(" && ");
+        sb.append("rm ").append(uploaded.getFilename()).append(" && ");
+        sb.append("git add -A && git commit -m 'Snapshot 1' && git push origin master");
+        System.out.println(sb.toString());
+        channel.setCommand(sb.toString());
+        channel.connect();
+
+        SSHClient.printOut(System.out, channel);
+        channel.disconnect();
+        session.disconnect();
         
         if (run) return runProject(project.getId());
       }
@@ -141,7 +155,7 @@ public class FunctionalController extends TestController {
         @Override
         public void run() {
           try {
-            VMModel vm = VMCreator.createNormalNonGuiVM(company);
+            VMModel vm = VMCreator.createNormalGuiVM(company);
             JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectType.functional);
             JenkinsJobHelper.createJenkinsJob(job);
             
@@ -204,6 +218,8 @@ public class FunctionalController extends TestController {
     channel.connect();
     
     SSHClient.printOut(System.out, channel);
+    channel.disconnect();
+    session.disconnect();
     return project;
   }
 }

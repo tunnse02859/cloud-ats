@@ -86,7 +86,10 @@ public class JenkinsJobExecutor {
             
             long time = System.currentTimeMillis();
             
-            if ("SUCCESS".equals(job.getStatus(buildNumber))) {
+            String buildStatus = job.getStatus(buildNumber);
+            Logger.debug("The build status: " + buildStatus);
+            
+            if ("SUCCESS".equals(buildStatus)) {
               jobModel.put("status", JenkinsJobStatus.Completed.toString());
               JenkinsJobHelper.updateJenkinsJob(jobModel);
               
@@ -98,19 +101,17 @@ public class JenkinsJobExecutor {
               project.put("last_build", time);
               TestHelper.updateProject(project);
               
-            } else if ("FAILURE".equals(job.getStatus(buildNumber))) {
+            } else if ("FAILURE".equals(buildStatus) || "UNSTABLE".equals(buildStatus)) {
               jobModel.put("status", JenkinsJobStatus.Errors.toString());
               JenkinsJobHelper.updateJenkinsJob(jobModel);
               
               snapshot.put("status", JenkinsJobStatus.Errors.toString());
-              snapshot.put("time", time);
+              snapshot.put("last_build", time);
               JMeterScriptHelper.updateJMeterScript(snapshot);
               
               project.put("status", JenkinsJobStatus.Errors.toString());
-              project.put("time", time);
+              project.put("last_build", time);
               TestHelper.updateProject(project);
-            } else if ("UNSTABLE".equals(job.getStatus(buildNumber))) {
-              //TODO
             }
             
           } catch (Exception e) {
@@ -153,23 +154,30 @@ public class JenkinsJobExecutor {
       
       long time = System.currentTimeMillis();
       
-      if ("SUCCESS".equals(job.getStatus(buildNumber))) {
+      String buildStatus = job.getStatus(buildNumber);
+      Logger.debug("The build status: " + buildStatus);
+      
+      if ("SUCCESS".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Completed.toString());
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Completed.toString());
         project.put("last_build", time);
         TestHelper.updateProject(project);
-        
-      } else if ("FAILURE".equals(job.getStatus(buildNumber))) {
+      } else if ("FAILURE".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Errors.toString());
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Errors.toString());
-        project.put("time", time);
+        project.put("last_build", time);
         TestHelper.updateProject(project);
-      } else if ("UNSTABLE".equals(job.getStatus(buildNumber))) {
-        //TODO
+      } else if ("UNSTABLE".equals(buildStatus)) {
+        jobModel.put("status", JenkinsJobStatus.Failure.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        project.put("status", JenkinsJobStatus.Failure.toString());
+        project.put("last_build", time);
+        TestHelper.updateProject(project);
       }
       
     } catch (Exception e) {

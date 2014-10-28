@@ -1,4 +1,4 @@
-@(t : String)
+@(t : String, body: Html)
 @import org.ats.component.usersmgt.feature._
 @import com.mongodb._
 @import controllers.test._
@@ -28,7 +28,7 @@
     
     <section id="main" class="main container">
 
-      @body(t)
+      @body
       
       @footer()
 
@@ -53,8 +53,14 @@
           var color;
 			    switch (this.status) {
 			    case "Ready":
-			    case "Completed":  
+			    case "Completed":
 			      color = "green";
+            $(projectRun).removeClass("disabled");
+            $(projectStop).addClass("disabled");
+            $(projectReport).removeClass("disabled");
+            break;
+			    case "Failure":  
+			      color = "";
 			      $(projectRun).removeClass("disabled");
 			      $(projectStop).addClass("disabled");
 			      $(projectReport).removeClass("disabled");
@@ -104,12 +110,18 @@
 	          var color;
 	          switch (this.status) {
 	          case "Ready":
-	          case "Completed":  
+	          case "Completed":
 	            color = "green";
 	            $(snapshotRun).removeClass("disabled");
-	            $(snapshotStop).addClass("disabled");
-	            $(snapshotReport).removeClass("disabled");
-	            break;
+              $(snapshotStop).addClass("disabled");
+              $(snapshotReport).removeClass("disabled");
+              break;
+	          case "Failure":  
+	            color = "";
+              $(snapshotRun).removeClass("disabled");
+              $(snapshotStop).addClass("disabled");
+              $(snapshotReport).removeClass("disabled");
+              break; 
 	          case "Running":
 	            color = "cyan";
 	            $(snapshotRun).addClass("disabled");

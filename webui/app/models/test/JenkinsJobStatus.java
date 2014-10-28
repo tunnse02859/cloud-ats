@@ -9,5 +9,5 @@ package models.test;
  * Oct 26, 2014
  */
 public enum JenkinsJobStatus {
-  Ready, Initializing, Running, Completed, Errors, Aborted
+  Ready, Initializing, Running, Completed, Failure, Errors, Aborted
 }

@@ -164,6 +164,7 @@ $(document).ready(function() {
       },
       error: function(error) {
         console.log(error);
+        $("#pleaseWaitDialog").modal('hide');
       }
     });
     return false;

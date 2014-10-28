@@ -106,11 +106,10 @@ public class VMCreator {
         
         //sudo
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
-        //TODO:workaround for unclean template
-        String command = "sed 's/172.27.4.81/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts";
+        String command = "sed 's/127.0.1.1/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts";
         channel.setCommand(command);
         channel.connect();
-        LogBuilder.log(sb, "Execute command: " + command);
+        LogBuilder.log(sb, "Executed command: " + command);
         channel.disconnect();
         
         //replace hosts
@@ -125,7 +124,7 @@ public class VMCreator {
         
         LinkedList<String> queue = new LinkedList<String>();
         int exitCode = SSHClient.printOut(queue, channel);
-        LogBuilder.log(sb, "Execute command: " + command);
+        LogBuilder.log(sb, "Executed command: " + command);
         
         for (String s : queue) {
           LogBuilder.log(sb, s);
