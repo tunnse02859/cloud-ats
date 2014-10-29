@@ -1,15 +1,256 @@
 @(t : String)
-<legend>New Test Project</legend>
+<legend>
+@if("performance" == t) { Create A New Performance Test }
+@if("functional" == t) { Create A New Functional Test }
+</legend>
 
 <div class="row-fluid">
-  <div class="test wizard">
+  <div class="project wizard">
     <ul class="steps">
       <li class="active" data-target="#step1">
         <span class="badge badge-info">1</span>Tools
       </li>
-      <li data-target="#step2"><span class="badge">2</span>Chef</li>
-      <li data-target="#step3"><span class="badge">3</span>Cloud API</li>
-      <li data-target="#step4"><span class="badge">4</span>Offering</li>
+      @if("functional" == t) {
+      <li data-target="#step2"><span class="badge">2</span>Environment</li>
+      <li data-target="#step3"><span class="badge">3</span>Script</li>
+      }
+      @if("performance" == t) {
+      <li data-target="#step2"><span class="badge">2</span>Script</li>
+      }
     </ul>
   </div>
+  <form class="form-horizontal" method="post" enctype="multipart/form-data"
+  @if("performance" == t){ action="@controllers.test.routes.PerformanceController.createProjectByUpload(false)" }
+  @if("functional" == t){ action="@controllers.test.routes.FunctionalController.createProjectByUpload(false)" } 
+  >
+  
+  <div class="step-content">
+    @if("functional" == t) {
+    <div id="step1" class="step-pane active" style="margin: 20px;">
+      <label class="radio radio-custom">
+        <input type="radio">
+        <i class="radio checked"></i>
+        <img style="height: 40px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/selenium.png")">
+        <img style="height: 40px;" alt="" src="@routes.Assets.at("/public", "images/tools/maven.png")">
+      </label>
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 40px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/Python.png")">
+        <b style="margin-left: 10px;">Python</b>
+      </label>
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 40px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/ruby.png")">
+        <b style="margin-left: 10px;">Ruby and Rails</b>
+      </label>
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 40px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/ocaml.png")">
+      </label>
+      
+      <a style="margin: 20px;" class="btn disabled" rel="tooltip" title="Add More Tools"><i class="icon-plus"></i> More</a>
+    </div>
+    
+    <div id="step2" class="step-pane" style="margin-top: 20px; margin-left: 40px;">
+      <label class="radio">
+        <input type="radio" checked="">
+        <b>Ubuntu 12.04</b>
+      </label>
+      <ul>
+        <li><i class="icon-linux icon-2x"></i> <b>OS 64 bit</b></li>
+        <li>
+        <img style="height: 25px;" src="@routes.Assets.at("/public", "images/browsers/firefox.png")">
+          <b>Firefox 26.0</b>
+        </li>
+        <li>
+        <img style="height: 25px;" src="@routes.Assets.at("/public", "images/browsers/chrome.png")">
+          <b>Google Chrome 38.0</b>
+        </li>
+      </ul>
+      
+      <label class="radio">
+        <input type="radio" disabled="disabled">
+        <b>Windows 7</b>
+      </label>
+      <ul>
+        <li><i class="icon-windows icon-2x"></i> <b>OS 64 bit</b></li>
+        <li>
+        <img style="height: 25px;" src="@routes.Assets.at("/public", "images/browsers/firefox.png")">
+          <b>Firefox 26.0</b>
+        </li>
+        <li>
+        <img style="height: 25px;" src="@routes.Assets.at("/public", "images/browsers/chrome.png")">
+          <b>Google Chrome 38.0</b>
+        </li>
+        <li>
+        <img style="height: 25px;" src="@routes.Assets.at("/public", "images/browsers/ie.png")">
+          <b>Internet Explore 9</b>
+        </li>
+      </ul>
+      
+      <a style="margin: 20px;" class="btn disabled" rel="tooltip" title="Add More Environment"><i class="icon-plus"></i> More</a>
+    </div>
+    }
+    
+    @if("performance" == t) {
+    <div id="step1" class="step-pane active" style="margin: 20px;">
+      <label class="radio radio-custom">
+        <input type="radio">
+        <i class="radio checked"></i>
+        <img style="height: 50px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/jmeter.jpg")">
+      </label>
+      
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 50px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/loadui.png")">
+      </label>
+      
+      
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 60px; margin-left: 20px;" src="@routes.Assets.at("/public", "images/tools/LoadRunner.png")">
+      </label>
+      
+      <label class="radio radio-custom">
+        <input type="radio" disabled="disabled">
+        <i class="radio disabled"></i>
+        <img style="height: 60px; margin-left: 20px;" src="http://gatling.io/assets/images/img1.png">
+        <b>Gatling</b>
+      </label>
+      
+      <a style="margin: 20px;" class="btn disabled" rel="tooltip" title="Add More Tools"><i class="icon-plus"></i> More</a>
+    </div>
+    }
+    
+    <div @if("functional" == t) {id="step3"} @if("performance" == t) { id="step2" }  class="step-pane" style="margin-top: 20px;">
+      <div class="row-fluid">
+      
+      <div class="span5">
+      
+      <div class="control-group">
+        <label for="name" class="control-label">Test Project Name</label>
+        <div class="controls">
+          <input type="text" required="" name="name" placeholder="Test Name">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="uploaded" class="control-label">Script Upload</label>
+        <div class="controls">
+          <input type="file" required="" name="uploaded">
+        </div>
+      </div>
+      
+      </div>
+      
+      <div class="span1" style="text-align: center;">
+        <span class="badge badge-green">OR</span>
+      </div>
+      
+      <div class="span5">
+        <a class="btn btn-large btn-primary"><i class="icon-magic"></i> Use Wizard</a>
+      </div>
+      
+      </div>
+    </div>
+  </div>
+  
+  <div class="form-actions">
+    <input type="button" value="Previous" class="project prev btn" disabled="disabled">
+    <input type="button" value="Next" class=" project next btn btn-primary">
+    <input type="submit" value="Finish" class="project finish btn btn-blue" style="display: none;">
+  </div>
+  
+  </form>
 </div>
+
+@if("functional" == t) {
+<script type="text/javascript">
+$(document).ready(function() {
+  /* Wizard
+  ================================================== */
+  $('.project.wizard').on('change', function (e, data) {
+    if (data.direction === 'next') {
+      $('.project.btn.prev').removeAttr('disabled');
+    }
+    if (data.direction === 'previous') {
+      $('.project.btn.next').show();
+      $('.project.btn.finish').hide();
+    }
+
+    if (data.step === 2 && data.direction === 'next') {
+      $('.project.btn.next').hide();
+      $('.project.btn.finish').show();
+    }
+  });
+
+  $('.project.wizard').on('changed', function (e, data) {
+    var item = $('.project.wizard').wizard('selectedItem');
+    if (item.step === 1) {
+      $('.project.btn.prev').attr("disabled", "disabled");
+    }
+    if (item.step !== 3) {
+      $('.project.btn.next').show();
+      $('.project.btn.finish').hide();
+    }
+  });
+  
+  $('.project.btn.finish').on('finished', function (e, data) {
+  });
+  
+  $('.project.btn.prev').on('click', function () {
+    var item = $('.cloud.wizard').wizard('selectedItem');
+    if (item.step === 2) {
+      $(this).attr("disabled", "disabled");
+    }
+    
+    $('.project.wizard').wizard('previous');
+  });
+  
+  $('.project.btn.next').on('click', function () {
+    $('.project.wizard').wizard('next', 'foo');
+  });
+});
+</script>
+}
+@if("performance" == t) { 
+<script type="text/javascript">
+$(document).ready(function() {
+  /* Wizard
+  ================================================== */
+  $('.project.wizard').on('change', function (e, data) {
+    if (data.direction === 'next') {
+      $('.project.btn.prev').removeAttr('disabled');
+    }
+    if (data.direction === 'previous') {
+      $('.project.btn.next').show();
+      $('.project.btn.prev').attr("disabled", "disabled");
+      $('.project.btn.finish').hide();
+    }
+
+    if (data.step === 1 && data.direction === 'next') {
+      $('.project.btn.next').hide();
+      $('.project.btn.finish').show();
+    }
+  });
+
+  $('.project.btn.prev').on('click', function () {
+    var item = $('.cloud.wizard').wizard('selectedItem');
+    if (item.step === 1) {
+      $(this).attr("disabled", "disabled");
+    }
+    
+    $('.project.wizard').wizard('previous');
+  });
+  
+  $('.project.btn.next').on('click', function () {
+    $('.project.wizard').wizard('next', 'foo');
+  });
+});
+</script>
+}

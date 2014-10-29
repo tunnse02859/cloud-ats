@@ -7,8 +7,10 @@
   <div class="span12">
   <form class="form-search form-inline">
     
-    <a class="btn btn-primary pull-right create-new-test" href="javascript:void(0);">
-    <i class="icon-plus"></i> @if("performance" == t) { Add New Performance Test } @if("functional" == t) { Add New Functional Test }</a>
+    <a class="btn btn-primary pull-right" href="@routes.TestController.createNewProject(t)">
+    <i class="icon-plus"></i> 
+    @if("performance" == t) { Add New Performance Test } 
+    @if("functional" == t) { Add New Functional Test }</a>
     
     <div class="btn-group">
       <button class="btn status">All Status</button>
