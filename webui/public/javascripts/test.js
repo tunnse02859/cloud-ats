@@ -28,6 +28,17 @@ $(document).ready(function() {
     })
   });
   
+  //show log
+  $("body").on("click", "a.btn.console", function() {
+    var target = $(this).attr("data-target");
+    var div = $(target);
+    if ($(div).css('display') == 'none') {
+      $(div).slideDown(400);
+    } else {
+      $(div).slideUp(400);
+    }
+  });
+  
   $("body").on("click", "form.upload .btn.start,.btn.save", function() {
     var action = $(this).attr("data-action");
     var form = $(this).closest("form");

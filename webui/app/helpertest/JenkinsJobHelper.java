@@ -73,6 +73,12 @@ public class JenkinsJobHelper {
     return jobs;
   }
   
+  public static JenkinsJobModel getJobById(String jobId) {
+    DBCollection col = getCollection();
+    DBObject source = col.findOne(new BasicDBObject("_id", jobId));
+    return source == null ? null : new JenkinsJobModel().from(source);
+  }
+  
   public static List<JenkinsJobModel> getRunningJobs() {
     BasicDBObject query = new BasicDBObject();
     query.put("status", JenkinsJobStatus.Running.toString());

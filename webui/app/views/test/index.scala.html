@@ -41,6 +41,13 @@
       
       projectStatus.onmessage = function(event) {
         var data = JSON.parse(event.data);
+        
+        $(data.logs).each(function() {
+          var id = this.id;
+          var msg = this.msg;
+          $("div#log-" + id + " pre").append(msg);
+        });
+        
         $(data.projects).each(function() {
           var projectId = this.id;
           $("tr.project-" + projectId + " td span.last-build").text(this.last_build);

@@ -42,7 +42,10 @@
      data-target="#report-project-@project.getId()">
     <i class="icon-bar-chart icon-2x"></i></a>
     @if(project.getType().toString() == "functional") {
-    <a class="btn btn-mini console" rel="tooltip" title="View Log"><i class="icon-terminal icon-2x"></i></a>
+    <a class="btn btn-mini console" rel="tooltip" title="View Log"
+     data-target="#log-@project.getId()">
+    <i class="icon-terminal icon-2x"></i>
+    </a>
     }
   </td>
   <td>
@@ -68,6 +71,18 @@
     </a>
   </td>
 </tr>
+
+@if(project.getType().toString() == "functional") {
+<tr>
+  <td colspan="10" style="padding: 0px; border: none;">
+    <div id="log-@project.getId()" style="display: none;">
+      <pre style="max-height: 300px;" class="pre-scrollable">
+      </pre>
+    </div>
+  </td>
+</tr>
+}
+
 @if(project.getType().toString() == "performance") {
 <tr>
   <td colspan="10" style="padding: 0px; border: none;">

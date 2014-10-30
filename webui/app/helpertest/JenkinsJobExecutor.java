@@ -61,6 +61,7 @@ public class JenkinsJobExecutor {
         JenkinsJobModel jobModel = new JenkinsJobModel().from(source);
         
         jobModel.put("status", JenkinsJobStatus.Running.toString());
+        jobModel.put("log", null);
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         QueueHolder.put(jobModel.getId(), new ConcurrentLinkedQueue<String>());
@@ -207,6 +208,8 @@ public class JenkinsJobExecutor {
       
       String buildStatus = job.getStatus(buildNumber);
       Logger.debug("The build status: " + buildStatus);
+      
+      jobModel = JenkinsJobHelper.getJobById(jobModel.getId());
       
       if ("SUCCESS".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Completed.toString());

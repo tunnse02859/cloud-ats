@@ -80,6 +80,7 @@ public class TestHelper {
     DB db = getDatabase();
     DBCollection col = db.getCollection(type.toString());
     DBObject source = col.findOne(new BasicDBObject("_id", projectId));
+    if (source == null) System.out.println("null is " + projectId);
     return new TestProjectModel().from(source);
   }
   
