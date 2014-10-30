@@ -5,6 +5,9 @@ package helpertest;
 
 import helpervm.VMHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +43,8 @@ public class JenkinsJobExecutor {
   public final static JenkinsJobExecutor getInstance() { 
     return instance == null ? (instance = new JenkinsJobExecutor()) : instance;
   }
+  
+  public static Map<String, ConcurrentLinkedQueue<String>> QueueHolder = new HashMap<String, ConcurrentLinkedQueue<String>>();
 
   public void start() {
     System.out.println("Start Jenkins Job Executor");
@@ -57,6 +62,8 @@ public class JenkinsJobExecutor {
         
         jobModel.put("status", JenkinsJobStatus.Running.toString());
         JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        QueueHolder.put(jobModel.getId(), new ConcurrentLinkedQueue<String>());
         
         VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
         VMModel vm = VMHelper.getVMByID(jobModel.getString("vm_id"));
@@ -80,9 +87,31 @@ public class JenkinsJobExecutor {
             
             project.put("status", JenkinsJobStatus.Running.toString());
             TestHelper.updateProject(project);
+            
+            int start = 0;
+            int last = 0;
+            byte[] bytes = null;
+            
+            ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
+            
             while (job.isBuilding(buildNumber)) {
+              bytes = job.getConsoleOutput(buildNumber, start);
+              last = bytes.length;
+              byte[] next = new byte[last - start];
+
+              System.arraycopy(bytes, start, next, 0, next.length);
+
+              start += (last - start);
+              
+              if (next.length > 0) { 
+                String output = new String(next);
+                queue.add(output.trim());
+                if (output.indexOf("channel stopped") != -1) break;
+              }
+              
               Thread.sleep(1000);
             }
+            queue.add("log.exit");
             
             long time = System.currentTimeMillis();
             
@@ -148,9 +177,31 @@ public class JenkinsJobExecutor {
       
       project.put("status", JenkinsJobStatus.Running.toString());
       TestHelper.updateProject(project);
+      
+      int start = 0;
+      int last = 0;
+      byte[] bytes = null;
+      
+      ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
+      
       while (job.isBuilding(buildNumber)) {
+        bytes = job.getConsoleOutput(buildNumber, start);
+        last = bytes.length;
+        byte[] next = new byte[last - start];
+
+        System.arraycopy(bytes, start, next, 0, next.length);
+
+        start += (last - start);
+        
+        if (next.length > 0) { 
+          String output = new String(next);
+          queue.add(output.trim());
+          if (output.indexOf("channel stopped") != -1) break;
+        }
+        
         Thread.sleep(1000);
       }
+      queue.add("log.exit");
       
       long time = System.currentTimeMillis();
       
