@@ -143,7 +143,12 @@
       </div>
       
       <div class="control-group">
-        <label for="uploaded" class="control-label">Script Upload</label>
+       @if("functional" == t) {
+        <label for="uploaded" class="control-label">Script Upload (<b>*.tar file</b>)</label>
+        }
+        @if("performance" == t) {
+        <label for="uploaded" class="control-label">Script Upload (<b>*.jmx file</b>)</label>
+        }
         <div class="controls">
           <input type="file" required="" name="uploaded">
         </div>
