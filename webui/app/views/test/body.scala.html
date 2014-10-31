@@ -9,8 +9,8 @@
     
     <a class="btn btn-primary pull-right" href="@routes.TestController.createNewProject(t)">
     <i class="icon-plus"></i> 
-    @if("performance" == t) { Add New Performance Test } 
-    @if("functional" == t) { Add New Functional Test }</a>
+    @if("Performance" == t) { Add New Performance Test } 
+    @if("Functional" == t) { Add New Functional Test }</a>
     
     <div class="btn-group">
       <button class="btn status">All Status</button>
@@ -30,7 +30,7 @@
       <button data-toggle="dropdown" class="btn dropdown-toggle"><span class="caret"></span></button>
       <ul class="dropdown-menu">
         @if(session().get("group_id") != null) {
-          @TestController.groupMenuList()
+          @TestController.groupMenuList(t)
         }
       </ul>
     </div>
@@ -61,58 +61,3 @@
     </table>
   </div>
 </section>
-
-<!-- Modal create project -->
-<div class="modal hide" id="createNewTestDialog">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  @if("performance" == t) {
-    <h3>Create New Performance Test</h3>
-  }
-  @if("functional" == t) {
-    <h3>Create New Functional Test</h3>
-  }
-  </div>
-  <div class="modal-body">
-    <div class="row-fluid">
-      <div class="@if("performance" == t){ span5 }else{ span12 }" @if("performance" == t){style="text-align: center;"}>
-        @if("performance" == t) {
-        <h5>Upload Your JMX Script</h5>
-        }
-        @if("functional" == t) {
-        <h5>Upload Your Maven Project</h5>  
-        }
-        <legend></legend>
-        <form class="form-horizontal upload" action="" method="post" enctype="multipart/form-data">
-          <div class="control-group">
-            <input type="text" required="" name="name" placeholder="Test Name">
-          </div>
-          <div class="control-group">
-            <input type="file" required="" name="uploaded">
-          </div>
-          <legend></legend>
-          <div>
-            <a class="btn btn-primary start" 
-            @if("performance" == t){ data-action="@routes.PerformanceController.createProjectByUpload(true)" }
-            @if("functional" == t){ data-action="@routes.FunctionalController.createProjectByUpload(true)" }
-            title="Create and Run" >Start</a>
-            <a class="btn btn-orange save"
-            @if("performance" == t){ data-action="@routes.PerformanceController.createProjectByUpload(false)" }
-            @if("functional" == t){ data-action="@routes.FunctionalController.createProjectByUpload(false)" } 
-            title="Create Only">Save</a>
-          </div>
-        </form>
-      </div>
-      @if("performance" == t) {
-      <div class="span2" style="text-align: center; margin: 0px;"> 
-        <span class="badge badge-green">OR</span> 
-      </div>
-      <div class="span5" style="text-align: center;">
-        <h5>Using Wizard</h5>
-        <legend></legend>
-        <a class="btn btn-large btn-primary">Wizard</a>
-      </div>
-      }
-    </div>
-  </div>
-</div>

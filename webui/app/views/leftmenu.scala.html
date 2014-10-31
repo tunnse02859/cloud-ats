@@ -30,14 +30,14 @@
             </li>
             }
             @if(feature.getName() == "Performance") {
-            <li @if(active == "performance") { class="active" }>
+            <li @if(active == "Performance") { class="active" }>
               <a href="@controllers.test.routes.PerformanceController.index()">
               <span class="icon-bolt"></span>@feature.getName()
               </a>
             </li>
             }
             @if(feature.getName() == "Functional") {
-            <li @if(active == "functional") { class="active" }>
+            <li @if(active == "Functional") { class="active" }>
               <a href="@controllers.test.routes.FunctionalController.index()">
               <span class="icon-bug"></span>@feature.getName()
               </a>

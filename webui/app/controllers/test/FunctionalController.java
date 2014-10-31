@@ -4,7 +4,7 @@
 package controllers.test;
 
 import helpertest.JenkinsJobHelper;
-import helpertest.TestHelper;
+import helpertest.TestProjectHelper;
 import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
@@ -18,7 +18,6 @@ import java.util.List;
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
-import models.test.TestProjectModel.TestProjectType;
 import models.vm.VMModel;
 
 import org.ats.common.StringUtil;
@@ -56,14 +55,13 @@ import controllers.vm.VMCreator;
 public class FunctionalController extends TestController {
 
   public static Result index() {
-    String type = TestProjectType.functional.toString();
-    return ok(index.render(type, body.render(type)));
+    return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL)));
   }
   
   public static Result report(String projectId) {
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("project_id", projectId)).iterator().next();
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
-    VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
     return ok(report_func.render(project.getName(), "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/surefire-reports/html/index.html"));
   }
   
@@ -96,12 +94,11 @@ public class FunctionalController extends TestController {
         String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
         
         TestProjectModel project = new TestProjectModel(
-            TestHelper.getCurrentProjectIndex(TestProjectType.functional) + 1,
             gitProject.getId(),
             testName, 
             currentGroup.getId(), 
             currentUser.getId(), 
-            TestProjectType.functional, 
+            TestProjectModel.FUNCTIONAL, 
             gitSshUrl,
             gitHttpUrl,
             uploaded.getFilename(), StringUtil.readStream(new FileInputStream(file)).getBytes());
@@ -110,7 +107,7 @@ public class FunctionalController extends TestController {
         project.put("jenkins_id", jenkins.getId());
         
         
-        TestHelper.createProject(TestProjectType.functional, project);
+        TestProjectHelper.createProject(project);
         
         SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
             "/tmp/" + testName, uploaded.getFilename(), new FileInputStream(file));
@@ -141,7 +138,7 @@ public class FunctionalController extends TestController {
   }
   
   public static Result runProject(String projectId) throws Exception {
-    final TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
+    final TestProjectModel project = TestProjectHelper.getProjectById( projectId);
     final VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
     
     final Group company = getCompany();
@@ -157,11 +154,11 @@ public class FunctionalController extends TestController {
         public void run() {
           try {
             VMModel vm = VMCreator.createNormalGuiVM(company);
-            JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectType.functional);
+            JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectModel.FUNCTIONAL);
             JenkinsJobHelper.createJenkinsJob(job);
             
             project.put("status", job.getStatus().toString());
-            TestHelper.updateProject(project);
+            TestProjectHelper.updateProject(project);
             
           } catch (Exception e) {
             e.printStackTrace();
@@ -171,19 +168,19 @@ public class FunctionalController extends TestController {
       thread.start();
     } else {
       VMModel vm = list.get(0);
-      JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectType.functional);
+      JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectModel.FUNCTIONAL);
       JenkinsJobHelper.createJenkinsJob(job);
 
       project.put("status", job.getStatus().toString());
-      TestHelper.updateProject(project);
+      TestProjectHelper.updateProject(project);
     }
     return redirect(routes.FunctionalController.index());
   }
   
   public static Result deleteProject(String projectId) throws IOException {
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.functional, projectId);
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     
-    TestHelper.removeProject(project);
+    TestProjectHelper.removeProject(project);
     JenkinsJobHelper.deleteBuildOfProject(project.getId());
     
     VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));

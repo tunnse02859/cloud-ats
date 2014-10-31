@@ -3,8 +3,6 @@
  */
 package models.test;
 
-import models.test.TestProjectModel.TestProjectType;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -20,11 +18,10 @@ public class JenkinsJobModel extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
 
-  public JenkinsJobModel(int index, String projectId, String snapshotId, String vmId, String jenkinsId, TestProjectType type) {
-    this.put("_id", snapshotId);
+  public JenkinsJobModel(int index, String id, String projectId, String vmId, String jenkinsId, String type) {
+    this.put("_id", id);
     this.put("index", index);
     this.put("project_id", projectId);
-    this.put("snapshot_id", snapshotId);
     this.put("vm_id", vmId);
     this.put("jenkins_id", jenkinsId);
     this.put("status", JenkinsJobStatus.Initializing.toString());
@@ -55,7 +52,6 @@ public class JenkinsJobModel extends BasicDBObject {
     this.put("_id", source.get("_id"));
     this.put("index", source.get("index"));
     this.put("project_id", source.get("project_id"));
-    this.put("snapshot_id", source.get("snapshot_id"));
     this.put("vm_id", source.get("vm_id"));
     this.put("jenkins_id", source.get("jenkins_id"));
     this.put("status", source.get("status"));

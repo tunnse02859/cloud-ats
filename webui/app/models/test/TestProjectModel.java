@@ -30,16 +30,22 @@ public class TestProjectModel extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
   
+  /** .*/
   private final SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
   
-  public TestProjectModel(int index, Integer gitlabProjectId, String name, String groupId, String userId, TestProjectType type, String gitSshUrl, String gitHttpUrl, String sourceFile, byte[] sourceContent) {
+  /** .*/
+  public static final String PERFORMANCE = "Performance";
+  
+  /** .*/
+  public static final String FUNCTIONAL = "Functional";
+  
+  public TestProjectModel(Integer gitlabProjectId, String name, String groupId, String userId, String type, String gitSshUrl, String gitHttpUrl, String sourceFile, byte[] sourceContent) {
     this.put("_id", UUID.randomUUID().toString());
-    this.put("index", index);
     this.put("gitlab_project_id", gitlabProjectId);
     this.put("name", name);
     this.put("group_id", groupId);
     this.put("user_id", userId);
-    this.put("type", type == null ? null : type.toString());
+    this.put("type", type);
     this.put("git_ssh_url", gitSshUrl);
     this.put("git_http_url", gitHttpUrl);
     this.put("source_file", sourceFile);
@@ -60,10 +66,6 @@ public class TestProjectModel extends BasicDBObject {
     return this.getString("_id");
   }
   
-  public int getIndex() {
-    return this.getInt("index");
-  }
-  
   public String getName() {
     return this.getString("name");
   }
@@ -76,8 +78,8 @@ public class TestProjectModel extends BasicDBObject {
     return this.getInt("gitlab_project_id");
   }
   
-  public TestProjectType getType() {
-    return TestProjectType.valueOf(this.getString("type"));
+  public String getType() {
+    return this.getString("type");
   }
   
   public String getGitSshUrl() {
@@ -113,12 +115,11 @@ public class TestProjectModel extends BasicDBObject {
   }
   
   public TestProjectModel() {
-    this(0, null, null, null, null, null, null, null, null, null);
+    this(0, null, null, null, null, null, null, null, null);
   }
   
   public TestProjectModel from(DBObject source) {
     this.put("_id", source.get("_id"));
-    this.put("index", source.get("index"));
     this.put("gitlab_project_id", source.get("gitlab_project_id"));
     this.put("name", source.get("name"));
     this.put("group_id", source.get("group_id"));
@@ -133,13 +134,8 @@ public class TestProjectModel extends BasicDBObject {
     this.put("last_build", source.get("last_build"));
     
     //additional
-//    this.put("jmeter", source.get("jmeter"));
     this.put("status", source.get("status"));
     this.put("jenkins_id", source.get("jenkins_id"));
     return this;
-  }
-
-  public static enum TestProjectType {
-    performance, functional;
   }
 }

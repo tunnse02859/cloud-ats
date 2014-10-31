@@ -15,7 +15,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 
 import controllers.Application;
 
@@ -30,38 +29,36 @@ public class JMeterScriptHelper {
     return DataFactory.getDatabase(Application.dbName);
   }
   
-  public static boolean createScript(JMeterScript... scripts) {
+  public static DBCollection getCollection() {
     DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
-    WriteResult result = col.insert(scripts, WriteConcern.ACKNOWLEDGED);
-    return result.getError() == null;
+    return db.getCollection("test_jmeter");
+  }
+  
+  public static void createScript(JMeterScript... scripts) {
+    DBCollection col = getCollection();
+    col.insert(scripts, WriteConcern.ACKNOWLEDGED);
   }
   
   public static JMeterScript updateJMeterScript(JMeterScript script) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
+    DBCollection col = getCollection();
     col.save(script);
     return script;
   }
   
   public static void deleteJMeterScript(String scriptId) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
+    DBCollection col = getCollection();
     col.remove(new BasicDBObject("_id", scriptId));
   }
   
   public static void deleteScriptOfProject(String projectId) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
+    DBCollection col = getCollection();
     col.remove(new BasicDBObject("project_id", projectId));
   }
   
   public static List<JMeterScript> getJMeterScript(String projectId) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
     BasicDBObject query = new BasicDBObject("project_id", projectId);
     
-    DBCursor cursor = col.find(query);
+    DBCursor cursor = getCollection().find(query);
     List<JMeterScript> scripts = new ArrayList<JMeterScript>();
     while (cursor.hasNext()) {
       scripts.add(new JMeterScript().from(cursor.next()));
@@ -70,11 +67,9 @@ public class JMeterScriptHelper {
   }
   
   public static JMeterScript getJMeterScript(String projectId, String commit) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
     BasicDBObject query = new BasicDBObject("project_id", projectId).append("commit", commit);
     
-    DBCursor cursor = col.find(query);
+    DBCursor cursor = getCollection().find(query);
     
     if (!cursor.hasNext()) return null;
     DBObject source = cursor.next();
@@ -83,18 +78,14 @@ public class JMeterScriptHelper {
   }
   
   public static JMeterScript getJMeterScriptById(String scriptId) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
-    DBObject source = col.findOne(new BasicDBObject("_id", scriptId));
-    return new JMeterScript().from(source);
+    DBObject source = getCollection().findOne(new BasicDBObject("_id", scriptId));
+    return source == null ? null : new JMeterScript().from(source);
   }
   
   public static JMeterScript getLastestCommit(String projectId) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jmeter");
     BasicDBObject query = new BasicDBObject("project_id", projectId);
     
-    DBCursor cursor = col.find(query).sort(new BasicDBObject("index", -1));
+    DBCursor cursor = getCollection().find(query).sort(new BasicDBObject("index", -1));
     
     List<JMeterScript> scripts = new ArrayList<JMeterScript>();
     while (cursor.hasNext()) {

@@ -6,8 +6,7 @@ package controllers.test;
 import helpertest.JMeterScriptHelper;
 import helpertest.JenkinsJobExecutor;
 import helpertest.JenkinsJobHelper;
-import helpertest.TestHelper;
-import helpervm.VMHelper;
+import helpertest.TestProjectHelper;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,20 +16,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import models.test.JenkinsJobModel;
+import models.test.TestProjectModel;
+
 import org.ats.component.usersmgt.group.Group;
 import org.ats.jmeter.models.JMeterScript;
 
-import models.test.JenkinsJobModel;
-import models.test.TestProjectModel;
-import models.test.TestProjectModel.TestProjectType;
-import models.vm.VMModel.VMStatus;
-
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
-import controllers.vm.VMCreator;
-import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
@@ -39,6 +30,10 @@ import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -68,32 +63,28 @@ public class ProjectStatusActor extends UntypedActor {
         ArrayNode arrayLogs = jsonObj.arrayNode();
         
         Set<TestProjectModel> projects = new HashSet<TestProjectModel>();
-        for (Group group : TestController.getAvailableGroups(channel.userId)) {
-          projects.addAll(TestHelper.getProject(TestProjectType.valueOf(channel.type), new BasicDBObject("group_id", group.getId())));
+        for (Group group : TestController.getAvailableGroups(channel.type, channel.userId)) {
+          projects.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId())));
         }
         
         for (TestProjectModel project : projects) {
 
           ObjectNode projectNode = Json.newObject().put("id", project.getId()).put("status", project.getStatus()).put("last_build", project.getLastBuildDate());
               
-          switch (project.getType()) {
-          case performance:
+          if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
             ArrayNode snapshotNode = projectNode.arrayNode();
             for (JMeterScript snapshot : JMeterScriptHelper.getJMeterScript(project.getId())) {
               snapshotNode.add(Json.newObject().put("id", snapshot.getString("_id")).put("status", snapshot.getString("status")).put("last_build", snapshot.getLastBuildDate()));
             }
             projectNode.put("snapshots", snapshotNode);
-          case functional:
-            arrayStatus.add(projectNode);
-            break;
-          default:
-            break;
           }
+          
+          arrayStatus.add(projectNode);
         }
         
         List<JenkinsJobModel> jobs = JenkinsJobHelper.getRunningJobs();
         for (JenkinsJobModel job : jobs) {
-          TestProjectModel project = TestHelper.getProjectById(TestProjectType.valueOf(channel.type), job.getString("project_id"));
+          TestProjectModel project = TestProjectHelper.getProjectById(job.getString("project_id"));
           if (!projects.contains(project)) continue;
           
           
@@ -103,14 +94,14 @@ public class ProjectStatusActor extends UntypedActor {
           
           if (s != null) {
             //push to log
-            StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("\n");
+            StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("<br>");
             LogBuilder.log(sb, s);
             job.put("log", sb.toString());
-            System.out.println(job);
+//            System.out.println(job);
             JenkinsJobHelper.updateJenkinsJob(job);
             
             arrayLogs.add(Json.newObject().put("id", job.getId()).put("msg", s));
-            Logger.debug(s);
+            //Logger.debug(s);
           }
           if ("log.exit".equals(s)) {
             JenkinsJobExecutor.QueueHolder.remove(job.getId());

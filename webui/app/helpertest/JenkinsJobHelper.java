@@ -39,31 +39,27 @@ public class JenkinsJobHelper {
   
   public static DBCollection getCollection() {
     DB db = getDatabase();
-    DBCollection col = db.getCollection("jobs");
+    DBCollection col = db.getCollection("test_job");
     return col;
   }
   
   public static void createJenkinsJob(JenkinsJobModel job) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jobs");
+    DBCollection col = getCollection();
     col.insert(job);
   }
   
   public static void updateJenkinsJob(JenkinsJobModel job) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jobs");
+    DBCollection col = getCollection();
     col.save(job);
   }
   
   public static void removeJenkinsJob(JenkinsJobModel job) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jobs");
+    DBCollection col = getCollection();
     col.remove(job);
   }
   
   public static List<JenkinsJobModel> getJobs(DBObject query) {
-    DB db = getDatabase();
-    DBCollection col = db.getCollection("jobs");
+    DBCollection col = getCollection();
     DBCursor cursor = col.find(query);
     if (!cursor.hasNext()) return Collections.emptyList();
     List<JenkinsJobModel> jobs = new ArrayList<JenkinsJobModel>();
@@ -92,7 +88,7 @@ public class JenkinsJobHelper {
   }
   
   public static void deleteBuildOfSnapshot(String snapshotId) throws IOException {
-    List<JenkinsJobModel> jobs = getJobs(new BasicDBObject("snapshot_id", snapshotId));
+    List<JenkinsJobModel> jobs = getJobs(new BasicDBObject("_id", snapshotId));
     for (JenkinsJobModel job : jobs) {
       VMModel master = VMHelper.getVMByID(job.getString("jenkins_id"));
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(new JenkinsMaster(master.getPublicIP(), "http", 8080), job.getId(), null, null, null, null, null);

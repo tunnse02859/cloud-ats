@@ -3,7 +3,6 @@
  */
 package controllers;
 
-import models.test.TestProjectModel.TestProjectType;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
@@ -90,17 +89,8 @@ public class FeatureInitializer {
     GroupDAO.getInstance(Application.dbName).update(systemGroup);
   }
   
-  public static void createTestFeature(Group systemGroup, TestProjectType type) throws UserManagementException {
-    Feature feature = null;
-    
-    switch (type) {
-    case performance:
-      feature = new Feature(Application.dbName, "Performance");
-      break;
-    case functional:
-      feature = new Feature(Application.dbName, "Functional");
-      break;
-    }
+  public static void createTestFeature(Group systemGroup, String type) throws UserManagementException {
+    Feature feature = new Feature(Application.dbName, "Performance");
     
     Operation o1 = new Operation(Application.dbName, "Administration");
     Operation o2 = new Operation(Application.dbName, "Test");

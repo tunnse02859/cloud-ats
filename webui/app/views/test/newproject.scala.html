@@ -1,20 +1,20 @@
 @(t : String)
 <legend>
-@if("performance" == t) { Create A New Performance Test }
-@if("functional" == t) { Create A New Functional Test }
+@if("Performance" == t) { Create A New Performance Test }
+@if("Functional" == t) { Create A New Functional Test }
 </legend>
 
 <div class="row-fluid">
   <div class="project wizard">
     <ul class="steps">
-      @if("functional" == t) {
+      @if("Functional" == t) {
       <li class="active" data-target="#step1">
         <span class="badge badge-info">1</span>Environment
       </li>
       <li data-target="#step2"><span class="badge">2</span>Tools</li>
       <li data-target="#step3"><span class="badge">3</span>Script</li>
       }
-      @if("performance" == t) {
+      @if("Performance" == t) {
       <li class="active" data-target="#step1">
         <span class="badge badge-info">1</span>Tools
       </li>
@@ -23,12 +23,12 @@
     </ul>
   </div>
   <form class="form-horizontal" method="post" enctype="multipart/form-data"
-  @if("performance" == t){ action="@controllers.test.routes.PerformanceController.createProjectByUpload(false)" }
-  @if("functional" == t){ action="@controllers.test.routes.FunctionalController.createProjectByUpload(false)" } 
+  @if("Performance" == t){ action="@controllers.test.routes.PerformanceController.createProjectByUpload(false)" }
+  @if("Functional" == t){ action="@controllers.test.routes.FunctionalController.createProjectByUpload(false)" } 
   >
   
   <div class="step-content">
-    @if("functional" == t) {
+    @if("Functional" == t) {
     <div id="step2" class="step-pane" style="margin: 20px;">
       <label class="radio radio-custom">
         <input type="radio">
@@ -98,7 +98,7 @@
     </div>
     }
     
-    @if("performance" == t) {
+    @if("Performance" == t) {
     <div id="step1" class="step-pane active" style="margin: 20px;">
       <label class="radio radio-custom">
         <input type="radio">
@@ -130,7 +130,7 @@
     </div>
     }
     
-    <div @if("functional" == t) {id="step3"} @if("performance" == t) { id="step2" }  class="step-pane" style="margin-top: 20px;">
+    <div @if("Functional" == t) {id="step3"} @if("Performance" == t) { id="step2" }  class="step-pane" style="margin-top: 20px;">
       <div class="row-fluid">
       
       <div class="span5">
@@ -146,7 +146,7 @@
        @if("functional" == t) {
         <label for="uploaded" class="control-label">Script Upload (<b>*.tar file</b>)</label>
         }
-        @if("performance" == t) {
+        @if("Performance" == t) {
         <label for="uploaded" class="control-label">Script Upload (<b>*.jmx file</b>)</label>
         }
         <div class="controls">
@@ -177,7 +177,7 @@
   </form>
 </div>
 
-@if("functional" == t) {
+@if("Functional" == t) {
 <script type="text/javascript">
 $(document).ready(function() {
   /* Wizard
@@ -226,7 +226,7 @@ $(document).ready(function() {
 });
 </script>
 }
-@if("performance" == t) { 
+@if("Performance" == t) { 
 <script type="text/javascript">
 $(document).ready(function() {
   /* Wizard

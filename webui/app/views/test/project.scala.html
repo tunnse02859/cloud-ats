@@ -19,7 +19,7 @@
 *@
 <tr class="project-@project.getId()">
   <td>
-    @if(project.getType().toString() == "performance") {
+    @if(project.getType().toString() == "Performance") {
     <a class="plus btn btn-mini"><i class="icon icon-plus"></i></a>
     }
   </td>
@@ -41,7 +41,7 @@
     <a class="btn btn-mini report disabled" title="View Report *" rel="tooltip" data-toggle="modal"
      data-target="#report-project-@project.getId()">
     <i class="icon-bar-chart icon-2x"></i></a>
-    @if(project.getType().toString() == "functional") {
+    @if(project.getType().toString() == "Functional") {
     <a class="btn btn-mini console" rel="tooltip" title="View Log"
      data-target="#log-@project.getId()">
     <i class="icon-terminal icon-2x"></i>
@@ -51,8 +51,8 @@
   <td>
     <a class="btn btn-mini run
      @if(project.getStatus().equals("Running") || project.getStatus().equals("Initializing")){ disabled }" 
-     @if(project.getType() == TestProjectType.performance) { href="@routes.PerformanceController.runProject(project.getId())" } 
-     @if(project.getType() == TestProjectType.functional) { href="@routes.FunctionalController.runProject(project.getId())" }
+     @if(project.getType() == PERFORMANCE) { href="@routes.PerformanceController.runProject(project.getId())" } 
+     @if(project.getType() == FUNCTIONAL) { href="@routes.FunctionalController.runProject(project.getId())" }
      rel="tooltip" title="Run">
      <i class="icon-play-circle icon-2x"></i> Run
     </a>
@@ -64,15 +64,15 @@
     </a>
     
     <a class="btn btn-mini" 
-    @if(project.getType() == TestProjectType.performance) { href="@routes.PerformanceController.deleteProject(project.getId())" } 
-    @if(project.getType() == TestProjectType.functional) { href="@routes.FunctionalController.deleteProject(project.getId())" }
+    @if(project.getType() == PERFORMANCE) { href="@routes.PerformanceController.deleteProject(project.getId())" } 
+    @if(project.getType() == FUNCTIONAL) { href="@routes.FunctionalController.deleteProject(project.getId())" }
     rel="tooltip" title="Delete">
     <i class="icon-trash icon-2x"></i> Delete
     </a>
   </td>
 </tr>
 
-@if(project.getType().toString() == "functional") {
+@if(project.getType().toString() == "Functional") {
 <tr>
   <td colspan="10" style="padding: 0px; border: none;">
     <div id="log-@project.getId()" style="display: none;">
@@ -83,7 +83,7 @@
 </tr>
 }
 
-@if(project.getType().toString() == "performance") {
+@if(project.getType().toString() == "Performance") {
 <tr>
   <td colspan="10" style="padding: 0px; border: none;">
     <div class="snapshots" style="display: none;">
@@ -109,10 +109,10 @@
 <!-- Modal performance report -->
 <div class="modal hide" id="report-project-@project.getId()"
  style="width: 800px; margin-left: -400px;"
-@if(project.getType().toString() == "performance") {
+@if(project.getType().toString() == "Performance") {
 data-remote="@routes.PerformanceController.report(JMeterScriptHelper.getLastestCommit(project.getId()).getString("_id"))"
 }
-@if(project.getType().toString() == "functional") {
+@if(project.getType().toString() == "Functional") {
 data-remote="@routes.FunctionalController.report(project.getId())"
 }
 >

@@ -5,7 +5,7 @@ package controllers.test;
 
 import helpertest.JMeterScriptHelper;
 import helpertest.JenkinsJobHelper;
-import helpertest.TestHelper;
+import helpertest.TestProjectHelper;
 import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
@@ -19,7 +19,6 @@ import java.util.List;
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
-import models.test.TestProjectModel.TestProjectType;
 import models.vm.VMModel;
 
 import org.ats.common.StringUtil;
@@ -62,14 +61,13 @@ import controllers.vm.VMCreator;
 public class PerformanceController extends TestController {
 
   public static Result index() {
-    String type = TestProjectType.performance.toString();
-    return ok(index.render(type, body.render(type)));
+    return ok(index.render(TestProjectModel.PERFORMANCE, body.render(TestProjectModel.PERFORMANCE)));
   }
   
   public static Result report(String snapshotId) throws Exception {
     JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapshotId);
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.performance, snapshot.getString("project_id"));
-    JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("snapshot_id", snapshotId)).iterator().next();
+    TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
+    JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("_id", snapshotId)).iterator().next();
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
     String report1 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ResponseTimesOverTime.png" ;
     String report2 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ThreadsStateOverTime.png" ;
@@ -89,7 +87,7 @@ public class PerformanceController extends TestController {
   }
   
   public static Result runProject(String projectId) throws Exception {
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.performance, projectId);
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     JMeterScript snapshot = JMeterScriptHelper.getLastestCommit(project.getId());    
     runSnapshot(project, snapshot);
     return redirect(routes.PerformanceController.index());
@@ -97,7 +95,7 @@ public class PerformanceController extends TestController {
   
   public static Result runSnapshot(String snapshotId) throws Exception {
     JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapshotId);
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.performance, snapshot.getString("project_id"));
+    TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
     runSnapshot(project, snapshot);
     return redirect(routes.PerformanceController.index());
   }
@@ -119,11 +117,17 @@ public class PerformanceController extends TestController {
         public void run() {
           try {
             VMModel vm = VMCreator.createNormalNonGuiVM(company);
-            JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), snapshot.getString("_id"), vm.getId(), jenkins.getId(), TestProjectType.performance);
+            JenkinsJobModel job = new JenkinsJobModel(
+                JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
+                snapshot.getString("_id"), 
+                project.getId(), 
+                vm.getId(), 
+                jenkins.getId(), 
+                TestProjectModel.PERFORMANCE);
             JenkinsJobHelper.createJenkinsJob(job);
             
             project.put("status", job.getStatus().toString());
-            TestHelper.updateProject(project);
+            TestProjectHelper.updateProject(project);
             
             snapshot.put("status", job.getStatus().toString());
             JMeterScriptHelper.updateJMeterScript(snapshot);
@@ -135,11 +139,17 @@ public class PerformanceController extends TestController {
       thread.start();
     } else {
       VMModel vm = list.get(0);
-      JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), snapshot.getString("_id"), vm.getId(), jenkins.getId(), TestProjectType.performance);
+      JenkinsJobModel job = new JenkinsJobModel(
+          JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
+          snapshot.getString("_id"), 
+          project.getId(), 
+          vm.getId(), 
+          jenkins.getId(), 
+          TestProjectModel.PERFORMANCE);
       JenkinsJobHelper.createJenkinsJob(job);
 
       project.put("status", job.getStatus().toString());
-      TestHelper.updateProject(project);
+      TestProjectHelper.updateProject(project);
       
       snapshot.put("status", job.getStatus().toString());
       JMeterScriptHelper.updateJMeterScript(snapshot);
@@ -147,9 +157,9 @@ public class PerformanceController extends TestController {
   }
   
   public static Result deleteProject(String projectId) throws IOException {
-    TestProjectModel project = TestHelper.getProjectById(TestProjectType.performance, projectId);
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     
-    TestHelper.removeProject(project);
+    TestProjectHelper.removeProject(project);
     JenkinsJobHelper.deleteBuildOfProject(project.getId());
     JMeterScriptHelper.deleteScriptOfProject(project.getId());
     
@@ -206,12 +216,11 @@ public class PerformanceController extends TestController {
         String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
         
         TestProjectModel project = new TestProjectModel(
-            TestHelper.getCurrentProjectIndex(TestProjectType.performance) + 1,
             gitProject.getId(),
             testName, 
             currentGroup.getId(), 
             currentUser.getId(), 
-            TestProjectType.performance, 
+            TestProjectModel.PERFORMANCE, 
             gitSshUrl,
             gitHttpUrl,
             uploaded.getFilename(), content.getBytes("UTF-8"));
@@ -229,7 +238,7 @@ public class PerformanceController extends TestController {
         
         JMeterScriptHelper.createScript(script);
         
-        TestHelper.createProject(TestProjectType.performance, project);
+        TestProjectHelper.createProject(project);
         
         if (run) runSnapshot(project, script);
       }

@@ -8,7 +8,7 @@ import interceptor.WizardInterceptor;
 
 import java.util.Collection;
 
-import models.test.TestProjectModel.TestProjectType;
+import models.test.TestProjectModel;
 import models.vm.VMModel;
 
 import org.ats.component.usersmgt.UserManagementException;
@@ -240,10 +240,10 @@ public class Application extends Controller {
     FeatureInitializer.createVMFeature(root, system);
     
     //Initialize Performance
-    FeatureInitializer.createTestFeature(system, TestProjectType.performance);
+    FeatureInitializer.createTestFeature(system, TestProjectModel.PERFORMANCE);
     
     //Initialize Functional
-    FeatureInitializer.createTestFeature(system, TestProjectType.functional);
+    FeatureInitializer.createTestFeature(system, TestProjectModel.FUNCTIONAL);
     
     //login
     session().clear();

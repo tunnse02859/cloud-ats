@@ -4,7 +4,7 @@
 package controllers.test;
 
 import static akka.pattern.Patterns.ask;
-import helpertest.TestHelper;
+import helpertest.TestProjectHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
-import models.test.TestProjectModel.TestProjectType;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
@@ -91,9 +90,9 @@ public class TestController extends Controller {
     }
   }
   
-  public static Html groupMenuList() throws UserManagementException {
+  public static Html groupMenuList(String type) throws UserManagementException {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
-    List<Group> groups = getAvailableGroups();
+    List<Group> groups = getAvailableGroups(type, session("user_id"));
     
     for (Group group : groups) {
       buildGroupPath(sb, group);
@@ -103,18 +102,10 @@ public class TestController extends Controller {
   }
   
   public static Result getProjectList() throws UserManagementException {
-    TestProjectType type = TestProjectType.performance ;
-    if (request().getQueryString("type") != null)
-      type = TestProjectType.valueOf(request().getQueryString("type"));
+    String type = request().getQueryString("type");
+    String group_id = request().getQueryString("group");
+    String userText = request().getQueryString("user");
 
-    String group_id = null;
-    if (request().getQueryString("group") != null) 
-      group_id = request().getQueryString("group");
-    
-    String userText = null;
-    if (request().getQueryString("user") != null) {
-      userText = request().getQueryString("user");
-    }
     return ok(getProjectListHtml(type.toString(), group_id, userText));
   }
   
@@ -123,8 +114,8 @@ public class TestController extends Controller {
     
     Set<TestProjectModel> set = new HashSet<TestProjectModel>();
     if (group_id == null) {
-      for (Group group : getAvailableGroups()) {
-        set.addAll(TestHelper.getProject(TestProjectType.valueOf(type), new BasicDBObject("group_id", group.getId())));
+      for (Group group : getAvailableGroups(type, session("user_id"))) {
+        set.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId()).append("type", type)));
       }
     }
     
@@ -132,7 +123,7 @@ public class TestController extends Controller {
     Collections.sort(projects, new Comparator<TestProjectModel>() {
       @Override
       public int compare(TestProjectModel o1, TestProjectModel o2) {
-        return o2.getIndex() - o1.getIndex();
+        return (int)(o2.getLong("created_date") - o1.getLong("created_date"));
       }
     });
     
@@ -142,18 +133,14 @@ public class TestController extends Controller {
     return new Html(sb);
   }
   
-  public static List<Group> getAvailableGroups() throws UserManagementException {
-    return getAvailableGroups(session("user_id"));
-  }
-  
-  public static List<Group> getAvailableGroups(String currentUserId) throws UserManagementException {
+  public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(currentUserId);
     
-    Feature perfFeature = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", "Performance")).iterator().next();
+    Feature feature = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", testType)).iterator().next();
     Operation perfAdOperation = null;
     Operation perfTestOperation = null;
-    for (Operation op : perfFeature.getOperations()) {
+    for (Operation op : feature.getOperations()) {
       if (op.getName().equals("Administration")) {
         perfAdOperation = op;
       } else if (op.getName().equals("Test")) {
@@ -161,25 +148,25 @@ public class TestController extends Controller {
       }
     }
     
-    List<Role> perfAdRoles = new ArrayList<Role>();
-    List<Role> perfTestRoles = new ArrayList<Role>();
+    List<Role> adRoles = new ArrayList<Role>();
+    List<Role> testRoles = new ArrayList<Role>();
     
     for (Role role : currentUser.getRoles()) {
       for (Permission per : role.getPermissions()) {
         Feature f = per.getFeature();
         Operation op = per.getOpertion();
-        if (f.equals(perfFeature)) {
+        if (f.equals(feature)) {
           if (op.equals(perfAdOperation))
-            perfAdRoles.add(role);
+            adRoles.add(role);
           else if (op.equals(perfTestOperation)) {
-            perfTestRoles.add(role);
+            testRoles.add(role);
           }
         }
       }
     }
     
-    List<Group> adminGroups = getGroupsHasPermission(currentUser, perfAdRoles);
-    List<Group> testGroups = getGroupsHasPermission(currentUser, perfTestRoles);
+    List<Group> adminGroups = getGroupsHasPermission(currentUser, adRoles);
+    List<Group> testGroups = getGroupsHasPermission(currentUser, testRoles);
     Set<Group> set = new HashSet<Group>();
     
     for (Group group : adminGroups) {
