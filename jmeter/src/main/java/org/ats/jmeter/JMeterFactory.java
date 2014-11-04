@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.ats.common.StringUtil;
 import org.ats.common.ssh.SSHClient;
@@ -46,12 +47,14 @@ public class JMeterFactory {
     
     String url = project.getSshUrl().replace("git.sme.org", api.getHost());
     
+    String hash = UUID.randomUUID().toString();
+    
     StringBuilder sb = new StringBuilder("ssh-keyscan -H ").append(api.getHost()).append(" >> ~/.ssh/known_hosts").append(" && ");
     sb.append("git config --global user.name 'Administrator'").append(" && ");
     sb.append("git config --global user.email 'admin@local.host'").append(" && ");
-    sb.append("rm -rf /tmp/").append(projectName).append(" && ");
-    sb.append("mkdir /tmp/").append(projectName).append(" && ");
-    sb.append("cd /tmp/").append(projectName).append(" && ");
+    sb.append("rm -rf /tmp/").append(hash).append(" && ");
+    sb.append("mkdir /tmp/").append(hash).append(" && ");
+    sb.append("cd /tmp/").append(hash).append(" && ");
     sb.append("git init").append(" && ");
     sb.append("touch README").append(" && ");
     sb.append("git add README").append(" && ");

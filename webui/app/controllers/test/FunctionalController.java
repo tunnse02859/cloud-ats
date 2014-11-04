@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
@@ -86,8 +87,10 @@ public class FunctionalController extends TestController {
         String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
 
         GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+        
+        String gitName = testName + "-" + UUID.randomUUID();
 
-        GitlabProject gitProject = createGitProject(gitlabAPI, testName);
+        GitlabProject gitProject = createGitProject(gitlabAPI, gitName);
 
         String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
 
@@ -109,23 +112,35 @@ public class FunctionalController extends TestController {
         
         TestProjectHelper.createProject(project);
         
-        SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
-            "/tmp/" + testName, uploaded.getFilename(), new FileInputStream(file));
-        
-//      make commit
         Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, "ubuntu", "ubuntu");
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
 
-        StringBuilder sb = new StringBuilder("cd /tmp/").append(testName).append(" && ");
+        //clone project
+        StringBuilder sb = new StringBuilder("cd /tmp && ").append("git clone ").append(gitSshUrl).append(" ").append(project.getId());
+        channel.setCommand(sb.toString());
+        channel.connect();
+        int exitCode = SSHClient.printOut(System.out, channel);
+        if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
+        channel.disconnect();
+        
+        SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
+            "/tmp/" + project.getId(), uploaded.getFilename(), new FileInputStream(file));
+        
+//      make commit
+        sb = new StringBuilder("cd /tmp/").append(project.getId()).append(" && ");
         sb.append("tar xvf ").append(uploaded.getFilename()).append(" && ");
         sb.append("rm ").append(uploaded.getFilename()).append(" && ");
         sb.append("git add -A && git commit -m 'Snapshot 1' && git push origin master");
-        System.out.println(sb.toString());
+        
+        channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(sb.toString());
         channel.connect();
 
-        SSHClient.printOut(System.out, channel);
+        exitCode = SSHClient.printOut(System.out, channel);
+        if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
         channel.disconnect();
+        
+        //disconnect session
         session.disconnect();
         
         if (run) return runProject(project.getId());
@@ -196,12 +211,14 @@ public class FunctionalController extends TestController {
     
     String url = project.getSshUrl().replace("git.sme.org", api.getHost());
     
+    String hash = UUID.randomUUID().toString();
+    
     StringBuilder sb = new StringBuilder("ssh-keyscan -H ").append(api.getHost()).append(" >> ~/.ssh/known_hosts").append(" && ");
     sb.append("git config --global user.name 'Administrator'").append(" && ");
     sb.append("git config --global user.email 'admin@local.host'").append(" && ");
-    sb.append("rm -rf /tmp/").append(projectName).append(" && ");
-    sb.append("mkdir /tmp/").append(projectName).append(" && ");
-    sb.append("cd /tmp/").append(projectName).append(" && ");
+    sb.append("rm -rf /tmp/").append(hash).append(" && ");
+    sb.append("mkdir /tmp/").append(hash).append(" && ");
+    sb.append("cd /tmp/").append(hash).append(" && ");
     sb.append("git init").append(" && ");
     sb.append("touch README").append(" && ");
     sb.append("git add README").append(" && ");

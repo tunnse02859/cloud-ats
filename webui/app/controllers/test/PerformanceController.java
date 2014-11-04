@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
@@ -205,7 +206,9 @@ public class PerformanceController extends TestController {
 
         GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
 
-        GitlabProject gitProject = factory.createProject(gitlabAPI, company.getString("name"), testName);
+        String gitName = testName + "-" + UUID.randomUUID();
+        
+        GitlabProject gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
 
         gitlabAPI.createFile(gitProject, "src/test/jmeter/script.jmx", "master", script.toString(), "Snapshot 1");
 
