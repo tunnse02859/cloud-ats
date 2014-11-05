@@ -65,18 +65,24 @@ $(document).ready(function() {
   //Run project and snapshot by ajax
   $("body").on("click", ".table.project a.btn.run", function(e) {
     var href = $(this).attr("href");
+
+    //prevent click many times on disabled button
+    if (!$(this).hasClass("disabled")) {
+      $.ajax({
+        url: href,
+        dataType: "html",
+        async: true,
+        success: function(data) {
+          console.log("run a job successfully");
+        },
+        error: function(e) {
+          console.log(e);
+        }
+      });
+    }
+    
     $(this).addClass("disabled");
     console.log("has just click run button");
     e.preventDefault();
-    $.ajax({
-      url: href,
-      dataType: "html",
-      success: function(data) {
-        console.log("run a job successfully");
-      },
-      error: function(e) {
-        console.log(e);
-      }
-    });
   });
 });
