@@ -144,28 +144,30 @@ public class JenkinsJobExecutor {
       
       ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
       
-      while (job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
-        bytes = job.getConsoleOutput(buildNumber, start);
-        last = bytes.length;
-        byte[] next = new byte[last - start];
+      try {
+        while (job.isBuilding(buildNumber, System.currentTimeMillis(), 5 * 60 * 1000)) {
+          bytes = job.getConsoleOutput(buildNumber, start);
+          last = bytes.length;
+          byte[] next = new byte[last - start];
 
-        System.arraycopy(bytes, start, next, 0, next.length);
+          System.arraycopy(bytes, start, next, 0, next.length);
 
-        start += (last - start);
-        
-        if (next.length > 0) { 
-          String output = new String(next);
-          queue.add(output.trim());
-          if (output.indexOf("channel stopped") != -1) break;
+          start += (last - start);
+
+          if (next.length > 0) { 
+            String output = new String(next);
+            queue.add(output.trim());
+            if (output.indexOf("channel stopped") != -1) break;
+          }
+
+          Thread.sleep(1000);
         }
-        
-        Thread.sleep(1000);
+      } catch (Exception e) {
+        e.printStackTrace();
+        job.delete();
+        return;
       }
       queue.add("log.exit");
-      
-      vm = VMHelper.getVMByID(vm.getId());
-      vm.setStatus(VMStatus.Ready);
-      VMHelper.updateVM(vm);
       
       long time = System.currentTimeMillis();
       
@@ -230,6 +232,10 @@ public class JenkinsJobExecutor {
       
       e.printStackTrace();
       Logger.debug("An error occurs when dequeue a jenkins maven job", e);
+    } finally {
+      vm = VMHelper.getVMByID(vm.getId());
+      vm.setStatus(VMStatus.Ready);
+      VMHelper.updateVM(vm);
     }
   }
   
