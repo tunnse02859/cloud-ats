@@ -63,9 +63,11 @@ $(document).ready(function() {
   });
   
   //Run project and snapshot by ajax
-  $("body").on("click", ".table.project a.btn.run", function() {
+  $("body").on("click", ".table.project a.btn.run", function(e) {
     var href = $(this).attr("href");
     $(this).addClass("disabled");
+    console.log("has just click run button");
+    e.preventDefault();
     $.ajax({
       url: href,
       dataType: "html",
@@ -76,6 +78,5 @@ $(document).ready(function() {
         console.log(e);
       }
     });
-    return false;
   });
 });

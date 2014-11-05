@@ -45,6 +45,7 @@
         $(data.logs).each(function() {
           var id = this.id;
           var msg = this.msg;
+          console.log(msg);
           $("div#log-" + id + " pre").append(msg);
         });
         

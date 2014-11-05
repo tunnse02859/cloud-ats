@@ -83,8 +83,7 @@ public class ProjectStatusActor extends UntypedActor {
           arrayStatus.add(projectNode);
         }
         
-        List<JenkinsJobModel> jobs = new ArrayList<JenkinsJobModel>(JenkinsJobHelper.getRunningJobs());
-        jobs.addAll(JenkinsJobHelper.getInitializingJobs());
+        List<JenkinsJobModel> jobs = new ArrayList<JenkinsJobModel>(JenkinsJobHelper.getJobs(new BasicDBObject()));
         
         for (JenkinsJobModel job : jobs) {
           

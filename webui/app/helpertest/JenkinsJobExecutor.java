@@ -108,7 +108,9 @@ public class JenkinsJobExecutor {
   
   private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
     JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
-
+    
+    ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
+    
     try {
 
       String command = null;
@@ -142,8 +144,6 @@ public class JenkinsJobExecutor {
       int last = 0;
       byte[] bytes = null;
       
-      ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
-      
       try {
         while (job.isBuilding(buildNumber, System.currentTimeMillis(), 5 * 60 * 1000)) {
           bytes = job.getConsoleOutput(buildNumber, start);
@@ -157,7 +157,6 @@ public class JenkinsJobExecutor {
           if (next.length > 0) { 
             String output = new String(next);
             queue.add(output.trim());
-            if (output.indexOf("channel stopped") != -1) break;
           }
 
           Thread.sleep(1000);
@@ -167,7 +166,21 @@ public class JenkinsJobExecutor {
         job.delete();
         return;
       }
-      queue.add("log.exit");
+      
+      //fetch the last log
+      bytes = job.getConsoleOutput(buildNumber, start);
+      last = bytes.length;
+      byte[] next = new byte[last - start];
+
+      System.arraycopy(bytes, start, next, 0, next.length);
+
+      start += (last - start);
+
+      if (next.length > 0) { 
+        String output = new String(next);
+        queue.add(output.trim());
+      }
+      //
       
       long time = System.currentTimeMillis();
       
@@ -236,6 +249,9 @@ public class JenkinsJobExecutor {
       vm = VMHelper.getVMByID(vm.getId());
       vm.setStatus(VMStatus.Ready);
       VMHelper.updateVM(vm);
+      
+      //
+      queue.add("log.exit");
     }
   }
   
