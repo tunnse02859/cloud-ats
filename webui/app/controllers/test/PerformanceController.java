@@ -21,6 +21,7 @@ import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.ats.common.StringUtil;
 import org.ats.component.usersmgt.group.Group;
@@ -117,12 +118,11 @@ public class PerformanceController extends TestController {
         @Override
         public void run() {
           try {
-            VMModel vm = VMCreator.createNormalNonGuiVM(company);
             JenkinsJobModel job = new JenkinsJobModel(
                 JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
                 snapshot.getString("_id"), 
                 project.getId(), 
-                vm.getId(), 
+                null, 
                 jenkins.getId(), 
                 TestProjectModel.PERFORMANCE);
             JenkinsJobHelper.createJenkinsJob(job);
@@ -132,6 +132,11 @@ public class PerformanceController extends TestController {
             
             snapshot.put("status", job.getStatus().toString());
             JMeterScriptHelper.updateJMeterScript(snapshot);
+            
+            VMModel vm = VMCreator.createNormalNonGuiVM(company);
+            job.put("vm_id", vm.getId());
+            JenkinsJobHelper.updateJenkinsJob(job);
+            
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -140,6 +145,7 @@ public class PerformanceController extends TestController {
       thread.start();
     } else {
       VMModel vm = list.get(0);
+      
       JenkinsJobModel job = new JenkinsJobModel(
           JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
           snapshot.getString("_id"), 

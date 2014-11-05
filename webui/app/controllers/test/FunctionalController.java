@@ -124,7 +124,7 @@ public class FunctionalController extends TestController {
         channel.disconnect();
         
         SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
-            "/tmp/" + project.getId(), uploaded.getFilename(), new FileInputStream(file));
+            "/tmp/" + project.getId(), uploaded.getFilename(), file);
         
 //      make commit
         sb = new StringBuilder("cd /tmp/").append(project.getId()).append(" && ");
@@ -168,12 +168,21 @@ public class FunctionalController extends TestController {
         @Override
         public void run() {
           try {
-            VMModel vm = VMCreator.createNormalGuiVM(company);
-            JenkinsJobModel job = new JenkinsJobModel(JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, project.getId(), project.getId(), vm.getId(), jenkins.getId(), TestProjectModel.FUNCTIONAL);
+            JenkinsJobModel job = new JenkinsJobModel(
+                JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1,
+                project.getId(), 
+                project.getId(), 
+                null, 
+                jenkins.getId(), 
+                TestProjectModel.FUNCTIONAL);
             JenkinsJobHelper.createJenkinsJob(job);
             
             project.put("status", job.getStatus().toString());
             TestProjectHelper.updateProject(project);
+
+            VMModel vm = VMCreator.createNormalGuiVM(company);
+            job.put("vm_id", vm.getId());
+            JenkinsJobHelper.updateJenkinsJob(job);
             
           } catch (Exception e) {
             e.printStackTrace();

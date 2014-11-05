@@ -8,6 +8,7 @@ import helpertest.JenkinsJobExecutor;
 import helpertest.JenkinsJobHelper;
 import helpertest.TestProjectHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -82,14 +83,19 @@ public class ProjectStatusActor extends UntypedActor {
           arrayStatus.add(projectNode);
         }
         
-        List<JenkinsJobModel> jobs = JenkinsJobHelper.getRunningJobs();
+        List<JenkinsJobModel> jobs = new ArrayList<JenkinsJobModel>(JenkinsJobHelper.getRunningJobs());
+        jobs.addAll(JenkinsJobHelper.getInitializingJobs());
+        
         for (JenkinsJobModel job : jobs) {
+          
           TestProjectModel project = TestProjectHelper.getProjectById(job.getString("project_id"));
+
           if (!projects.contains(project)) continue;
           
-          
           ConcurrentLinkedQueue<String> queue = JenkinsJobExecutor.QueueHolder.get(job.getId());
+          
           if (queue == null) continue;
+
           String s = queue.poll();
           
           if (s != null) {
@@ -97,11 +103,9 @@ public class ProjectStatusActor extends UntypedActor {
             StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("<br>");
             LogBuilder.log(sb, s);
             job.put("log", sb.toString());
-//            System.out.println(job);
             JenkinsJobHelper.updateJenkinsJob(job);
             
             arrayLogs.add(Json.newObject().put("id", job.getId()).put("msg", s));
-            //Logger.debug(s);
           }
           if ("log.exit".equals(s)) {
             JenkinsJobExecutor.QueueHolder.remove(job.getId());

@@ -8,6 +8,7 @@ import helpervm.VMHelper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,7 @@ import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -35,6 +37,8 @@ public class JenkinsJobExecutor {
   /** .*/
   private ScheduledExecutorService service = null;
   
+  /** .*/
+  private ExecutorService executor = Executors.newCachedThreadPool();
   private JenkinsJobExecutor() {}
   
   private static JenkinsJobExecutor instance = null;
@@ -53,26 +57,48 @@ public class JenkinsJobExecutor {
     this.service.scheduleAtFixedRate(new Runnable() {
 
       public void run() {
-        DBObject source = JenkinsJobHelper.getCollection().findOne(new BasicDBObject("status", JenkinsJobStatus.Initializing.toString()));
+        final DBObject source = JenkinsJobHelper.getCollection().findOne(new BasicDBObject("status", JenkinsJobStatus.Initializing.toString()));
         
         if (source == null) return;
 
-        JenkinsJobModel jobModel = new JenkinsJobModel().from(source);
+        final JenkinsJobModel jobModel = new JenkinsJobModel().from(source);
         
-        jobModel.put("status", JenkinsJobStatus.Running.toString());
-        jobModel.put("log", null);
-        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
         
-        QueueHolder.put(jobModel.getId(), new ConcurrentLinkedQueue<String>());
+        if (queue == null) QueueHolder.put(jobModel.getId(), queue = new ConcurrentLinkedQueue<String>());
         
-        VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
-        VMModel vm = VMHelper.getVMByID(jobModel.getString("vm_id"));
+        final VMModel vm = VMHelper.getVMByID(jobModel.getString("vm_id"));
+        
+        if (vm == null) return;
+        
+        if (vm.getStatus() == VMStatus.Initializing) {
+          queue.add(".");
+          return;
+        } else if (vm.getStatus() == VMStatus.Error) {
+          queue.add("VM " + vm.getPublicIP() + " has occurred some errors in initialization phase");
+          jobModel.put("status", JenkinsJobStatus.Errors.toString());
+          JenkinsJobHelper.updateJenkinsJob(jobModel);
+          return;
+        } else if (vm.getStatus() == VMStatus.Ready) {
+          jobModel.put("status", JenkinsJobStatus.Running.toString());
+          jobModel.put("log", null);
+          JenkinsJobHelper.updateJenkinsJob(jobModel);
+          
+          executor.execute(new Runnable() {
+            
+            @Override
+            public void run() {
+              
+              VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
 
-        TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
+              TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
 
-        JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+              JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
 
-        runTest(project, jenkinsMaster, jobModel, vm);
+              runTest(project, jenkinsMaster, jobModel, vm);
+            }
+          });
+        }
       }
     }, 0, 1000, TimeUnit.MILLISECONDS);
   }
@@ -93,13 +119,15 @@ public class JenkinsJobExecutor {
       if (TestProjectModel.FUNCTIONAL.equals(project.getType())) {
         assigned = vm.getPublicIP();
       } else if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
-        assigned = "master";
+        assigned = vm.getPublicIP();
       }
       
       JenkinsMavenJob job = new JenkinsMavenJob(jenkinsMaster, jobModel.getString("_id") , assigned, 
           project.geGitHttpUrl(), snapshot != null ? snapshot.getString("_id") : "master", command, null);
 
       int buildNumber = job.submit();
+      
+      System.out.println(buildNumber);
       
       if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
         snapshot.put("status", JenkinsJobStatus.Running.toString());
@@ -134,6 +162,10 @@ public class JenkinsJobExecutor {
       }
       queue.add("log.exit");
       
+      vm = VMHelper.getVMByID(vm.getId());
+      vm.setStatus(VMStatus.Ready);
+      VMHelper.updateVM(vm);
+      
       long time = System.currentTimeMillis();
       
       String buildStatus = job.getStatus(buildNumber);
@@ -154,6 +186,7 @@ public class JenkinsJobExecutor {
         }
         
       } else if ("FAILURE".equals(buildStatus) || "UNSTABLE".equals(buildStatus)) {
+        
         jobModel.put("status", JenkinsJobStatus.Errors.toString());
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
@@ -166,6 +199,20 @@ public class JenkinsJobExecutor {
           snapshot.put("last_build", time);
           JMeterScriptHelper.updateJMeterScript(snapshot);
         }
+        //
+      } else if ("ABORTED".equals(buildStatus)) {
+        jobModel.put("status", JenkinsJobStatus.Aborted.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        project.put("status", JenkinsJobStatus.Aborted.toString());
+        project.put("last_build", time);
+        TestProjectHelper.updateProject(project);
+        
+        if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+          snapshot.put("status", JenkinsJobStatus.Aborted.toString());
+          snapshot.put("last_build", time);
+          JMeterScriptHelper.updateJMeterScript(snapshot);
+        } 
       }
       
     } catch (Exception e) {

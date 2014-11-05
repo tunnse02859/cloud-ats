@@ -80,10 +80,10 @@
 			      break;
 			    case "Aborted":
 			      color = "orange";
-			      $(projectRun).addClass("disabled");
-            $(projectStop).removeClass("disabled");
+			      $(projectRun).removeClass("disabled");
+            $(projectStop).addClass("disabled");
             $(projectReport).addClass("disabled");
-			      break;
+            break;
 			    case "Errors":
 			      color = "red";
 			      $(projectRun).removeClass("disabled");

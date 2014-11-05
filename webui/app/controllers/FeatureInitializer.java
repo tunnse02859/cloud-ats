@@ -90,7 +90,7 @@ public class FeatureInitializer {
   }
   
   public static void createTestFeature(Group systemGroup, String type) throws UserManagementException {
-    Feature feature = new Feature(Application.dbName, "Performance");
+    Feature feature = new Feature(Application.dbName, type);
     
     Operation o1 = new Operation(Application.dbName, "Administration");
     Operation o2 = new Operation(Application.dbName, "Test");
