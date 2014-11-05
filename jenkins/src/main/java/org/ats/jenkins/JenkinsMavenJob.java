@@ -103,17 +103,20 @@ public class JenkinsMavenJob {
     return HttpClientUtil.getContentBodyAsByteArray(res);
   }
   
-  public boolean isBuilding(int buildNumber) throws UnsupportedEncodingException  {
+  public boolean isBuilding(int buildNumber, long start, long timeout) throws Exception  {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
     DefaultHttpClient client = HttpClientFactory.getInstance();
-    String response = null;
+    HttpResponse response = null;
     try {
-      response = HttpClientUtil.fetch(client, url);
-      JSONObject json = new JSONObject(response);
+      response = HttpClientUtil.execute(client, url);
+      JSONObject json = new JSONObject(HttpClientUtil.getContentBodyAsString(response));
       return json.getBoolean("building");
     } catch (Exception e) {
-      System.out.println(response);
-      return false;
+      if ((System.currentTimeMillis() - start) < timeout) {
+        Thread.sleep(3000);
+        return isBuilding(buildNumber, start, timeout);
+      }
+      throw new Exception("The request " + url + " has reponse code " + response.getStatusLine().getStatusCode());
     }
   }
   

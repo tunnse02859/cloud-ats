@@ -82,7 +82,7 @@ public class JenkinsMasterTestCase extends AbstractVMTestCase {
       int start = 0;
       int last = 0;
       byte[] bytes = null;
-      while(job.isBuilding(buildNumber)) {
+      while(job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
         
         bytes = job.getConsoleOutput(buildNumber, start);
         last = bytes.length;
@@ -134,7 +134,7 @@ public class JenkinsMasterTestCase extends AbstractVMTestCase {
       int start = 0;
       int last = 0;
       byte[] bytes = null;
-      while(job.isBuilding(buildNumber)) {
+      while(job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
         
         bytes = job.getConsoleOutput(buildNumber, start);
         last = bytes.length;

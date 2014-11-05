@@ -70,7 +70,7 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
     api.deleteProject(project);
   }
   
-  private void build(JenkinsMavenJob job) throws IOException {
+  private void build(JenkinsMavenJob job) throws Exception {
     int buildNumber = job.submit();    
     Assert.assertTrue(buildNumber != -1);
     
@@ -79,7 +79,7 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
     byte[] bytes = null;
     
 
-    while(job.isBuilding(buildNumber)) {
+    while(job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
 
       bytes = job.getConsoleOutput(buildNumber, start);
       last = bytes.length;

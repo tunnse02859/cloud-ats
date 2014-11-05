@@ -191,8 +191,7 @@ public class JobController extends Controller {
         int start = 0;
         int last = 0;
         byte[] bytes = null;
-        Thread.sleep(3000); //sleep 3s for stable
-        while(job.isBuilding(buildNumber)) {
+        while(job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
 
           bytes = job.getConsoleOutput(buildNumber, start);
           last = bytes.length;

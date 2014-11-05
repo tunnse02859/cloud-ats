@@ -84,6 +84,9 @@ public class JenkinsJobExecutor {
           jobModel.put("log", null);
           JenkinsJobHelper.updateJenkinsJob(jobModel);
           
+          vm.setStatus(VMStatus.Running);
+          VMHelper.updateVM(vm);
+          
           executor.execute(new Runnable() {
             
             @Override
@@ -127,8 +130,6 @@ public class JenkinsJobExecutor {
 
       int buildNumber = job.submit();
       
-      System.out.println(buildNumber);
-      
       if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
         snapshot.put("status", JenkinsJobStatus.Running.toString());
         JMeterScriptHelper.updateJMeterScript(snapshot);
@@ -143,7 +144,7 @@ public class JenkinsJobExecutor {
       
       ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
       
-      while (job.isBuilding(buildNumber)) {
+      while (job.isBuilding(buildNumber, System.currentTimeMillis(), 30 * 1000)) {
         bytes = job.getConsoleOutput(buildNumber, start);
         last = bytes.length;
         byte[] next = new byte[last - start];

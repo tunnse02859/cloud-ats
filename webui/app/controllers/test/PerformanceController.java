@@ -21,7 +21,6 @@ import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
-import models.vm.VMModel.VMStatus;
 
 import org.ats.common.StringUtil;
 import org.ats.component.usersmgt.group.Group;
