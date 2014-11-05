@@ -302,9 +302,9 @@ public class VMController extends Controller {
    * @throws Exception
    */
   @With(VMWizardIterceptor.class)
-  public static Promise<Result> vmAction(String action, final String vmId) throws Exception {
+  public static Result vmAction(String action, final String vmId) throws Exception {
 
-    if (! hasRightPermission(vmId)) return Promise.<Result>pure(forbidden(views.html.forbidden.render()));
+    if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
 
     final CloudStackClient client = VMHelper.getCloudStackClient();
 
@@ -335,38 +335,41 @@ public class VMController extends Controller {
     } else if ("destroy".equals(action)) {
       final VMModel vm = VMHelper.getVMByID(vmId);
 
-      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return Promise.<Result>pure(forbidden(views.html.forbidden.render()));
+      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return forbidden(views.html.forbidden.render());
 
       VMHelper.removeVM(vm);
       
       VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
       VMHelper.getKnife().deleteNode(vm.getName());
+      
       new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
       
-      Promise<Boolean> result = Promise.promise(new Function0<Boolean>() {
-        @Override
-        public Boolean apply() throws Throwable {
-          String jobId = VirtualMachineAPI.destroyVM(client, vmId, true);
-          Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-          while (!job.getStatus().done()) {
-            job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-          }
-
-          if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-            return true;
-          }
-          return false;
-        }
-      });
-      return result.map(new Function<Boolean, Result>() {
-        @Override
-        public Result apply(Boolean a) throws Throwable {
-          return a ? status(200) : status(500);
-        }
-      });
+      VirtualMachineAPI.destroyVM(client, vmId, true);
+      
+//      Promise<Boolean> result = Promise.promise(new Function0<Boolean>() {
+//        @Override
+//        public Boolean apply() throws Throwable {
+//          String jobId = VirtualMachineAPI.destroyVM(client, vmId, true);
+//          Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+//          while (!job.getStatus().done()) {
+//            job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
+//          }
+//
+//          if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
+//            return true;
+//          }
+//          return false;
+//        }
+//      });
+//      return result.map(new Function<Boolean, Result>() {
+//        @Override
+//        public Result apply(Boolean a) throws Throwable {
+//          return a ? status(200) : status(500);
+//        }
+//      });
     }
 
-    return Promise.<Result>pure(status(200));
+    return status(200);
   }
 
   @WithSystem
