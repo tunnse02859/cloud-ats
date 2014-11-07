@@ -55,7 +55,8 @@ public class Main {
     Enumeration<InetAddress> inets = eth0.getInetAddresses();
     while (inets.hasMoreElements()) {
       String inetAddress = inets.nextElement().getHostAddress();
-
+      if (inetAddress.indexOf('.') == -1) continue;
+      
       JenkinsSlave slave = null;
       Map<String, String> env = null;
 

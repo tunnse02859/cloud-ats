@@ -6,10 +6,11 @@
   "labelString": "", 
   "mode": "NORMAL", 
   "": ["hudson.plugins.sshslaves.SSHLauncher", "hudson.slaves.RetentionStrategy$Always"], 
-  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "host": "%s", "credentialsId": "eff1bd7f-5d1c-46c8-9e4e-df214ff5e304", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": ""}, 
+  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "host": "%s", "credentialsId": "b8a369d5-314a-42d4-9f55-030f4095ab16", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": "", "maxNumRetries": "", "retryWaitTime": ""}, 
   "retentionStrategy": {"stapler-class": "hudson.slaves.RetentionStrategy$Always"}, 
   "nodeProperties": {
     "stapler-class-bag": "true", 
     "hudson-tools-ToolLocationNodeProperty": {"locations": [{"key": "hudson.plugins.git.GitTool$DescriptorImpl@Default", "home": "/usr/bin/git"}, {"key": "hudson.model.JDK$DescriptorImpl@jdk1.7.0_51", "home": "/home/ubuntu/java/jdk1.7.0_51"}, {"key": "hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.2.1", "home": "/home/ubuntu/java/apache-maven-3.2.1"}]}
-  }
-}
+  }, 
+  "type": "hudson.slaves.DumbSlave"
+ }
