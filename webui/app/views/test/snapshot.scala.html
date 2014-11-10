@@ -1,5 +1,6 @@
 @(script: org.ats.jmeter.models.JMeterScript)
 @import controllers.test._
+@import helpertest._
 @**
 <tr>
   <th>Snapshot</th>
@@ -48,6 +49,9 @@
   <td colspan="10" style="padding: 0px; border: none;">
     <div id="log-@script.getString("_id")" style="display: none;">
       <pre style="max-height: 300px;" class="pre-scrollable">
+      @defining(JenkinsJobHelper.getJobById(script.getString("_id"))) { job =>
+        @if(job != null) { @job.getString("log") }
+      }
       </pre>
     </div>
   </td>

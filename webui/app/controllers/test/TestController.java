@@ -333,6 +333,20 @@ public class TestController extends Controller {
     return ok(index.render(type, newproject.render(type)));
   }
   
+  public static WebSocket<JsonNode> projectLog(final String type, final String sessionId, final String currentUserId) {
+    return new WebSocket<JsonNode>() {
+
+      @Override
+      public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
+        try {
+          Await.result(ask(ProjectLogActor.actor, new ProjectChannel(sessionId, currentUserId, type, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+        } catch (Exception e) {
+          Logger.debug("Can not create akka for project log actor", e);
+        }
+      }
+    };
+  }
+  
   public static WebSocket<JsonNode> projectStatus(final String type, final String sessionId, final String currentUserId) {
     return new WebSocket<JsonNode>() {
       @Override

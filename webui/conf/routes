@@ -111,6 +111,7 @@ GET    /portal/test/f/report/:id  controllers.test.FunctionalController.report(i
 GET    /portal/test/c/:type       controllers.test.TestController.createNewProject(type)
 GET    /portal/test/filter        controllers.test.TestController.getProjectList()
 GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(t, s, u)
+GET    /portal/test/log/:t/:s/:u  controllers.test.TestController.projectLog(t, s, u)
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

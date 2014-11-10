@@ -90,7 +90,7 @@ public class JenkinsJobExecutor {
         if (vm == null) return;
         
         if (vm.getStatus() == VMStatus.Initializing) {
-          queue.add(".");
+          queue.add("vm-log-" + vm.getId());
           return;
         } else if (vm.getStatus() == VMStatus.Error) {
           queue.add("VM " + vm.getPublicIP() + " has occurred some errors in initialization phase");
@@ -100,7 +100,6 @@ public class JenkinsJobExecutor {
         } else if (vm.getStatus() == VMStatus.Ready) {
           
           jobModel.put("status", JenkinsJobStatus.Running.toString());
-          jobModel.put("log", null);
           JenkinsJobHelper.updateJenkinsJob(jobModel);
           
           vm.setStatus(VMStatus.Running);
@@ -126,6 +125,8 @@ public class JenkinsJobExecutor {
   }
   
   private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
+    jobModel.put("log", null);
+    JenkinsJobHelper.updateJenkinsJob(jobModel);
     
     ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
     queue.add("Checking Jenkins Master status...");
@@ -227,6 +228,8 @@ public class JenkinsJobExecutor {
       
       String buildStatus = job.getStatus(buildNumber);
       Logger.debug("The build status: " + buildStatus);
+      
+      jobModel = JenkinsJobHelper.getJobById(jobModel.getId());
       
       if ("SUCCESS".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Completed.toString());
