@@ -175,6 +175,16 @@ public class JenkinsMavenJob {
     return -1;
   }
   
+  public boolean update() throws Exception {
+    DefaultHttpClient client = HttpClientFactory.getInstance();
+    HttpContext httpContext = new BasicHttpContext();
+    String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/configSubmit");
+    HttpPost post = new HttpPost(url);
+    post.setEntity(this.buildFormData());
+    HttpResponse res = client.execute(post, httpContext);
+    return res.getStatusLine().getStatusCode() == 302;
+  }
+  
   public int build() {
     try {
       DefaultHttpClient client = HttpClientFactory.getInstance();
