@@ -29,13 +29,11 @@ import models.vm.VMModel;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.ats.cloudstack.AsyncJobAPI;
 import org.ats.cloudstack.CloudStackAPI;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.cloudstack.ServiceOfferingAPI;
 import org.ats.cloudstack.TemplateAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
-import org.ats.cloudstack.model.Job;
 import org.ats.cloudstack.model.ServiceOffering;
 import org.ats.cloudstack.model.Template;
 import org.ats.cloudstack.model.VirtualMachine;
@@ -58,6 +56,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -148,7 +147,7 @@ public class VMController extends Controller {
         try {
           Await.result(ask(VMStatusActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
         } catch (Exception e) {
-          e.printStackTrace();
+          Logger.debug("Can not create akka for vm status actor", e);
         }
       }
     };
@@ -162,7 +161,7 @@ public class VMController extends Controller {
         try {
           Await.result(ask(VMLogActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
         } catch (Exception e) {
-          e.printStackTrace();
+          Logger.debug("Can not create akka for vm log actor", e);
         }
       }
     };
@@ -289,7 +288,7 @@ public class VMController extends Controller {
       String src = node.getAttributes().getNamedItem("src").getNodeValue();
       return ok(terminal.render(src));
     } catch (Exception e) {
-      e.printStackTrace();
+      Logger.debug("Has error when view vm remote console", e);
       return ok();
     }
   }
@@ -309,29 +308,11 @@ public class VMController extends Controller {
     final CloudStackClient client = VMHelper.getCloudStackClient();
 
     if ("start".equals(action)) {
-      String jobId =VirtualMachineAPI.startVM(client, vmId);
-      Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-      while (!job.getStatus().done()) {
-        job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-      }
-
-      if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-        VMModel vm = VMHelper.getVMByID(vmId);
-        if (vm.getBoolean("jenkins")) VMCreator.startJenkins(vm);
-      }
+      VirtualMachineAPI.startVM(client, vmId);
     } else if ("stop".equals(action)) {
       VirtualMachineAPI.stopVM(client, vmId, false);
     } else if ("restore".equals(action)) {
-      String jobId = VirtualMachineAPI.restoreVM(client, vmId, null);
-      Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-      while (!job.getStatus().done()) {
-        job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-      }
-
-      if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-        VMModel vm = VMHelper.getVMByID(vmId);
-        if (vm.getBoolean("jenkins")) VMCreator.startJenkins(vm);
-      }
+      VirtualMachineAPI.restoreVM(client, vmId, null);
     } else if ("destroy".equals(action)) {
       final VMModel vm = VMHelper.getVMByID(vmId);
 
@@ -342,7 +323,11 @@ public class VMController extends Controller {
       VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
       VMHelper.getKnife().deleteNode(vm.getName());
       
-      new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      try {
+        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      } catch (IOException e) {
+        Logger.debug("Could not release jenkins node ", e);
+      }
       
       VirtualMachineAPI.destroyVM(client, vmId, true);
       

@@ -4,10 +4,16 @@
 package controllers.test;
 
 import static akka.pattern.Patterns.ask;
+import helpertest.JMeterScriptHelper;
+import helpertest.JenkinsJobHelper;
 import helpertest.TestProjectHelper;
+import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,11 +21,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
+import models.vm.VMModel;
 
+import org.ats.common.StringUtil;
+import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
@@ -30,20 +41,35 @@ import org.ats.component.usersmgt.role.Permission;
 import org.ats.component.usersmgt.role.Role;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
+import org.ats.gitlab.GitlabAPI;
+import org.ats.jmeter.JMeterFactory;
+import org.ats.jmeter.JMeterParser;
+import org.ats.jmeter.models.JMeterScript;
+import org.gitlab.api.models.GitlabCommit;
+import org.gitlab.api.models.GitlabProject;
 
+import play.Logger;
 import play.api.templates.Html;
+import play.data.DynamicForm;
 import play.mvc.Controller;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import play.mvc.With;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
+import views.html.test.index;
+import views.html.test.newproject;
+import views.html.test.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 
 import controllers.Application;
-import views.html.test.*;
+import controllers.vm.VMCreator;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -53,6 +79,255 @@ import views.html.test.*;
 
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class TestController extends Controller {
+  
+  public static void delete(String projectId) throws IOException  {
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    
+    TestProjectHelper.removeProject(project);
+    JenkinsJobHelper.deleteBuildOfProject(project.getId());
+    JMeterScriptHelper.deleteScriptOfProject(project.getId());
+    
+    
+    VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+    String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    gitlabAPI.deleteProject(project.getGitlabProjectId());
+  }
+  
+  private static GitlabProject createGitProject(GitlabAPI api, String projectName) throws Exception {
+    GitlabProject project = api.getAPI().createProject(projectName);
+    
+    String url = project.getSshUrl().replace("git.sme.org", api.getHost());
+    
+    String hash = UUID.randomUUID().toString();
+    
+    StringBuilder sb = new StringBuilder("ssh-keyscan -H ").append(api.getHost()).append(" >> ~/.ssh/known_hosts").append(" && ");
+    sb.append("git config --global user.name 'Administrator'").append(" && ");
+    sb.append("git config --global user.email 'admin@local.host'").append(" && ");
+    sb.append("rm -rf /tmp/").append(hash).append(" && ");
+    sb.append("mkdir /tmp/").append(hash).append(" && ");
+    sb.append("cd /tmp/").append(hash).append(" && ");
+    sb.append("git init").append(" && ");
+    sb.append("touch README").append(" && ");
+    sb.append("git add README").append(" && ");
+    sb.append("git commit -m 'first commit'").append(" && ");
+    sb.append("git remote add origin ").append(url).append(" && ");
+    sb.append("git push -u origin master");
+  
+    Session session = SSHClient.getSession(api.getHost(), 22, "ubuntu", "ubuntu");
+    ChannelExec channel = (ChannelExec) session.openChannel("exec");
+       
+    channel.setCommand(sb.toString());
+    channel.connect();
+    
+    SSHClient.printOut(System.out, channel);
+    channel.disconnect();
+    session.disconnect();
+    return project;
+  }
+  
+  public static void createProjectByUpload(boolean run, String testType) {
+    try {
+      MultipartFormData body = request().body().asMultipartFormData();
+      DynamicForm form = DynamicForm.form().bindFromRequest();
+
+      String testName = form.get("name");
+
+      FilePart uploaded = body.getFile("uploaded");
+      if (uploaded != null) {
+        
+        File file = uploaded.getFile();
+        JMeterFactory factory = new JMeterFactory();
+        
+        Group company = TestController.getCompany();
+        User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+        Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
+        
+        VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
+
+        String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+
+        GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+        
+        String gitName = testName + "-" + UUID.randomUUID();
+
+        GitlabProject gitProject = null;
+        
+        if (TestProjectModel.FUNCTIONAL.equals(testType)) {
+          gitProject = createGitProject(gitlabAPI, gitName);
+        }
+        
+        if (TestProjectModel.PERFORMANCE.equals(testType)) {
+          gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
+        }
+
+        String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+
+        String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
+        
+        TestProjectModel project = new TestProjectModel(
+            gitProject.getId(),
+            testName, 
+            currentGroup.getId(), 
+            currentUser.getId(), 
+            testType, 
+            gitSshUrl,
+            gitHttpUrl,
+            uploaded.getFilename(), StringUtil.readStream(new FileInputStream(file)).getBytes());
+
+        project.put("status", run ? JenkinsJobStatus.Initializing.toString() : JenkinsJobStatus.Ready.toString());
+        project.put("jenkins_id", jenkins.getId());
+        
+        
+        TestProjectHelper.createProject(project);
+        
+        if (TestProjectModel.FUNCTIONAL.equals(testType)) {
+          Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, "ubuntu", "ubuntu");
+          ChannelExec channel = (ChannelExec) session.openChannel("exec");
+
+          //clone project
+          StringBuilder sb = new StringBuilder("cd /tmp && ").append("git clone ").append(gitSshUrl).append(" ").append(project.getId());
+          channel.setCommand(sb.toString());
+          channel.connect();
+          int exitCode = SSHClient.printOut(System.out, channel);
+          if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
+          channel.disconnect();
+          
+          SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
+              "/tmp/" + project.getId(), uploaded.getFilename(), file);
+          
+//        make commit
+          sb = new StringBuilder("cd /tmp/").append(project.getId()).append(" && ");
+          sb.append("tar xvf ").append(uploaded.getFilename()).append(" && ");
+          sb.append("rm ").append(uploaded.getFilename()).append(" && ");
+          sb.append("git add -A && git commit -m 'Snapshot 1' && git push origin master");
+          
+          channel = (ChannelExec) session.openChannel("exec");
+          channel.setCommand(sb.toString());
+          channel.connect();
+
+          exitCode = SSHClient.printOut(System.out, channel);
+          if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
+          channel.disconnect();
+          
+          //disconnect session
+          session.disconnect();
+          
+          if (run) run(project, project.getId());
+        }
+        
+        if (TestProjectModel.PERFORMANCE.equals(testType)) {
+          
+          FileInputStream fis = new FileInputStream(file);
+          String content = StringUtil.readStream(fis);
+
+          JMeterParser parser = factory.createJMeterParser(content);
+          JMeterScript script = parser.parse();
+          
+          gitlabAPI.createFile(gitProject, "src/test/jmeter/script.jmx", "master", script.toString(), "Snapshot 1");
+
+          GitlabCommit commit = gitlabAPI.getCommits(gitProject, "master").get(0);
+          
+          script.put("_id", commit.getId());
+          script.put("project_id", project.getId());
+          script.put("commit", commit.getTitle());
+          script.put("index", 1);
+          script.put("status", run ? JenkinsJobStatus.Initializing.toString() : JenkinsJobStatus.Ready.toString());
+          
+          JMeterScriptHelper.createScript(script);
+          
+          if (run) TestController.run(project, script.getString("_id"));
+        }
+      }
+    } catch (Exception e) {
+     throw new RuntimeException(e);
+    }
+  }
+  
+  public static void run(final TestProjectModel project, final String snapshotId) throws UserManagementException {
+    
+    final VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+
+    final Group company = getCompany();
+
+    List<VMModel> list = VMHelper.getReadyVMs(company.getId(), new BasicDBObject("gui", TestProjectModel.PERFORMANCE.equals(project.getType()) ? false : true));
+
+    final JMeterScript snapshot = new JMeterScript();
+    if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+      snapshot.from(JMeterScriptHelper.getJMeterScriptById(snapshotId));
+    }
+    
+    //remove last build
+    //JenkinsJobHelper.deleteBuildOfSnapshot(snapshot.getString("_id"));
+    
+    if (list.isEmpty()) {
+      Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            JenkinsJobModel job = JenkinsJobHelper.getJobById(snapshotId);
+            
+            if (job == null) {
+              job = new JenkinsJobModel(
+                  JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
+                  snapshotId, 
+                  project.getId(), 
+                  null, 
+                  jenkins.getId(), 
+                  project.getType());
+              
+              JenkinsJobHelper.createJenkinsJob(job);
+            } else {
+              job.put("status", JenkinsJobStatus.Initializing.toString());
+              JenkinsJobHelper.updateJenkinsJob(job);
+            }
+
+            project.put("status", job.getStatus().toString());
+            TestProjectHelper.updateProject(project);
+
+            if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+              snapshot.put("status", job.getStatus().toString());
+              JMeterScriptHelper.updateJMeterScript(snapshot);
+            }
+
+            VMModel vm = TestProjectModel.PERFORMANCE.equals(project.getType()) ? VMCreator.createNormalNonGuiVM(company) : VMCreator.createNormalGuiVM(company);
+            job.put("vm_id", vm.getId());
+            JenkinsJobHelper.updateJenkinsJob(job);
+
+          } catch (Exception e) {
+            Logger.debug("has an error when run functional project", e);
+          }
+        }
+      });
+      thread.start();
+    } else {
+      VMModel vm = list.get(0);
+      
+      JenkinsJobModel job = JenkinsJobHelper.getJobById(snapshotId);
+      if (job == null) {
+        job = new JenkinsJobModel(
+            JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
+            snapshotId, 
+            project.getId(), 
+            vm.getId(), 
+            jenkins.getId(), 
+            project.getType());
+        JenkinsJobHelper.createJenkinsJob(job);
+      } else {
+        job.put("status", JenkinsJobStatus.Initializing.toString());
+        job.put("vm_id", vm.getId());
+        JenkinsJobHelper.updateJenkinsJob(job);
+      }
+
+      project.put("status", job.getStatus().toString());
+      TestProjectHelper.updateProject(project);
+
+      if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+        snapshot.put("status", job.getStatus().toString());
+        JMeterScriptHelper.updateJMeterScript(snapshot);
+      }
+    }
+  }
   
   public static Result createNewProject(String type) {
     return ok(index.render(type, newproject.render(type)));
@@ -65,7 +340,7 @@ public class TestController extends Controller {
         try {
           Await.result(ask(ProjectStatusActor.actor, new ProjectChannel(sessionId, currentUserId, type, out), 1000), Duration.create(1, TimeUnit.SECONDS));
         } catch (Exception e) {
-          e.printStackTrace();
+          Logger.debug("Can not create akka for project status actor", e);
         }
       }
     };

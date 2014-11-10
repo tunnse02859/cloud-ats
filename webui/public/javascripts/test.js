@@ -1,6 +1,8 @@
 $(document).ready(function() {
   
   $("[rel=tooltip]").tooltip();
+  
+  
   $("body").on("click", "a.disabled", function(e) {
     e.preventDefault();
     e.cancelBubble = true;

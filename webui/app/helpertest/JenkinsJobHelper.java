@@ -87,6 +87,7 @@ public class JenkinsJobHelper {
     return getJobs(query);
   }
   
+  @Deprecated
   public static void deleteBuildOfSnapshot(String snapshotId) throws IOException {
     List<JenkinsJobModel> jobs = getJobs(new BasicDBObject("_id", snapshotId));
     for (JenkinsJobModel job : jobs) {
@@ -107,7 +108,7 @@ public class JenkinsJobHelper {
     }
   }
   
-  public static int getCurrentBuildIndex(String projectId) throws IOException {
+  public static int getCurrentBuildIndex(String projectId) {
     DBCollection col  = getCollection();
     DBCursor cursor = col.find(new BasicDBObject("project_id", projectId)).sort(new BasicDBObject("index", -1)).limit(1);
     if (!cursor.hasNext()) return 0;

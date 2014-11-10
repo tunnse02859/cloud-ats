@@ -19,6 +19,7 @@ import org.ats.jmeter.models.JMeterScript;
 
 import play.Logger;
 import models.test.JenkinsJobModel;
+import models.test.JenkinsJobModel.JenkinsBuildResult;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
@@ -47,6 +48,23 @@ public class JenkinsJobExecutor {
     return instance == null ? (instance = new JenkinsJobExecutor()) : instance;
   }
   
+  public static boolean checkJenkinsMasterReady(JenkinsMaster master, long start, long timeout) {
+    boolean ready = false;
+    try {
+      ready = master.isReady();
+    } catch (Exception e) {
+      Logger.debug("Jenkins Master " + master.getMasterHost() + " is not ready", e);
+      if ((start - System.currentTimeMillis()) > timeout) return false;
+      try {
+        Thread.sleep(3000);
+      } catch (InterruptedException e1) {
+        Logger.debug("Interrupted thread sleep", e);
+      }
+      return checkJenkinsMasterReady(master, start, timeout);
+    }
+    return ready;
+  }
+  
   public static Map<String, ConcurrentLinkedQueue<String>> QueueHolder = new HashMap<String, ConcurrentLinkedQueue<String>>();
 
   public void start() {
@@ -60,7 +78,7 @@ public class JenkinsJobExecutor {
         final DBObject source = JenkinsJobHelper.getCollection().findOne(new BasicDBObject("status", JenkinsJobStatus.Initializing.toString()));
         
         if (source == null) return;
-
+        
         final JenkinsJobModel jobModel = new JenkinsJobModel().from(source);
         
         ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
@@ -80,6 +98,7 @@ public class JenkinsJobExecutor {
           JenkinsJobHelper.updateJenkinsJob(jobModel);
           return;
         } else if (vm.getStatus() == VMStatus.Ready) {
+          
           jobModel.put("status", JenkinsJobStatus.Running.toString());
           jobModel.put("log", null);
           JenkinsJobHelper.updateJenkinsJob(jobModel);
@@ -107,9 +126,14 @@ public class JenkinsJobExecutor {
   }
   
   private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
-    JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
     
     ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
+    queue.add("Checking Jenkins Master status...");
+    while(!checkJenkinsMasterReady(jenkinsMaster, System.currentTimeMillis(), 10 * 60 * 1000)) {
+      queue.add("Waiting for Jenkins Master to be ready...");
+    }
+    
+    JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
     
     try {
 
@@ -130,7 +154,9 @@ public class JenkinsJobExecutor {
       JenkinsMavenJob job = new JenkinsMavenJob(jenkinsMaster, jobModel.getString("_id") , assigned, 
           project.geGitHttpUrl(), snapshot != null ? snapshot.getString("_id") : "master", command, null);
 
-      int buildNumber = job.submit();
+      int buildNumber = job.update() ? job.build() : job.submit();
+      
+      Logger.debug("The current build number of " + job.getName() + " is: " + buildNumber);
       
       if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
         snapshot.put("status", JenkinsJobStatus.Running.toString());
@@ -162,8 +188,23 @@ public class JenkinsJobExecutor {
           Thread.sleep(1000);
         }
       } catch (Exception e) {
-        e.printStackTrace();
-        job.delete();
+        
+        long time = System.currentTimeMillis();
+        
+        jobModel.put("status", JenkinsJobStatus.Errors.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        project.put("status", JenkinsJobStatus.Errors.toString());
+        project.put("last_build", time);
+        TestProjectHelper.updateProject(project);
+        
+        if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+          snapshot.put("status", JenkinsJobStatus.Errors.toString());
+          snapshot.put("last_build", time);
+          JMeterScriptHelper.updateJMeterScript(snapshot);
+        }
+        
+        Logger.debug("Can not build a job", e);
         return;
       }
       
@@ -189,6 +230,7 @@ public class JenkinsJobExecutor {
       
       if ("SUCCESS".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Completed.toString());
+        jobModel.addBuildResult(new JenkinsBuildResult(buildNumber, JenkinsJobStatus.Completed, time));
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Completed.toString());
@@ -204,6 +246,7 @@ public class JenkinsJobExecutor {
       } else if ("FAILURE".equals(buildStatus) || "UNSTABLE".equals(buildStatus)) {
         
         jobModel.put("status", JenkinsJobStatus.Errors.toString());
+        jobModel.addBuildResult(new JenkinsBuildResult(buildNumber, JenkinsJobStatus.Errors, time));
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Errors.toString());
@@ -218,6 +261,7 @@ public class JenkinsJobExecutor {
         //
       } else if ("ABORTED".equals(buildStatus)) {
         jobModel.put("status", JenkinsJobStatus.Aborted.toString());
+        jobModel.addBuildResult(new JenkinsBuildResult(buildNumber, JenkinsJobStatus.Aborted, time));
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Aborted.toString());
@@ -243,7 +287,6 @@ public class JenkinsJobExecutor {
         JMeterScriptHelper.updateJMeterScript(snapshot);
       }
       
-      e.printStackTrace();
       Logger.debug("An error occurs when dequeue a jenkins maven job", e);
     } finally {
       vm = VMHelper.getVMByID(vm.getId());

@@ -99,7 +99,7 @@ public class ProjectStatusActor extends UntypedActor {
           
           if (s != null) {
             //push to log
-            StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("<br>");
+            StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("\n");
             LogBuilder.log(sb, s);
             job.put("log", sb.toString());
             JenkinsJobHelper.updateJenkinsJob(job);

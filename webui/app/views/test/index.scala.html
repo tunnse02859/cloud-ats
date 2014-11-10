@@ -60,12 +60,12 @@
           
           var color;
 			    switch (this.status) {
-			    case "Ready":
 			    case "Completed":
+			      $(projectReport).removeClass("disabled");
+			    case "Ready":
 			      color = "green";
             $(projectRun).removeClass("disabled");
             $(projectStop).addClass("disabled");
-            $(projectReport).removeClass("disabled");
             break;
 			    case "Failure":  
 			      color = "";

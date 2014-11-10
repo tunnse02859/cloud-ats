@@ -12,7 +12,7 @@
     </a>
   </td>
   <td>
-    <span class="label label-blue">@vm.get("name")</span>
+    <span class="label label-blue">@vm.get("normal_name") @if(vm.get("normal_name") == null) { @vm.getName() }</span>
   </td>
   <td><span class="label label-green">@vm.get("public_ip")</span></td>
   <td><span class="label label-cyan" rel="tooltip" 

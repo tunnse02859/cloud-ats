@@ -3,6 +3,8 @@
  */
 package models.test;
 
+import java.util.ArrayList;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -17,7 +19,7 @@ public class JenkinsJobModel extends BasicDBObject {
    * 
    */
   private static final long serialVersionUID = 1L;
-
+  
   public JenkinsJobModel(int index, String id, String projectId, String vmId, String jenkinsId, String type) {
     this.put("_id", id);
     this.put("index", index);
@@ -26,6 +28,8 @@ public class JenkinsJobModel extends BasicDBObject {
     this.put("jenkins_id", jenkinsId);
     this.put("status", JenkinsJobStatus.Initializing.toString());
     this.put("job_type", type == null ? null : type.toString());
+    
+    this.put("results", new ArrayList<JenkinsBuildResult>());
   }
   
   public JenkinsJobModel() {
@@ -58,6 +62,27 @@ public class JenkinsJobModel extends BasicDBObject {
     this.put("job_type", source.get("job_type"));
 
     this.put("log", source.get("log"));
+    this.put("results", source.get("results"));
     return this;
+  }
+  
+  public void addBuildResult(JenkinsBuildResult result) {
+    ArrayList<JenkinsBuildResult> results = (ArrayList<JenkinsBuildResult>) this.get("results");
+    results.add(result);
+    this.put("results", results);
+  }
+  
+  public static class JenkinsBuildResult extends BasicDBObject {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public JenkinsBuildResult(int buildNumber, JenkinsJobStatus status, long buildTime) {
+      this.put("build_number", buildNumber);
+      this.put("status", status.toString());
+      this.put("build_time", buildTime);
+    }
   }
 }

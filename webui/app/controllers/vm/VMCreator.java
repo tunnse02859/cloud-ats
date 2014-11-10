@@ -46,6 +46,7 @@ import com.mongodb.BasicDBObject;
  */
 public class VMCreator {
   
+  @Deprecated
   public static void startJenkins(VMModel jenkins) throws Exception {
     
     StringBuilder sb = jenkins.getString("log") == null ? new StringBuilder() : new StringBuilder(jenkins.getString("log"));
@@ -78,10 +79,16 @@ public class VMCreator {
   }
   
   public static VMModel createCompanySystemVM(Group company) throws Exception {
+    
     CloudStackClient client = VMHelper.getCloudStackClient();
-    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, company.getString("name") + "-jenkins", "gitlab-jenkins", "Large Instance", null);
+    
+    String normalName = new StringBuilder().append(company.getString("name")).append("-jenkins").toString();
+    String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
+    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, "gitlab-jenkins", "Large Instance", null);
+    
     String vmId = response[0];
     String jobId = response[1];
+    
     Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
     while (!job.getStatus().done()) {
       job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
@@ -90,10 +97,11 @@ public class VMCreator {
     if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
       
       VirtualMachine vm = VirtualMachineAPI.findVMById(client, vmId, null);
-      VMModel vmModel = new VMModel(vm.id, vm.name, company.getId(), vm.templateName, vm.templateId, vm.nic[0].ipAddress, "ubuntu", "ubuntu");
+      VMModel vmModel = new VMModel(vm.id, name, company.getId(), vm.templateName, vm.templateId, vm.nic[0].ipAddress, "ubuntu", "ubuntu");
       vmModel.put("system", true);
       vmModel.put("jenkins", true);
       vmModel.put("offering_id", vm.serviceOfferingId);
+      vmModel.put("normal_name", normalName);
       VMHelper.createVM(vmModel);
       
       //edit `/etc/hosts` file
@@ -132,8 +140,6 @@ public class VMCreator {
         LogBuilder.log(sb, "exit code: " + exitCode);
         channel.disconnect();
         
-        //start jenkins
-        VMCreator.startJenkins(vmModel);
         //disconnect session
         session.disconnect();
       } else {
@@ -176,7 +182,8 @@ public class VMCreator {
     final VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("system", true).append("jenkins", true)).get(0);
     
     //create instance
-    final String name = getAvailableName(company, subfix, 0);
+    String normalName = getAvailableName(company, subfix, 0);
+    final String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     QueueHolder.put(name, new ConcurrentLinkedQueue<String>());
     
     String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, template, offering.getName(), null);
@@ -189,11 +196,12 @@ public class VMCreator {
     
     if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
       VirtualMachine guiVM = VirtualMachineAPI.findVMById(client, vmId, null);
-      final VMModel vmModel = new VMModel(guiVM.id, guiVM.name, company.getId(), guiVM.templateName, guiVM.templateId, guiVM.nic[0].ipAddress, "ubuntu", "ubuntu");
+      final VMModel vmModel = new VMModel(guiVM.id, name, company.getId(), guiVM.templateName, guiVM.templateId, guiVM.nic[0].ipAddress, "ubuntu", "ubuntu");
       vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
       vmModel.put("system", false);
       vmModel.put("offering_id", guiVM.serviceOfferingId);
       vmModel.setStatus(VMStatus.Initializing);
+      vmModel.put("normal_name", normalName);
       VMHelper.createVM(vmModel);
 
       //Run recipes
@@ -245,8 +253,7 @@ public class VMCreator {
               queue.add("Cloud not establish connection in 120s");
             }
           } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error(null, e);
+            Logger.debug("Has an error when create vm", e);
             queue.add("setup.vm.error");
           } finally {
             queue.add("log.exit");
@@ -261,9 +268,12 @@ public class VMCreator {
     return null;
   }
   
-  public static String getAvailableName(Group company, String subfix, int indent) throws IOException, JSchException {
+  public static String getAvailableName(Group company, String subfix, int index) throws IOException, JSchException {
     CloudStackClient client = VMHelper.getCloudStackClient();
-    String name = company.getString("name") + "-" + subfix + "-" + indent;
+    
+    String normalName = new StringBuilder(company.getString("name")).append("-").append(subfix).append("-").append(index).toString();
+
+    String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     
     //remove legacy vm
     List<VMModel> vms = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("system", false));
@@ -278,7 +288,31 @@ public class VMCreator {
     }
     
     List<VirtualMachine> list = VirtualMachineAPI.listVirtualMachines(client, null, name, null, null, null);
-    if (list.size() == 0) return name;
-    return getAvailableName(company, subfix, indent + 1);
+    if (list.size() == 0) return normalName;
+    return getAvailableName(company, subfix, index + 1);
+  }
+  
+  /**
+   * Instance name can not be longer than 63 characters. 
+   * Only ASCII letters a~z, A~Z, digits 0~9, hyphen are allowed. Must start with a letter and end with a letter or a digit.
+   */
+  public static String normalizeVMName(String name) {
+    StringBuilder sb = new StringBuilder();
+    char[] chars = name.toCharArray();
+    for (int i = 0; i < chars.length; i++) {
+      char ch = chars[i];
+      if (ch >= 'a' && ch <= 'z') sb.append(ch);
+      else if (ch >= 'A' && ch <= 'Z') sb.append(ch);
+      else if (ch >= '0' && ch <= '9') sb.append(ch);
+      else if (ch == '-' && i != 0 && i != 62 && i != chars.length -1) sb.append(ch);
+      else {
+        if (i == 0) sb.append('a');
+        else if (i == 62) sb.append('a');
+        else if (i == chars.length -1) sb.append('z');
+        else sb.append('-');
+      }
+    }
+    name = sb.length() > 63 ? sb.substring(0, 63) : sb.toString();
+    return name;
   }
 }

@@ -53,7 +53,6 @@ public class DeleteGroupListener implements EventListener {
         OfferingHelper.removeDefaultOfferingOfGroup(group.getId());
       }
     } catch (Exception e) {
-      e.printStackTrace();
       Logger.error("DeleteGroupListener error", e);
     }
   }

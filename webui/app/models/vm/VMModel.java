@@ -89,6 +89,10 @@ public class VMModel extends BasicDBObject {
     return VMStatus.valueOf(this.getString("status"));
   }
   
+  public String getNormalName() {
+    return this.getString("normal_name");
+  }
+  
   public VMModel from(DBObject source) {
     this.put("_id", source.get("_id"));
     this.put("name", source.get("name"));
@@ -106,6 +110,7 @@ public class VMModel extends BasicDBObject {
     this.put("offering_id", source.get("offering_id"));
     this.put("log", source.get("log"));
     this.put("status", source.get("status"));
+    this.put("normal_name", source.get("normal_name"));
     return this;
   }
   
