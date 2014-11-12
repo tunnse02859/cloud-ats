@@ -60,11 +60,11 @@ public class Dashboard extends Controller {
     SimpleDateFormat identityFormat = new SimpleDateFormat("yyyyMMdd");
     SimpleDateFormat normalFormat = new SimpleDateFormat("MMM dd");
     
-    Map<String, Integer> completed = new HashMap<String, Integer>();
-    Map<String, Integer> running = new HashMap<String, Integer>();
-    Map<String, Integer> error = new HashMap<String, Integer>();
+    Map<Integer, Integer> completed = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> running = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> error = new HashMap<Integer, Integer>();
     
-    Map<String, String> labels = new HashMap<String, String>();
+    Map<Integer, String> labels = new HashMap<Integer, String>();
     
     ObjectNode json = Json.newObject();
     ArrayNode array = json.arrayNode();
@@ -75,7 +75,7 @@ public class Dashboard extends Controller {
         
         Date date = new Date(result.getLong("build_time"));
         
-        String identityString = identityFormat.format(date);
+        int identityString = Integer.parseInt(identityFormat.format(date));
         String normalString = normalFormat.format(date);
         labels.put(identityString, normalString);
         
@@ -135,21 +135,21 @@ public class Dashboard extends Controller {
     if (labels.isEmpty()) return json;
 
     ArrayNode lableArray = json.arrayNode();
-    Iterator<Map.Entry<String, String>> iterator = labels.entrySet().iterator();
+    Iterator<Map.Entry<Integer, String>> iterator = labels.entrySet().iterator();
     while (iterator.hasNext()) {
-      Map.Entry<String, String> entry = iterator.next();
+      Map.Entry<Integer, String> entry = iterator.next();
       lableArray.add(Json.newObject().arrayNode().add(entry.getKey()).add(entry.getValue()));
     }
     json.put("labels", lableArray);    
     return json;
   }
   
-  private static void foo(ArrayNode array, Map<String, Integer> source, String label) {
+  private static void foo(ArrayNode array, Map<Integer, Integer> source, String label) {
     ObjectNode node = Json.newObject();
     node.put("label", label);
     ArrayNode nodeArray = node.arrayNode();
     
-    for (Map.Entry<String, Integer> entry : source.entrySet()) {
+    for (Map.Entry<Integer, Integer> entry : source.entrySet()) {
       nodeArray.add(Json.newObject().arrayNode().add(entry.getKey()).add(entry.getValue()));
     }
     node.put("data", nodeArray);
