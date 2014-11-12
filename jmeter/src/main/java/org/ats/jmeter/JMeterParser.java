@@ -51,15 +51,20 @@ public class JMeterParser {
     
     String testName = ((Node) XPathUtil.read(document, "//THREADGROUP", XPathConstants.NODE)).getAttributes().getNamedItem("testname").getNodeValue();
 
-    int loops = Integer.parseInt(((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"LoopController.loops\"]", XPathConstants.NODE)).getTextContent());
+    String loopStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"LoopController.loops\"]", XPathConstants.NODE)).getTextContent();
+    int loops = (loopStr == null || loopStr.isEmpty()) ? 0 : Integer.parseInt(loopStr);
     
-    int numberThreads = Integer.parseInt(((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.num_threads\"]", XPathConstants.NODE)).getTextContent());
+    String numberThreadsStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.num_threads\"]", XPathConstants.NODE)).getTextContent();
+    int numberThreads = (numberThreadsStr == null || numberThreadsStr.isEmpty()) ? 0 : Integer.parseInt(numberThreadsStr);
     
-    int ramUp = Integer.parseInt(((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.ramp_time\"]", XPathConstants.NODE)).getTextContent());
+    String ramUpStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.ramp_time\"]", XPathConstants.NODE)).getTextContent();
+    int ramUp = (ramUpStr == null || ramUpStr.isEmpty()) ? 0 : Integer.parseInt(ramUpStr);
     
-    boolean scheduler = Boolean.parseBoolean(((Node) XPathUtil.read(document, "//BOOLPROP[@name=\"ThreadGroup.scheduler\"]", XPathConstants.NODE)).getTextContent());
+    String schedulerStr = ((Node) XPathUtil.read(document, "//BOOLPROP[@name=\"ThreadGroup.scheduler\"]", XPathConstants.NODE)).getTextContent();
+    boolean scheduler = (schedulerStr == null || schedulerStr.isEmpty()) ? false : Boolean.parseBoolean(schedulerStr);
     
-    int duration = Integer.parseInt(((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.duration\"]", XPathConstants.NODE)).getTextContent());
+    String durationStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.duration\"]", XPathConstants.NODE)).getTextContent();
+    int duration = (durationStr == null || durationStr.isEmpty()) ? 0 : Integer.parseInt(durationStr);
     
   
     //Find samplers
