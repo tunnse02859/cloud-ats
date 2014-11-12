@@ -1,5 +1,6 @@
 @import org.ats.component.usersmgt.user._
 @import org.ats.component.usersmgt.group._
+@import models.test._
 
 <!DOCTYPE html>
 <html>
@@ -20,14 +21,12 @@
     
     @leftmenu("Dashboard")
     
-    <section id="main" class="main container">
-    @defining(UserDAO.getInstance(controllers.Application.dbName).findOne(session().get("user_id"))) { currentUser =>
-      @defining(GroupDAO.getInstance(controllers.Application.dbName).findOne(session().get("group_id"))) { currentGroup =>
-        @body(currentUser, currentGroup)      
-      }
-    }
+    <section class="container">
+        @controllers.Dashboard.chart(TestProjectModel.FUNCTIONAL)      
     </section>
-
+    <section class="container">
+        @controllers.Dashboard.chart(TestProjectModel.PERFORMANCE)      
+    </section>
   </body>
   
 </html>

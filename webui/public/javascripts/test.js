@@ -67,8 +67,6 @@ $(document).ready(function() {
   //Run project and snapshot by ajax
   $("body").on("click", ".table.project a.btn.run", function(e) {
     
-    console.log($("pre.pre-scrollable"));
-    
     $("pre.pre-scrollable").text("");
     var href = $(this).attr("href");
 

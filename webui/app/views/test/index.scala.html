@@ -63,6 +63,7 @@
           
           if (msg.substring(0, 7) == 'vm-log-') {
             $(pre).addClass(msg);
+            $(pre).append(".");
           } else {
             $(pre).append(msg);          
           }

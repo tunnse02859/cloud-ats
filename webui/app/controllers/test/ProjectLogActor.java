@@ -84,7 +84,10 @@ public class ProjectLogActor extends UntypedActor {
           
           if (s != null) {
             //push to log
-            LogBuilder.log(sb, s);
+            if (!s.startsWith("vm-log-")) {
+              LogBuilder.log(sb, s);
+            }
+            
             job.put("log", sb.toString());
             JenkinsJobHelper.updateJenkinsJob(job);
             

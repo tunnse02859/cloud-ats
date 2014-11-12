@@ -7,7 +7,7 @@
   <div id="left-panel-content" style="overflow: hidden;">
     <ul>
       <li @if(active == "Dashboard") { class="active" }>
-        <a href="@controllers.routes.Application.dashboard()" ajax-url="@controllers.routes.Dashboard.body()">
+        <a href="@controllers.routes.Application.dashboard()">
           <span class="icon-dashboard"></span>Dashboard
         </a>
       </li>
@@ -17,7 +17,7 @@
           @if(FeatureAction.hasPermissionOnFeature(feature)) {
             @if(feature.getName() == "Organization") {
             <li @if(active == "Organization") { class="active" }>
-              <a href="@routes.Organization.index()" ajax-url="@routes.Organization.indexAjax()">
+              <a href="@routes.Organization.index()">
               <span class="icon-group"></span>Organization
               </a>
             </li>

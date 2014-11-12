@@ -4,7 +4,11 @@
 package models.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -66,6 +70,18 @@ public class JenkinsJobModel extends BasicDBObject {
     return this;
   }
   
+  public List<JenkinsBuildResult> getResults() {
+    if (this.get("results") == null) return Collections.emptyList();
+    List<JenkinsBuildResult> list = new ArrayList<JenkinsBuildResult>();
+    Iterator<Object> iterator = ((BasicDBList)this.get("results")).iterator();
+    while(iterator.hasNext()) {
+      Object obj = iterator.next();
+      BasicDBObject source = (BasicDBObject) obj;
+      list.add(new JenkinsBuildResult().from(source));
+    }
+    return list;
+  }
+  
   public void addBuildResult(JenkinsBuildResult result) {
     ArrayList<JenkinsBuildResult> results = (ArrayList<JenkinsBuildResult>) this.get("results");
     results.add(result);
@@ -78,11 +94,22 @@ public class JenkinsJobModel extends BasicDBObject {
      * 
      */
     private static final long serialVersionUID = 1L;
+    
+    public JenkinsBuildResult() {
+      this(0, JenkinsJobStatus.Completed, 0);
+    }
 
     public JenkinsBuildResult(int buildNumber, JenkinsJobStatus status, long buildTime) {
       this.put("build_number", buildNumber);
       this.put("status", status.toString());
       this.put("build_time", buildTime);
+    }
+    
+    public JenkinsBuildResult from(DBObject source) {
+      this.put("build_number", source.get("build_number"));
+      this.put("status", source.get("status"));
+      this.put("build_time", source.get("build_time"));
+      return this;
     }
   }
 }

@@ -3,13 +3,22 @@
  */
 package controllers;
 
+import helpertest.JenkinsJobHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import models.test.JenkinsJobModel;
+import models.test.JenkinsJobStatus;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.group.Group;
@@ -24,7 +33,9 @@ import play.mvc.Result;
 import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -34,6 +45,116 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class Dashboard extends Controller {
+  
+  public static Html chart(String jobType) {
+    ObjectNode json =buildJobData(jobType);
+    
+    String data1 = json.get("bar").toString();
+    String data2 = json.get("pie").toString();
+    String labels = json.get("labels").toString();
+    
+    return views.html.dashboard.chart.render(jobType + "-chart", jobType, new Html(new StringBuilder(data1)), new Html(new StringBuilder(data2)), new Html(new StringBuilder(labels)));
+  }
+  
+  private static ObjectNode buildJobData(String jobType) {
+    SimpleDateFormat identityFormat = new SimpleDateFormat("yyyyMMdd");
+    SimpleDateFormat normalFormat = new SimpleDateFormat("MMM dd");
+    
+    Map<String, Integer> completed = new HashMap<String, Integer>();
+    Map<String, Integer> running = new HashMap<String, Integer>();
+    Map<String, Integer> error = new HashMap<String, Integer>();
+    
+    Map<String, String> labels = new HashMap<String, String>();
+    
+    ObjectNode json = Json.newObject();
+    ArrayNode array = json.arrayNode();
+    
+    List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("job_type", jobType));
+    for (JenkinsJobModel job : jobs) {
+      for (JenkinsJobModel.JenkinsBuildResult result : job.getResults()) {
+        
+        Date date = new Date(result.getLong("build_time"));
+        
+        String identityString = identityFormat.format(date);
+        String normalString = normalFormat.format(date);
+        labels.put(identityString, normalString);
+        
+        JenkinsJobStatus status = JenkinsJobStatus.valueOf(result.getString("status"));
+        switch (status) {
+        case Completed:
+          completed.put(identityString, completed.get(identityString) == null ? 1 : (completed.get(identityString) + 1));
+          break;
+        case Aborted:
+        case Errors:
+        case Failure:
+          error.put(identityString, error.get(identityString) == null ? 1 : (error.get(identityString) + 1));
+          break;
+        case Running:
+        case Initializing:
+          running.put(identityString, running.get(identityString) == null ? 1 : (running.get(identityString) + 1));
+          break;
+        default:
+          break;
+        }
+      }
+    }
+    
+    //Completed Node;
+    foo(array, completed, "Completed");
+    
+    //Running Node;
+    foo(array, running, "Running");
+    
+    //Error Node
+    foo(array, error, "Error");
+    
+    json.put("bar", array);
+    
+    ArrayNode pieArray = json.arrayNode();
+    
+    int completedCount = 0;
+    for (Integer i : completed.values()) {
+      completedCount += i;
+    }
+    pieArray.add(Json.newObject().put("label", "Completed").put("data", completedCount));
+    
+    int runningCount = 0;
+    for (Integer i : running.values()) {
+      runningCount += i;
+    }
+    pieArray.add(Json.newObject().put("label", "Running").put("data", runningCount));
+    
+    int errorCount = 0;
+    for (Integer i : error.values()) {
+      errorCount += i;
+    }
+    pieArray.add(Json.newObject().put("label", "Error").put("data", errorCount));
+    
+    json.put("pie", pieArray);
+    
+    if (labels.isEmpty()) return json;
+
+    ArrayNode lableArray = json.arrayNode();
+    Iterator<Map.Entry<String, String>> iterator = labels.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, String> entry = iterator.next();
+      lableArray.add(Json.newObject().arrayNode().add(entry.getKey()).add(entry.getValue()));
+    }
+    json.put("labels", lableArray);    
+    return json;
+  }
+  
+  private static void foo(ArrayNode array, Map<String, Integer> source, String label) {
+    ObjectNode node = Json.newObject();
+    node.put("label", label);
+    ArrayNode nodeArray = node.arrayNode();
+    
+    for (Map.Entry<String, Integer> entry : source.entrySet()) {
+      nodeArray.add(Json.newObject().arrayNode().add(entry.getKey()).add(entry.getValue()));
+    }
+    node.put("data", nodeArray);
+    array.add(node);
+  }
   
   public static Result body() throws UserManagementException {
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
