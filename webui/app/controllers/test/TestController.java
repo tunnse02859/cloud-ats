@@ -126,61 +126,61 @@ public class TestController extends Controller {
     return project;
   }
   
-  public static void createProjectByUpload(boolean run, String testType) {
-    try {
-      MultipartFormData body = request().body().asMultipartFormData();
-      DynamicForm form = DynamicForm.form().bindFromRequest();
+  public static void createProjectByUpload(boolean run, String testType) throws Exception {
+    MultipartFormData body = request().body().asMultipartFormData();
+    DynamicForm form = DynamicForm.form().bindFromRequest();
 
-      String testName = form.get("name");
+    String testName = form.get("name");
 
-      FilePart uploaded = body.getFile("uploaded");
-      if (uploaded != null) {
-        
-        File file = uploaded.getFile();
-        JMeterFactory factory = new JMeterFactory();
-        
-        Group company = TestController.getCompany();
-        User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
-        Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-        
-        VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
+    FilePart uploaded = body.getFile("uploaded");
+    if (uploaded != null) {
 
-        String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+      File file = uploaded.getFile();
+      JMeterFactory factory = new JMeterFactory();
 
-        GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
-        
-        String gitName = testName + "-" + UUID.randomUUID();
+      Group company = TestController.getCompany();
+      User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+      Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
 
-        GitlabProject gitProject = null;
-        
-        if (TestProjectModel.FUNCTIONAL.equals(testType)) {
-          gitProject = createGitProject(gitlabAPI, gitName);
-        }
-        
-        if (TestProjectModel.PERFORMANCE.equals(testType)) {
-          gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
-        }
+      VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
 
-        String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+      String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
 
-        String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
-        
-        TestProjectModel project = new TestProjectModel(
-            gitProject.getId(),
-            testName, 
-            currentGroup.getId(), 
-            currentUser.getId(), 
-            testType, 
-            gitSshUrl,
-            gitHttpUrl,
-            uploaded.getFilename(), StringUtil.readStream(new FileInputStream(file)).getBytes());
+      GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
 
-        project.put("status", run ? JenkinsJobStatus.Initializing.toString() : JenkinsJobStatus.Ready.toString());
-        project.put("jenkins_id", jenkins.getId());
-        
-        
-        TestProjectHelper.createProject(project);
-        
+      String gitName = testName + "-" + UUID.randomUUID();
+
+      GitlabProject gitProject = null;
+
+      if (TestProjectModel.FUNCTIONAL.equals(testType)) {
+        gitProject = createGitProject(gitlabAPI, gitName);
+      }
+
+      if (TestProjectModel.PERFORMANCE.equals(testType)) {
+        gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
+      }
+
+      String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+
+      String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
+
+      TestProjectModel project = new TestProjectModel(
+          gitProject.getId(),
+          testName, 
+          currentGroup.getId(), 
+          currentUser.getId(), 
+          testType, 
+          gitSshUrl,
+          gitHttpUrl,
+          uploaded.getFilename(), StringUtil.readStream(new FileInputStream(file)).getBytes());
+
+      project.put("status", run ? JenkinsJobStatus.Initializing.toString() : JenkinsJobStatus.Ready.toString());
+      project.put("jenkins_id", jenkins.getId());
+
+
+      TestProjectHelper.createProject(project);
+
+      try {
         if (TestProjectModel.FUNCTIONAL.equals(testType)) {
           Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, "ubuntu", "ubuntu");
           ChannelExec channel = (ChannelExec) session.openChannel("exec");
@@ -192,16 +192,16 @@ public class TestController extends Controller {
           int exitCode = SSHClient.printOut(System.out, channel);
           if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
           channel.disconnect();
-          
+
           SSHClient.sendFile(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword(), 
               "/tmp/" + project.getId(), uploaded.getFilename(), file);
-          
-//        make commit
+
+          //        make commit
           sb = new StringBuilder("cd /tmp/").append(project.getId()).append(" && ");
           sb.append("tar xvf ").append(uploaded.getFilename()).append(" && ");
           sb.append("rm ").append(uploaded.getFilename()).append(" && ");
           sb.append("git add -A && git commit -m 'Snapshot 1' && git push origin master");
-          
+
           channel = (ChannelExec) session.openChannel("exec");
           channel.setCommand(sb.toString());
           channel.connect();
@@ -209,38 +209,40 @@ public class TestController extends Controller {
           exitCode = SSHClient.printOut(System.out, channel);
           if (exitCode != 0) throw new RuntimeException("Can not execute command: `" + sb.toString());
           channel.disconnect();
-          
+
           //disconnect session
           session.disconnect();
-          
+
           if (run) run(project, project.getId());
         }
-        
+
         if (TestProjectModel.PERFORMANCE.equals(testType)) {
-          
+
           FileInputStream fis = new FileInputStream(file);
           String content = StringUtil.readStream(fis);
 
           JMeterParser parser = factory.createJMeterParser(content);
           JMeterScript script = parser.parse();
-          
+
           gitlabAPI.createFile(gitProject, "src/test/jmeter/script.jmx", "master", script.toString(), "Snapshot 1");
 
           GitlabCommit commit = gitlabAPI.getCommits(gitProject, "master").get(0);
-          
+
           script.put("_id", commit.getId());
           script.put("project_id", project.getId());
           script.put("commit", commit.getTitle());
           script.put("index", 1);
           script.put("status", run ? JenkinsJobStatus.Initializing.toString() : JenkinsJobStatus.Ready.toString());
-          
+
           JMeterScriptHelper.createScript(script);
-          
+
           if (run) TestController.run(project, script.getString("_id"));
         }
+      } catch (Exception e) {
+        TestProjectHelper.removeProject(project);
+        gitlabAPI.deleteProject(gitProject);
+        throw new RuntimeException(e);
       }
-    } catch (Exception e) {
-     throw new RuntimeException(e);
     }
   }
   
@@ -279,6 +281,7 @@ public class TestController extends Controller {
               JenkinsJobHelper.createJenkinsJob(job);
             } else {
               job.put("status", JenkinsJobStatus.Initializing.toString());
+              job.put("log", null);
               JenkinsJobHelper.updateJenkinsJob(job);
             }
 
@@ -316,6 +319,7 @@ public class TestController extends Controller {
       } else {
         job.put("status", JenkinsJobStatus.Initializing.toString());
         job.put("vm_id", vm.getId());
+        job.put("log", null);
         JenkinsJobHelper.updateJenkinsJob(job);
       }
 

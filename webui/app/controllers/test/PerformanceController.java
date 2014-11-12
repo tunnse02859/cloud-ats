@@ -86,7 +86,7 @@ public class PerformanceController extends TestController {
     return redirect(routes.PerformanceController.index());
   }
 
-  public static Result createProjectByUpload(boolean run) {
+  public static Result createProjectByUpload(boolean run) throws Exception {
     TestController.createProjectByUpload(run, TestProjectModel.PERFORMANCE);
     return redirect(controllers.test.routes.PerformanceController.index());
   }

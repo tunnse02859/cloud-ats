@@ -125,8 +125,6 @@ public class JenkinsJobExecutor {
   }
   
   private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
-    jobModel.put("log", null);
-    JenkinsJobHelper.updateJenkinsJob(jobModel);
     
     ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
     queue.add("Checking Jenkins Master status...");
@@ -297,7 +295,7 @@ public class JenkinsJobExecutor {
       VMHelper.updateVM(vm);
       
       //
-      queue.add("log.exit");
+      queue.add("project.log.exit");
     }
   }
   

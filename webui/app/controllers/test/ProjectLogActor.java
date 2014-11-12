@@ -80,20 +80,19 @@ public class ProjectLogActor extends UntypedActor {
 
           String s = queue.poll();
 
-          StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log")).append("\n");
+          StringBuilder sb = job.getString("log") == null ? new StringBuilder() : new StringBuilder(job.getString("log"));
           
           if (s != null) {
             //push to log
             if (!s.startsWith("vm-log-")) {
               LogBuilder.log(sb, s);
+              job.put("log", sb.toString());
+              JenkinsJobHelper.updateJenkinsJob(job);
             }
-            
-            job.put("log", sb.toString());
-            JenkinsJobHelper.updateJenkinsJob(job);
             
             arrayLogs.add(Json.newObject().put("id", job.getId()).put("msg", s));
           }
-          if ("log.exit".equals(s)) {
+          if ("project.log.exit".equals(s)) {
             LogBuilder.log(sb, s);
             job.put("log", sb.toString());
             JenkinsJobExecutor.QueueHolder.remove(job.getId());

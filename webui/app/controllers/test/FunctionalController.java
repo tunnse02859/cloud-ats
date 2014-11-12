@@ -43,7 +43,7 @@ public class FunctionalController extends TestController {
     return ok(report_func.render(project.getName(), "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/surefire-reports/html/index.html"));
   }
   
-  public static Result createProjectByUpload(boolean run) {
+  public static Result createProjectByUpload(boolean run) throws Exception {
     TestController.createProjectByUpload(run, TestProjectModel.FUNCTIONAL);
     return redirect(routes.FunctionalController.index());
   }
