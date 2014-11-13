@@ -5,6 +5,7 @@ package helpertest;
 
 import helpervm.VMHelper;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,8 +14,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.ats.cloudstack.CloudStackClient;
+import org.ats.cloudstack.VirtualMachineAPI;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.jenkins.JenkinsSlave;
 import org.ats.jmeter.models.JMeterScript;
 
 import play.Logger;
@@ -94,8 +98,46 @@ public class JenkinsJobExecutor {
           return;
         } else if (vm.getStatus() == VMStatus.Error) {
           queue.add("VM " + vm.getPublicIP() + " has occurred some errors in initialization phase");
+
+          long time = System.currentTimeMillis();
+          
           jobModel.put("status", JenkinsJobStatus.Errors.toString());
+          jobModel.addBuildResult(new JenkinsBuildResult(-1, JenkinsJobStatus.Errors, time));
           JenkinsJobHelper.updateJenkinsJob(jobModel);
+          
+          TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
+          project.put("status", JenkinsJobStatus.Errors.toString());
+          project.put("last_build", time);
+          TestProjectHelper.updateProject(project);
+          
+          if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+            JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
+            snapshot.put("status", JenkinsJobStatus.Completed.toString());
+            snapshot.put("last_build", time);
+            JMeterScriptHelper.updateJMeterScript(snapshot);
+          }
+          
+          VMHelper.removeVM(vm);
+          VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+          try {
+            VMHelper.getKnife().deleteNode(vm.getName());
+          } catch (Exception e) {
+            Logger.debug("Cloud not release chef node", e);
+          }
+          
+          try {
+            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+          } catch (IOException e) {
+            Logger.debug("Could not release jenkins node ", e);
+          }
+
+          CloudStackClient client = VMHelper.getCloudStackClient();
+          try {
+            VirtualMachineAPI.destroyVM(client, vm.getId(), true);
+          } catch (IOException e) {
+            Logger.debug("Cloud not destroy vm", e);
+          }
+          
           return;
         } else if (vm.getStatus() == VMStatus.Ready) {
           
@@ -157,6 +199,9 @@ public class JenkinsJobExecutor {
       
       Logger.debug("The current build number of " + job.getName() + " is: " + buildNumber);
       
+      jobModel.addBuildResult(new JenkinsBuildResult(buildNumber, JenkinsJobStatus.Running, System.currentTimeMillis()));
+      JenkinsJobHelper.updateJenkinsJob(jobModel);
+      
       if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
         snapshot.put("status", JenkinsJobStatus.Running.toString());
         JMeterScriptHelper.updateJMeterScript(snapshot);
@@ -191,6 +236,7 @@ public class JenkinsJobExecutor {
         long time = System.currentTimeMillis();
         
         jobModel.put("status", JenkinsJobStatus.Errors.toString());
+        jobModel.addBuildResult(new JenkinsBuildResult(buildNumber, JenkinsJobStatus.Errors, time));
         JenkinsJobHelper.updateJenkinsJob(jobModel);
         
         project.put("status", JenkinsJobStatus.Errors.toString());

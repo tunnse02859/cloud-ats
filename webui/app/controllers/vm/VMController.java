@@ -331,27 +331,6 @@ public class VMController extends Controller {
       
       VirtualMachineAPI.destroyVM(client, vmId, true);
       
-//      Promise<Boolean> result = Promise.promise(new Function0<Boolean>() {
-//        @Override
-//        public Boolean apply() throws Throwable {
-//          String jobId = VirtualMachineAPI.destroyVM(client, vmId, true);
-//          Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-//          while (!job.getStatus().done()) {
-//            job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-//          }
-//
-//          if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-//            return true;
-//          }
-//          return false;
-//        }
-//      });
-//      return result.map(new Function<Boolean, Result>() {
-//        @Override
-//        public Result apply(Boolean a) throws Throwable {
-//          return a ? status(200) : status(500);
-//        }
-//      });
     }
 
     return status(200);

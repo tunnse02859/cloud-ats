@@ -3,6 +3,8 @@
  */
 package models.test;
 
+import helpertest.JenkinsJobHelper;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -11,6 +13,7 @@ import java.util.List;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -84,6 +87,15 @@ public class JenkinsJobModel extends BasicDBObject {
   
   public void addBuildResult(JenkinsBuildResult result) {
     ArrayList<JenkinsBuildResult> results = (ArrayList<JenkinsBuildResult>) this.get("results");
+    
+    DBObject query = QueryBuilder.start("results").elemMatch(QueryBuilder.start("build_number").is(result.get("build_number")).get()).get();
+    
+    DBObject source = JenkinsJobHelper.getCollection().findOne(new BasicDBObject("_id", this.get("_id")), query);
+    if(source.containsField("results")) {
+      Iterator<Object> iterator = ((BasicDBList) source.get("results")).iterator();
+      results.remove(new JenkinsBuildResult().from((DBObject) iterator.next())); 
+    }
+    
     results.add(result);
     this.put("results", results);
   }
