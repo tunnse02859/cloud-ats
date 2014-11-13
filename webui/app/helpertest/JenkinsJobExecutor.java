@@ -8,6 +8,7 @@ import helpervm.VMHelper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -93,82 +94,104 @@ public class JenkinsJobExecutor {
         
         if (vm == null) return;
         
-        if (vm.getStatus() == VMStatus.Initializing) {
-          queue.add("vm-log-" + vm.getId());
-          return;
-        } else if (vm.getStatus() == VMStatus.Error) {
-          queue.add("VM " + vm.getPublicIP() + " has occurred some errors in initialization phase");
+        jobModel.put("status", JenkinsJobStatus.Running.toString());
+        JenkinsJobHelper.updateJenkinsJob(jobModel);
+        
+        
+        //Run a test
 
-          long time = System.currentTimeMillis();
+        executor.execute(new Runnable() {
           
-          jobModel.put("status", JenkinsJobStatus.Errors.toString());
-          jobModel.addBuildResult(new JenkinsBuildResult(-1, JenkinsJobStatus.Errors, time));
-          JenkinsJobHelper.updateJenkinsJob(jobModel);
-          
-          TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
-          project.put("status", JenkinsJobStatus.Errors.toString());
-          project.put("last_build", time);
-          TestProjectHelper.updateProject(project);
-          
-          if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
-            JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
-            snapshot.put("status", JenkinsJobStatus.Completed.toString());
-            snapshot.put("last_build", time);
-            JMeterScriptHelper.updateJMeterScript(snapshot);
-          }
-          
-          VMHelper.removeVM(vm);
-          VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-          try {
-            VMHelper.getKnife().deleteNode(vm.getName());
-          } catch (Exception e) {
-            Logger.debug("Cloud not release chef node", e);
-          }
-          
-          try {
-            new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-          } catch (IOException e) {
-            Logger.debug("Could not release jenkins node ", e);
-          }
-
-          CloudStackClient client = VMHelper.getCloudStackClient();
-          try {
-            VirtualMachineAPI.destroyVM(client, vm.getId(), true);
-          } catch (IOException e) {
-            Logger.debug("Cloud not destroy vm", e);
-          }
-          
-          return;
-        } else if (vm.getStatus() == VMStatus.Ready) {
-          
-          jobModel.put("status", JenkinsJobStatus.Running.toString());
-          JenkinsJobHelper.updateJenkinsJob(jobModel);
-          
-          vm.setStatus(VMStatus.Running);
-          VMHelper.updateVM(vm);
-          
-          executor.execute(new Runnable() {
+          @Override
+          public void run() {
             
-            @Override
-            public void run() {
-              
-              VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
+            VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
 
-              TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
+            TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
 
-              JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+            JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
 
-              runTest(project, jenkinsMaster, jobModel, vm);
-            }
-          });
-        }
+            runTest(project, jenkinsMaster, jobModel, vm);
+          }
+        });
+        
       }
     }, 0, 1000, TimeUnit.MILLISECONDS);
+  }
+  
+  private boolean checkVMReady(VMModel vm, ConcurrentLinkedQueue<String> queue) {
+    
+    while(true) {
+      vm = VMHelper.getVMByID(vm.getId());
+      switch (vm.getStatus()) {
+      case Initializing:
+        queue.add("vm-log-" + vm.getId());
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+          Logger.debug("Interrupted sleeping thread", e1);
+        }
+        continue;
+      case Error:
+        queue.add("VM " + vm.getPublicIP() + " has occurred some errors in initialization phase");
+
+        VMHelper.removeVM(vm);
+        VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+        try {
+          VMHelper.getKnife().deleteNode(vm.getName());
+        } catch (Exception e) {
+          Logger.debug("Cloud not release chef node", e);
+        }
+        
+        try {
+          new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+        } catch (IOException e) {
+          Logger.debug("Could not release jenkins node ", e);
+        }
+
+        CloudStackClient client = VMHelper.getCloudStackClient();
+        try {
+          VirtualMachineAPI.destroyVM(client, vm.getId(), true);
+        } catch (IOException e) {
+          Logger.debug("Cloud not destroy vm", e);
+        }
+        
+        return false;
+      case Ready:
+        vm.setStatus(VMStatus.Running);
+        VMHelper.updateVM(vm);
+        return true;
+      default:
+        return false;
+      }
+    }
   }
   
   private void runTest(TestProjectModel project, JenkinsMaster jenkinsMaster, JenkinsJobModel jobModel, VMModel vm) {
     
     ConcurrentLinkedQueue<String> queue = QueueHolder.get(jobModel.getId());
+    
+   //Checking VM
+    if (! checkVMReady(vm, queue)) {
+      long time = System.currentTimeMillis();
+      
+      jobModel.put("status", JenkinsJobStatus.Errors.toString());
+      jobModel.addBuildResult(new JenkinsBuildResult(new Random().nextInt(65536) - 65537, JenkinsJobStatus.Errors, time));
+      JenkinsJobHelper.updateJenkinsJob(jobModel);
+      
+      project.put("status", JenkinsJobStatus.Errors.toString());
+      project.put("last_build", time);
+      TestProjectHelper.updateProject(project);
+      
+      if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+        JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(jobModel.getId());
+        snapshot.put("status", JenkinsJobStatus.Completed.toString());
+        snapshot.put("last_build", time);
+        JMeterScriptHelper.updateJMeterScript(snapshot);
+      }
+      return;
+    }
+    
     queue.add("Checking Jenkins Master status...");
     while(!checkJenkinsMasterReady(jenkinsMaster, System.currentTimeMillis(), 10 * 60 * 1000)) {
       queue.add("Waiting for Jenkins Master to be ready...");
