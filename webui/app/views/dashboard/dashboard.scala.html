@@ -1,6 +1,5 @@
 @import org.ats.component.usersmgt.user._
 @import org.ats.component.usersmgt.group._
-@import models.test._
 
 <!DOCTYPE html>
 <html>
@@ -21,12 +20,8 @@
     
     @leftmenu("Dashboard")
     
-    <section class="container">
-        @controllers.Dashboard.chart(TestProjectModel.FUNCTIONAL)      
-    </section>
-    <section class="container">
-        @controllers.Dashboard.chart(TestProjectModel.PERFORMANCE)      
-    </section>
+    @controllers.Dashboard.body()
+    
   </body>
   
 </html>

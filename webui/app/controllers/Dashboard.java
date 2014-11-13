@@ -4,6 +4,7 @@
 package controllers;
 
 import helpertest.JenkinsJobHelper;
+import helpertest.TestProjectHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
@@ -46,14 +47,13 @@ import com.mongodb.BasicDBObject;
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class Dashboard extends Controller {
   
-  public static Html chart(String jobType) {
-    ObjectNode json =buildJobData(jobType);
-    
-    String data1 = json.get("bar").toString();
-    String data2 = json.get("pie").toString();
-    String labels = json.get("labels").toString();
-    
-    return views.html.dashboard.chart.render(jobType + "-chart", jobType, new Html(new StringBuilder(data1)), new Html(new StringBuilder(data2)), new Html(new StringBuilder(labels)));
+  public static Html chart(String jobType) throws UserManagementException {
+      ObjectNode json =buildJobData(jobType);
+      String data1 = json.get("bar").toString();
+      String data2 = json.get("pie").toString();
+      String labels = json.get("labels").toString();
+
+      return views.html.dashboard.chart.render(jobType + "-chart", jobType, new Html(new StringBuilder(data1)), new Html(new StringBuilder(data2)), new Html(new StringBuilder(labels)));
   }
   
   private static ObjectNode buildJobData(String jobType) {
@@ -156,10 +156,15 @@ public class Dashboard extends Controller {
     array.add(node);
   }
   
-  public static Result body() throws UserManagementException {
-    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
-    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-    return ok(views.html.dashboard.body.render(currentUser, currentGroup));
+  public static Html body() throws UserManagementException {
+    
+    if (TestProjectHelper.getCollection().count() == 0) {
+      User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+      Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
+      return views.html.dashboard.body.render(currentUser, currentGroup);
+    } else {
+      return views.html.dashboard.chartbody.render();
+    }
   }
   
   public static Html groupMenuList() throws UserManagementException {
