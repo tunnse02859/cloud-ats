@@ -46,38 +46,6 @@ import com.mongodb.BasicDBObject;
  */
 public class VMCreator {
   
-  @Deprecated
-  public static void startJenkins(VMModel jenkins) throws Exception {
-    
-    StringBuilder sb = jenkins.getString("log") == null ? new StringBuilder() : new StringBuilder(jenkins.getString("log"));
-    
-    if (SSHClient.checkEstablished(jenkins.getPublicIP(), 22, 120)) {
-      Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
-      ChannelExec channel = (ChannelExec) session.openChannel("exec");
-         
-      LinkedList<String> queue = new LinkedList<String>();
-      
-      String command = "/home/ubuntu/java/jdk1.7.0_51/bin/java -jar jenkins.war > log.txt &";
-      channel.setCommand(command);
-      channel.connect();
-      LogBuilder.log(sb, "Execute command: " + command);
-      
-      int exitCode = SSHClient.printOut(queue, channel);
-      
-      for (String s : queue) {
-        LogBuilder.log(sb, s);
-      }
-      LogBuilder.log(sb, "exit code: " + exitCode);
-      channel.disconnect();
-      session.disconnect();
-    } else {
-      LogBuilder.log(sb, "Cloud not establish connection in 120s");
-    }
-    
-    jenkins.put("log", sb.toString());
-    VMHelper.updateVM(jenkins);
-  }
-  
   public static VMModel createCompanySystemVM(Group company) throws Exception {
     
     CloudStackClient client = VMHelper.getCloudStackClient();
@@ -107,7 +75,7 @@ public class VMCreator {
       //edit `/etc/hosts` file
       StringBuilder sb = new StringBuilder();
       LogBuilder.log(sb, "Checking SSHD on " + vmModel.getPublicIP());
-      if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 120)) {
+      if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
         LogBuilder.log(sb, "Connection is established");
         
         Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
@@ -211,7 +179,7 @@ public class VMCreator {
           ConcurrentLinkedQueue<String> queue = QueueHolder.get(name);
           try {
             queue.add("Checking SSHD on " + vmModel.getPublicIP());
-            if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 120)) {
+            if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
               queue.add("Connection is established");
               
               Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
