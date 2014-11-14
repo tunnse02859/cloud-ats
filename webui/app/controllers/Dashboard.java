@@ -9,6 +9,7 @@ import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -48,7 +49,7 @@ import com.mongodb.BasicDBObject;
 public class Dashboard extends Controller {
   
   public static Html chart(String jobType) throws UserManagementException {
-      ObjectNode json =buildJobData(jobType);
+      ObjectNode json = buildJobData(jobType);
       String data1 = json.get("bar").toString();
       String data2 = json.get("pie").toString();
       String labels = json.get("labels").toString();
@@ -149,8 +150,15 @@ public class Dashboard extends Controller {
     node.put("label", label);
     ArrayNode nodeArray = node.arrayNode();
     
-    for (Map.Entry<Integer, Integer> entry : source.entrySet()) {
-      nodeArray.add(Json.newObject().arrayNode().add(entry.getKey()).add(entry.getValue()));
+    List<Integer> keys = new ArrayList<Integer>(source.keySet());
+    Collections.sort(keys, new Comparator<Integer>() {
+      @Override
+      public int compare(Integer o1, Integer o2) {
+        return o1 - o2;
+      }
+    });
+    for (Integer key : keys) {
+      nodeArray.add(Json.newObject().arrayNode().add(key).add(source.get(key)));
     }
     node.put("data", nodeArray);
     array.add(node);
