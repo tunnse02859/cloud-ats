@@ -4,7 +4,7 @@
 @if("Functional" == t) { Create A New Functional Test }
 </legend>
 
-<div class="row-fluid">
+<div class="row-fluid project-wizard-block">
   <div class="project wizard">
     <ul class="steps">
       @if("Functional" == t) {
@@ -161,7 +161,7 @@
       </div>
       
       <div class="span5">
-        <a class="btn btn-large btn-primary"><i class="icon-magic"></i> Use Wizard</a>
+        <a class="btn btn-large btn-primary use-wizard" data-target="@controllers.test.routes.TestController.wizard()"><i class="icon-magic"></i> Use Wizard</a>
       </div>
       
       </div>

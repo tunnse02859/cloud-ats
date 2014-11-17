@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,9 @@ import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.gitlab.GitlabAPI;
 import org.ats.jmeter.JMeterFactory;
 import org.ats.jmeter.JMeterParser;
+import org.ats.jmeter.models.JMeterArgument;
+import org.ats.jmeter.models.JMeterSampler;
+import org.ats.jmeter.models.JMeterSampler.Method;
 import org.ats.jmeter.models.JMeterScript;
 import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabProject;
@@ -79,6 +83,134 @@ import controllers.vm.VMCreator;
 
 @With({WizardInterceptor.class, AuthenticationInterceptor.class})
 public class TestController extends Controller {
+  
+  public static Result wizard() {
+    String type = request().getQueryString("type");
+    String name = request().getQueryString("name");
+    
+    if (type == null || type.isEmpty()) type = TestProjectModel.PERFORMANCE;
+    return ok(index.render(type, views.html.test.wizard.render(type, name)));
+  }
+  
+  public static Result doWizard(String testType) throws Exception {
+    Map<String, String[]> params = request().body().asFormUrlEncoded();
+    Set<String> keys = params.keySet();
+    
+    int samplerCount = 0;
+    for (String key : keys) {
+      if (key.startsWith("sampler-url[")) samplerCount++;
+    }
+    
+    JMeterFactory factory = new JMeterFactory();
+    
+    JMeterSampler[] samplers = new JMeterSampler[samplerCount];
+    
+    for(int i = 0; i < samplerCount; i++) {
+      String prefix = "sampler[" + i + "]";
+
+      int paramCount = 0;
+      for (String key : keys) {
+        if (key.startsWith(prefix + "-param-name")) paramCount++;
+      }
+      
+      JMeterArgument[] args = new JMeterArgument[paramCount];
+      for (int j = 0; j < paramCount; j++) {
+        String paramName = params.get(prefix + "-param-name[" + j + "]")[0];
+        String paramValue = params.get(prefix + "-param-value[" + j + "]")[0];
+        args[j] = factory.createArgument(paramName, paramValue);
+      }
+ 
+      String samplerName = params.get(prefix)[0];
+      String samplerMethod = params.get("sampler-method[" + i + "]")[0];
+      String samplerUrl = params.get("sampler-url[" + i + "]")[0];
+      
+      String assertionText = params.get("sampler-assertion-text[" + i +"]")[0];
+      
+      if(assertionText != null) assertionText = assertionText.trim();
+      
+      if (assertionText.isEmpty()) assertionText = null;
+      
+      long constantTime = Integer.parseInt(params.get("sampler-constant-time[" + i + "]" )[0]) * 1000;
+      
+      samplers[i] = factory.createHttpRequest(
+          Method.valueOf(samplerMethod), 
+          samplerName, 
+          samplerUrl, assertionText, constantTime, args);
+    }
+    
+    int duration = Integer.parseInt(params.get("duration")[0]);
+    int loops = Integer.parseInt(params.get("loops")[0]);
+    int rampup = Integer.parseInt(params.get("rampup")[0]);
+    int users = Integer.parseInt(params.get("users")[0]);
+    
+    String testName = params.get("test-name")[0];
+    
+    JMeterScript script = factory.createJmeterScript(testName, loops, users, rampup, duration > 0, duration, samplers);
+    
+    
+    //create project
+    Group company = TestController.getCompany();
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
+
+    VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
+
+    String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+
+    String gitName = testName + "-" + UUID.randomUUID();
+
+    GitlabProject gitProject = null;
+
+    if (TestProjectModel.FUNCTIONAL.equals(testType)) {
+      gitProject = createGitProject(gitlabAPI, gitName);
+    }
+
+    if (TestProjectModel.PERFORMANCE.equals(testType)) {
+      gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
+    }
+
+    String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+
+    String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
+
+    TestProjectModel project = new TestProjectModel(
+        gitProject.getId(),
+        testName, 
+        currentGroup.getId(), 
+        currentUser.getId(), 
+        testType, 
+        gitSshUrl,
+        gitHttpUrl,
+        null,
+        script.toString().getBytes("UTF-8"));
+
+    project.put("status", JenkinsJobStatus.Ready.toString());
+    project.put("jenkins_id", jenkins.getId());
+
+
+    TestProjectHelper.createProject(project);
+    
+    //
+    gitlabAPI.createFile(gitProject, "src/test/jmeter/script.jmx", "master", script.toString(), "Snapshot 1");
+
+    GitlabCommit commit = gitlabAPI.getCommits(gitProject, "master").get(0);
+
+    script.put("_id", commit.getId());
+    script.put("project_id", project.getId());
+    script.put("commit", commit.getTitle());
+    script.put("index", 1);
+    script.put("status", JenkinsJobStatus.Ready.toString());
+
+    JMeterScriptHelper.createScript(script);
+    
+    return redirect(routes.PerformanceController.index());
+  }
+  
+  public static Result projectWebSocketJs(String type) {
+    return ok(views.js.test.project_websocket.render(type)).as("text/javascript");
+  }
   
   public static void delete(String projectId) throws IOException  {
     TestProjectModel project = TestProjectHelper.getProjectById(projectId);
