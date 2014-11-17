@@ -50,6 +50,9 @@ public class Dashboard extends Controller {
   
   public static Html chart(String jobType) throws UserManagementException {
       ObjectNode json = buildJobData(jobType);
+      
+      if(json == null) return null;
+      
       String data1 = json.get("bar").toString();
       String data2 = json.get("pie").toString();
       String labels = json.get("labels").toString();
@@ -71,6 +74,9 @@ public class Dashboard extends Controller {
     ArrayNode array = json.arrayNode();
     
     List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("job_type", jobType));
+    
+    if (jobs.isEmpty()) return null;
+    
     for (JenkinsJobModel job : jobs) {
       for (JenkinsJobModel.JenkinsBuildResult result : job.getResults()) {
         
@@ -109,6 +115,25 @@ public class Dashboard extends Controller {
     //Error Node
     foo(array, error, "Error");
     
+    if(labels.size() > 5) {
+      List<Integer> keys = new ArrayList<Integer>(labels.keySet());
+      
+      Collections.sort(keys, new Comparator<Integer>() {
+        @Override
+        public int compare(Integer o1, Integer o2) {
+          return o1 - o2;
+        }
+      });
+      
+      keys = keys.subList(keys.size() - 5, keys.size());
+      Map<Integer, String> map = new HashMap<Integer, String>();
+      for (Integer key : keys) {
+        map.put(key, labels.get(key));
+      }
+      
+      labels = map;
+    }
+    
     json.put("bar", array);
     
     ArrayNode pieArray = json.arrayNode();
@@ -133,8 +158,6 @@ public class Dashboard extends Controller {
     
     json.put("pie", pieArray);
     
-    if (labels.isEmpty()) return json;
-
     ArrayNode lableArray = json.arrayNode();
     Iterator<Map.Entry<Integer, String>> iterator = labels.entrySet().iterator();
     while (iterator.hasNext()) {
@@ -157,6 +180,9 @@ public class Dashboard extends Controller {
         return o1 - o2;
       }
     });
+    
+    if (keys.size() > 5) keys = keys.subList(keys.size() - 5, keys.size());
+    
     for (Integer key : keys) {
       nodeArray.add(Json.newObject().arrayNode().add(key).add(source.get(key)));
     }
