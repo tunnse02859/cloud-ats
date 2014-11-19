@@ -98,7 +98,7 @@ $(document).ready(function(){
     $(params).remove();
   });
   
-  $('.slider').slider({tooltip: 'never'});
+  $('.slider').slider({tooltip: 'hide'});
   $("#users").on("slide", function(slideEvt) {
     $("#usersSliderVal").text(slideEvt.value);
   });
