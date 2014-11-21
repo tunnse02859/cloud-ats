@@ -89,4 +89,9 @@ $(document).ready(function() {
     console.log("has just click run button");
     e.preventDefault();
   });
+  
+  //Click create project finish
+  $("body").on("click", ".finish", function(e) {
+    $("#pleaseWaitDialog").modal();
+  });
 });

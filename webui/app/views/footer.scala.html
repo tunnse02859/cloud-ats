@@ -7,3 +7,38 @@
     On Top&nbsp;<i class=" icon-chevron-up"></i>
   </a>      
 </footer>
+
+<div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-header">
+        <h4>In Progress</h4>
+  </div>
+  <div class="modal-body">
+    <div class="progress progress-blue progress-striped active">
+      <div class="bar" style="width: 0px;"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var progress;
+  $("#pleaseWaitDialog").on("show", function() {
+    progress = setInterval(function() {
+      var $bar = $('.bar');
+
+      if ($bar.width() >= 560) {
+          clearInterval(progress);
+          $('.progress').removeClass('active');
+      } else {
+          $bar.width($bar.width() + 50);
+      }
+    }, 800);
+  });
+  $("#pleaseWaitDialog").on("hide", function() {
+    console.log("hiden modal");
+    clearInterval(progress);
+    var $bar = $(this).find('.bar');
+    $bar.width(0);
+  });
+});
+</script>
