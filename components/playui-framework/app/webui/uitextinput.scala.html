@@ -1,0 +1,71 @@
+@(name : String, value: String, clazz: String, id : String, attributes : Map[String, String])
+
+<input 
+  class="webui-UITextInput @clazz" 
+  id="@id" 
+  name="@name" 
+  type="text" 
+  value="@value"
+  @for(entry <- attributes.entrySet()) {
+    @entry.getKey()="@entry.getValue()"
+  }
+  >
+
+<script type="text/javascript">
+$(document).ready(function(){
+  
+  var processEvent = function(_this, data) {
+    $(data.effected).each(function(){
+      var id = this.id;
+      var type = this.type;
+      var name = this.name;
+      var value = this.value;
+
+      if (type == "attr") {
+        $("#" + id).attr(name, value);
+      } else if (type == "prop") {
+        $("#" + id).prop(name, value);
+      }
+    });
+    $(data.eval).each(function(){
+      eval(this.eval);
+    });
+    $(data.broadcast).each(function() {
+      var id = this.id;
+      var type = this.type;
+      var attr = this.attr;
+      
+      var url = "@webui.routes.EventController.broadcastEvent("EventType", "ComponentId")";
+      url = url.replace("EventType", type);
+      url = url.replace("ComponentId", id);
+      
+      $.ajax({
+        url : url,
+        type: "GET",
+        data: attr,
+        success: function(data) {
+          processEvent(_this, data);
+        }
+      });
+    });
+  };
+
+  $("#@id").on("keypress", function(e) {
+    var value = $(this).val();
+    var _this = $(this);
+    
+    if (e.which == 13) {
+      $.ajax({
+        url: "@webui.routes.EventController.broadcastEvent("KeyEnter", id)",
+        type: "GET",
+        data: {
+          "value": value
+        },
+        success: function(data) {
+          processEvent(_this, data);
+        }
+      });
+    }
+  });
+});
+</script>
