@@ -1,0 +1,313 @@
+@(project: models.test.TestProjectModel, jmeter : org.ats.jmeter.models.JMeterScript, samplers: List[org.ats.jmeter.models.JMeterSampler], arguments: List[org.ats.jmeter.models.JMeterArgument])
+@import controllers.test._
+@import models.test._
+@import org.ats.jmeter.models.JMeterSampler.Method;
+
+@if(project.getType() == TestProjectModel.PERFORMANCE) {
+<legend>
+  Update Performance Wizard
+</legend>
+
+<div class="row-fluid performance">
+  <div class="wizard">
+    <ul class="steps">
+      <li class="active" data-target="#step1">
+        <span class="badge badge-info">1</span>Configuration
+      </li>
+      <li data-target="#step2">
+        <span class="badge">2</span>Samplers
+      </li>
+    </ul>
+  </div>
+  <form class="form-horizontal" method="post" action="@routes.TestController.doUpdateWizard(project.getId())">
+    <div class="step-content">
+      <div id="step1" class="step-pane active" style="margin: 20px;">
+        
+        <div class="control-group">
+          <label for="name" class="control-label"><b>Project Name</b></label>
+          <div class="controls">
+            <input type="text" required="" name="test-name" placeholder="Test Name" value="@project.getName()">
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="name" class="control-label"><b>Users</b> (Concurrent)</label>
+          <div class="controls">
+            <input class="slider" id="users" data-slider-id='usersSlider' 
+            type="text"
+            name="users" 
+            data-slider-min="100" 
+            data-slider-max="1000" 
+            data-slider-step="100" 
+            data-slider-value="@jmeter.getNumberThreads()"/>
+            <span class="badge badge-green" id="usersSliderVal" style="margin-left: 20px;">@jmeter.getNumberThreads()</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="name" class="control-label"><b>Ramp Up</b> (s)</label>
+          <div class="controls">
+            <input class="slider" id="rampup" data-slider-id='rampupSlider' 
+            type="text"
+            name="rampup" 
+            data-slider-min="5" 
+            data-slider-max="300" 
+            data-slider-step="10" 
+            data-slider-value="@jmeter.getRamUp()"/>
+            <span class="badge badge-green" id="rampupSliderVal" style="margin-left: 20px;">@jmeter.getRamUp()</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="name" class="control-label"><b>Loops</b></label>
+          <div class="controls">
+            <input class="slider" id="loops" data-slider-id='loopsSlider' 
+            type="text"
+            name="loops" 
+            data-slider-min="1" 
+            data-slider-max="10" 
+            data-slider-step="1" 
+            data-slider-value="@jmeter.getLoops()"/>
+            <span class="badge badge-green" id="loopsSliderVal" style="margin-left: 20px;">@jmeter.getLoops()</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="name" class="control-label"><b>Duration</b>(s)</label>
+          <div class="controls">
+            <input class="slider" id="duration" data-slider-id='durationSlider' 
+            type="text"
+            name="duration" 
+            data-slider-min="0" 
+            data-slider-max="300" 
+            data-slider-step="10" 
+            data-slider-value="@jmeter.getDuration()"/>
+            <span class="badge badge-green" id="durationSliderVal" style="margin-left: 20px;">@jmeter.getDuration()</span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="step2" class="step-pane " style="margin: 20px;">
+        <table class="samplers">
+        	@for(sampler <-  samplers){
+          <tr class="sampler">
+            <td></td>
+            <td>
+              <input class="input-small sampler-name" type="text" placeholder="Sampler Name" required value="@sampler.getName()">
+            </td>
+            <td>
+          		@if(sampler.getMethod() == Method.GET){
+              <select class="input-small sampler-method" required>
+                <option selected="selected">GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+              </select>
+              }
+              @if(sampler.getMethod() == Method.POST){
+              <select class="input-small sampler-method" required>
+                <option>GET</option>
+                <option selected="selected">POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+              </select>
+              
+              }
+                @if(sampler.getMethod() == Method.PUT){
+              <select class="input-small sampler-method" required>
+                <option>GET</option>
+                <option>POST</option>
+                <option selected="selected">PUT</option>
+                <option>DELETE</option>
+              </select>
+              
+              }
+                @if(sampler.getMethod() == Method.DELETE){
+              <select class="input-small sampler-method" required>
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option selected="selected">DELETE</option>
+              </select>
+              
+              }
+            </td>
+            <td class="url">
+              <input class="sampler-url" style="width: 400px;" type="text" placeholder="Sampler URL" required value="@sampler.getUrl()"><br>
+            </td>
+            <td>
+              <input class="input-small sampler-assertion-text" type="text" placeholder="Assertion Text" value="@sampler.getAssertionText()">
+            </td>
+            <td>
+              <label><b>Constant Timer(s)</b></label>
+            </td>
+            <td>
+            	@if(sampler.getContantTime() == 0){
+              <select class="input-small sampler-constant-time" required>
+                <option selected="selected">0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+              }
+              @if(sampler.getContantTime() == 1000){
+              <select class="input-small sampler-constant-time" required>
+                <option>0</option>
+                <option selected="selected">1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+              }
+              @if(sampler.getContantTime() == 2000){
+              <select class="input-small sampler-constant-time" required>
+                <option>0</option>
+                <option>1</option>
+                <option selected="selected">2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+              }@if(sampler.getContantTime() == 3000){
+              <select class="input-small sampler-constant-time" required>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option selected="selected">3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+              }
+              @if(sampler.getContantTime() == 4000){
+              <select class="input-small sampler-constant-time" required>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option selected="selected">4</option>
+                <option>5</option>
+              </select>
+              }
+              @if(sampler.getContantTime() == 5000){
+              <select class="input-small sampler-constant-time" required>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option selected="selected">5</option>
+              </select>
+              }
+            </td>
+            <td>
+              <a class="btn btn-mini btn-primary add-sampler"><i class="icon-plus"></i></a>
+            </td>
+          </tr>
+          <tr class="sampler-params">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+              <a class="btn btn-mini show-param"><i class="icon-plus"></i> Parameters</a>
+              @for(argument <-  arguments){
+              	<div class="param-block">
+								  <a class="btn btn-mini remove"><i class="icon-remove"></i></a>
+								  <input class="input-small sampler-param-name" type="text" placeholder="Param Name" required value="@argument.getParamName()">
+								  <input class="input-small sampler-param-value" type="text" placeholder="Param Value" required value="@argument.getParamValue()">
+								  <a class="btn btn-mini add"><i class="icon-plus"></i></a>
+								</div>
+              }
+            </td>
+          </tr>
+          }
+        </table>
+      </div>
+      
+    </div>
+    
+    <div class="form-actions">
+      <input type="button" value="Previous" class="performance prev btn" disabled="disabled">
+      <input type="button" value="Next" class=" performance next btn btn-primary">
+      <input type="submit" value="Finish" class="performance finish btn btn-blue" style="display: none;">
+    </div>
+  </form>
+</div>
+
+<script id="show-param-tmpl" type="text/template">
+  <a class="btn btn-mini show-param"><i class="icon-plus"></i> Parameters</a>
+</script>
+<script id="param-block-tmpl" type="text/template">
+<div class="param-block">
+  <a class="btn btn-mini remove"><i class="icon-remove"></i></a>
+  <input class="input-small sampler-param-name" type="text" placeholder="Param Name" required value="">
+  <input class="input-small sampler-param-value" type="text" placeholder="Param Value" required>
+  <a class="btn btn-mini add"><i class="icon-plus"></i></a>
+</div>
+</script>
+
+<script id="sampler-block-tmpl" type="text/template">
+<tr class="sampler">
+<td><a class="btn btn-mini remove-sampler"><i class="icon-remove"></i></a></td>
+<td>
+  <input class="input-small sampler-name" type="text" placeholder="Sampler Name" required>
+</td>
+<td>
+  <select class="input-small sampler-method" required>
+    <option>GET</option>
+    <option>POST</option>
+    <option>PUT</option>
+    <option>DELETE</option>
+  </select>
+</td>
+<td class="url">
+  <input class="sampler-url" style="width: 400px;" type="text" placeholder="Sampler URL" required><br>
+</td>
+<td>
+  <input class="input-small sampler-assertion-text" type="text" placeholder="Assertion Text">
+</td>
+<td>
+  <label><b>Constant Timer(s)</b></label>
+</td>
+<td>
+  <select class="input-small sampler-constant-time" required>
+    <option>0</option>
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+    <option>5</option>
+  </select>
+</td>
+<td>
+  <a class="btn btn-mini btn-primary add-sampler"><i class="icon-plus"></i></a>
+</td>
+</tr>
+<tr class="sampler-params">
+<td></td>
+<td></td>
+<td></td>
+<td>
+  <a class="btn btn-mini show-param"><i class="icon-plus"></i> Parameters</a>
+</td>
+</tr>
+</script>
+
+<style>
+#usersSlider .slider-selection {
+  background: #f3a139;
+}
+#loopsSlider .slider-selection {
+  background: #f3a139;
+}
+#rampupSlider .slider-selection {
+  background: #f3a139;
+}
+#durationSlider .slider-selection {
+  background: #f3a139;
+}
+
+</style>
+}
