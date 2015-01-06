@@ -96,7 +96,9 @@ GET    /portal/test/p/d/:id       controllers.test.PerformanceController.deleteP
 GET    /portal/test/p/r/:id       controllers.test.PerformanceController.runProject(id)
 GET    /portal/test/p/s/r/:id     controllers.test.PerformanceController.runSnapshot(id)
 GET    /portal/test/p/report/:id  controllers.test.PerformanceController.report(id)
-
+GET	   /portal/test/p/u/:id		  controllers.test.PerformanceController.updateProject(id) 
+GET	   /portal/test/p/s/:id		  controllers.test.PerformanceController.stopProject(id)
+GET	   /portal/test/p/sn/:id	  controllers.test.PerformanceController.stopSnapsort(id)
 ############################# Functional Test #################################
 
 GET    /portal/test/f             controllers.test.FunctionalController.index()
@@ -107,13 +109,15 @@ GET    /portal/test/f/report/:id  controllers.test.FunctionalController.report(i
 
 ############################# Test General ####################################
 
-GET    /portal/test/c/:type       controllers.test.TestController.createNewProject(type)
-GET    /portal/test/filter        controllers.test.TestController.getProjectList()
-GET    /portal/test/s/:t/:s/:u    controllers.test.TestController.projectStatus(t, s, u)
-GET    /portal/test/log/:t/:s/:u  controllers.test.TestController.projectLog(t, s, u)
-GET    /portal/test/js/:t         controllers.test.TestController.projectWebSocketJs(t)
-GET    /portal/test/wizard        controllers.test.TestController.wizard()
-POST   /portal/test/wizard/:t     controllers.test.TestController.doWizard(t)
+GET    /portal/test/c/:type       			controllers.test.TestController.createNewProject(type)
+GET    /portal/test/filter        			controllers.test.TestController.getProjectList()
+GET    /portal/test/s/:t/:s/:u    			controllers.test.TestController.projectStatus(t, s, u)
+GET    /portal/test/log/:t/:s/:u  			controllers.test.TestController.projectLog(t, s, u)
+GET    /portal/test/js/:t         			controllers.test.TestController.projectWebSocketJs(t)
+GET    /portal/test/wizard        			controllers.test.TestController.wizard()
+#GET	   /portal/test/updateWizard/:id		controllers.test.TestController.updateWizard(id)
+POST   /portal/test/wizard/:t     			controllers.test.TestController.doWizard(t)
+POST   /portal/test/updatewizard/:id     	controllers.test.TestController.doUpdateWizard(id)
 
 ############################# Demostration ###############################
 GET     /demo                            controllers.demo.Application.index()

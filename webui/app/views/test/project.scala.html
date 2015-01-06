@@ -57,9 +57,15 @@
      <i class="icon-play-circle icon-2x"></i> Run
     </a>
      
-    <a class="btn btn-mini" rel="tooltip" title="Edit"><i class="icon-edit icon-2x"></i> Edit</a>
+    <a class="btn btn-mini"
+    @if(project.getType() == PERFORMANCE){ href="@routes.PerformanceController.updateProject(project.getId())"}
+    @if(project.getType() == FUNCTIONAL){ href="@routes.PerformanceController.updateProject(project.getId())"}
+     rel="tooltip" title="Edit">
+    <i class="icon-edit icon-2x"></i> Edit
     
-    <a class="btn btn-mini stop @if("Running" != project.getStatus()){disabled}" rel="tooltip" title="Stop">
+    </a>
+    
+    <a class="btn btn-mini stop @if("Running" != project.getStatus()){disabled }" href="@routes.PerformanceController.stopProject(project.getId())"" rel="tooltip" title="Stop">
     <i class="icon-stop icon-2x"></i> Stop
     </a>
     
