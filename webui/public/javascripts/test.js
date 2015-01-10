@@ -99,31 +99,38 @@ $(document).ready(function() {
     
     if(projectName && file && !projectNameWizard){
       $("#pleaseWaitDialog").modal();
-    } /*else if(!projectNameWizard ) {
-      
-      console.log('a');
-      var item = $('.performance .wizard').wizard('selectedItem');
-      if (item.step === 1) {
-        $(this).attr("disabled", "disabled");
-      }
-      $('.performance .wizard').wizard('previous');
-      $("#pleaseWaitDialog").modal();
-    } */
+    }
   });
   
-  $("body").on("keypress", ".test-filter .form-search input", function(e) {
+  //when user press enter , click search button
+  $("body").on("keypress", ".test-filter .form-search input.name", function(e) {
     if (e.which == 13) {
-      var projectName = $('input[name=name]').val();
-      var creator = $('input[name=creator]').val();
-      var ajaxURL = $(this).parent().find('a.filter').attr("ajax-url");
-      var form = $(this).parent('form');
-      var values = form.serialize();
+      $(this).parent().find('a.filter').click();
+    }
+  });
+  
+  //prevent submit form search
+  $('body').on('submit',".form-search",function() {
+    return false;
+  });
+  
+  //send ajax request with data in form search
+  $('body').on('click','.form-search a.filter', function() {
+    
+    var projectName = $('input[name=name]').val();
+    var ajaxURL = $(this).parent().find('a.filter').attr("ajax-url");
+    var form = $(this).parent('form');
+    var values = form.serialize();
+    if(projectName){
       $.ajax({
         method: "GET",
         url: ajaxURL,
         data: values,
         dataType: "json",
         success: function(data) {
+          if(data.length==0){
+            $('.project tbody').find('tr:not(:first)').hide();
+          }
           var arr = [];
           $(data).each(function(){
             var projectId = ('project-'+this.id);
@@ -140,7 +147,7 @@ $(document).ready(function() {
           for(var i = 0; i < arr.length; i ++){
            
             var count = 0;
-            for(var j = 0; j < arrElement.length; j ++ ){
+            for(var j = 1; j < arrElement.length; j ++ ){
               $('.'+arrElement[j]).hide();
               if(arr[i] === arrElement[j]){
                 total.push(arr[i]);
@@ -156,14 +163,12 @@ $(document).ready(function() {
          
         },
         error: function() {
-         // location.reload();
+          location.reload();
         }
       });
     }
+    else {
+      $('.project tbody').find('tr').show();
+    }
   });
-  
-  $('body').on('submit',".form-search",function() {
-    return false;
-  });
-  
 });

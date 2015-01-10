@@ -703,15 +703,15 @@ public class TestController extends Controller {
     
     Map<String, String[]> parameters = request().queryString();
     Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
-    
+    String name = parameters.get("name")[0];
     BasicDBObject query = new BasicDBObject();
-    if (parameters.containsKey("name")) {
-      String name = parameters.get("name")[0];
-      System.out.println(name);
-      query.put("$text", new BasicDBObject("$search", name));
-    } 
+    if(parameters.containsKey("name") && parameters.containsKey("creator")){
+      
+      if(!"".equalsIgnoreCase(name) ){
+        query.put("$text", new BasicDBObject("$search", name));
+      }
+    }
     filter.addAll(TestProjectHelper.getProject(query));
-    System.out.println(filter.size());
     List<TestProjectModel> projects = new ArrayList<TestProjectModel>(filter);
     ArrayNode array = Json.newObject().arrayNode();
     ObjectNode json = null;
