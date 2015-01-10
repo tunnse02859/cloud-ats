@@ -99,6 +99,7 @@ GET    /portal/test/p/report/:id  controllers.test.PerformanceController.report(
 GET	   /portal/test/p/u/:id		  controllers.test.PerformanceController.updateProject(id) 
 GET	   /portal/test/p/s/:id		  controllers.test.PerformanceController.stopProject(id)
 GET	   /portal/test/p/sn/:id	  controllers.test.PerformanceController.stopSnapsort(id)
+GET    /portal/test/p/filter      controllers.test.TestController.filter()
 ############################# Functional Test #################################
 
 GET    /portal/test/f             controllers.test.FunctionalController.index()

@@ -55,6 +55,7 @@ import org.gitlab.api.models.GitlabProject;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -68,6 +69,8 @@ import views.html.test.newproject;
 import views.html.test.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
@@ -696,6 +699,31 @@ public class TestController extends Controller {
     return new Html(sb);
   }
   
+  public static Result filter() throws UserManagementException {
+    
+    Map<String, String[]> parameters = request().queryString();
+    Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
+    
+    BasicDBObject query = new BasicDBObject();
+    if (parameters.containsKey("name")) {
+      String name = parameters.get("name")[0];
+      System.out.println(name);
+      query.put("$text", new BasicDBObject("$search", name));
+    } 
+    filter.addAll(TestProjectHelper.getProject(query));
+    System.out.println(filter.size());
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(filter);
+    ArrayNode array = Json.newObject().arrayNode();
+    ObjectNode json = null;
+    for (TestProjectModel project : projects) {
+      json= Json.newObject();
+      json.put("id", project.getId());
+      array.add(json);
+    }
+    return ok(array);
+   
+  }
+  
   public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(currentUserId);
@@ -780,4 +808,5 @@ public class TestController extends Controller {
     
     return null;
   }
+ 
 }

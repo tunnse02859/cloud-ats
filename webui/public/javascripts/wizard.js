@@ -2,9 +2,10 @@ $(document).ready(function(){
   
   //Click Use wizard
   $("body").on("click", ".btn.use-wizard", function() {
-    var form = $(".project-wizard-block form");
-    var href = $(this).attr("data-target") + "?" + $(form).serialize();
-    window.location = href;
+      var form = $(".project-wizard-block form");
+      var href = $(this).attr("data-target") + "?" + $(form).serialize();
+      window.location = href;
+   
   });
   
   //Form summit
@@ -150,5 +151,35 @@ $(document).ready(function(){
       $('.performance .btn.next').show();
       $('.performance .btn.finish').hide();
     }
+  });
+ $('.performance .btn.finish').on('click', function () {
+    
+      console.log('wizard');
+      var projectName = $('input[name=test-name]').val();
+      if(projectName === null || projectName === ''){
+        var item = $('.performance .wizard').wizard('selectedItem');
+        if (item.step === 1) {
+          $(this).attr("disabled", "disabled");
+        }
+        
+        $('.performance .wizard').wizard('previous');
+       
+      }
+      else {
+        var len = $('table.samplers').find('input[required]').length;
+       
+        var count = 0;
+        $('table.samplers').find('input[required]').each(function(){
+          
+          if($(this).val()){
+           
+            count ++;
+          }
+        });
+        if(count == len){
+          $("#pleaseWaitDialog").modal();
+        }
+      }
+    
   });
 });

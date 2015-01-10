@@ -15,6 +15,21 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.at("/public", "stylesheets/font.css")">
 
     <script type="text/javascript">
+	    function checkMail(mail){
+		   	var filter = /^\w+@@[a-z]+?\./;
+		   	if (filter.test(mail)) {
+			   	return true;
+			  }
+			  return false;
+		  }
+	    function checkValidate(){
+	      var mail = $('form input[name=email]').val();
+	      if(!checkMail(mail)){
+	        $('.alert.mail').show();
+	        return false;
+	      }
+	      return true;
+	    }
       $(document).ready(function() {
         var updateBoxPosition = function() {
           $("#signin-container").css({
@@ -24,6 +39,8 @@
 
         $(window).resize(updateBoxPosition);
         setTimeout(updateBoxPosition, 50);
+        
+        
       });
     </script>  
   </head>
@@ -40,12 +57,15 @@
       @if(flash.get("signin-faild")) {
       <p style="text-align: center; color: red;">Wrong email or password!!!</p>
       }
-      <form action="@controllers.routes.Application.doSignin()" method="post">
+      <div class="alert mail" style="display: none;">
+		    <strong>Warning!</strong> Mail is invalid !
+			</div>
+      <form action="@controllers.routes.Application.doSignin()" method="post" onsubmit="return checkValidate();">
         <fieldset>
           <div class="fields">
-            <input type="text" name="email" placeholder="Email" id="id_email" tabindex="1">
+            <input type="text" name="email" placeholder="Email" id="id_email" tabindex="1" required="required">
             
-            <input type="password" name="password" placeholder="Password" id="id_password" tabindex="2">
+            <input type="password" name="password" placeholder="Password" id="id_password" tabindex="2" required="required">
           </div>
           <a class="forgot-password" tabindex="3">Forgot?</a>
           

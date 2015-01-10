@@ -5,6 +5,7 @@ $(document).ready(function(){
       location.reload();
     }
   };
+ 
   
   var updateByAjax = function(data) {
     $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
@@ -132,25 +133,30 @@ $(document).ready(function(){
     return false;
   });
   
-  $("#main").on("click", ".org-group-new a.create", function() {
-    var ajaxURL = $(this).attr("ajax-url");
-    var form = $("form.org-group-new");
-    var disabled = form.find(':input:disabled').removeAttr('disabled');
-    var formValue = $(form).serialize();
-    disabled.attr('disabled','disabled');
-    
-    $.ajax({
-      method: "GET",
-      url: ajaxURL,
-      dataType: "json",
-      data: formValue,
-      success: function(data){
-        updateByAjax(data);
-      },
-      error: function() {
-        location.reload();
-      }
-    })
-    return false;
+  $("#main").on("click", ".org-group-new input.create", function() {
+  
+     var name = $('input[name=name]').val();
+     var desc = $('textarea[name=desc]').val();
+     
+     if(name != null  && name != ''){
+       var ajaxURL = $(this).attr("ajax-url");
+       var form = $("form.org-group-new");
+       var disabled = form.find(':input:disabled').removeAttr('disabled');
+       var formValue = $(form).serialize();
+       disabled.attr('disabled','disabled');
+       
+       $.ajax({
+         method: "GET",
+         url: ajaxURL,
+         dataType: "json",
+         data: formValue,
+         success: function(data){
+           updateByAjax(data);
+         },
+         error: function() {
+           location.reload();
+         }
+       })
+     }
   });
 });

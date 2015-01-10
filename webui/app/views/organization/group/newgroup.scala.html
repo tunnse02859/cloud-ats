@@ -6,7 +6,7 @@
     <legend>Create Child Group</legend>
     <div class="control-group">
       <div class="controls">
-        <input type="text" id="newgroupname" name="name" placeholder="Group Name">      
+        <input type="text" id="newgroupname" name="name" placeholder="Group Name" required="required">      
       </div>
     </div>
     
@@ -31,6 +31,7 @@
 	  </div>
 	}
 	<div class="form-actions">
-	 <a href="javascript:void(0);" ajax-url="@routes.GroupAction.doCreate()" class="create btn btn-primary">Create</a>
+	 <input type="submit"  ajax-url="@routes.GroupAction.doCreate()" class="create btn btn-primary" value="Create">
 	</div>
+	
 </form>
