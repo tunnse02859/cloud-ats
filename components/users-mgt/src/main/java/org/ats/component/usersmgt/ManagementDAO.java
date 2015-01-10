@@ -46,7 +46,7 @@ public abstract class ManagementDAO<T extends BaseObject<T>> {
       if ((colName + "Index").equals(index.get("name"))) exist = true;
     }
     if (!exist) {
-      col.ensureIndex(new BasicDBObject("name", "text"), colName + "Index");
+      col.createIndex(new BasicDBObject("name", "text"));
       System.out.println("create " + colName + "Index");
     }
     return result.getError() == null;
