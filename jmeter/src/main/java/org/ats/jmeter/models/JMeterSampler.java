@@ -13,6 +13,7 @@ import org.ats.jmeter.JMeterFactory.Template;
 import org.ats.jmeter.ParamBuilder;
 import org.rythmengine.Rythm;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -35,6 +36,21 @@ public class JMeterSampler extends BasicDBObject {
     this.put("contant_time", contantTime);
     this.put("templates", templates);
     this.put("arguments", arguments);
+  }
+  
+  public JMeterSampler() {
+    this(null, Method.GET, null, null, null, 0);
+  }
+  
+  public JMeterSampler from(BasicDBObject obj) {
+    this.put("method", obj.get("method"));
+    this.put("name", obj.get("name"));
+    this.put("url", obj.get("url"));
+    this.put("assertion_text", obj.get("assertion_text"));
+    this.put("contant_time", obj.get("contant_time"));
+    this.put("templates", obj.get("templates"));
+    this.put("arguments", obj.get("arguments"));
+    return this;
   }
   
   public Map<String, String> getTemplates() {
@@ -82,7 +98,19 @@ public class JMeterSampler extends BasicDBObject {
   }
 
   public JMeterArgument[] getArguments() {
-    return (JMeterArgument[]) this.get("arguments");
+    Object obj = this.get("arguments");
+    if (obj instanceof BasicDBList) {
+      BasicDBList list = (BasicDBList) obj;
+      JMeterArgument[] arguments = new JMeterArgument[list.size()];
+      for(int i = 0; i < list.size(); i++) {
+        arguments[i] = new JMeterArgument().from((BasicDBObject) list.get(i));
+      }
+      return arguments;
+    } else if (obj instanceof JMeterArgument[]) {
+      return (JMeterArgument[]) obj;
+    }
+    
+    return null;
   }
 
   public JMeterSampler addArgument(JMeterArgument argument) {

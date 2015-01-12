@@ -1,3 +1,13 @@
+function checkCheckbox(){
+  var countCheckbox = $("td :checkbox:checked").length;
+  var name = $('input[name=name]').val();
+  if(name != null && name != '' && countCheckbox ===0){
+    $('.alert').show();
+    return false;
+  }
+  return true;
+}
+
 $(document).ready(function() {
   $("#main").on("click", ".org-role-filter .form-search a.filter", function() {
     var ajaxURL = $(this).attr("ajax-url");
@@ -42,5 +52,8 @@ $(document).ready(function() {
   
   $("#main").on("submit", ".org-role-filter .form-search", function() {
     return false;
+  });
+  $('#main').on('click','.form-actions .btn', function () {
+    
   });
 })

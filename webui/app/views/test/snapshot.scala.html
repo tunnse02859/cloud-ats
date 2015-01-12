@@ -40,7 +40,7 @@
      >
      <i class="icon-play-circle icon-2x"></i> Run</a>
      
-     <a class="btn btn-mini stop @if("Running" != script.getString("status")){disabled}" rel="tooltip" title="Stop">
+     <a class="btn btn-mini stop @if("Running" != script.getString("status")){disabled}" rel="tooltip" title="Stop" href="@routes.PerformanceController.stopSnapsort(script.getString("_id"))">
      <i class="icon-stop icon-2x"></i> Stop
      </a>
   </td>

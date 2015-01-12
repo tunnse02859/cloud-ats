@@ -16,6 +16,37 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.at("/public", "stylesheets/font.css")">
 
     <script type="text/javascript">
+
+	   	function checkMail(mail){
+		   	var filter = /^\w+@@[a-z]+?\./;
+		   	if (filter.test(mail)) {
+			   	return true;
+			  }
+			  return false;
+		  }
+	    function checkValidate(){
+	  
+	        var pass = $("input[name=password]").val();
+	        var repass = $("input[name=repassword]").val();
+	        var mail = $("input[name=email]").val();
+	        if(pass != repass && checkMail(mail)){
+	          $('.alert.pass').show();
+	          $('.alert.mail').hide();
+	          return false;
+	  			}
+	        else if (! checkMail(mail) && pass === repass){
+		        $('.alert.pass').hide();
+		  			$('.alert.mail').show();
+		  			return false;
+		  		}
+	        else if (! checkMail(mail) && (pass != repass)) {
+	          $('.alert.pass').show();
+		  			$('.alert.mail').show();
+		  			return false;
+		      }
+					return true;
+	  			   
+	  	}
       $(document).ready(function() {
         var updateBoxPosition = function() {
           $("#signin-container").css({
@@ -25,6 +56,7 @@
 
         $(window).resize(updateBoxPosition);
         setTimeout(updateBoxPosition, 50);
+        
       });
     </script>  
   </head>
@@ -44,22 +76,27 @@
           <strong>Cloud ATS</strong>
         </span>
       </a>
-      
-      <form action="@controllers.routes.Application.doSignup()" method="post">
+      <div class="alert pass" style="display: none;">
+		    <strong>Warning!</strong> PassWord and Re-PassWord are not same !
+    	</div>
+    	<div class="alert mail" style="display: none;">
+		    <strong>Warning!</strong> Mail is invalid !
+    	</div>
+      <form action="@controllers.routes.Application.doSignup()" method="post" onsubmit="return checkValidate();">
         <fieldset>
           <div class="fields">
           @if(group) {
             <input type="hidden" name="group" value="true">
-            <input type="text" name="company" placeholder="Company" tabindex="1">
+            <input type="text" name="company" placeholder="Company" tabindex="1" required="required">
             <input type="text" name="domain" placeholder="Company Domain" tabindex="2">
-            <input type="text" name="email" placeholder="Admin Email" tabindex="3">
-            <input type="password" name="password" placeholder="Admin Password" tabindex="4">
-            <input type="password" name="repassword" placeholder="Admin Re-Password" tabindex="5">
+            <input type="email" name="email" placeholder="Admin Email" tabindex="3" required="required">
+            <input type="password" name="password" placeholder="Admin Password" tabindex="4" required="required">
+            <input type="password" name="repassword" placeholder="Admin Re-Password" tabindex="5" required="required">
           } else {
             <input type="hidden" name="group" value="false">
-            <input type="text" name="email" placeholder="Your Email" tabindex="1">
-            <input type="password" name="password" placeholder="Password" tabindex="2">
-            <input type="password" name="repassword" placeholder="Re-Password" tabindex="3">
+            <input type="email" name="email" placeholder="Your Email" tabindex="1" required="required">
+            <input type="password" name="password" placeholder="Password" tabindex="2" required="required">
+            <input type="password" name="repassword" placeholder="Re-Password" tabindex="3" required="required">
           }  
           </div>
           

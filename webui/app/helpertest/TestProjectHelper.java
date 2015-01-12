@@ -47,7 +47,7 @@ public class TestProjectHelper {
       if ("Test Project Index".equals(index.get("name"))) exist = true;
     }
     if (!exist) {
-      col.ensureIndex(new BasicDBObject("name", "text"), "Test Project Index");
+      col.createIndex(new BasicDBObject("name", "text"));
       System.out.println("Create Test Project Index");
     }
   }

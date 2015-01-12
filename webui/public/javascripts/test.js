@@ -91,7 +91,84 @@ $(document).ready(function() {
   });
   
   //Click create project finish
-  $("body").on("click", ".finish", function(e) {
-    $("#pleaseWaitDialog").modal();
+  $("body").on("click", ".project.finish", function(e) {
+    console.log('test');
+    var projectName = $('input[name=name]').val();
+    var file = $('input[name=uploaded]').val();
+   // var projectNameWizard = $('input[name=test-name]').val();
+    
+    if(projectName && file && !projectNameWizard){
+      $("#pleaseWaitDialog").modal();
+    }
+  });
+  
+  //when user press enter , click search button
+  $("body").on("keypress", ".test-filter .form-search input.name", function(e) {
+    if (e.which == 13) {
+      $(this).parent().find('a.filter').click();
+    }
+  });
+  
+  //prevent submit form search
+  $('body').on('submit',".form-search",function() {
+    return false;
+  });
+  
+  //send ajax request with data in form search
+  $('body').on('click','.form-search a.filter', function() {
+    
+    var projectName = $('input[name=name]').val();
+    var ajaxURL = $(this).parent().find('a.filter').attr("ajax-url");
+    var form = $(this).parent('form');
+    var values = form.serialize();
+    if(projectName){
+      $.ajax({
+        method: "GET",
+        url: ajaxURL,
+        data: values,
+        dataType: "json",
+        success: function(data) {
+          if(data.length==0){
+            $('.project tbody').find('tr:not(:first)').hide();
+          }
+          var arr = [];
+          $(data).each(function(){
+            var projectId = ('project-'+this.id);
+            
+            arr.push(projectId);
+          });
+          var arrElement = [];
+          $('.project tbody').find('tr').each(function(){
+            
+            arrElement.push($(this).attr('class'));
+           
+          });
+          var total = [];
+          for(var i = 0; i < arr.length; i ++){
+           
+            var count = 0;
+            for(var j = 1; j < arrElement.length; j ++ ){
+              $('.'+arrElement[j]).hide();
+              if(arr[i] === arrElement[j]){
+                total.push(arr[i]);
+                
+              }
+              
+            }
+            
+          }
+          for(var k = 0; k < total.length; k ++){
+            $('.'+total[k]).show();
+          }
+         
+        },
+        error: function() {
+          location.reload();
+        }
+      });
+    }
+    else {
+      $('.project tbody').find('tr').show();
+    }
   });
 });

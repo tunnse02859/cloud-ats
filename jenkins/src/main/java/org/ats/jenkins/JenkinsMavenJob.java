@@ -185,6 +185,27 @@ public class JenkinsMavenJob {
     return res.getStatusLine().getStatusCode() == 302;
   }
   
+  public boolean stop() {
+    try{
+      DefaultHttpClient client = HttpClientFactory.getInstance();
+      String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/api/json");
+      String body = HttpClientUtil.fetch(client, url);
+      System.out.println(body);
+      JSONObject json = new JSONObject(body);
+      int currentbuildNumber = json.getInt("nextBuildNumber")-1;
+      HttpContext httpContext = new BasicHttpContext();
+     // String status = getStatus(currentbuildNumber);
+      url = master.buildURL("job/" + encodeURIComponent(this.name) + "/"+currentbuildNumber+"/stop" );
+      HttpPost post = new HttpPost(url);
+      HttpResponse res = client.execute(post,httpContext);
+      return res.getStatusLine().getStatusCode() == 302;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+  
   public int build() {
     try {
       DefaultHttpClient client = HttpClientFactory.getInstance();

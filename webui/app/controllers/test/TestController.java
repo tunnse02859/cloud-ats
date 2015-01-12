@@ -55,6 +55,7 @@ import org.gitlab.api.models.GitlabProject;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -68,9 +69,13 @@ import views.html.test.newproject;
 import views.html.test.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBList;
+import com.mongodb.DBObject;
 
 import controllers.Application;
 import controllers.vm.VMCreator;
@@ -147,7 +152,6 @@ public class TestController extends Controller {
     
     JMeterScript script = factory.createJmeterScript(testName, loops, users, rampup, duration > 0, duration, samplers);
     
-    
     //create project
     Group company = TestController.getCompany();
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
@@ -208,6 +212,101 @@ public class TestController extends Controller {
     return redirect(routes.PerformanceController.index());
   }
   
+  public static Result doUpdateWizard(String projectId) throws Exception {
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    Map<String, String[]> params = request().body().asFormUrlEncoded();
+    Set<String> keys = params.keySet();
+    
+    int samplerCount = 0;
+    for (String key : keys) {
+      if (key.startsWith("sampler-url[")) samplerCount++;
+    }
+    
+    JMeterFactory factory = new JMeterFactory();
+    
+    JMeterSampler[] samplers = new JMeterSampler[samplerCount];
+    
+    for(int i = 0; i < samplerCount; i++) {
+      String prefix = "sampler[" + i + "]";
+
+      int paramCount = 0;
+      for (String key : keys) {
+        if (key.startsWith(prefix + "-param-name")) paramCount++;
+      }
+      
+      JMeterArgument[] args = new JMeterArgument[paramCount];
+      for (int j = 0; j < paramCount; j++) {
+        String paramName = params.get(prefix + "-param-name[" + j + "]")[0];
+        String paramValue = params.get(prefix + "-param-value[" + j + "]")[0];
+        args[j] = factory.createArgument(paramName, paramValue);
+      }
+ 
+      String samplerName = params.get(prefix)[0];
+      String samplerMethod = params.get("sampler-method[" + i + "]")[0];
+      String samplerUrl = params.get("sampler-url[" + i + "]")[0];
+      
+      String assertionText = params.get("sampler-assertion-text[" + i +"]")[0];
+      
+      if(assertionText != null) assertionText = assertionText.trim();
+      
+      if (assertionText.isEmpty()) assertionText = null;
+      
+      long constantTime = Integer.parseInt(params.get("sampler-constant-time[" + i + "]" )[0]) * 1000;
+      
+      samplers[i] = factory.createHttpRequest(
+          Method.valueOf(samplerMethod), 
+          samplerName, 
+          samplerUrl, assertionText, constantTime, args);
+    }
+    
+    int duration = Integer.parseInt(params.get("duration")[0]);
+    int loops = Integer.parseInt(params.get("loops")[0]);
+    int rampup = Integer.parseInt(params.get("rampup")[0]);
+    int users = Integer.parseInt(params.get("users")[0]);
+    
+    String testName = params.get("test-name")[0];
+    project.put("name", testName);
+    
+    JMeterScript script = factory.createJmeterScript(testName, loops, users, rampup, duration > 0, duration, samplers);
+
+    String scriptContent = script.toString();
+    
+    project.put("source_content", scriptContent.getBytes("UTF-8"));
+    project.put("status", JenkinsJobStatus.Ready.toString());
+    project.put("modified_date", System.currentTimeMillis());
+    
+    //Update in database
+    TestProjectHelper.updateProject(project);
+    
+    //Create commit on GitLab
+    Group company = TestController.getCompany();
+    VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
+    String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    
+    int snapshotCount = JMeterScriptHelper.getJMeterScript(projectId).size() + 1;
+    String commitMsg = "Snapshot " + snapshotCount;
+    
+    gitlabAPI.updateFile(project.getGitlabProjectId(), 
+        "src/test/jmeter/script.jmx", "master", 
+        scriptContent, commitMsg);
+    
+    List<GitlabCommit> commits = gitlabAPI.getCommits(project.getGitlabProjectId(), "master");
+    GitlabCommit commit = null;
+    for (GitlabCommit self : commits) {
+      if (self.getTitle().equals(commitMsg)) commit = self;
+    }
+
+    script.put("_id", commit.getId());
+    script.put("project_id", project.getId());
+    script.put("commit", commit.getTitle());
+    script.put("index", snapshotCount);
+    script.put("status", JenkinsJobStatus.Ready.toString());
+
+    JMeterScriptHelper.createScript(script);
+    
+    return redirect(routes.PerformanceController.index());
+  }
   public static Result projectWebSocketJs(String type) {
     return ok(views.js.test.project_websocket.render(type)).as("text/javascript");
   }
@@ -218,7 +317,6 @@ public class TestController extends Controller {
     TestProjectHelper.removeProject(project);
     JenkinsJobHelper.deleteBuildOfProject(project.getId());
     JMeterScriptHelper.deleteScriptOfProject(project.getId());
-    
     
     VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
     String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
@@ -465,6 +563,49 @@ public class TestController extends Controller {
     }
   }
   
+  public static void stop(TestProjectModel project, String projectId) throws UserManagementException {
+    
+    final VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
+
+    final Group company = getCompany();
+    final JMeterScript snapshot = new JMeterScript();
+    List<JMeterScript> listScript = JMeterScriptHelper.getJMeterScript(projectId);
+    if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+      snapshot.from(listScript.get(listScript.size()-1));
+    }
+    List<VMModel> list = VMHelper.getReadyVMs(company.getId(), new BasicDBObject("gui", TestProjectModel.PERFORMANCE.equals(project.getType()) ? false : true));
+      
+    //remove last build
+    //JenkinsJobHelper.deleteBuildOfSnapshot(snapshot.getString("_id"));
+      VMModel vm = list.get(0);
+      
+      JenkinsJobModel job = JenkinsJobHelper.getJobById(projectId);
+      if (job == null) {
+        job = new JenkinsJobModel(
+            JenkinsJobHelper.getCurrentBuildIndex(project.getId()) + 1, 
+            projectId, 
+            project.getId(), 
+            vm.getId(), 
+            jenkins.getId(), 
+            project.getType());
+        JenkinsJobHelper.createJenkinsJob(job);
+      } else {
+        job.put("status", JenkinsJobStatus.Aborted.toString());
+        job.put("vm_id", vm.getId());
+        job.put("log", null);
+        JenkinsJobHelper.updateJenkinsJob(job);
+      }
+
+      project.put("status", job.getStatus().toString());
+      TestProjectHelper.updateProject(project);
+
+      if (TestProjectModel.PERFORMANCE.equals(project.getType())) {
+        snapshot.put("status", job.getStatus().toString());
+        JMeterScriptHelper.updateJMeterScript(snapshot);
+      }
+    
+  }
+  
   public static Result createNewProject(String type) {
     return ok(index.render(type, newproject.render(type)));
   }
@@ -558,6 +699,31 @@ public class TestController extends Controller {
     return new Html(sb);
   }
   
+  public static Result filter() throws UserManagementException {
+    
+    Map<String, String[]> parameters = request().queryString();
+    Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
+    String name = parameters.get("name")[0];
+    BasicDBObject query = new BasicDBObject();
+    if(parameters.containsKey("name") && parameters.containsKey("creator")){
+      
+      if(!"".equalsIgnoreCase(name) ){
+        query.put("$text", new BasicDBObject("$search", name));
+      }
+    }
+    filter.addAll(TestProjectHelper.getProject(query));
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(filter);
+    ArrayNode array = Json.newObject().arrayNode();
+    ObjectNode json = null;
+    for (TestProjectModel project : projects) {
+      json= Json.newObject();
+      json.put("id", project.getId());
+      array.add(json);
+    }
+    return ok(array);
+   
+  }
+  
   public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(currentUserId);
@@ -642,4 +808,5 @@ public class TestController extends Controller {
     
     return null;
   }
+ 
 }

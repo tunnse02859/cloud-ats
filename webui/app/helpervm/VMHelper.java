@@ -49,7 +49,7 @@ public class VMHelper extends AbstractHelper {
       if ("VM Index".equals(index.get("name"))) exist = true;
     }
     if (!exist) {
-      col.ensureIndex(new BasicDBObject("name", "text"), "VM Index");
+      col.createIndex(new BasicDBObject("name", "text"));
       System.out.println("Create VM Index");
     }
     return result.getError() == null;

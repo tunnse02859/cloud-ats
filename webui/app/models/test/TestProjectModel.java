@@ -53,7 +53,7 @@ public class TestProjectModel extends BasicDBObject {
     this.put("created_date", System.currentTimeMillis());
     this.put("modified_date", System.currentTimeMillis());
   }
-  
+   
   public Group getGroupOwner() throws UserManagementException {
     return GroupDAO.getInstance(Application.dbName).findOne(this.getString("group_id"));
   }

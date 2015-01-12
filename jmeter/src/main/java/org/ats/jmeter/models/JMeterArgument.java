@@ -30,6 +30,17 @@ public class JMeterArgument extends BasicDBObject {
     this.put("templates", templates);
   }
   
+  public JMeterArgument() {
+    this(null, null, null);
+  }
+  
+  public JMeterArgument from(BasicDBObject obj) {
+    this.put("paramName", obj.get("paramName"));
+    this.put("paramValue", obj.get("paramValue"));
+    this.put("templates", obj.get("templates"));
+    return this;
+  }
+  
   public Map<String, String> getTemplates() {
     return Collections.unmodifiableMap((Map<String, String>)this.get("templates"));
   }

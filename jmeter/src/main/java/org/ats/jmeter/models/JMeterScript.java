@@ -13,6 +13,7 @@ import org.ats.jmeter.JMeterFactory.Template;
 import org.ats.jmeter.ParamBuilder;
 import org.rythmengine.Rythm;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -96,10 +97,23 @@ public class JMeterScript extends BasicDBObject {
 
   public void setDuration(int duration) {
     this.put("duration", duration);
+    
   }
 
   public JMeterSampler[] getSamplers() {
-    return (JMeterSampler[]) this.get("samplers");
+    Object obj = this.get("samplers");
+    if (obj instanceof BasicDBList) {
+      BasicDBList list = (BasicDBList) this.get("samplers");
+      JMeterSampler[] samplers = new JMeterSampler[list.size()]; 
+      for(int i = 0; i < list.size(); i++) {
+        samplers[i] = new JMeterSampler().from((BasicDBObject) list.get(i));
+      }
+      return samplers;  
+    } else if (obj instanceof JMeterSampler[]) {
+      return (JMeterSampler[])obj;
+    }
+    
+    return null;
   }
 
   public JMeterScript addSampler(JMeterSampler sampler) {

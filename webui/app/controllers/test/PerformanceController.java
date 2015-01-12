@@ -3,33 +3,38 @@
  */
 package controllers.test;
 
-import helpertest.JMeterScriptHelper;
-import helpertest.JenkinsJobHelper;
-import helpertest.TestProjectHelper;
+import helpertest.*;
 import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.Authorization;
 import interceptor.WizardInterceptor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import models.test.JenkinsJobModel;
+import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
 
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.jmeter.models.JMeterArgument;
+import org.ats.jmeter.models.JMeterSampler;
 import org.ats.jmeter.models.JMeterScript;
 
 import play.api.templates.Html;
 import play.mvc.Result;
 import play.mvc.With;
 import scala.collection.mutable.StringBuilder;
-import views.html.test.body;
-import views.html.test.index;
-import views.html.test.report_perf;
-import views.html.test.snapshot;
+import views.html.test.*;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -61,6 +66,14 @@ public class PerformanceController extends TestController {
   public static Html getSnapshotHtml(TestProjectModel project) {
     StringBuilder sb = new StringBuilder();
     List<JMeterScript> scripts = JMeterScriptHelper.getJMeterScript(project.getId());
+    Collections.sort(scripts, new Comparator<JMeterScript>() {
+     
+      @Override
+      public int compare(JMeterScript o1, JMeterScript o2) {
+        return (o2.getInt("index") - o1.getInt("index"));
+      }
+    });
+    
     for(JMeterScript script : scripts) {
       sb.append(snapshot.render(script));
     }
@@ -81,6 +94,34 @@ public class PerformanceController extends TestController {
     return redirect(routes.PerformanceController.index());
   }
   
+  public static Result updateProject(String projectId) throws IOException {
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    
+    String type = project.getType();
+    
+    List<JMeterScript> jmeter = JMeterScriptHelper.getJMeterScript(projectId);
+    JMeterScript jmeterModel= null;
+    BasicDBObject query = new BasicDBObject();
+    query.append("index", jmeter.size());
+    DBCursor cursor = JMeterScriptHelper.getCollection().find(query);
+    if(!cursor.hasNext()) {
+      Collections.emptyList();
+    }
+    while( cursor.hasNext()){
+      jmeterModel = new JMeterScript().from(cursor.next());
+    }
+    
+    JMeterSampler[] samplers = jmeterModel.getSamplers();
+    List<JMeterSampler> listSample = new ArrayList<JMeterSampler>();
+    
+    for (JMeterSampler sampler : samplers) {
+     
+      listSample.add(sampler);
+    }
+    
+    return ok(index.render(type, views.html.test.updatewizard.render(project,jmeterModel,listSample)));
+  }
+  
   public static Result deleteProject(String projectId) throws IOException {
     TestController.delete(projectId);
     return redirect(routes.PerformanceController.index());
@@ -90,4 +131,26 @@ public class PerformanceController extends TestController {
     TestController.createProjectByUpload(run, TestProjectModel.PERFORMANCE);
     return redirect(controllers.test.routes.PerformanceController.index());
   }
+  
+  public static Result stopProject(String projectId) throws Exception {
+    List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("status", JenkinsJobStatus.Running.toString()).append("project_id", projectId));
+    final JenkinsJobModel jobModel = jobs.get(0);
+    VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+    String snapsortId = jobModel.getId();
+    JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);
+    maven.stop();
+    return redirect(routes.PerformanceController.index());
+  }
+  
+  public static Result stopSnapsort(String snapsortId) throws Exception {
+    final JenkinsJobModel jobModel = JenkinsJobHelper.getJobById(snapsortId);
+    VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+    JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);
+    maven.stop();
+    return redirect(routes.PerformanceController.index());
+  }
+  
 }

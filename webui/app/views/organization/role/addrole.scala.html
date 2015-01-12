@@ -1,11 +1,15 @@
 @(currentGroup: org.ats.component.usersmgt.group.Group)
 @import controllers.organization._
 
-<form class="form-horizontal" method="get" action="@routes.RoleAction.doAddRole()">
+    <div class="alert" style="display: none;">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>Warning!</strong> You have to choose at least one operation !
+    </div>
+<form class="form-horizontal" method="get" action="@routes.RoleAction.doAddRole()" onsubmit="return checkCheckbox();">
   <legend>Create Role in <span class="badge badge-blue">@currentGroup.get("name")</span></legend>
   <div class="control-group">
     <div class="controls">
-      <input type="text" name="name" placeholder="Role Name">
+      <input type="text" name="name" placeholder="Role Name" required="required">
     </div>
   </div>
   <div class="control-group">
@@ -36,6 +40,6 @@
     </tbody>
   </table>
   <div class="form-actions">
-    <button type="submit" class="btn btn-primary">OK</button>
+    <button type="submit" class="btn btn-primary" >OK</button>
   </div>
 </form>

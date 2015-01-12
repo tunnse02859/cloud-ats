@@ -16,6 +16,35 @@
     <link rel="stylesheet" type="text/css"  href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700">
 
     <script type="text/javascript">
+    
+	  	function checkMail(mail){
+		   	var filter = /^\w+@@[a-z]+?\./;
+		   	if (filter.test(mail)) {
+			   	return true;
+			  }
+			  return false;
+		  }
+	    function checkValidate() {
+	  	  var mail = $('form input[name=email]').val();
+	  	  var pass = $('form input[name=password]').val();
+	  	  var repass = $('form input[name=repassword]').val();
+	  		if(pass != repass && checkMail(mail)){
+	  		  $('.alert.pass').show();
+	  		  $('.alert.mail').hide();
+	  		  return false;
+	  		}
+	  		else if(pass === repass && !checkMail(mail)){
+	  		  $('.alert.pass').hide();
+	  		  $('.alert.mail').show();
+	  		  return false;
+	  		}
+	  		else if(pass != repass && !checkMail(mail)){
+	  		  $('.alert.pass').show();
+	  		  $('.alert.mail').show();
+	  		  return false;
+	  		}
+	  		return true;
+	  	}
       $(document).ready(function() {
         $('#signin-container').submit(function() {
           document.location = '/';
@@ -45,13 +74,18 @@
           <strong>Cloud ATS</strong>
         </span>
       </a>
-      
-      <form action="@controllers.routes.Application.wizard()" method="post">
+      <div class="alert pass" style="display: none;">
+		    <strong>Warning!</strong> PassWord and Re-PassWord are not same !
+			</div>
+			<div class="alert mail" style="display: none;">
+		    <strong>Warning!</strong> Mail is invalid !
+			</div>
+      <form action="@controllers.routes.Application.wizard()" method="post" onsubmit="return checkValidate();">
         <fieldset>
           <div class="fields">
-            <input type="text" name="email" placeholder="Email" tabindex="1">
-            <input type="password" name="password" placeholder="Password" tabindex="2">
-            <input type="password" name="repassword" placeholder="Re-Password" tabindex="3">
+            <input type="text" name="email" placeholder="Email" tabindex="1" required="required">
+            <input type="password" name="password" placeholder="Password" tabindex="2" required="required">
+            <input type="password" name="repassword" placeholder="Re-Password" tabindex="3" required="required">
           </div>
           
           <button type="submit" class="btn btn-primary btn-block" tabindex="4">Setup</button>
