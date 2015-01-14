@@ -45,17 +45,7 @@ $(document).ready(function(){
     });
     
   });
-//  $("body").on("click", ".performance.finish", function(event) {
-//    var form = $(".performance form");
-//    var samplerNames = $(this).find("input.sampler-name");
-//    
-//    $(samplerNames).each(function(index) {
-//      console.log(index);
-//    });
-//    
-//    event.preventDefault();
-//    return false;
-//  })
+
   
   //Click show parameter block
   $("body").on("click", ".performance .show-param", function() {

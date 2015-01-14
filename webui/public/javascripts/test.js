@@ -77,22 +77,18 @@ $(document).ready(function() {
         dataType: "html",
         async: true,
         success: function(data) {
-          console.log("run a job successfully");
         },
         error: function(e) {
-          console.log(e);
         }
       });
     }
     
     $(this).addClass("disabled");
-    console.log("has just click run button");
     e.preventDefault();
   });
   
   //Click create project finish
   $("body").on("click", ".project.finish", function(e) {
-    console.log('test');
     var projectName = $('input[name=name]').val();
     var file = $('input[name=uploaded]').val();
    // var projectNameWizard = $('input[name=test-name]').val();

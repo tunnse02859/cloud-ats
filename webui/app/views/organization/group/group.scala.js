@@ -7,9 +7,13 @@ $(document).ready(function(){
       location.reload();
     }
   };
-  
+  var len = $(".pagination ul").find('li').length;
+  if(len==3){
+    $('.pagination ul li:last-child').addClass("disabled");
+  }
   $(".pagination ul li:nth-child(2)").addClass("active");
   $('.pagination ul li:first-child').addClass("disabled");
+  
   var updateByAjax = function(data) {
     $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
     $("#main-navbar .current-group").html(data.navbar);
@@ -183,7 +187,7 @@ $(document).ready(function(){
     var currentText = $(current).text();
     var lastPage =  $(this).parent().parent().find('li').length;
     
-    if(currentText == lastPage-2){
+    if(currentText == lastPage-2 || lastPage == 3){
       return false;
     }
     $(current).next().find('a').click();
@@ -193,11 +197,18 @@ $(document).ready(function(){
  // click page number
   $("#main").on("click", ".pagination ul li a.pageNumber", function (e) {
     var length = $(this).parent().parent().find('li').length;
-    $(this).parent().parent().find('li').removeClass('active');
+    var activePage = $(this).parent().parent().find('li.active a.pageNumber').text();
+    var current = $(e.target).text();
+    if(activePage != current){
+      $(this).parent().parent().find('li').removeClass('active');
+    }
+    else {
+      return false;
+    }
     $(this).parent().addClass("active");
     var ajaxURL = $(this).attr("ajax-url");
     var id = $(this).attr("id");
-    var current = $(e.target).text();
+    
     if(current == length-2){
       $('.pagination ul li:last-child').addClass("disabled");
     }
@@ -209,6 +220,9 @@ $(document).ready(function(){
     }
     else {
       $('.pagination ul li:first-child').removeClass("disabled");
+    }
+    if (current == activePage) {
+      return false;
     }
     paginationData(id,current,ajaxURL);
    
@@ -226,8 +240,8 @@ $(document).ready(function(){
         success: function(data) {
           var oldElement = $('.table tbody').find('tr:not(:first)');
           $(oldElement).remove();
+          
           $(data).each(function() {
-            
             var html = 
             "<tr class='group' id='group-"+this.id+"'>"+
               "<td class='group-name'>"+
@@ -235,7 +249,8 @@ $(document).ready(function(){
                   "ajax-url='@routes.Organization.body()?nav=group&group="+this.id+"'>"+this.name+"</a>" +
               "</td>"+
               
-              "<td class='group-ancestor'>/"+this.ancensor+"</td>"+
+              "<td class='group-ancestor'>/ <a href='@routes.Organization.index()?nav=group&group="+id+"'"+
+              "ajax-url='@routes.Organization.body()?nav=group&group="+id+"'>"+this.ancensor+"</a></td>"+
               "<td><span class='badge badge-primary'>"+this.childrenSize+"</span></td>"+
               "<td><span class='badge badge-cyan'>"+this.level+"</span></td>"+
               "<td><span class='badge badge-pink'>"+this.userSize+"</span></td>"+
@@ -243,8 +258,8 @@ $(document).ready(function(){
               "<td><span class='badge badge-pink'>"+this.featureSize+"</span></td>"+
               "<td>"+
                 
-                "<a href='@routes.GroupAction.editGroup("+this.id+")' class='btn btn-mini btn-blue'>Update</a>"+
-                "<a href='@routes.GroupAction.deleteGroup("+this.id+")' class='btn btn-mini btn-red'>Delete</a>"+
+                "<a href='@routes.GroupAction.editGroup("forgroup")?group=" +this.id +"' class='btn btn-mini btn-blue'>Update</a> "+
+                "<a href='@routes.GroupAction.deleteGroup("forgroup")?group="+this.id+"' class='btn btn-mini btn-red'>Delete</a>"+
                 
               "</td>"+
              "</tr>";
