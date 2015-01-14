@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.ats.component.usersmgt.DataFactory;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
@@ -29,6 +30,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import play.Logger;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -47,9 +49,14 @@ import views.html.organization.role.roles;
 import views.html.organization.user.user;
 import views.html.organization.user.users;
 
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
 import controllers.Application;
 /**
@@ -139,6 +146,7 @@ public class Organization extends Controller {
     session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
+    
     return ok(index.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), body, current.getId()));
   }
   
@@ -157,6 +165,12 @@ public class Organization extends Controller {
     return ok(indexajax.render("group", body, current.getId()));
   }
   
+  public static Result getGroupJS() {
+    
+    return ok(views.js.organization.group.group.render()).as("text/javascript");
+   
+  }
+  
   public static Result body() throws UserManagementException {
     Group currentGroup = setCurrentGroup(request().getQueryString("group"));
     if (currentGroup == null) return forbidden(views.html.forbidden.render());
@@ -168,7 +182,6 @@ public class Organization extends Controller {
     Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     Html body = bodyComposite(request().queryString());
-    
     Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     StringBuilder sb = new StringBuilder();
@@ -187,6 +200,32 @@ public class Organization extends Controller {
     return ok(json);
   }
   
+  public static Result pagination() throws UserManagementException {
+    String id = request().getQueryString("id");
+    String currentPage = request().getQueryString("current");
+    int currentPageNumber = Integer.parseInt(currentPage);
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(id);
+    String nameGroup = currentGroup.getString("name");
+    Set<Group> groupsSetChildren = GroupDAO.getInstance(Application.dbName).getGroupChildrenBySize(currentGroup, 10, currentPageNumber);
+    List<Group> groupsListChildren = new ArrayList<Group>(groupsSetChildren);
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    ObjectNode json = null;
+    for (Group g : groupsListChildren) {
+      json = Json.newObject();
+      json.put("name", g.getString("name"));
+      json.put("ancensor", nameGroup );
+      json.put("childrenSize", g.getAllChildren().size());
+      json.put("level", g.getString("level"));
+      json.put("userSize", g.getUsers().size());
+      json.put("roleSize", g.getRoles().size());
+      json.put("featureSize", g.getFeatures().size());
+      json.put("id", g.getId());
+      array.add(json);
+    }
+   
+    return ok(array);
+  }
   /**
    * Build a part of content body base on current state.
    * @param parameters
@@ -198,7 +237,11 @@ public class Organization extends Controller {
     String nav = parameters.containsKey("nav") ? parameters.get("nav")[0] : "group";
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-    
+    int records = (int) count("group");
+    int check = records % 10;
+    if( check != 0) {
+      records = (records - check) +10;
+    }
     if ("group".equals(nav)) {
       
       StringBuilder sb = new StringBuilder();
@@ -207,7 +250,7 @@ public class Organization extends Controller {
         sb.append(group.render(g));
       }
       
-      return groups.render(new Html(sb), isSystem(currentUser));
+      return groups.render(new Html(sb), isSystem(currentUser), records, currentGroup);
     
     } else if ("user".equals(nav)) {
       
@@ -266,7 +309,8 @@ public class Organization extends Controller {
     if (current.getBoolean("system")) {
       all = new ArrayList<Group>(GroupDAO.getInstance(Application.dbName).find(new BasicDBObject()));
     }  else {
-      all = new ArrayList<Group>(current.getAllChildren());
+      Set<Group> groups = GroupDAO.getInstance(Application.dbName).getGroupChildrenBySize(current, 10, 1);
+      all = new ArrayList<Group>(groups);
     }
     
     Collections.sort(all, new Comparator<Group>() {
@@ -570,4 +614,5 @@ public class Organization extends Controller {
     
     return true;
   }
+  
 }

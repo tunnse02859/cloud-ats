@@ -21,10 +21,11 @@ GET     /*path/                          controllers.Application.untrail(path: S
 
 ############################# Organization ###############################
 
-GET     /portal/o               controllers.organization.Organization.index()
-GET     /portal/o/b             controllers.organization.Organization.body()
-GET     /portal/o/aj            controllers.organization.Organization.indexAjax()
-GET     /portal/o/fl/:nav       controllers.organization.Organization.filter(nav)
+GET     /portal/o               				controllers.organization.Organization.index()
+GET     /portal/o/b             				controllers.organization.Organization.body()
+GET     /portal/o/aj            				controllers.organization.Organization.indexAjax()
+GET     /portal/o/fl/:nav       				controllers.organization.Organization.filter(nav)
+GET     /portal/o/b/paginations	            	controllers.organization.Organization.pagination()
 
 ############################# Group Action ###############################
 
@@ -150,3 +151,4 @@ GET     /demo/job/console/:jobName       controllers.demo.job.JobController.cons
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /fonts/*file                controllers.Assets.at(path="/public/fonts", file)
 GET     /images/*file               controllers.Assets.at(path="/public/images", file)
+GET     /getJS   					controllers.organization.Organization.getGroupJS()

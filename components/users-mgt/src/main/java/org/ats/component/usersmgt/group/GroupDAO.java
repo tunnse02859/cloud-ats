@@ -127,6 +127,27 @@ public class GroupDAO extends ManagementDAO<Group> {
     return children;
   }
   
+  public Set<Group> getGroupChildrenBySize(Group group, int size, int current) {
+    
+    if (group.get("group_children_ids") == null) {
+      return Collections.emptySet();
+    }
+    Set<String> children_ids = group.stringIDtoSet(group.getString("group_children_ids"));
+    List<String> ids = new ArrayList<String>(children_ids);
+    Set<Group> children = new HashSet<Group>();
+    int limit = current*size;
+   
+    for(int i = (current-1)*size; (i <limit && i < ids.size()); i ++ ){
+      try {
+        Group child = this.findOne(ids.get(i));
+        children.add(child);
+      } catch (UserManagementException e) {
+         e.printStackTrace();
+      }
+    }
+    
+    return children;
+  }
   public List<Feature> getFeatures(Group group) {
     if (group.get("feature_ids") == null) return Collections.emptyList();
     
