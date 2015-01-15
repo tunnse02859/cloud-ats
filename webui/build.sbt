@@ -14,7 +14,14 @@ libraryDependencies ++= Seq(
 	"org.ats" % "cloud-jmeter" % "0.1-SNAPSHOT",
 	"org.apache.cloudstack" % "cloud-api" % "4.3.0",
 	"org.mongodb" % "mongo-java-driver" % "2.12.4",
-	"com.typesafe.akka" % "akka-actor_2.10" % "2.2.4"
+	"com.typesafe.akka" % "akka-actor_2.10" % "2.2.4",
+	"com.microsoft.azure" % "azure-core" % "0.7.0",
+	"com.microsoft.azure" % "azure-management" % "0.7.0",
+	"com.microsoft.azure" % "azure-management-compute" % "0.7.0",
+	"com.microsoft.azure" % "azure-management-network" % "0.7.0",
+	"com.sun.jersey" % "jersey-core" % "1.13",
+	"com.sun.jersey" % "jersey-client" % "1.13",
+	"com.sun.jersey" % "jersey-json" % "1.13"
 )     
 
 resolvers += (
