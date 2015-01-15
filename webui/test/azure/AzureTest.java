@@ -51,7 +51,7 @@ public class AzureTest {
     
   }
 
-  @Test
+  //@Test
   public void testGetOfferingDetail() throws Exception {
     RoleSize extraSmall = client.getOfferingByName(VirtualMachineRoleSize.EXTRASMALL);
     Assert.assertEquals(1, extraSmall.getCores());
@@ -69,6 +69,17 @@ public class AzureTest {
     System.out.println(medium.getLabel());
   }
   
+  @Test
+  public void testListVirtualMachine() throws Exception {
+    RoleInstance vm = client.getVirutalMachineByName("cats-ui");
+    System.out.println(vm.getIPAddress().getHostAddress());
+    System.out.println(vm.getPublicIPs().size());
+    System.out.println(vm.getNetworkInterfaces().size());
+    System.out.println(vm.getHostName());
+    
+    //System.out.println(vm.getPublicIPs().get(0).getAddress());
+  }
+  
   //@Test
   public void testCreateSystemVM() throws Exception {
     Future<OperationStatusResponse> result = client.createSystemVM("cats-group-sys");
@@ -84,7 +95,7 @@ public class AzureTest {
     Assert.assertNull(vm);
   }
   
-  @Test
+  //@Test
   public void testStartStopVMs() throws Exception {
     RoleInstance vm1 = client.getVirutalMachineByName("cats-ui");
     Assert.assertEquals("cats-ui", vm1.getRoleName());
