@@ -90,7 +90,7 @@ public class AzureClient {
     return mgmClient;
   }
   
-  public String[] getAvailabilityOfferingNames() {
+  public static String[] getAvailabilityOfferingNames() {
     return new String[] { VirtualMachineRoleSize.EXTRASMALL, VirtualMachineRoleSize.SMALL, VirtualMachineRoleSize.MEDIUM };
   }
   

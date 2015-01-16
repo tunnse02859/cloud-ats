@@ -52,8 +52,7 @@ public class VMCreator {
     
     String normalName = new StringBuilder().append(company.getString("name")).append("-jenkins").toString();
     String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
-    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, "gitlab-jenkins", "Large Instance", null);
-    
+    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, "gitlab-jenkins", "Large Instance", null);    
     String vmId = response[0];
     String jobId = response[1];
     

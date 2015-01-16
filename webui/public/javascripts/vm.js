@@ -13,22 +13,31 @@ $(document).ready(function() {
       $('.cloud.btn.finish').hide();
     }
     if (data.step === 3 && data.direction === 'next') {
-      var cloudstackApiUrl = $("input[name='cloudstack-api-url']").val();
-      var cloudstackApiKey = $("input[name='cloudstack-api-key']").val();
-      var cloudstackApiSecret = $("input[name='cloudstack-api-secret']").val();
-      var data = "cloudstack-api-url="+cloudstackApiUrl+"&cloudstack-api-key="+cloudstackApiKey+"&cloudstack-api-secret="+cloudstackApiSecret;
-      var container = $(".step-content #step4");
-      $.ajax({
-        url: "/portal/vm/so",
-        dataType: "html",
-        data: data,
-        async: false,
-        success: function(data) {
-          $(container).html(data);
-        }
-      });
-      $('.cloud.btn.next').hide();
-      $('.cloud.btn.finish').show();
+    	var container = $(".step-content #step4");
+    	var checkedService =$('input[name=vmCloudService]:checked').val();
+		if(checkedService=="apiCloudStack"){
+		  var cloudstackApiUrl = $("input[name='cloudstack-api-url']").val();
+	      var cloudstackApiKey = $("input[name='cloudstack-api-key']").val();
+	      var cloudstackApiSecret = $("input[name='cloudstack-api-secret']").val();
+	      var data = "cloudstack-api-url="+cloudstackApiUrl+"&cloudstack-api-key="+cloudstackApiKey+"&cloudstack-api-secret="+cloudstackApiSecret;	      
+	      $.ajax({
+	        url: "/portal/vm/so",
+	        dataType: "html",
+	        data: data,
+	        async: false,
+	        success: function(data) {
+	          $(container).html(data);
+	        }
+	      });	    		
+	      }else if(checkedService=="apiAzure"){	    	  
+	    		
+	      }else if(checkedService=="apiAmazon"){
+	    		
+	      }else{
+    		
+	      } 
+	    $('.cloud.btn.next').hide();
+	    $('.cloud.btn.finish').show();  
     }
   });
   
@@ -57,7 +66,25 @@ $(document).ready(function() {
   
   $('.cloud.btn.next').on('click', function () {
     $('.cloud.wizard').wizard('next', 'foo');
+  });  
+  
+  
+  $('input[name=vmCloudService]:radio').on('change', function (e, data) { 	  
+	  var activeDiv =$(this).val();	   
+	  var apiDivContainer=$("#container_div_apivm");
+	  $(".apivm").remove();
+	  var data = "service="+activeDiv;	      
+      $.ajax({
+        url: "/portal/vm/vmapi",
+        dataType: "html",
+        data: data,
+        async: false,
+        success: function(data) {        	
+          $(apiDivContainer).html(data);
+        }
+      });	  
   });
+  
 
   /* Cloud VM list
    ===================================================== */
