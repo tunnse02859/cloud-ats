@@ -21,7 +21,8 @@ libraryDependencies ++= Seq(
 	"com.microsoft.azure" % "azure-management-network" % "0.7.0",
 	"com.sun.jersey" % "jersey-core" % "1.13",
 	"com.sun.jersey" % "jersey-client" % "1.13",
-	"com.sun.jersey" % "jersey-json" % "1.13"
+	"com.sun.jersey" % "jersey-json" % "1.13",
+	"junit" % "junit" % "4.8.2"
 )     
 
 resolvers += (

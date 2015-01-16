@@ -87,6 +87,8 @@ GET     /portal/vm/l/:g/:s         controllers.vm.VMController.vmLog(g, s)
 POST    /portal/vm/o/c/:g          controllers.vm.VMController.saveOffering(g)      
 GET     /portal/vm/p               controllers.vm.VMController.propertiesView()
 POST    /portal/vm/p/s             controllers.vm.VMController.saveProperties()
+GET     /portal/vm/vmapi           controllers.vm.VMController.apivmView()
+
 
 ############################# Performance Test ################################
 

@@ -8,12 +8,12 @@
       <li class="active" data-target="#step1">
         <span class="badge badge-info">1</span>GitLab
       </li>
-      <li data-target="#step2"><span class="badge">2</span>Chef</li>
+      <li data-target="#step2"><span class="badge">2</span>Default User</li>
       <li data-target="#step3"><span class="badge">3</span>Cloud API</li>
       <li data-target="#step4"><span class="badge">4</span>Offering</li>
     </ul>
   </div>
-  <form class="form-horizontal" action="@routes.VMController.doWizard()" method="post">
+  <form class="form-horizontal" action="@routes.VMController.doWizard()" method="post" enctype="multipart/form-data">
   <div class="step-content">
     
     <div id="step1" class="step-pane active" style="margin-top: 20px;">
@@ -27,26 +27,25 @@
       
     </div>
     
-    <div id="step2" class="step-pane" style="margin-top: 20px;">
+    <div id="step2" class="step-pane" style="margin-top: 20px;">     
       
       <div class="control-group">
-        <label class="control-label">Chef Workstation</label>
+        <label class="control-label">Default user</label>
         <div class="controls">
-          <input required="required" type="text" name="chef-workstation-ip" placeholder="Workstation IP">
+          <input required="required" type="text" name="default-user" placeholder="Username">
         </div>
       </div>
-      
-      <div class="control-group">
-        <label class="control-label">Username</label>
-        <div class="controls">
-          <input required="required" type="text" name="chef-username" placeholder="Username">
-        </div>
-      </div>
-      
       <div class="control-group">
         <label class="control-label">Password</label>
         <div class="controls">
-          <input required="required" type="password" name="chef-password" placeholder="Password">
+          <input required="required" type="password" name="default-password" placeholder="Password">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Confirm Password</label>
+        <div class="controls">
+          <input required="required" type="password" name="confirm-default-password" placeholder="Confirm Password">
         </div>
       </div>
 
@@ -55,57 +54,98 @@
     <div id="step3" class="step-pane" style="margin-top: 20px;">
       
       <div class="control-group">
+       
         <div class="controls">
-        <label class="radio">
-          <input type="radio" checked="checked"> CloudStack
+        <div class="radio ">
+        <label>
+          <input type="radio" name="vmCloudService" id="vmCloudService2" value="apiAzure" checked> Azure Web Service
         </label>
-        <label class="radio">
-          <input type="radio" disabled="disabled"> Amazon Web Service
+        </div>
+        <div class="radio">
+        <label >
+          <input type="radio" name="vmCloudService" id="vmCloudService1" value="apiCloudStack" disabled > CloudStack
         </label>
+        </div>        
+        
+        <div class="radio disabled">
+        <label >
+          <input type="radio" name="vmCloudService" id="vmCloudService3" value="apiAmazon" disabled> Amazon Web Service
+        </label>
+        </div>
         </div>
       </div>
       <legend></legend>
-      
-      <div class="control-group">
-        <label class="control-label">CloudStack User</label>
-        <div class="controls">
-          <input required="required" type="text" name="cloudstack-username" placeholder="Username">
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">CloudStack Password</label>
-        <div class="controls">
-          <input required="required" type="password" name="cloudstack-password" placeholder="Password">
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">CloudStack API</label>
-        <div class="controls">
-          <input required="required" type="text" name="cloudstack-api-url" placeholder="URL">
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">API Key</label>
-        <div class="controls">
-          <input required="required" type="text" name="cloudstack-api-key" placeholder="Api Key">
-        </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">Secret Key</label>
-        <div class="controls">
-          <input required="required" type="text" name="cloudstack-api-secret" placeholder="Secret Key">
-        </div>
-      </div>
-    </div>
+	<div id="apiAzure" class="apivm">	 
+		<div class="control-group">
+			<label class="control-label">Subscription Id</label>
+			<div class="controls">
+				<input required="required" type="text"
+					name="subscription-id" placeholder="Subscription Id">
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">Keystore Type</label>
+			<div class="controls">
+				<select name="keystore-type">
+					<option value="jks">JKS</option>
+					<option value="jceks">JCEKS</option>					
+					<option value="pkcs12">PKCS12</option>
+				</select>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">Keystore</label>
+			<div class="controls">
+				<input required="required" type="file" name="Keystore-file">
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">Keystore Password</label>
+			<div class="controls">
+				<input required="required" type="password"
+					name="keystore-password">
+			</div>
+		</div>
+	</div>
+
+   </div>
     
     <div id="step4" class="step-pane" style="margin-top: 20px;">
-      
-    </div>
-    
+    <div class="control-group">  
+	  <div class="controls">
+	    <label class="checkbox">
+	      <input checked="checked" type="checkbox" name="ExtraSmall" value="A1">
+	      <label class="label label-blue">Extra Small</label>
+	    </label>
+	    <ul>
+	      <li>CPU Core: 1</li>	     
+	      <li>RAM: 768 MB</li>
+	    </ul>
+	  </div>
+	  
+	  <div class="controls">
+	    <label class="checkbox">
+	      <input checked="checked" type="checkbox" name="Small" value="A2">
+	      <label class="label label-blue">Small</label>
+	    </label>
+	    <ul>
+	      <li>CPU Core: 1</li>	      
+	      <li>RAM: 1792 MB</li>
+	    </ul>
+	  </div>
+	  
+	  <div class="controls">
+	    <label class="checkbox">
+	      <input checked="checked" type="checkbox" name="Medium" value="A3">
+	      <label class="label label-blue">Medium</label>
+	    </label>
+	    <ul>
+	      <li>CPU Core: 2</li>	      
+	      <li>RAM: 3584 MB</li>
+	    </ul>
+	  </div>	  
+	</div>      
+    </div>    
   </div>
   
   <div class="form-actions">

@@ -28,7 +28,7 @@ public class VMWizardIterceptor extends Simple {
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(ctx.session().get("user_id"));
     if (currentUser == null) return Promise.<SimpleResult>pure(redirect("/"));
     
-    if (VMHelper.vmCount() == 0) {
+    if (VMHelper.getSystemProperties().size() == 0) {
       return currentUser.getBoolean("system") ? Promise.<SimpleResult>pure(ok(index.render(wizard.render()))) : Promise.<SimpleResult>pure(forbidden(views.html.forbidden.render()));
     }
     return delegate.call(ctx);

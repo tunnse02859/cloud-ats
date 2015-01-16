@@ -3,6 +3,7 @@
  */
 package helpervm;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +17,8 @@ import models.vm.VMModel.VMStatus;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.component.usersmgt.DataFactory;
 import org.ats.knife.Knife;
+
+import azure.AzureClient;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -167,6 +170,7 @@ public class VMHelper extends AbstractHelper {
     return (String) obj.get("value");
   }
   
+  @Deprecated
   public static CloudStackClient getCloudStackClient() {
     Map<String, String> properties = getSystemProperties();
     String cloudstackApiUrl = properties.get("cloudstack-api-url");
@@ -174,6 +178,20 @@ public class VMHelper extends AbstractHelper {
     String cloudstackApiSecret = properties.get("cloudstack-api-secret");
     return new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
   }
+  
+  public static AzureClient getAzureClient() throws IOException {
+    Map<String, String> properties = getSystemProperties();
+    
+    String subcriptionIdAzure = properties.get("subscription-id");
+    String keystorePassword = properties.get("keystore-password");
+    String keystorePath = properties.get("keystore-path"); 
+    
+    String rootPath=play.Play.application().path().getAbsolutePath();
+    String keystoreLocation = rootPath + keystorePath;
+    return new AzureClient(subcriptionIdAzure, keystoreLocation, keystorePassword);
+  }
+  
+  
   
   public static Knife getKnife() {
     DB db = getDatabase();

@@ -12,6 +12,7 @@ import interceptor.VMWizardIterceptor;
 import interceptor.WithSystem;
 import interceptor.WizardInterceptor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import play.Logger;
+import play.api.mvc.MultipartFormData;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -70,21 +72,16 @@ import play.mvc.WebSocket;
 import play.mvc.With;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
-import views.html.vm.alert;
-import views.html.vm.index;
-import views.html.vm.offering;
-import views.html.vm.offeringbody;
-import views.html.vm.propertiesbody;
-import views.html.vm.terminal;
-import views.html.vm.vmbody;
-import views.html.vm.vmproperties;
-import views.html.vm.vmstatus;
-import views.html.vm.wizard;
+import utils.Util;
+import views.html.vm.*;
+import azure.AzureClient;
 
 import com.cloud.template.VirtualMachineTemplate.TemplateFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
+import com.ning.http.client.FilePart;
 
 import controllers.Application;
 import controllers.organization.Organization;
@@ -101,10 +98,6 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   public static Result index() throws Exception {
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
-
-    if (VMHelper.vmCount() == 0) {
-      return currentUser.getBoolean("system") ? ok(index.render(wizard.render())) : forbidden(views.html.forbidden.render());
-    }
 
     boolean system = checkCurrentSystem();
     Group group = null;
@@ -221,54 +214,75 @@ public class VMController extends Controller {
   @WithSystem
   public static Result doWizard() throws UserManagementException, IOException {
     DynamicForm form = Form.form().bindFromRequest();
+    //get queryString for azure api
+    
+    String subcriptionIdAzure = form.get("subscription-id");
+    String keystoreType = form.get("keystore-type");
+    String keystorePwd = form.get("keystore-password");    
+    String defaultUser = form.get("default-user");
+    String defaultPassword = form.get("default-password");
+    
+    String keystorePath = "";
+    File fileinput = null;
+    play.mvc.Http.MultipartFormData _body = request().body().asMultipartFormData();        
+    play.mvc.Http.MultipartFormData.FilePart keystorefile = _body.getFile("keystore-file");
 
-    Group systemGroup = GroupDAO.getInstance(Application.dbName).find(new BasicDBObject("system", true)).iterator().next();
-
-    String cloudstackApiUrl = form.get("cloudstack-api-url");
-    String cloudstackApiKey = form.get("cloudstack-api-key");
-    String cloudstackApiSecret = form.get("cloudstack-api-secret");
-    String cloudstackUsername = form.get("cloudstack-username");
-    String cloudstackPassword = form.get("cloudstack-password");
-
-    CloudStackClient client = new CloudStackClient(cloudstackApiUrl, cloudstackApiKey, cloudstackApiSecret);
-
+    if (keystorefile != null) {
+      String fileName = keystorefile.getFilename();
+      fileinput = keystorefile.getFile();
+      String rootPath = play.Play.application().path().getAbsolutePath();  
+      String sepPath = System.getProperty("file.separator");
+      keystorePath = sepPath + "project" + sepPath;
+      
+      //uload
+      Util.uploadFile(fileinput, fileName, rootPath + keystorePath);
+      keystorePath = keystorePath + fileName;
+    }
+    
     String gitlabToken = form.get("gitlab-token");
-
-    String chefWorkstationIp = form.get("chef-workstation-ip");
-    String chefUsername = form.get("chef-username");
-    String chefPassword = form.get("chef-password");
-
-    Template template = TemplateAPI.listTemplates(client, TemplateFilter.all, null, "chef-workstation",  null).get(0);
-    VirtualMachine vm = VirtualMachineAPI.listVirtualMachines(client, null, null, null, template.id, null).get(0);
-    VMModel chefWorkstationVM = new VMModel(vm.id, "chef-workstation", systemGroup.getId(), vm.templateName, vm.templateId, chefWorkstationIp, chefUsername, chefPassword);
-    chefWorkstationVM.put("system", true);
-    chefWorkstationVM.put("offering_id", vm.serviceOfferingId);
-
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("cloudstack-api-url", cloudstackApiUrl);
-    properties.put("cloudstack-api-key", cloudstackApiKey);
-    properties.put("cloudstack-api-secret", cloudstackApiSecret);
-    properties.put("cloudstack-username", cloudstackUsername);
-    properties.put("cloudstack-password", cloudstackPassword);
+    properties.put("subscription-id", subcriptionIdAzure);
+    properties.put("keystore-type", keystoreType);
+    properties.put("keystore-password", keystorePwd);
+    properties.put("keystore-path", keystorePath);    
+    properties.put("default-user", defaultUser);
+    properties.put("default-password", defaultPassword);
     properties.put("gitlab-api-token", gitlabToken);
-
+    
+    //insert properties into database
     VMHelper.setSystemProperties(properties);
-    VMHelper.createVM(chefWorkstationVM);
-
-    createOffering(form, client);
-
+    
+    //insert offer
+    createOffering(form);
     return redirect(controllers.vm.routes.VMController.index());
   }
 
-  private static void createOffering(DynamicForm form, CloudStackClient client) throws IOException {
-    List<ServiceOffering> list = ServiceOfferingAPI.listServiceOfferings(client, null, null);
-    for (ServiceOffering offering : list) {
-      OfferingModel model = new OfferingModel(offering.id, offering.name, offering.cpuNumber, offering.cpuSpeed, offering.memory);
-      model.put("disabled", form.get("offering-" + offering.id) != null ? false : true);
+  private static void createOffering(DynamicForm form) throws IOException {
+    String[] list = AzureClient.getAvailabilityOfferingNames();
+    for (String offering : list) {
+      OfferingModel model = null;
+      
+      switch (offering) {
+      case VirtualMachineRoleSize.EXTRASMALL:
+        model = new OfferingModel(offering, offering, 1, -1, 768);
+        model.put("disabled", form.get(offering) != null ? false : true);
+        break;
+      case VirtualMachineRoleSize.SMALL:
+        model = new OfferingModel(offering, offering, 1, -1, 1792);
+        model.put("disabled", form.get(offering) != null ? false : true);
+        break;
+      case VirtualMachineRoleSize.MEDIUM:
+        model = new OfferingModel(offering, offering, 2, -1, 3584);
+        model.put("disabled", form.get(offering) != null ? false : true);
+        break;
+      default:
+        break;
+      }
+      
       OfferingHelper.createOffering(model);
     }
   }
-
+  
   @With(VMWizardIterceptor.class)
   public static Result viewConsoleURL(String vmId) {
     String cloudstackApiUrl = VMHelper.getSystemProperty("cloudstack-api-url");
@@ -518,4 +532,26 @@ public class VMController extends Controller {
   public static boolean checkCurrentSystem() throws UserManagementException {
     return Organization.isSystem(UserDAO.getInstance(Application.dbName).findOne(session("user_id")));
   }
+  
+  //get template render form input apikey
+  
+  @WithSystem
+  public static Result apivmView() throws Exception {
+    String service = request().getQueryString("service");  
+    Html html =null;
+    if("apiCloudStack".equalsIgnoreCase(service)){
+      html=cloudstacktemplate.render();
+    }else if("apiAzure".equalsIgnoreCase(service)){
+      html=azuretemplate.render();
+    }else if("apiAmazon".equalsIgnoreCase(service)){
+      html=amazontemplate.render();
+    }else{
+      html=Html.apply( "<h1>Default template</h1>");
+    } 
+    return ok(html);
+  }
+  
+ 
+  
+  
 }
