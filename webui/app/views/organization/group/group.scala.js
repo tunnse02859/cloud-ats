@@ -91,7 +91,10 @@ $(document).ready(function(){
     form.find(":input").each(function(){
       if (this.value == '') this.disabled = true;
     })
-    
+    if(!$(".form-search").find("input[name=name]").val() && !$(".form-search").find("input[name=level]").val()){
+      $(".org-left ul li.group a").click();
+      return false;
+    }
     var values = form.serialize();
     form.find(":input:disabled").prop('disabled',false);
     
