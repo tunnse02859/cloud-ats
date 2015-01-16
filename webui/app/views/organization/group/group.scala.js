@@ -33,6 +33,7 @@ $(document).ready(function(){
     })
   }
   
+ 
   //Link on left-menu
   $("#main").on("click", ".org-body .org-left a", function() {
     
@@ -95,16 +96,27 @@ $(document).ready(function(){
     form.find(":input:disabled").prop('disabled',false);
     
     var text = $(form).find(":input[value!='']").serialize();
+    
+    //$(hiden_name).val(name);
+    
     $.ajax({
       method: "GET",
       url: ajaxURL,
       data: values,
       dataType: "json",
       success: function(data) {
-        $(".org-body .org-right table.org-group tr.group").hide();
-        $(data.groups).each(function() {
-          $("#group-" + this).show();
-        });
+        updateByAjax(data);
+        
+        var hidden_name = $(".pagination input:hidden[name=hidden_name]");
+        $(hidden_name).val(data.name);
+        var pagination = $(".pagination ul li");
+        var len = $(pagination).length;
+        if(len==2){
+          $(pagination).addClass("disabled");
+        }
+        else {
+          $(".pagination ul li:nth-child(2)").addClass("active");
+        }
       },
       error: function() {
         location.reload();
@@ -271,5 +283,43 @@ $(document).ready(function(){
           location.reload();
         }
      });
-    }
+   }
+  
+  // function to handle click number page after filter
+   $("#main").on("click",".pagination ul li a.pageNumberFilter", function () {
+     var activePage = $(this).parent().parent().find('li.active a.pageNumberFilter').text();
+     var current = $(this).text();
+     
+     if(activePage == current){
+      
+       return false;
+     }
+     
+     var ajaxURL = $(this).attr("ajax-url");
+   
+     var form = $(this).parent("form");
+     form.find(":input").each(function(){
+       if (this.value == '') this.disabled = true;
+     })
+     var name = $('form').find("input[name=name]").val();
+     var level = $('form').find("input[name=level]").val();
+     var values = form.serialize();
+     form.find(":input:disabled").prop('disabled',false);
+     
+     var text = $(form).find(":input[value!='']").serialize();
+     $.ajax({
+       method: "GET",
+       url: ajaxURL+"&name="+name+"&level="+level+"",
+       data: values,
+       dataType: "json",
+       success: function(data) {
+     
+         updateByAjax(data);
+         
+       },
+       error: function() {
+         location.reload();
+       }
+     });
+   });
 });

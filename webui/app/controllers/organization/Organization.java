@@ -44,6 +44,7 @@ import views.html.organization.feature.feature;
 import views.html.organization.feature.features;
 import views.html.organization.group.group;
 import views.html.organization.group.groups;
+import views.html.organization.group.filters;
 import views.html.organization.role.role;
 import views.html.organization.role.roles;
 import views.html.organization.user.user;
@@ -208,15 +209,19 @@ public class Organization extends Controller {
     String nameGroup = currentGroup.getString("name");
     Set<Group> groupsSetChildren = GroupDAO.getInstance(Application.dbName).getGroupChildrenBySize(currentGroup, 10, currentPageNumber);
     List<Group> groupsListChildren = new ArrayList<Group>(groupsSetChildren);
-    
     ArrayNode array = Json.newObject().arrayNode();
     ObjectNode json = null;
     for (Group g : groupsListChildren) {
       json = Json.newObject();
+      List<Group> groups = GroupDAO.getInstance(Application.dbName).buildParentTree(g);
+      ArrayNode arrayChild = json.putArray("ids");
       json.put("name", g.getString("name"));
       json.put("ancensor", nameGroup );
       json.put("childrenSize", g.getAllChildren().size());
       json.put("level", g.getString("level"));
+      for(int i = 0; i < groups.size(); i ++){
+        arrayChild.add(groups.get(i).getId());
+      }
       json.put("userSize", g.getUsers().size());
       json.put("roleSize", g.getRoles().size());
       json.put("featureSize", g.getFeatures().size());
@@ -464,6 +469,19 @@ public class Organization extends Controller {
     return -1;
   }
   
+  public static List<Group> getGroupByFilter(Group group, int currentPage, int size, BasicDBObject query) throws UserManagementException{
+    
+    Set<Group> filter = new HashSet<Group>();
+    filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
+    
+    List<Group> listGroup = new ArrayList<Group>(filter);
+    List<Group> all = new ArrayList<Group>();
+    for(int i =(currentPage -1) * size;( (i < currentPage * size) && i < listGroup.size()); i ++){
+      all.add(listGroup.get(i));
+    }
+    return all;
+    
+  }
   /**
    * Filter group and build presentation of content. The content should update by ajax.
    * @return
@@ -472,12 +490,85 @@ public class Organization extends Controller {
   public static Result filter(String nav) throws UserManagementException {
     
     Map<String, String[]> parameters = request().queryString();
-    
     Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-    
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     if ("group".equals(nav)) {
-
       Set<Group> filter = new HashSet<Group>();
+      if (current.getBoolean("system")) {
+        
+        BasicDBObject query = new BasicDBObject();
+        
+        if (parameters.containsKey("name")) {
+          String name = parameters.get("name")[0];
+          query.put("$text", new BasicDBObject("$search", name));
+        }
+        if (parameters.containsKey("level")) {
+          int level = Integer.parseInt(parameters.get("level")[0]);
+          query.put("level", level);
+        }
+        
+        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
+        
+        ObjectNode json = Json.newObject();
+        ArrayNode array = json.putArray("groups");
+        for (Group g : filter) {
+          array.add(g.getId());
+        }
+        return ok(json);
+      } 
+      else {
+        int pageNumber = 1;
+        if(request().getQueryString("page") != null){
+          pageNumber = Integer.parseInt(request().getQueryString("page"));
+        }
+        ObjectNode jsonFilter = Json.newObject();
+
+        Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+
+        //Html body = bodyComposite(request().queryString());
+        Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+
+        StringBuilder sb = new StringBuilder();
+        LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(current);
+        for (Group parent : parents) {
+          sb.append(" / ").append(parent.getString("name"));
+        }
+        sb.append(" / ").append(current.getString("name"));
+
+
+        BasicDBObject query = new BasicDBObject();
+        String name="";
+        if (parameters.containsKey("name") && parameters.get("name")[0] != null && !"".equals(parameters.get("name")[0])) {
+           name= parameters.get("name")[0];
+          query.put("$text", new BasicDBObject("$search", name));
+        }
+       
+        String level = null ;
+        if (parameters.containsKey("level") && parameters.get("level")[0] != null && parameters.get("level")[0] != "") {
+          level = parameters.get("level")[0];
+          query.put("level", Integer.parseInt(level));
+        }
+        List<Group> all = getGroupByFilter(current, pageNumber, 10, query);
+        StringBuilder sb2 = new StringBuilder();
+        for (Group g : all) {
+          sb2.append(group.render(g));
+        }
+        int records = GroupDAO.getInstance(Application.dbName).find(query).size();
+        int check = records % 10;
+        if(check != 0){
+          records =(records - check) + 10;
+        }
+        Html body = filters.render(new Html(sb2),isSystem(currentUser), records, current,pageNumber,name,level );
+
+        jsonFilter.put("breadcrumb", breadcrumb.toString());
+        jsonFilter.put("navbar", sb.toString());
+        jsonFilter.put("leftmenu", leftMenu.toString());
+        jsonFilter.put("body", body.toString());
+        jsonFilter.put("group", current.getId());
+        jsonFilter.put("name", name);
+        return ok(jsonFilter);
+      }
+      /*Set<Group> filter = new HashSet<Group>();
       
       if (current.getBoolean("system")) {
         
@@ -499,7 +590,6 @@ public class Organization extends Controller {
         for (Group g : filter) {
           array.add(g.getId());
         }
-        
         return ok(json);
       } else {
         List<Group> all = listGroupVisible();
@@ -530,7 +620,7 @@ public class Organization extends Controller {
         }
         
         return ok(json);
-      }
+      }*/
     } else if ("user".equals(nav)) {
       
       Set<User> filter = new HashSet<User>();
