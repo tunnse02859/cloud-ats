@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -79,6 +80,7 @@ import azure.AzureClient;
 import com.cloud.template.VirtualMachineTemplate.TemplateFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 import com.ning.http.client.FilePart;
@@ -318,32 +320,37 @@ public class VMController extends Controller {
   public static Result vmAction(String action, final String vmId) throws Exception {
 
     if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
-
-    final CloudStackClient client = VMHelper.getCloudStackClient();
+    
+    final AzureClient azureClient = VMHelper.getAzureClient();
 
     if ("start".equals(action)) {
-      VirtualMachineAPI.startVM(client, vmId);
+      Future<OperationStatusResponse> response = azureClient.startVirtualMachineByName(vmId);
+      response.get();
+      Logger.info("Start vm " + vmId + "successfully");
     } else if ("stop".equals(action)) {
-      VirtualMachineAPI.stopVM(client, vmId, false);
+      Future<OperationStatusResponse> response = azureClient.stopVirtualMachineByName(vmId);      
+      response.get();
+      Logger.info("Stop vm " + vmId + "successfully");
     } else if ("restore".equals(action)) {
-      VirtualMachineAPI.restoreVM(client, vmId, null);
+      
+//      VirtualMachineAPI.restoreVM(client, vmId, null);
     } else if ("destroy".equals(action)) {
-      final VMModel vm = VMHelper.getVMByID(vmId);
-
-      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return forbidden(views.html.forbidden.render());
-
-      VMHelper.removeVM(vm);
-      
-      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-      VMHelper.getKnife().deleteNode(vm.getName());
-      
-      try {
-        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-      } catch (IOException e) {
-        Logger.debug("Could not release jenkins node ", e);
-      }
-      
-      VirtualMachineAPI.destroyVM(client, vmId, true);
+//      final VMModel vm = VMHelper.getVMByID(vmId);
+//
+//      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return forbidden(views.html.forbidden.render());
+//
+//      VMHelper.removeVM(vm);
+//      
+//      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+//      VMHelper.getKnife().deleteNode(vm.getName());
+//      
+//      try {
+//        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+//      } catch (IOException e) {
+//        Logger.debug("Could not release jenkins node ", e);
+//      }
+//      
+//      VirtualMachineAPI.destroyVM(client, vmId, true);
       
     }
 

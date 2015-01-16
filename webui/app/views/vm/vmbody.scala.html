@@ -17,13 +17,16 @@ $(document).ready(function() {
      var tr = $("tr.vm-status-" + this.id);
      if ($(tr).length > 0) {
        var span = $(tr).find("td.status span.badge").html(this.status);
-       if(this.status === "Running") {
+       if(this.status == "Running") {
          $(span).removeClass();
          $(span).addClass("badge badge-green");
+		 $(tr).find(".btn.start").hide();
          $(tr).find(".btn.stop,.btn.restore,.btn.destroy").show();
-       } else if(this.status === "Stopped") {
+       } else if(this.status == "Stopped") {
          $(span).removeClass();
          $(span).addClass("badge badge-red");
+         
+		 $(tr).find(".btn.stop").hide();
          $(tr).find(".btn.start,.btn.restore,.btn.destroy").show();
        } else {
          $(tr).find(".btn.stop,.btn.start,.btn.restore,.btn.destroy").hide();
