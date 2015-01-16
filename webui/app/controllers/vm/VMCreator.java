@@ -11,10 +11,10 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
 import models.vm.OfferingModel;
 import models.vm.VMModel;
@@ -32,11 +32,14 @@ import org.ats.jenkins.JenkinsSlave;
 import org.ats.knife.Knife;
 
 import play.Logger;
-import utils.LogBuilder;
+import azure.AzureClient;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.microsoft.windowsazure.core.OperationStatusResponse;
+import com.microsoft.windowsazure.management.compute.models.RoleInstance;
+import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -48,89 +51,37 @@ public class VMCreator {
   
   public static VMModel createCompanySystemVM(Group company) throws Exception {
     
-    CloudStackClient client = VMHelper.getCloudStackClient();
+    AzureClient azureClient = VMHelper.getAzureClient();
     
     String normalName = new StringBuilder().append(company.getString("name")).append("-jenkins").toString();
     String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
-    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, "gitlab-jenkins", "Large Instance", null);    
-    String vmId = response[0];
-    String jobId = response[1];
     
-    Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    while (!job.getStatus().done()) {
-      job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    }
+    Future<OperationStatusResponse> response = azureClient.createSystemVM(name);
+    OperationStatusResponse status = response.get();
+    Logger.info("Create system vm " + name + " has been " + status.getStatus());
     
-    if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-      
-      VirtualMachine vm = VirtualMachineAPI.findVMById(client, vmId, null);
-      VMModel vmModel = new VMModel(vm.id, name, company.getId(), vm.templateName, vm.templateId, vm.nic[0].ipAddress, "ubuntu", "ubuntu");
-      vmModel.put("system", true);
-      vmModel.put("jenkins", true);
-      vmModel.put("offering_id", vm.serviceOfferingId);
-      vmModel.put("normal_name", normalName);
-      VMHelper.createVM(vmModel);
-      
-      //edit `/etc/hosts` file
-      StringBuilder sb = new StringBuilder();
-      LogBuilder.log(sb, "Checking SSHD on " + vmModel.getPublicIP());
-      if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
-        LogBuilder.log(sb, "Connection is established");
-        
-        Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
-        
-        //sudo
-        ChannelExec channel = (ChannelExec) session.openChannel("exec");
-        String command = "sed 's/127.0.1.1/" + vmModel.getPublicIP() + "/' /etc/hosts > /tmp/hosts";
-        channel.setCommand(command);
-        channel.connect();
-        LogBuilder.log(sb, "Executed command: " + command);
-        channel.disconnect();
-        
-        //replace hosts
-        channel = (ChannelExec) session.openChannel("exec");
-        command = "sudo -S -p '' cp /tmp/hosts /etc/hosts";
-        channel.setCommand(command);
-        OutputStream out = channel.getOutputStream();
-        channel.connect();
-        
-        out.write((vmModel.getPassword() + "\n").getBytes());
-        out.flush();
-        
-        LinkedList<String> queue = new LinkedList<String>();
-        int exitCode = SSHClient.printOut(queue, channel);
-        LogBuilder.log(sb, "Executed command: " + command);
-        
-        for (String s : queue) {
-          LogBuilder.log(sb, s);
-        }
-        LogBuilder.log(sb, "exit code: " + exitCode);
-        channel.disconnect();
-        
-        //disconnect session
-        session.disconnect();
-      } else {
-        LogBuilder.log(sb, "Cloud not establish connection in 120s");
+    
+    RoleInstance vm = azureClient.getVirutalMachineByName(name);
+    
+    VMModel vmModel = new VMModel(vm.getRoleName(), name, company.getId(), "cats-sys-image", "cats-sys-image", 
+        vm.getIPAddress().getHostAddress(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+    vmModel.put("system", true);
+    vmModel.put("jenkins", true);
+    vmModel.put("offering_id", VirtualMachineRoleSize.MEDIUM);
+    vmModel.put("normal_name", normalName);
+    VMHelper.createVM(vmModel);
+
+    List<OfferingModel> list = OfferingHelper.getEnableOfferings();
+    Collections.sort(list, new Comparator<OfferingModel>() {
+      @Override
+      public int compare(OfferingModel o1, OfferingModel o2) {
+        return o2.getMemory() - o1.getMemory();
       }
-      
-      vmModel.put("log", sb.toString());
-      VMHelper.updateVM(vmModel);
-      
-      List<OfferingModel> list = OfferingHelper.getEnableOfferings();
-      Collections.sort(list, new Comparator<OfferingModel>() {
-        @Override
-        public int compare(OfferingModel o1, OfferingModel o2) {
-          return o2.getMemory() - o1.getMemory();
-        }
-      });
-      
-      OfferingModel defaultOffering = list.get(0);
-      OfferingHelper.addDefaultOfferingForGroup(company.getId(), defaultOffering.getId());
-      return vmModel;
-    } else {
-      Logger.error("Could not create system vm for company " + company.getString("name"));
-      return createCompanySystemVM(company);
-    }
+    });
+
+    OfferingModel defaultOffering = list.get(0);
+    OfferingHelper.addDefaultOfferingForGroup(company.getId(), defaultOffering.getId());
+    return vmModel;
   }
   
   public static VMModel createNormalGuiVM(Group company) throws Exception {
