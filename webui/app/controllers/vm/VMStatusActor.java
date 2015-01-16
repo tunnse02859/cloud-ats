@@ -21,11 +21,13 @@ import scala.concurrent.duration.Duration;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.microsoft.windowsazure.management.compute.models.RoleInstance;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import azure.AzureClient;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -37,7 +39,7 @@ public class VMStatusActor extends UntypedActor {
   
   static ActorRef actor = Akka.system().actorOf(Props.create(VMStatusActor.class));
   
-  final static Cancellable canceller = Akka.system().scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
+  final static Cancellable canceller = Akka.system().scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
       actor,
       "Check",
       Akka.system().dispatcher(),
@@ -53,14 +55,26 @@ public class VMStatusActor extends UntypedActor {
       getSender().tell("OK", getSelf());
     } else if (msg.equals("Check")) {
       for (VMChannel channel : channels.values()) {
-        CloudStackClient client = VMHelper.getCloudStackClient();
+        
+        AzureClient azureClient = VMHelper.getAzureClient();
+        
         ObjectNode jsonObj = Json.newObject();
         ArrayNode array = jsonObj.arrayNode();
+        
         for (VMModel sel : VMHelper.getVMsByGroupID(channel.groupId)) {
-          VirtualMachine vm = VirtualMachineAPI.findVMById(client, sel.getId(), null);
+          RoleInstance vm = azureClient.getVirutalMachineByName(sel.getId());
           if (vm == null) return;
-          array.add(Json.newObject().put("id", vm.id).put("status", vm.state));
+          String status = null;
+          if ("ReadyRole".equals(vm.getInstanceStatus())) {
+            status = "Running";
+          } else if ("StoppedDeallocated".equals(vm.getInstanceStatus()) || "StoppedVM".equals(vm.getInstanceStatus())) {
+            status = "Stopped";
+          } else {
+            status = vm.getInstanceStatus();
+          }          
+          array.add(Json.newObject().put("id", vm.getRoleName()).put("status", status));
         }
+        
         jsonObj.put("vms", array);
         channel.out.write(jsonObj);
       }
