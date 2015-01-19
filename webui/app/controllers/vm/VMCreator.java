@@ -6,8 +6,6 @@ package controllers.vm;
 import helpervm.OfferingHelper;
 import helpervm.VMHelper;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,11 +18,6 @@ import models.vm.OfferingModel;
 import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
 
-import org.ats.cloudstack.AsyncJobAPI;
-import org.ats.cloudstack.CloudStackClient;
-import org.ats.cloudstack.VirtualMachineAPI;
-import org.ats.cloudstack.model.Job;
-import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.jenkins.JenkinsMaster;
@@ -35,7 +28,6 @@ import play.Logger;
 import azure.AzureClient;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.RoleInstance;
@@ -85,17 +77,19 @@ public class VMCreator {
   }
   
   public static VMModel createNormalGuiVM(Group company) throws Exception {
-    return createNormalVM(company, "Gui", "jenkins-slave", "jenkins-slave-gui");
+    return createNormalVM(company, "Gui", "cats-ui-image");
   }
   
   public static VMModel createNormalNonGuiVM(Group company) throws Exception {
-    return createNormalVM(company, "Non-Gui", "jenkins-slave-non-ui", "jenkins-slave", "jmeter");
+    return createNormalVM(company, "Non-Gui", "cats-non-ui-image");
   }
   
   public static Map<String, ConcurrentLinkedQueue<String>> QueueHolder = new HashMap<String, ConcurrentLinkedQueue<String>>();
 
-  public static VMModel createNormalVM(Group company, String subfix, String template, final String ...recipes) throws IOException, JSchException {
-    CloudStackClient client = VMHelper.getCloudStackClient();
+  public static VMModel createNormalVM(Group company, final String subfix, String template, final String ...recipes) throws Exception {
+
+    AzureClient azureClient = VMHelper.getAzureClient();
+    
     OfferingModel offering = OfferingHelper.getDefaultOfferingOfGroup(company.getId()).getOffering();
     final VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("system", true).append("jenkins", true)).get(0);
     
@@ -104,109 +98,88 @@ public class VMCreator {
     final String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     QueueHolder.put(name, new ConcurrentLinkedQueue<String>());
     
-    String[] response = VirtualMachineAPI.quickDeployVirtualMachine(client, name, template, offering.getName(), null);
-    String vmId = response[0];
-    String jobId = response[1];
-    Job job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    while (!job.getStatus().done()) {
-      job = AsyncJobAPI.queryAsyncJobResult(client, jobId);
-    }
+    Future<OperationStatusResponse> response = azureClient.createVM(name, template, offering.getId());    
+    OperationStatusResponse status = response.get();
+    Logger.info("Create " + subfix + " vm " + name + " has been " + status.getStatus());    
     
-    if (job.getStatus() == org.apache.cloudstack.jobs.JobInfo.Status.SUCCEEDED) {
-      VirtualMachine guiVM = VirtualMachineAPI.findVMById(client, vmId, null);
-      final VMModel vmModel = new VMModel(guiVM.id, name, company.getId(), guiVM.templateName, guiVM.templateId, guiVM.nic[0].ipAddress, "ubuntu", "ubuntu");
-      vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
-      vmModel.put("system", false);
-      vmModel.put("offering_id", guiVM.serviceOfferingId);
-      vmModel.setStatus(VMStatus.Initializing);
-      vmModel.put("normal_name", normalName);
-      VMHelper.createVM(vmModel);
+    //get vm by name
+    RoleInstance vm = azureClient.getVirutalMachineByName(name);    
+    final VMModel vmModel = new VMModel(vm.getRoleName(), name, company.getId(), template, template, 
+        vm.getIPAddress().getHostAddress(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+    vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
+    vmModel.put("system", false);
+    vmModel.put("offering_id", offering.getId());
+    vmModel.setStatus(VMStatus.Initializing);
+    vmModel.put("normal_name", normalName);
+    VMHelper.createVM(vmModel);
 
-      //Run recipes
-      Thread thread = new Thread() {
-        @Override
-        public void run() {
-          ConcurrentLinkedQueue<String> queue = QueueHolder.get(name);
-          try {
-            queue.add("Checking SSHD on " + vmModel.getPublicIP());
-            if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
-              queue.add("Connection is established");
-              
-              Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
-              
-              //sudo
-              ChannelExec channel = (ChannelExec) session.openChannel("exec");
-              String command = "echo '" + jenkins.getPublicIP() + "' > ~/jenkins.master";
+    //Run recipes
+    Thread thread = new Thread() {
+      @Override
+      public void run() {
+        ConcurrentLinkedQueue<String> queue = QueueHolder.get(name);
+        try {
+          queue.add("Checking SSHD on " + vmModel.getPublicIP());
+          if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
+            
+            queue.add("Connection is established");
+            Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
+            
+            //sudo
+            ChannelExec channel = (ChannelExec) session.openChannel("exec");
+            //create jenkins slave
+            JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);           
+            String inetAddress = vmModel.getPublicIP();          
+            
+            Map<String, String> env = new HashMap<String, String>();
+            if ("Gui".equals(subfix)) env.put("DISPLAY", ":0");
+            JenkinsSlave slave = new JenkinsSlave(master, inetAddress, env);
+
+            if (slave.join()) {
+              System.out.println("Create slave " + inetAddress + " sucessfully");
+            } else {
+              System.out.println("Can not create slave" + inetAddress);
+            }
+            
+            //run Jmeter
+            if("Non-Gui".equals(subfix)){
+              String command = "nohup jmeter-start 2>/dev/null &";
               channel.setCommand(command);
               channel.connect();
               queue.add("Execute command: " + command);
               channel.disconnect();
-              
-              //TODO:Workaround for unclean vm template
-              channel = (ChannelExec) session.openChannel("exec");
-              command = "sudo -S -p '' rm /etc/chef/client.rb";
-              channel.setCommand(command);
-              OutputStream out = channel.getOutputStream();
-              channel.connect();
-              
-              out.write((vmModel.getPassword() + "\n").getBytes());
-              out.flush();
-              channel.disconnect();
-              
-              channel = (ChannelExec) session.openChannel("exec");
-              command = "sudo -S -p '' rm /etc/chef/client.pem";
-              channel.setCommand(command);
-              out = channel.getOutputStream();
-              channel.connect();
-              
-              out.write((vmModel.getPassword() + "\n").getBytes());
-              out.flush();
-              channel.disconnect();
-              //End
-              
-              Knife knife = VMHelper.getKnife();
-              knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), queue, recipes);
-              
-            } else {
-              queue.add("Cloud not establish connection in 120s");
-            }
-          } catch (Exception e) {
-            Logger.debug("Has an error when create vm", e);
-            queue.add("setup.vm.error");
-          } finally {
-            queue.add("log.exit");
+            }      
+            //End
+            
+            Knife knife = VMHelper.getKnife(jenkins);
+            knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), queue, recipes);
+
+          } else {
+            queue.add("Cloud not establish connection in 120s");
           }
+        } catch (Exception e) {
+          Logger.debug("Has an error when create vm", e);
+          queue.add("setup.vm.error");
+        } finally {
+          queue.add("log.exit");
         }
-      };
-      thread.start();
-      
-      return vmModel;
-    }
+      }
+    };
+    thread.start();
+
+    return vmModel;
+
     
-    return null;
+    
   }
   
-  public static String getAvailableName(Group company, String subfix, int index) throws IOException, JSchException {
-    CloudStackClient client = VMHelper.getCloudStackClient();
+  public static String getAvailableName(Group company, String subfix, int index) throws Exception {
+    AzureClient azureClient = VMHelper.getAzureClient();    
     
     String normalName = new StringBuilder(company.getString("name")).append("-").append(subfix).append("-").append(index).toString();
-
-    String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
-    
-    //remove legacy vm
-    List<VMModel> vms = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("system", false));
-    VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
-    
-    for (VMModel vm : vms) {
-      if (VirtualMachineAPI.findVMById(client, vm.getId(), null) == null) {
-        VMHelper.removeVM(vm);
-        VMHelper.getKnife().deleteNode(vm.getName());
-        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-      }
-    }
-    
-    List<VirtualMachine> list = VirtualMachineAPI.listVirtualMachines(client, null, name, null, null, null);
-    if (list.size() == 0) return normalName;
+    String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());    
+    RoleInstance vm = azureClient.getVirutalMachineByName(name);
+    if (vm == null) return normalName;
     return getAvailableName(company, subfix, index + 1);
   }
   
