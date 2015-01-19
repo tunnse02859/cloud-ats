@@ -119,6 +119,7 @@ public class AzureClient {
     parameters.setProvisionGuestAgent(true);
     parameters.setRoleSize(offering);
     parameters.setVMImageName(template);
+    parameters.setAvailabilitySetName("cloud-ats-set");
     Future<OperationStatusResponse> result = getComputeManagementClient().getVirtualMachinesOperations().createAsync(serviceName, deploymentName, parameters);
     return result;
   }

@@ -19,7 +19,7 @@ public class DataFactory {
   
   static {
     try {
-      client = new MongoClient();
+      client = new MongoClient("cloud-ats.cloudapp.net");
     } catch (UnknownHostException e) {
       throw new RuntimeException(e);
     }
