@@ -10,8 +10,8 @@
     @Organization.count("group")</span></a>
   </li>
   <li class="user @if(nav =="user"){ active }">
-    <a href="@routes.Organization.index()?nav=user&group=@group_id"
-      ajax-url="@routes.Organization.body()?nav=user&group=@group_id">
+    <a href="@routes.Organization.filter("user")?nav=user&group=@group_id"
+      ajax-url="@routes.Organization.filter("user")?nav=user&group=@group_id">
     <i class="icon-user"></i> User <span class="badge pull-right @if(nav =="user"){ badge-primary }">
     @Organization.count("user")</span></a>
   </li>

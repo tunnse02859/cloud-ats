@@ -51,6 +51,7 @@ import views.html.organization.role.roles;
 import views.html.organization.role.rolefilter;
 import views.html.organization.user.user;
 import views.html.organization.user.users;
+import views.html.organization.user.userfilter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -233,9 +234,7 @@ public class Organization extends Controller {
     return ok(array);
   }
   
-  public static Result paginationLeft(String nav) {
-    return ok();
-  }
+  
   /**
    * Build a part of content body base on current state.
    * @param parameters
@@ -538,25 +537,87 @@ public class Organization extends Controller {
     
     return all;
   }
+   
+ /**
+  * 
+  * @param group
+  * @param currentPage
+  * @param size
+  * @param name
+  * @return List Role with size and current from list role by filtering name
+  * @throws UserManagementException
+  */
+ public static List<Role> getRoleByFilter(Group group, int currentPage, int size, String name) throws UserManagementException {
+   List<Role> listRole = getAllRoleByName(group, name);
+   List<Role> all = new ArrayList<Role>();
+   
+   for(int i = (currentPage-1)*size; (i < currentPage *size)&&i < listRole.size(); i ++) {
+     all.add(listRole.get(i));
+   }
+   return all;
+ }
+   /**
+    * 
+    * @param group
+    * @param currentPage
+    * @param size
+    * @return list all user
+    * @throws UserManagementException
+    */
  
+  public static List<User> getUser (Group group, int currentPage, int size) throws UserManagementException{
+      
+      List<User> listUser = new ArrayList<User>(group.getUsers());
+      List<User> all = new ArrayList<User>();
+      
+      for(int i =(currentPage-1)*size; ((i < currentPage *size) && i < listUser.size()); i ++) {
+        all.add(listUser.get(i));
+        
+      }
+      
+      return all;
+    
+  }
+  
   /**
    * 
    * @param group
    * @param currentPage
    * @param size
-   * @param name
-   * @return List Role with size and current from list role by filtering name
+   * @return return list user with email that user use filter feature
    * @throws UserManagementException
    */
-  public static List<Role> getRoleByFilter(Group group, int currentPage, int size, String name) throws UserManagementException {
-    List<Role> listRole = getAllRoleByName(group, name);
-    List<Role> all = new ArrayList<Role>();
+  public static List<User> getUserByFilter(Group group, int currentPage, int size, String email) throws UserManagementException{
     
-    for(int i = (currentPage-1)*size; (i < currentPage *size)&&i < listRole.size(); i ++) {
-      all.add(listRole.get(i));
+    List<User> listUser = getAllUserByEmail(group, email);
+    List<User> all = new ArrayList<User>();
+    
+    for(int i =(currentPage -1) * size; (i < currentPage * size) && i < listUser.size(); i ++){
+      all.add(listUser.get(i));
+    }
+    return all;
+    
+  }
+  
+  /**
+   * 
+   * @param group
+   * @param email
+   * @return list user that has email equal input value by user
+   */
+  public static List<User> getAllUserByEmail(Group group, String email) {
+    
+    List<User> listUser = new ArrayList<User>(group.getUsers());
+    List<User> all = new ArrayList<User>();
+    
+    for(int i = 0; i < listUser.size(); i ++) {
+      if(email.equals(listUser.get(i).getEmail())){
+        all.add(listUser.get(i));
+      }
     }
     return all;
   }
+ 
   /**
    * Filter group and build presentation of content. The content should update by ajax.
    * @return
@@ -718,8 +779,44 @@ public class Organization extends Controller {
        /* for (User u : current.getUsers()) {
           if (filter.contains(u)) array.add(u.getId());
         }*/
-       
-        
+        Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
+        Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
+        StringBuilder sb = new StringBuilder();
+        LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(current);
+        for (Group parent : parents) {
+          sb.append(" / ").append(parent.getString("name"));
+        }
+        sb.append(" / ").append(current.getString("name"));
+       List<User> all;
+       int pageNumber = 1;
+       if(parameters.containsKey("page")){
+         pageNumber = Integer.parseInt(parameters.get("page")[0]);
+        }
+        int records = 0;
+        String email = "";
+        if (parameters.containsKey("email") && !"".equals(parameters.get("email")[0]) && parameters.get("email")[0] != null) {
+          email = parameters.get("email")[0];
+          all = getUserByFilter(current, pageNumber, 2, email);
+          records = getAllUserByEmail(current, email).size();
+        } else {
+          all = getUser(current, pageNumber, 2);
+          records = (int) count("user");
+        }
+        int check = records % 2;
+        if (check != 0) {
+          records = (records - check) + 2;
+        }
+        StringBuilder sb2 = new StringBuilder();
+        for (User u : all) {
+          List<Role> listCurrentRoles = u.getRoles();
+          sb2.append(user.render(u, false,listCurrentRoles));
+          
+        }
+        Html body = userfilter.render(new Html(sb2),false,records, pageNumber, email);
+        json.put("breadcrumb", breadcrumb.toString());
+        json.put("navbar", sb.toString());
+        json.put("leftmenu", leftMenu.toString());
+        json.put("body", body.toString());
       }
       return ok(json);
     } else if ("role".equals(nav)) {
