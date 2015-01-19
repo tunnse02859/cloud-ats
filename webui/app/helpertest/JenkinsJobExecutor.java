@@ -138,7 +138,7 @@ public class JenkinsJobExecutor {
         VMHelper.removeVM(vm);
         VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
         try {
-          VMHelper.getKnife().deleteNode(vm.getName());
+          VMHelper.getKnife(jenkins).deleteNode(vm.getName());
         } catch (Exception e) {
           Logger.debug("Cloud not release chef node", e);
         }
