@@ -30,14 +30,12 @@ import models.vm.OfferingModel;
 import models.vm.VMModel;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.ats.cloudstack.CloudStackAPI;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.cloudstack.ServiceOfferingAPI;
-import org.ats.cloudstack.TemplateAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
 import org.ats.cloudstack.model.ServiceOffering;
-import org.ats.cloudstack.model.Template;
 import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.html.HtmlParser;
 import org.ats.common.html.XPathUtil;
@@ -53,13 +51,11 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.jenkins.JenkinsMaster;
-import org.ats.jenkins.JenkinsSlave;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import play.Logger;
-import play.api.mvc.MultipartFormData;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -74,16 +70,25 @@ import play.mvc.With;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 import utils.Util;
-import views.html.vm.*;
+import views.html.vm.alert;
+import views.html.vm.amazontemplate;
+import views.html.vm.azuretemplate;
+import views.html.vm.cloudstacktemplate;
+import views.html.vm.index;
+import views.html.vm.offering;
+import views.html.vm.offeringbody;
+import views.html.vm.propertiesbody;
+import views.html.vm.terminal;
+import views.html.vm.vmbody;
+import views.html.vm.vmproperties;
+import views.html.vm.vmstatus;
 import azure.AzureClient;
 
-import com.cloud.template.VirtualMachineTemplate.TemplateFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
-import com.ning.http.client.FilePart;
 
 import controllers.Application;
 import controllers.organization.Organization;
@@ -292,7 +297,7 @@ public class VMController extends Controller {
     String cloudstackPassword = VMHelper.getSystemProperty("cloudstack-password");
 
     try {
-      DefaultHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
+      CloseableHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
       String cloudstackConsoleUrl = cloudstackApiUrl.substring(0, cloudstackApiUrl.lastIndexOf('/') + 1) + "console?cmd=access&vm=" + vmId;
       String response = HttpClientUtil.fetch(client, cloudstackConsoleUrl);
 

@@ -12,17 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.Header;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnRouteParams;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 
 /**
@@ -61,20 +56,6 @@ public class HttpClientUtil {
     return httpclient.execute(get);
   }
 
-  public static Cookie addCookie(HttpClient httpclient, String name, String value) {
-    if (httpclient == null) {
-      throw new NullPointerException();
-    }
-    BasicClientCookie cookie = new BasicClientCookie(name, value);
-    ((AbstractHttpClient) httpclient).getCookieStore().addCookie(cookie);
-    return cookie;
-  }
-
-  public static void setProxy(HttpClient httpclient, String proxy, int port) {
-    HttpHost host = new HttpHost(proxy, port, "http");
-    ((AbstractHttpClient) httpclient).getParams().setParameter(
-        ConnRouteParams.DEFAULT_PROXY, host);
-  }
 
   public static byte[] getContentBodyAsByteArray(HttpResponse res) throws IOException {
     InputStream is = res.getEntity().getContent();

@@ -6,12 +6,9 @@ package org.ats.cloudstack;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.ats.cloudstack.model.AbstractModel;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
@@ -33,8 +30,8 @@ import com.fasterxml.jackson.databind.ObjectReader;
  */
 public abstract class CloudStackAPI {
   
-  public static DefaultHttpClient login(CloudStackClient client, String username, String password) throws IOException {
-    DefaultHttpClient http = HttpClientFactory.getInstance();
+  public static CloseableHttpClient login(CloudStackClient client, String username, String password) throws IOException {
+    CloseableHttpClient http = HttpClientFactory.getInstance();
     String url = client.buildCommandURL("command=login&response=json&username=" + username + "&password=" + password);
     HttpClientUtil.fetch(http, url);
     return http;
@@ -43,7 +40,7 @@ public abstract class CloudStackAPI {
   
   protected static String request(CloudStackClient client, String command) throws IOException {
     String url = client.buildCommandURL(command);
-    DefaultHttpClient http = HttpClientFactory.getInstance();
+    CloseableHttpClient http = HttpClientFactory.getInstance();
     return HttpClientUtil.fetch(http, url.replaceAll(" ", "%20"));    
   }
   

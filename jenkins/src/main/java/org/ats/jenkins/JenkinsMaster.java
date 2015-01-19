@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -41,7 +41,7 @@ public class JenkinsMaster {
   }
   
   public boolean isReady() throws IOException {
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     String url = buildURL("api/json");
     HttpResponse response = HttpClientUtil.execute(client, url);
     return response.getStatusLine().getStatusCode() == 200;
@@ -58,7 +58,7 @@ public class JenkinsMaster {
   
   public List<String> listSlaves() throws IOException {
     List<String> slaves = new ArrayList<String>();
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     String json = HttpClientUtil.fetch(client, buildURL("computer/api/json"));
     JSONObject jsonObj = new JSONObject(json);
     JSONArray array = jsonObj.getJSONArray("computer");

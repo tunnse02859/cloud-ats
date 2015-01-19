@@ -16,7 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -94,7 +94,7 @@ public class JenkinsMavenJob {
   
   public byte[] getConsoleOutput(int buildNumber, int start) throws IOException {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/logText/progressiveHtml");
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
     List<NameValuePair> list = new ArrayList<NameValuePair>();
@@ -105,7 +105,7 @@ public class JenkinsMavenJob {
   
   public boolean isBuilding(int buildNumber, long start, long timeout) throws Exception  {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpResponse response = null;
     try {
       response = HttpClientUtil.execute(client, url);
@@ -122,7 +122,7 @@ public class JenkinsMavenJob {
   
   public String getStatus(int buildNumber) throws IOException {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     String response = HttpClientUtil.fetch(client, url);
     JSONObject json = new JSONObject(response);
     return json.getString("result");
@@ -130,7 +130,7 @@ public class JenkinsMavenJob {
   
   public boolean delete() throws IOException {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/doDelete");
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
     HttpResponse res = client.execute(post, httpContext);
@@ -144,7 +144,7 @@ public class JenkinsMavenJob {
    */
   public int submit() throws IOException {
     String url = master.buildURL("createItem");
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
 
@@ -176,7 +176,7 @@ public class JenkinsMavenJob {
   }
   
   public boolean update() throws Exception {
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/configSubmit");
     HttpPost post = new HttpPost(url);
@@ -187,7 +187,7 @@ public class JenkinsMavenJob {
   
   public boolean stop() {
     try{
-      DefaultHttpClient client = HttpClientFactory.getInstance();
+      CloseableHttpClient client = HttpClientFactory.getInstance();
       String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/api/json");
       String body = HttpClientUtil.fetch(client, url);
       System.out.println(body);
@@ -208,7 +208,7 @@ public class JenkinsMavenJob {
   
   public int build() {
     try {
-      DefaultHttpClient client = HttpClientFactory.getInstance();
+      CloseableHttpClient client = HttpClientFactory.getInstance();
       String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/api/json");
       String body = HttpClientUtil.fetch(client, url);
       JSONObject json = new JSONObject(body);

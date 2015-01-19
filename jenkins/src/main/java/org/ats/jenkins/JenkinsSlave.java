@@ -18,7 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -98,7 +98,7 @@ public class JenkinsSlave {
   }
   
   public boolean isOffline() throws IOException {
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     
     String body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
     JSONObject json = new JSONObject(body);
@@ -106,7 +106,7 @@ public class JenkinsSlave {
   }
   
   public boolean join() throws IOException {
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     
     HttpPost post = new HttpPost(master.buildURL("computer/doCreateItem"));
@@ -144,7 +144,7 @@ public class JenkinsSlave {
     if (!master.listSlaves().contains(this.slaveAddress)) return true;
     
     String url = master.buildURL(new StringBuilder("computer/").append(slaveAddress).append("/doDelete").toString());
-    DefaultHttpClient client = HttpClientFactory.getInstance();
+    CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     HttpPost post = new HttpPost(url);
     
