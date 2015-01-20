@@ -7,12 +7,12 @@ $(document).ready(function(){
       location.reload();
     }
   };
-  var len = $(".pagination ul").find('li').length;
+  var len = $(".pagination.group ul").find('li').length;
   if(len==3){
-    $('.pagination ul li:last-child').addClass("disabled");
+    $('.pagination.group ul li:last-child').addClass("disabled");
   }
-  $(".pagination ul li:nth-child(2)").addClass("active");
-  $('.pagination ul li:first-child').addClass("disabled");
+  $(".pagination.group ul li:nth-child(2)").addClass("active");
+  $('.pagination.group ul li:first-child').addClass("disabled");
   
   var updateByAjax = function(data) {
     $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
@@ -52,7 +52,7 @@ $(document).ready(function(){
       dataType: "json",
       success: function(data) {
         updateByAjax(data);
-        $('.pagination ul li:nth-child(2)').addClass('active');
+        $('.pagination.group ul li:nth-child(2)').addClass('active');
       },
       error: function() {
         location.reload();
@@ -110,15 +110,15 @@ $(document).ready(function(){
       success: function(data) {
         updateByAjax(data);
         
-        var hidden_name = $(".pagination input:hidden[name=hidden_name]");
+        var hidden_name = $(".pagination.group input:hidden[name=hidden_name]");
         $(hidden_name).val(data.name);
-        var pagination = $(".pagination ul li");
+        var pagination = $(".pagination.group ul li");
         var len = $(pagination).length;
         if(len==2){
           $(pagination).addClass("disabled");
-        }
-        else {
-          $(".pagination ul li:nth-child(2)").addClass("active");
+        } else {
+          $(".pagination.group ul li:nth-child(2)").addClass("active");
+          $(".pagination.group ul li:nth-child(1)").addClass("disabled");
         }
       },
       error: function() {
@@ -185,7 +185,7 @@ $(document).ready(function(){
   });
   
   // click button previous
-  $("#main").on("click", ".pagination ul li a.prev", function () {
+  $("#main").on("click", ".pagination.group ul li a.prev", function () {
     var current = $(this).parent().parent().find(".active");
     var currentText = $(current).text();
     if(currentText == 1 ){
@@ -197,7 +197,7 @@ $(document).ready(function(){
   });
   
   // click button next
- $("#main").on("click", ".pagination ul li a.next", function () {
+ $("#main").on("click", ".pagination.group ul li a.next", function () {
     var current = $(this).parent().parent().find(".active");
     var currentText = $(current).text();
     var lastPage =  $(this).parent().parent().find('li').length;
@@ -205,19 +205,18 @@ $(document).ready(function(){
     if(currentText == lastPage-2 || lastPage == 3){
       return false;
     }
-    $(current).next().find('a').click();
+    $(current).next().find('a').trigger('click');
     // return false;
   });
  
  // click page number
-  $("#main").on("click", ".pagination ul li a.pageNumber", function (e) {
+  $("#main").on("click", ".pagination.group ul li a.pageNumber", function (e) {
     var length = $(this).parent().parent().find('li').length;
     var activePage = $(this).parent().parent().find('li.active a.pageNumber').text();
     var current = $(e.target).text();
     if(activePage != current){
       $(this).parent().parent().find('li').removeClass('active');
-    }
-    else {
+    } else {
       return false;
     }
     $(this).parent().addClass("active");
@@ -225,16 +224,14 @@ $(document).ready(function(){
     var id = $(this).attr("id");
     
     if(current == length-2){
-      $('.pagination ul li:last-child').addClass("disabled");
-    }
-    else {
-      $('.pagination ul li:last-child').removeClass("disabled");
+      $('.pagination.group ul li:last-child').addClass("disabled");
+    } else {
+      $('.pagination.group ul li:last-child').removeClass("disabled");
     }
     if(current == 1){
-      $('.pagination ul li:first-child').addClass("disabled");
-    }
-    else {
-      $('.pagination ul li:first-child').removeClass("disabled");
+      $('.pagination.group ul li:first-child').addClass("disabled");
+    } else {
+      $('.pagination.group ul li:first-child').removeClass("disabled");
     }
     if (current == activePage) {
       return false;
@@ -289,7 +286,7 @@ $(document).ready(function(){
    }
   
   // function to handle click number page after filter
-   $("#main").on("click",".pagination ul li a.pageNumberFilter", function () {
+   $("#main").on("click",".pagination.group ul li a.pageNumberFilter", function () {
      var activePage = $(this).parent().parent().find('li.active a.pageNumberFilter').text();
      var current = $(this).text();
      

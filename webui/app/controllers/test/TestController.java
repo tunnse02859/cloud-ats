@@ -672,13 +672,17 @@ public class TestController extends Controller {
     String group_id = request().getQueryString("group");
     String userText = request().getQueryString("user");
 
-    return ok(getProjectListHtml(type.toString(), group_id, userText));
+    return ok(getProjectListHtml(type.toString(), group_id, userText,0));
   }
   
-  public static Html getProjectListHtml(String type, String group_id, String userText) throws UserManagementException {
+  public static Html getProjectListHtml(String type, String group_id, String userText, int page) throws UserManagementException {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
+    List<TestProjectModel> projects = getListTestProject(type, group_id, userText);
     
-    Set<TestProjectModel> set = new HashSet<TestProjectModel>();
+    for(int i = (page -1) * 10; i < projects.size() && i < (page * 10); i ++) {
+      sb.append(project.render(projects.get(i)));
+    }
+    /*Set<TestProjectModel> set = new HashSet<TestProjectModel>();
     if (group_id == null) {
       for (Group group : getAvailableGroups(type, session("user_id"))) {
         set.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId()).append("type", type)));
@@ -692,14 +696,76 @@ public class TestController extends Controller {
         return (int)(o2.getLong("created_date") - o1.getLong("created_date"));
       }
     });
-    
-    for (TestProjectModel p : projects) {
+    */
+    /*for (TestProjectModel p : projects) {
       sb.append(project.render(p));
+    }*/
+    return new Html(sb);
+  }
+  
+  public static Html getProjectListHtml(String type, String group_id, String userText, int page, String name) throws UserManagementException {
+    scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
+    List<TestProjectModel> projects = getListTestProjectByName(type, group_id, userText, name);
+    
+    for(int i = (page -1) * 10; i < projects.size() && i <(page * 10); i ++) {
+      sb.append(project.render(projects.get(i)));
     }
     return new Html(sb);
   }
   
-  public static Result filter() throws UserManagementException {
+  public static List<TestProjectModel> getListTestProject (String type, String group_id, String userText) throws UserManagementException{
+    
+    Set<TestProjectModel> set = new HashSet<TestProjectModel>();
+    if (group_id == null) {
+      for (Group group : getAvailableGroups(type, session("user_id"))) {
+        set.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId()).append("type", type)));
+      }
+    }
+    
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(set);
+    return projects;
+  }
+  
+  public static List<TestProjectModel> getListTestProjectByName(String type, String group_id, String userText, String name) throws UserManagementException{
+    
+    Set<TestProjectModel> setProject = new HashSet<TestProjectModel>();
+    BasicDBObject query = new BasicDBObject();
+    query.put("$text", new BasicDBObject("$search", name));
+    setProject.addAll(TestProjectHelper.getProject(query));
+    
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(setProject);
+    return projects;
+    
+  }
+  public static int countProject(String type) throws UserManagementException{
+    Set<TestProjectModel> set = new HashSet<TestProjectModel>();
+    for (Group group : getAvailableGroups(type, session("user_id"))) {
+      set.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId()).append("type", type)));
+    }
+    
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(set);
+    int records = projects.size();
+    int check = records % 10;
+    if(check != 0) {
+      records = records -check + 10;
+    }
+    return records;
+  }
+  
+  public static int countProjectByName(String name) throws UserManagementException {
+    
+    Set<TestProjectModel> setProject = new HashSet<TestProjectModel>();
+    BasicDBObject query = new BasicDBObject();
+    query.put("$text", new BasicDBObject("$search", name));
+    setProject.addAll(TestProjectHelper.getProject(query));
+    int records = setProject.size();
+    int check = records % 10;
+    if(check != 0) {
+      records = records -check + 10;
+    }
+    return records;
+  }
+ /* public static Result filter() throws UserManagementException {
     
     Map<String, String[]> parameters = request().queryString();
     Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
@@ -722,7 +788,7 @@ public class TestController extends Controller {
     }
     return ok(array);
    
-  }
+  }*/
   
   public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     

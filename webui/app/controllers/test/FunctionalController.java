@@ -33,7 +33,7 @@ import com.mongodb.BasicDBObject;
 public class FunctionalController extends TestController {
 
   public static Result index() {
-    return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL)));
+    return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL,0,0,null)));
   }
   
   public static Result report(String projectId) {

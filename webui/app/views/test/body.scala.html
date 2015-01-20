@@ -1,4 +1,4 @@
-@(t: String)
+@(t: String, records: Integer, page: Integer, name: String)
 
 @import org.ats.component.usersmgt.group._
 @import controllers.test._
@@ -35,10 +35,10 @@
       </ul>
     </div>
    
-    <input type="text" class="name" name="name" placeholder="Test Name">
+    <input type="text" class="name" name="name" placeholder="Test Name" value="@name">
      
     <input type="text" class="creator" name = "creator" placeholder="Creator">
-    <a href="javascript:void(0);" ajax-url="@routes.TestController.filter()" class="filter btn btn-cyan"><i class="icon-search"></i></a>
+    <a href="javascript:void(0);" ajax-url="@routes.PerformanceController.index()" class="filter btn btn-cyan"><i class="icon-search"></i></a>
   </form>  
   </div>
 </section>
@@ -58,7 +58,30 @@
         <th>Report</th>
         <th>Action</th>
       </tr>
-      @TestController.getProjectListHtml(t, null, null)
+      @if(name != null){
+      	@TestController.getProjectListHtml(t, null, null,page, name)
+      } else {
+      	@TestController.getProjectListHtml(t, null, null,page)
+      }
     </table>
   </div>
 </section>
+<div class="pagination project" style="text-align: center;">
+<ul>
+	<li @if(page==1){class="disabled"}><a class="prev" href="javascript:void(0);">Prev</a></li>
+	@if(name != null){
+		@for(i<-1 to records/10){
+			<li @if(i == page){ class="active"}><a class="pageNumberProjectFilter" href="javascript:void(0);"  ajax-url='@routes.PerformanceController.index()?page=@i' >@i</a></li>
+			
+		}
+	}else{
+	
+		@for(i<-1 to records/10){
+			<li @if(i == page){ class="active"}><a class="pageNumberProject" href="javascript:void(0);"  ajax-url='@routes.PerformanceController.index()?page=@i' >@i</a></li>
+			
+		}
+	}
+	<li @if(page== records/10){ class="disabled"}><a class="next"  href="javascript:void(0);">Next</a></li>
+</ul>
+
+</div>
