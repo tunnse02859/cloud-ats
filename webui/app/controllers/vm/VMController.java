@@ -476,29 +476,26 @@ public class VMController extends Controller {
 
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
-  public static Promise<Result> createrNormalVM(String groupId, final boolean gui) throws Exception {
+  public static Result createrNormalVM(String groupId, final boolean gui) throws Exception {
     final Group company = GroupDAO.getInstance(Application.dbName).findOne(groupId);
-    Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
+    
+    Thread thread = new Thread(new Runnable() {
       @Override
-      public VMModel apply() throws Throwable {
-        VMModel vm = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
-        JenkinsMaster jenkins = new JenkinsMaster(vm.getPublicIP(), "http", 8080);
-        if (jenkins.isReady()) {
-          return gui  ? VMCreator.createNormalGuiVM(company): VMCreator.createNormalNonGuiVM(company);
+      public void run() {
+        try {
+          VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
+          JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+          if (jenkinsMaster.isReady()) {
+            VMModel vm =  gui  ? VMCreator.createNormalGuiVM(company): VMCreator.createNormalNonGuiVM(company);
+          }
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
-        return null;
       }
     });
-
-    return result.map(new Function<VMModel, Result>() {
-      @Override
-      public Result apply(VMModel vm) throws Throwable {
-        scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
-        sb.append(vmstatus.render(vm, false));
-        sb.append(vmproperties.render(vm, checkCurrentSystem(), null, false));
-        return ok(sb.toString());
-      }
-    });
+    thread.start();
+    
+    return ok();
   }
   
   @With(VMWizardIterceptor.class)

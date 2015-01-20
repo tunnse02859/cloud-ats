@@ -63,7 +63,7 @@ public class Application extends Controller {
     return ok(signup.render(group));
   }
   
-  public static Promise<Result> doSignup() throws Exception {
+  public static Result doSignup() throws Exception {
     DynamicForm form = Form.form().bindFromRequest();
     boolean group = Boolean.parseBoolean(form.get("group"));
     
@@ -127,24 +127,24 @@ public class Application extends Controller {
       RoleDAO.getInstance(dbName).create(administration, vmRole, perfRole, funcRole);
       
       //Create system vm
-      Promise<VMModel> result = Promise.promise(new Function0<VMModel>() {
+      Thread thread = new Thread(new Runnable() {
         @Override
-        public VMModel apply() throws Throwable {
-          return VMCreator.createCompanySystemVM(company);
+        public void run() {
+          try {
+            VMCreator.createCompanySystemVM(company);
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
         }
       });
+      thread.start();
       
       session().clear();
       session().put("email", admin.getEmail());
       session().put("user_id", admin.getId());
       session().put("group_id", company.getId());
       
-      return result.map(new Function<VMModel, Result>() {
-        @Override
-        public Result apply(VMModel a) throws Throwable {
-          return redirect(controllers.routes.Application.dashboard());
-        }
-      });
+      return redirect(controllers.routes.Application.dashboard());
     } else {
       String email = form.get("email");
       String password = form.get("password");
@@ -155,7 +155,7 @@ public class Application extends Controller {
       session().put("email", user.getEmail());
       session().put("user_id", user.getId());
       
-      return Promise.<Result>pure(redirect(controllers.routes.Application.dashboard()));
+      return redirect(controllers.routes.Application.dashboard());
     }
   }
   
