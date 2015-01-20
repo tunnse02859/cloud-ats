@@ -704,59 +704,7 @@ public class Organization extends Controller {
         jsonFilter.put("name", name);
         return ok(jsonFilter);
       }
-      /*Set<Group> filter = new HashSet<Group>();
       
-      if (current.getBoolean("system")) {
-        
-        BasicDBObject query = new BasicDBObject();
-        
-        if (parameters.containsKey("name")) {
-          String name = parameters.get("name")[0];
-          query.put("$text", new BasicDBObject("$search", name));
-        }
-        if (parameters.containsKey("level")) {
-          int level = Integer.parseInt(parameters.get("level")[0]);
-          query.put("level", level);
-        }
-        
-        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
-        
-        ObjectNode json = Json.newObject();
-        ArrayNode array = json.putArray("groups");
-        for (Group g : filter) {
-          array.add(g.getId());
-        }
-        return ok(json);
-      } else {
-        List<Group> all = listGroupVisible();
-        BasicDBObject query = new BasicDBObject();
-        
-        if (parameters.containsKey("name")) {
-          String name = parameters.get("name")[0];
-          query.put("$text", new BasicDBObject("$search", name));
-        }
-        if (parameters.containsKey("level")) {
-          int level = Integer.parseInt(parameters.get("level")[0]);
-          query.put("level", level);
-        }
-        
-        ObjectNode json = Json.newObject();
-        ArrayNode array = json.putArray("groups");
-        
-        if (query.isEmpty()) {
-          for (Group g : all) {
-            array.add(g.getId());
-          }
-          return ok(json);
-        }
-        
-        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
-        for (Group g : all) {
-          if (filter.contains(g)) array.add(g.getId());
-        }
-        
-        return ok(json);
-      }*/
     } else if ("user".equals(nav)) {
       
       Set<User> filter = new HashSet<User>();
@@ -776,9 +724,6 @@ public class Organization extends Controller {
           array.add(u.getId());
         }
       } else {
-       /* for (User u : current.getUsers()) {
-          if (filter.contains(u)) array.add(u.getId());
-        }*/
         Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
         Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
         StringBuilder sb = new StringBuilder();
