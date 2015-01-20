@@ -143,10 +143,11 @@ public class VMCreator {
             
             //run Jmeter
             if("Non-Gui".equals(subfix)){
-              String command = "nohup jmeter-start 2>/dev/null &";
+              String command = "nohup jmeter-start > log.log 2>&1 &";
               channel.setCommand(command);
               channel.connect();
-              queue.add("Execute command: " + command);
+              //channel.run();
+              queue.add("Execute command: " + command);              
               channel.disconnect();
             }      
             //End

@@ -14,11 +14,15 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.Future;
 
+import org.ats.common.ssh.SSHClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentGetResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentStatus;
@@ -160,5 +164,17 @@ public class AzureTest {
       Thread.sleep(1000);
     }
     return future;
+  }
+  @Test
+  public void testExecuteCommand() throws JSchException{
+    Session session = SSHClient.getSession("10.32.0.5", 22, "azureuser", "#CloudATS");    
+    //sudo
+    ChannelExec channel = (ChannelExec) session.openChannel("exec");
+    String command = "nohup jmeter-start > log.log 2>&1 &";
+    channel.setCommand(command);
+    channel.connect();
+    System.out.println("connect success");
+    //channel.run();                  
+    channel.disconnect();
   }
 }
