@@ -37,7 +37,7 @@ public class VMLogActor extends UntypedActor {
   
   static ActorRef actor = Akka.system().actorOf(Props.create(VMLogActor.class));
   
-  final static Cancellable canceler = Akka.system().scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
+  final static Cancellable canceler = Akka.system().scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
       actor,
       "Dequeue",
       Akka.system().dispatcher(),

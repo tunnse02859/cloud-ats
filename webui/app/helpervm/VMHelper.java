@@ -194,10 +194,6 @@ public class VMHelper extends AbstractHelper {
   
   
   public static Knife getKnife(VMModel jenkins) {
-//    DB db = getDatabase();
-//    DBCollection col = db.getCollection(vmColumn);
-//    VMModel chefWorkstation = new VMModel().from(col.findOne(BasicDBObjectBuilder.start("system", true).add("name", "chef-workstation").get()));
-//    Knife knife = new Knife(chefWorkstation.getPublicIP(), chefWorkstation.getUsername(), chefWorkstation.getPassword());
     Knife knife = new Knife(jenkins.getPublicIP(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
     return knife;
   }  

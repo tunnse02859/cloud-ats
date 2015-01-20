@@ -153,7 +153,7 @@ public class VMCreator {
             //End
             
             Knife knife = VMHelper.getKnife(jenkins);
-            knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), queue, recipes);
+            knife.bootstrap(vmModel.getPublicIP(), vmModel.getName());
 
           } else {
             queue.add("Cloud not establish connection in 120s");
