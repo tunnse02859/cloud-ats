@@ -28,9 +28,9 @@ public class KnifeTestCase extends AbstractVMTestCase {
     String ipAddress = vm.nic[0].ipAddress;
     
     Knife knife = Knife.getInstance();
-    
+    String userName = "ubuntu", password = "ubuntu";
     if (SSHClient.checkEstablished(ipAddress, 22, 120)) {
-      knife.bootstrap(ipAddress, vm.name, "jenkins-slave");
+      knife.bootstrap(ipAddress, vm.name, userName, password, "jenkins-slave");
     } else {
       Assert.fail("Can not establish ssh connection for " + ipAddress);
     }

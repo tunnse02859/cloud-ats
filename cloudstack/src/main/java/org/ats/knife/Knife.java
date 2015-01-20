@@ -49,13 +49,13 @@ public class Knife {
     this.password = password;
   }
   
-  public boolean bootstrap(String nodeIP, String nodeName, String... recipes) throws JSchException, IOException {
-    return bootstrap(nodeIP, nodeName, null, System.err, recipes);
+  public boolean bootstrap(String nodeIP, String nodeName, String userName, String password, String... recipes) throws JSchException, IOException {
+    return bootstrap(nodeIP, nodeName, userName, password, null, System.err, recipes);
   }
   
-  public boolean bootstrap(String nodeIP, String nodeName, InputStream is, OutputStream err, String... recipes) throws JSchException, IOException {
+  public boolean bootstrap(String nodeIP, String nodeName, String userName, String password, InputStream is, OutputStream err, String... recipes) throws JSchException, IOException {
     StringBuilder sb = new StringBuilder("knife bootstrap ").append(nodeIP);
-    sb.append(" -x ubuntu -P ubuntu --sudo --use-sudo-password --no-host-key-verify -N ").append(nodeName);
+    sb.append(" -x ").append(userName).append(" -P ").append(password).append(" --sudo --use-sudo-password --no-host-key-verify -N ").append(nodeName);
     if(recipes != null && recipes.length != 0) {
       sb.append(" -r ");
       for (int i = 0; i < recipes.length; i++) {
@@ -68,9 +68,9 @@ public class Knife {
     return exitCode == 0;
   }
   
-  public boolean bootstrap(String nodeIP, String nodeName, Queue<String> queue, String... recipes) throws JSchException, IOException {
+  public boolean bootstrap(String nodeIP, String nodeName, String userName, String password, Queue<String> queue, String... recipes) throws JSchException, IOException {
     StringBuilder sb = new StringBuilder("knife bootstrap ").append(nodeIP);
-    sb.append(" -x ubuntu -P ubuntu --sudo --use-sudo-password --no-host-key-verify -N ").append(nodeName);
+    sb.append(" -x ").append(userName).append(" -P ").append(password).append(" --sudo --use-sudo-password --no-host-key-verify -N ").append(nodeName);
     if(recipes != null && recipes.length != 0) {
       sb.append(" -r ");
       for (int i = 0; i < recipes.length; i++) {
