@@ -13,22 +13,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.Future;
-
-import org.ats.common.ssh.SSHClient;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentGetResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentStatus;
 import com.microsoft.windowsazure.management.compute.models.RoleInstance;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.microsoft.windowsazure.management.models.RoleSizeListResponse.RoleSize;
+
+import controllers.vm.VMCreator;
 
 public class AzureTest {
   
@@ -166,15 +163,11 @@ public class AzureTest {
     return future;
   }
   @Test
-  public void testExecuteCommand() throws JSchException{
-    Session session = SSHClient.getSession("10.32.0.5", 22, "azureuser", "#CloudATS");    
-    //sudo
-    ChannelExec channel = (ChannelExec) session.openChannel("exec");
-    String command = "nohup jmeter-start > log.log 2>&1 &";
-    channel.setCommand(command);
-    channel.connect();
-    System.out.println("connect success");
-    //channel.run();                  
-    channel.disconnect();
+  public void testExecuteCommand() throws Exception{  
+    
+    String groupId="8258a80d-adec-461c-8586-5192aac6fdc7";
+    org.ats.component.usersmgt.group.Group company = org.ats.component.usersmgt.group.GroupDAO.getInstance("cloud-ats").findOne(groupId);
+    VMCreator.createNormalVM(company, "Non-Gui", "cats-non-ui-image");
+    
   }
 }

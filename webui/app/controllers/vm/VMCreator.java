@@ -128,30 +128,33 @@ public class VMCreator {
             //sudo
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             //create jenkins slave
+            Logger.info("IP JENIN MASTER: "+jenkins.getPublicIP());
             JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);           
-            String inetAddress = vmModel.getPublicIP();          
+            String inetAddress = vmModel.getPublicIP();
+            Logger.info("IP new vm: "+inetAddress);
             
             Map<String, String> env = new HashMap<String, String>();
             if ("Gui".equals(subfix)) env.put("DISPLAY", ":0");
             JenkinsSlave slave = new JenkinsSlave(master, inetAddress, env);
 
             if (slave.join()) {
-              System.out.println("Create slave " + inetAddress + " sucessfully");
+              Logger.info("Create slave " + inetAddress + " sucessfully");
             } else {
-              System.out.println("Can not create slave" + inetAddress);
+              Logger.info("Can not create slave" + inetAddress);
             }
             
             //run Jmeter
             if("Non-Gui".equals(subfix)){
-              String command = "nohup jmeter-start > log.log 2>&1 &";
+              String command = "nohup jmeter-start > jmeter-server.log 2>&1 &";
               channel.setCommand(command);
-              channel.connect();
-              //channel.run();
+              channel.connect();            
               queue.add("Execute command: " + command);              
               channel.disconnect();
-            }      
-            //End
+            }
+            Logger.info("End run register jmetter");
+            //End            
             
+            Logger.info("Start bootstrap node");
             Knife knife = VMHelper.getKnife(jenkins);
             knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"), queue, recipes);
 
