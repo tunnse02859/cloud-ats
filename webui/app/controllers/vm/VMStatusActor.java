@@ -3,6 +3,7 @@
  */
 package controllers.vm;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import helpervm.VMHelper;
 
 import java.util.HashMap;
@@ -10,25 +11,19 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import models.vm.VMModel;
-
-import org.ats.cloudstack.CloudStackClient;
-import org.ats.cloudstack.VirtualMachineAPI;
-import org.ats.cloudstack.model.VirtualMachine;
-
+import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+import akka.actor.UntypedActor;
+import azure.AzureClient;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.windowsazure.management.compute.models.RoleInstance;
-
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Props;
-import akka.actor.UntypedActor;
-import azure.AzureClient;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -37,15 +32,36 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class VMStatusActor extends UntypedActor {
   
+  private static ActorSystem system = null;
+  
   static ActorRef actor = Akka.system().actorOf(Props.create(VMStatusActor.class));
   
-  final static Cancellable canceller = Akka.system().scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
-      actor,
-      "Check",
-      Akka.system().dispatcher(),
-      null);
+  static Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
   
-  Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
+  public static void start() {
+    if (system == null) {
+      system = ActorSystem.create("vm-status");
+      actor = system.actorOf(Props.create(VMStatusActor.class));
+      
+      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
+          actor,
+          "Check",
+          Akka.system().dispatcher(),
+          null);
+    }
+    Logger.info("Started Akka system has named vm-status");
+  }
+  
+  public static void stop() {
+    if (system != null) {
+      system.shutdown();
+    }
+    Logger.info("Shutdowned Akka system has named vm-status");
+  }
+  
+  static void addChannel(VMChannel channel) {
+    channels.put(channel.sessionId, channel);
+  }
   
   @Override
   public void onReceive(Object msg) throws Exception {

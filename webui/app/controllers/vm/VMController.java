@@ -145,7 +145,7 @@ public class VMController extends Controller {
       @Override
       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
         try {
-          Await.result(ask(VMStatusActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+          VMStatusActor.addChannel(new VMChannel(sessionId, groupId, out));
         } catch (Exception e) {
           Logger.debug("Can not create akka for vm status actor", e);
         }
