@@ -804,23 +804,6 @@ public class Organization extends Controller {
         sb2.append(role.render(r, listPermission));
       }
       Html body = rolefilter.render(new Html(sb2), records, pageNumber,name);
-      /*Set<Role> filter = new HashSet<Role>();
-      ObjectNode json = Json.newObject();
-      ArrayNode array = json.putArray("roles");
-
-      BasicDBObject query = new BasicDBObject();
-      if (parameters.containsKey("name")) {
-        String name = parameters.get("name")[0];
-        query.put("$text", new BasicDBObject("$search", name));
-      } else {
-        for (Role r : current.getRoles()) {
-          array.add(r.getId());
-        }
-      }
-      filter.addAll(RoleDAO.getInstance(Application.dbName).find(query));
-      for (Role r : current.getRoles()) {
-        if (filter.contains(r)) array.add(r.getId());
-      }*/
       ObjectNode json = Json.newObject();
       json.put("breadcrumb", breadcrumb.toString());
       json.put("navbar", sb.toString());
