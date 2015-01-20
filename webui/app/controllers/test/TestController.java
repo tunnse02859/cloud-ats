@@ -682,24 +682,7 @@ public class TestController extends Controller {
     for(int i = (page -1) * 10; i < projects.size() && i < (page * 10); i ++) {
       sb.append(project.render(projects.get(i)));
     }
-    /*Set<TestProjectModel> set = new HashSet<TestProjectModel>();
-    if (group_id == null) {
-      for (Group group : getAvailableGroups(type, session("user_id"))) {
-        set.addAll(TestProjectHelper.getProject(new BasicDBObject("group_id", group.getId()).append("type", type)));
-      }
-    }
-    
-    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(set);
-    Collections.sort(projects, new Comparator<TestProjectModel>() {
-      @Override
-      public int compare(TestProjectModel o1, TestProjectModel o2) {
-        return (int)(o2.getLong("created_date") - o1.getLong("created_date"));
-      }
-    });
-    */
-    /*for (TestProjectModel p : projects) {
-      sb.append(project.render(p));
-    }*/
+   
     return new Html(sb);
   }
   
@@ -765,30 +748,6 @@ public class TestController extends Controller {
     }
     return records;
   }
- /* public static Result filter() throws UserManagementException {
-    
-    Map<String, String[]> parameters = request().queryString();
-    Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
-    String name = parameters.get("name")[0];
-    BasicDBObject query = new BasicDBObject();
-    if(parameters.containsKey("name") && parameters.containsKey("creator")){
-      
-      if(!"".equalsIgnoreCase(name) ){
-        query.put("$text", new BasicDBObject("$search", name));
-      }
-    }
-    filter.addAll(TestProjectHelper.getProject(query));
-    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(filter);
-    ArrayNode array = Json.newObject().arrayNode();
-    ObjectNode json = null;
-    for (TestProjectModel project : projects) {
-      json= Json.newObject();
-      json.put("id", project.getId());
-      array.add(json);
-    }
-    return ok(array);
-   
-  }*/
   
   public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     
