@@ -14,6 +14,7 @@ import interceptor.WizardInterceptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.html.HtmlParser;
 import org.ats.common.html.XPathUtil;
 import org.ats.common.http.HttpClientUtil;
+import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.Operation;
@@ -87,6 +89,8 @@ import azure.AzureClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
@@ -240,7 +244,7 @@ public class VMController extends Controller {
       fileinput = keystorefile.getFile();
       String rootPath = play.Play.application().path().getAbsolutePath();  
       String sepPath = System.getProperty("file.separator");
-      keystorePath = sepPath + "project" + sepPath;
+      keystorePath = sepPath + "conf" + sepPath;
       
       //uload
       Util.uploadFile(fileinput, fileName, rootPath + keystorePath);
@@ -332,11 +336,11 @@ public class VMController extends Controller {
     if ("start".equals(action)) {
       Future<OperationStatusResponse> response = azureClient.startVirtualMachineByName(vmId);
       response.get();
-      Logger.info("Start vm " + vmId + "successfully");
+      Logger.debug("Start vm " + vmId + " successfully");
     } else if ("stop".equals(action)) {
       Future<OperationStatusResponse> response = azureClient.stopVirtualMachineByName(vmId);      
       response.get();
-      Logger.info("Stop vm " + vmId + "successfully");
+      Logger.debug("Stop vm " + vmId + " successfully");
     } else if ("restore".equals(action)) {
       
 //      VirtualMachineAPI.restoreVM(client, vmId, null);
@@ -353,11 +357,59 @@ public class VMController extends Controller {
       VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
       VMHelper.getKnife(jenkins).deleteNode(vm.getName());
       
-      //remote node of jenkins server
+      //remove node of jenkins server
       try {
         new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
       } catch (IOException e) {
         Logger.debug("Could not release jenkins node ", e);
+      }
+      
+      
+      //remove node from guacamole
+      
+      boolean isGui = vm.getBoolean("gui");
+      Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      String command = "";
+      if (isGui) {
+        try {
+          channel = (ChannelExec) session.openChannel("exec");
+          command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
+              + vm.getPublicIP() + " 5900 '"
+              + VMHelper.getSystemProperty("default-password") + "' vnc 1";
+          channel.setCommand(command);
+          OutputStream out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((jenkins.getPassword() + "\n").getBytes());
+          out.flush();
+          channel.disconnect();
+        } catch (Exception e) {
+          Logger.error("Exception when run:" + e.getMessage());
+        }
+
+        Logger.info("Command run add connection guacamole: " + command);
+
+      } else {
+
+        try {
+          channel = (ChannelExec) session.openChannel("exec");
+          command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
+              + vm.getPublicIP() + " 22 '"
+              + VMHelper.getSystemProperty("default-password") + "' ssh 1";
+          channel.setCommand(command);
+          OutputStream out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((jenkins.getPassword() + "\n").getBytes());
+          out.flush();
+          channel.disconnect();
+        } catch (Exception e) {
+          Logger.error("Exception when run:" + e.getMessage());
+        }
+
+        Logger.info("Command run add connection guacamole: " + command);
+
       }
       
       //delete virtual machine from azure
