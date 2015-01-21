@@ -49,6 +49,11 @@ public class VMCreator {
     String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     
     Future<OperationStatusResponse> response = azureClient.createSystemVM(name);
+    Logger.info("Submited request to create system vm");
+    while (!response.isDone()) {
+      System.out.print('.');
+      Thread.sleep(3000);
+    }
     OperationStatusResponse status = response.get();
     Logger.info("Create system vm " + name + " has been " + status.getStatus());
     
@@ -98,7 +103,13 @@ public class VMCreator {
     final String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     QueueHolder.put(name, new ConcurrentLinkedQueue<String>());
     
-    Future<OperationStatusResponse> response = azureClient.createVM(name, template, offering.getId());    
+    Future<OperationStatusResponse> response = azureClient.createVM(name, template, offering.getId());
+    Logger.info("Submited request to create test vm");
+    while (!response.isDone()) {
+      System.out.print('.');
+      Thread.sleep(3000);
+    }
+    
     OperationStatusResponse status = response.get();
     Logger.info("Create " + subfix + " vm " + name + " has been " + status.getStatus());    
     
