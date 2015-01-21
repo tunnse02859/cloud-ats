@@ -11,7 +11,18 @@ $(document).ready(function() {
     if (data.direction === 'previous') {
       $('.cloud.btn.next').show();
       $('.cloud.btn.finish').hide();
+    }    
+    if (data.step === 2 && data.direction === 'next') {
+    	var pass = $('form').find("input[name=default-password]").val();
+		console.log(pass);
+		var repass = $('form').find("input[name=confirm-default-password]").val();
+		console.log(repass);
+		if (pass != repass){
+			$(".alert.validatepass").show();
+			$('.cloud.wizard').wizard('previous');			
+		}
     }
+    
     if (data.step === 3 && data.direction === 'next') {
     	var container = $(".step-content #step4");
     	var checkedService =$('input[name=vmCloudService]:checked').val();

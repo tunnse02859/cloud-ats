@@ -1,7 +1,24 @@
 @import controllers.vm._
 
+<script type="text/javascript">
+	function checkValidate() {
+		
+		var pass = $('form').find("input[name=default-password]").val();
+		console.log(pass);
+		var repass = $('form').find("input[name=confirm-default-password]").val();
+		console.log(repass);
+		if (pass != repass){
+			return false;
+		} else { 			
+			return true;
+		}
+	}
+	
+</script>
 <legend>Virtual Machine Feature Initialization</legend>
-
+<div class="alert validatepass" style="display: none;">
+	<strong>Warning!</strong> Confirm password is not match!
+</div>
 <div class="row-fluid">
   <div class="cloud wizard">
     <ul class="steps">
@@ -13,7 +30,7 @@
       <li data-target="#step4"><span class="badge">4</span>Offering</li>
     </ul>
   </div>
-  <form class="form-horizontal" action="@routes.VMController.doWizard()" method="post" enctype="multipart/form-data">
+  <form class="form-horizontal"   action="@routes.VMController.doWizard()"  method="post" enctype="multipart/form-data" onsubmit="return checkValidate();">
   <div class="step-content">
     
     <div id="step1" class="step-pane active" style="margin-top: 20px;">

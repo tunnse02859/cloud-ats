@@ -548,13 +548,13 @@ public class VMController extends Controller {
   public static Result apivmView() throws Exception {
     String service = request().getQueryString("service");  
     Html html =null;
-    if("apiCloudStack".equalsIgnoreCase(service)){
+    if ("apiCloudStack".equalsIgnoreCase(service)) {
       html=cloudstacktemplate.render();
-    }else if("apiAzure".equalsIgnoreCase(service)){
+    } else if ("apiAzure".equalsIgnoreCase(service)) {
       html=azuretemplate.render();
-    }else if("apiAmazon".equalsIgnoreCase(service)){
+    } else if ("apiAmazon".equalsIgnoreCase(service)) {
       html=amazontemplate.render();
-    }else{
+    } else {
       html=Html.apply( "<h1>Default template</h1>");
     } 
     return ok(html);
