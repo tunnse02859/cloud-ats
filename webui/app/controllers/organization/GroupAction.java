@@ -159,6 +159,10 @@ public class GroupAction extends Controller {
   }
   
   public static Result editGroup(String g) throws UserManagementException {
+    if ("forgroup".equals(g) && request().getQueryString("group") != null) {
+      g = request().getQueryString("group");
+    }
+    
     Group group_ = GroupDAO.getInstance(Application.dbName).findOne(g);
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
@@ -244,6 +248,10 @@ public class GroupAction extends Controller {
    * @throws UserManagementException
    */
   public static Result deleteGroup(String g) throws UserManagementException {
+    if ("forgroup".equals(g) && request().getQueryString("group") != null) {
+      g = request().getQueryString("group");
+    }
+    
     Group group_   = GroupDAO.getInstance(Application.dbName).findOne(g);
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));

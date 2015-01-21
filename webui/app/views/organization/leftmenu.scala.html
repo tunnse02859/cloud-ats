@@ -10,14 +10,14 @@
     @Organization.count("group")</span></a>
   </li>
   <li class="user @if(nav =="user"){ active }">
-    <a href="@routes.Organization.index()?nav=user&group=@group_id"
-      ajax-url="@routes.Organization.body()?nav=user&group=@group_id">
+    <a href="@routes.Organization.filter("user")?nav=user&group=@group_id"
+      ajax-url="@routes.Organization.filter("user")?nav=user&group=@group_id">
     <i class="icon-user"></i> User <span class="badge pull-right @if(nav =="user"){ badge-primary }">
     @Organization.count("user")</span></a>
   </li>
   <li class="role @if(nav =="role"){ active }">
-    <a href="@routes.Organization.index()?nav=role&group=@group_id"
-      ajax-url="@routes.Organization.body()?nav=role&group=@group_id">
+    <a href="@routes.Organization.filter("role")?group=@group_id"
+      ajax-url="@routes.Organization.filter("role")?group=@group_id">
     <i class="icon-key"></i> Role <span class="badge pull-right @if(nav =="role"){ badge-primary }">
     @Organization.count("role")
     </span></a>
@@ -29,3 +29,31 @@
     @Organization.count("feature")</span></a>
   </li>
 </ul>
+
+<script>
+var updateByAjax = function(data) {
+  $(".org-breadcrumb .breadcrumb").html(data.breadcrumb);
+  $("#main-navbar .current-group").html(data.navbar);
+  $(".org-body .org-right").html(data.body);
+  $(".org-body .org-left").html(data.leftmenu);
+  
+  $.ajax({
+    method: "GET",
+    url: "/portal/o/f/u/Organization",
+    dataType: "html",
+    success: function(data) {
+      $("#left-panel").replaceWith(data);
+    },
+    error: function() {
+      location.reload();
+    }
+  })
+}
+$(document).ready(function(){
+
+  $("ul").on("click","li.role", function() {
+		
+  });
+});
+
+</script>
