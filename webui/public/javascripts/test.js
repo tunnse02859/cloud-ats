@@ -2,7 +2,6 @@ $(document).ready(function() {
   
   $("[rel=tooltip]").tooltip();
   
-  
   $("body").on("click", "a.disabled", function(e) {
     e.preventDefault();
     e.cancelBubble = true;
@@ -77,26 +76,20 @@ $(document).ready(function() {
         dataType: "html",
         async: true,
         success: function(data) {
-          console.log("run a job successfully");
         },
         error: function(e) {
-          console.log(e);
         }
       });
     }
     
     $(this).addClass("disabled");
-    console.log("has just click run button");
     e.preventDefault();
   });
   
   //Click create project finish
   $("body").on("click", ".project.finish", function(e) {
-    console.log('test');
     var projectName = $('input[name=name]').val();
     var file = $('input[name=uploaded]').val();
-   // var projectNameWizard = $('input[name=test-name]').val();
-    
     if(projectName && file && !projectNameWizard){
       $("#pleaseWaitDialog").modal();
     }
@@ -104,8 +97,11 @@ $(document).ready(function() {
   
   //when user press enter , click search button
   $("body").on("keypress", ".test-filter .form-search input.name", function(e) {
-    if (e.which == 13) {
+    if ($(this).val() && e.which == 13) {
       $(this).parent().find('a.filter').click();
+    } else if (! $(this).val() && e.which == 13) {
+      var href = $(this).parent().find("a.filter").attr('ajax-url');
+      window.location.href= href;
     }
   });
   
@@ -119,56 +115,63 @@ $(document).ready(function() {
     
     var projectName = $('input[name=name]').val();
     var ajaxURL = $(this).parent().find('a.filter').attr("ajax-url");
-    var form = $(this).parent('form');
-    var values = form.serialize();
     if(projectName){
-      $.ajax({
-        method: "GET",
-        url: ajaxURL,
-        data: values,
-        dataType: "json",
-        success: function(data) {
-          if(data.length==0){
-            $('.project tbody').find('tr:not(:first)').hide();
-          }
-          var arr = [];
-          $(data).each(function(){
-            var projectId = ('project-'+this.id);
-            
-            arr.push(projectId);
-          });
-          var arrElement = [];
-          $('.project tbody').find('tr').each(function(){
-            
-            arrElement.push($(this).attr('class'));
-           
-          });
-          var total = [];
-          for(var i = 0; i < arr.length; i ++){
-           
-            var count = 0;
-            for(var j = 1; j < arrElement.length; j ++ ){
-              $('.'+arrElement[j]).hide();
-              if(arr[i] === arrElement[j]){
-                total.push(arr[i]);
-                
-              }
-              
-            }
-            
-          }
-          for(var k = 0; k < total.length; k ++){
-            $('.'+total[k]).show();
-          }
-         
-        },
-        error: function() {
-          location.reload();
-        }
-      });
-    }
-    else {
-      $('.project tbody').find('tr').show();
+      window.location= ajaxURL+"?name="+projectName;
+      
+    } else {
+      //$('.project tbody').find('tr').show();
     }
   });
+  $("body").on("click",".pagination.project ul li a.pageNumberProject", function() {
+   
+    var length = $(this).parent().parent().find('li').length;
+    var activePage = $(this).parent().parent().find('li.active a.pageNumberProject').text();
+    var current = $(this).text();
+    if(activePage == current){
+      return false;
+    }
+    var href = $(this).attr("ajax-url");
+    window.location.href = href;
+   
+  });
+  
+  $("body").on("click",".pagination.project ul li a.pageNumberProjectFilter", function () {
+    var href = $(this).attr("ajax-url");
+    var name = $("form").find("input[name=name]").val();
+    var link;
+    if(name){
+      link = href+"&name="+name;
+      
+    } else {
+      link = href;
+    } 
+    window.location.href= link;
+  });
+  // click button previous
+  $("#main").on("click", ".pagination.project ul li a.prev", function () {
+    
+    
+    var current = $(this).parent().parent().find(".active");
+    var currentText = $(current).text();
+    if(currentText == 1 ){
+      return false;
+    }
+    $(current).prev().find('a').click();
+    
+  });
+  
+  // click button next
+ $("#main").on("click", ".pagination.project ul li a.next", function () {
+    var current = $(this).parent().parent().find(".active");
+    var currentText = $(current).text();
+    var lastPage =  $(this).parent().parent().find('li').length;
+    
+    if(currentText == lastPage-2 || lastPage == 3){
+      return false;
+    }
+    
+    $(current).next().find('a').click();
+    
+  });
+ 
 });

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.ats.component.usersmgt.DataFactory;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.FeatureDAO;
@@ -29,11 +30,13 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 
+import play.Logger;
 import play.api.templates.Html;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import scala.Array;
 import scala.collection.mutable.StringBuilder;
 import views.html.organization.index;
 import views.html.organization.indexajax;
@@ -42,14 +45,21 @@ import views.html.organization.feature.feature;
 import views.html.organization.feature.features;
 import views.html.organization.group.group;
 import views.html.organization.group.groups;
+import views.html.organization.group.filters;
 import views.html.organization.role.role;
 import views.html.organization.role.roles;
+import views.html.organization.role.rolefilter;
 import views.html.organization.user.user;
 import views.html.organization.user.users;
+import views.html.organization.user.userfilter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
 import controllers.Application;
 /**
@@ -139,6 +149,7 @@ public class Organization extends Controller {
     session().put("group_id", current.getId());
     
     Html body = bodyComposite(request().queryString());
+    
     return ok(index.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), body, current.getId()));
   }
   
@@ -157,6 +168,12 @@ public class Organization extends Controller {
     return ok(indexajax.render("group", body, current.getId()));
   }
   
+  public static Result getGroupJS() {
+    
+    return ok(views.js.organization.group.group.render()).as("text/javascript");
+   
+  }
+  
   public static Result body() throws UserManagementException {
     Group currentGroup = setCurrentGroup(request().getQueryString("group"));
     if (currentGroup == null) return forbidden(views.html.forbidden.render());
@@ -168,7 +185,6 @@ public class Organization extends Controller {
     Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     Html body = bodyComposite(request().queryString());
-    
     Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), currentGroup.getId());
     
     StringBuilder sb = new StringBuilder();
@@ -187,6 +203,38 @@ public class Organization extends Controller {
     return ok(json);
   }
   
+  public static Result pagination() throws UserManagementException {
+    String id = request().getQueryString("id");
+    String currentPage = request().getQueryString("current");
+    int currentPageNumber = Integer.parseInt(currentPage);
+    Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(id);
+    String nameGroup = currentGroup.getString("name");
+    Set<Group> groupsSetChildren = GroupDAO.getInstance(Application.dbName).getGroupChildrenBySize(currentGroup, 10, currentPageNumber);
+    List<Group> groupsListChildren = new ArrayList<Group>(groupsSetChildren);
+    ArrayNode array = Json.newObject().arrayNode();
+    ObjectNode json = null;
+    for (Group g : groupsListChildren) {
+      json = Json.newObject();
+      List<Group> groups = GroupDAO.getInstance(Application.dbName).buildParentTree(g);
+      ArrayNode arrayChild = json.putArray("ids");
+      json.put("name", g.getString("name"));
+      json.put("ancensor", nameGroup );
+      json.put("childrenSize", g.getAllChildren().size());
+      json.put("level", g.getString("level"));
+      for(int i = 0; i < groups.size(); i ++){
+        arrayChild.add(groups.get(i).getId());
+      }
+      json.put("userSize", g.getUsers().size());
+      json.put("roleSize", g.getRoles().size());
+      json.put("featureSize", g.getFeatures().size());
+      json.put("id", g.getId());
+      array.add(json);
+    }
+   
+    return ok(array);
+  }
+  
+  
   /**
    * Build a part of content body base on current state.
    * @param parameters
@@ -198,7 +246,11 @@ public class Organization extends Controller {
     String nav = parameters.containsKey("nav") ? parameters.get("nav")[0] : "group";
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     Group currentGroup = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-    
+    int records = (int) count("group");
+    int check = records % 10;
+    if( check != 0) {
+      records = (records - check) +10;
+    }
     if ("group".equals(nav)) {
       
       StringBuilder sb = new StringBuilder();
@@ -207,7 +259,7 @@ public class Organization extends Controller {
         sb.append(group.render(g));
       }
       
-      return groups.render(new Html(sb), isSystem(currentUser));
+      return groups.render(new Html(sb), isSystem(currentUser), records, currentGroup);
     
     } else if ("user".equals(nav)) {
       
@@ -266,7 +318,8 @@ public class Organization extends Controller {
     if (current.getBoolean("system")) {
       all = new ArrayList<Group>(GroupDAO.getInstance(Application.dbName).find(new BasicDBObject()));
     }  else {
-      all = new ArrayList<Group>(current.getAllChildren());
+      Set<Group> groups = GroupDAO.getInstance(Application.dbName).getGroupChildrenBySize(current, 10, 1);
+      all = new ArrayList<Group>(groups);
     }
     
     Collections.sort(all, new Comparator<Group>() {
@@ -421,6 +474,151 @@ public class Organization extends Controller {
   }
   
   /**
+   * Get group data with size page, current group
+   * @param group CurrentGroup
+   * @param currentPage Number Page that user clicked
+   * @param size Size of Page
+   * @param query Condition
+   * @return
+   * @throws UserManagementException
+   */
+  public static List<Group> getGroupByFilter(Group group, int currentPage, int size, BasicDBObject query) throws UserManagementException{
+    
+    Set<Group> filter = new HashSet<Group>();
+    filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
+    
+    List<Group> listGroup = new ArrayList<Group>(filter);
+    List<Group> all = new ArrayList<Group>();
+    for(int i =(currentPage -1) * size;( (i < currentPage * size) && i < listGroup.size()); i ++){
+      all.add(listGroup.get(i));
+    }
+    return all;
+    
+  }
+  
+  /**
+   * 
+   * @param group
+   * @param currentPage
+   * @param size
+   * @return List Role of current Group
+   * @throws UserManagementException
+   */
+  public static List<Role> getRole(Group group, int currentPage, int size) throws UserManagementException{
+    
+    List<Role> listRole = new ArrayList<Role>(group.getRoles());
+    List<Role> all = new ArrayList<Role>();
+    
+    for(int i =(currentPage-1)*size; ((i < currentPage *size) && i < listRole.size()); i ++) {
+      all.add(listRole.get(i));
+      
+    }
+    
+    return all;
+ }
+  
+ /**
+  * 
+  * @param group
+  * @param name
+  * @return List Role when user filter by Name
+  * @throws UserManagementException
+  */
+ public static List<Role> getAllRoleByName(Group group, String name) throws UserManagementException{
+    
+    List<Role> listRole = new ArrayList<Role>(group.getRoles());
+    List<Role> all = new ArrayList<Role>();
+    
+    for(int i = 0; i < listRole.size(); i ++) {
+      if(name.equals(listRole.get(i).getName())){
+        all.add(listRole.get(i));
+      }
+    }
+    
+    return all;
+  }
+   
+ /**
+  * 
+  * @param group
+  * @param currentPage
+  * @param size
+  * @param name
+  * @return List Role with size and current from list role by filtering name
+  * @throws UserManagementException
+  */
+ public static List<Role> getRoleByFilter(Group group, int currentPage, int size, String name) throws UserManagementException {
+   List<Role> listRole = getAllRoleByName(group, name);
+   List<Role> all = new ArrayList<Role>();
+   
+   for(int i = (currentPage-1)*size; (i < currentPage *size)&&i < listRole.size(); i ++) {
+     all.add(listRole.get(i));
+   }
+   return all;
+ }
+   /**
+    * 
+    * @param group
+    * @param currentPage
+    * @param size
+    * @return list all user
+    * @throws UserManagementException
+    */
+ 
+  public static List<User> getUser (Group group, int currentPage, int size) throws UserManagementException{
+      
+      List<User> listUser = new ArrayList<User>(group.getUsers());
+      List<User> all = new ArrayList<User>();
+      
+      for(int i =(currentPage-1)*size; ((i < currentPage *size) && i < listUser.size()); i ++) {
+        all.add(listUser.get(i));
+        
+      }
+      
+      return all;
+    
+  }
+  
+  /**
+   * 
+   * @param group
+   * @param currentPage
+   * @param size
+   * @return return list user with email that user use filter feature
+   * @throws UserManagementException
+   */
+  public static List<User> getUserByFilter(Group group, int currentPage, int size, String email) throws UserManagementException{
+    
+    List<User> listUser = getAllUserByEmail(group, email);
+    List<User> all = new ArrayList<User>();
+    
+    for(int i =(currentPage -1) * size; (i < currentPage * size) && i < listUser.size(); i ++){
+      all.add(listUser.get(i));
+    }
+    return all;
+    
+  }
+  
+  /**
+   * 
+   * @param group
+   * @param email
+   * @return list user that has email equal input value by user
+   */
+  public static List<User> getAllUserByEmail(Group group, String email) {
+    
+    List<User> listUser = new ArrayList<User>(group.getUsers());
+    List<User> all = new ArrayList<User>();
+    
+    for(int i = 0; i < listUser.size(); i ++) {
+      if(email.equals(listUser.get(i).getEmail())){
+        all.add(listUser.get(i));
+      }
+    }
+    return all;
+  }
+ 
+  /**
    * Filter group and build presentation of content. The content should update by ajax.
    * @return
    * @throws UserManagementException
@@ -428,13 +626,10 @@ public class Organization extends Controller {
   public static Result filter(String nav) throws UserManagementException {
     
     Map<String, String[]> parameters = request().queryString();
-    
     Group current = GroupDAO.getInstance(Application.dbName).findOne(session("group_id"));
-    
+    User currentUser = UserDAO.getInstance(Application.dbName).findOne(session("user_id"));
     if ("group".equals(nav)) {
-
       Set<Group> filter = new HashSet<Group>();
-      
       if (current.getBoolean("system")) {
         
         BasicDBObject query = new BasicDBObject();
@@ -455,38 +650,61 @@ public class Organization extends Controller {
         for (Group g : filter) {
           array.add(g.getId());
         }
-        
         return ok(json);
-      } else {
-        List<Group> all = listGroupVisible();
+      } 
+      else {
+        int pageNumber = 1;
+        if(request().getQueryString("page") != null){
+          pageNumber = Integer.parseInt(request().getQueryString("page"));
+        }
+        ObjectNode jsonFilter = Json.newObject();
+
+        Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+
+        //Html body = bodyComposite(request().queryString());
+        Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "group" : request().getQueryString("nav"), current.getId());
+
+        StringBuilder sb = new StringBuilder();
+        LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(current);
+        for (Group parent : parents) {
+          sb.append(" / ").append(parent.getString("name"));
+        }
+        sb.append(" / ").append(current.getString("name"));
+
+
         BasicDBObject query = new BasicDBObject();
-        
-        if (parameters.containsKey("name")) {
-          String name = parameters.get("name")[0];
+        String name="";
+        if (parameters.containsKey("name") && parameters.get("name")[0] != null && !"".equals(parameters.get("name")[0])) {
+           name= parameters.get("name")[0];
           query.put("$text", new BasicDBObject("$search", name));
         }
-        if (parameters.containsKey("level")) {
-          int level = Integer.parseInt(parameters.get("level")[0]);
-          query.put("level", level);
+        
+        String level = null ;
+        if (parameters.containsKey("level") && parameters.get("level")[0] != null && parameters.get("level")[0] != "") {
+          level = parameters.get("level")[0];
+          query.put("level", Integer.parseInt(level));
         }
-        
-        ObjectNode json = Json.newObject();
-        ArrayNode array = json.putArray("groups");
-        
-        if (query.isEmpty()) {
-          for (Group g : all) {
-            array.add(g.getId());
-          }
-          return ok(json);
-        }
-        
-        filter.addAll(GroupDAO.getInstance(Application.dbName).find(query));
+        List<Group> all = getGroupByFilter(current, pageNumber, 10, query);
+        StringBuilder sb2 = new StringBuilder();
         for (Group g : all) {
-          if (filter.contains(g)) array.add(g.getId());
+          sb2.append(group.render(g));
         }
-        
-        return ok(json);
+        int records = GroupDAO.getInstance(Application.dbName).find(query).size();
+        int check = records % 10;
+        if(check != 0){
+          records =(records - check) + 10;          
+        }
+        Html body = filters.render(new Html(sb2),isSystem(currentUser), records, current,pageNumber,name,level );
+
+        jsonFilter.put("breadcrumb", breadcrumb.toString());
+        jsonFilter.put("navbar", sb.toString());
+        jsonFilter.put("leftmenu", leftMenu.toString());
+        jsonFilter.put("body", body.toString());
+        jsonFilter.put("group", current.getId());
+        jsonFilter.put("name", name);
+        return ok(jsonFilter);
       }
+      
     } else if ("user".equals(nav)) {
       
       Set<User> filter = new HashSet<User>();
@@ -506,29 +724,92 @@ public class Organization extends Controller {
           array.add(u.getId());
         }
       } else {
-        for (User u : current.getUsers()) {
-          if (filter.contains(u)) array.add(u.getId());
+        Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
+        Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "user" : request().getQueryString("nav"), current.getId());
+        StringBuilder sb = new StringBuilder();
+        LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(current);
+        for (Group parent : parents) {
+          sb.append(" / ").append(parent.getString("name"));
         }
+        sb.append(" / ").append(current.getString("name"));
+       List<User> all;
+       int pageNumber = 1;
+       if(parameters.containsKey("page")){
+         pageNumber = Integer.parseInt(parameters.get("page")[0]);
+        }
+        int records = 0;
+        String email = "";
+        if (parameters.containsKey("email") && !"".equals(parameters.get("email")[0]) && parameters.get("email")[0] != null) {
+          email = parameters.get("email")[0];
+          all = getUserByFilter(current, pageNumber, 2, email);
+          records = getAllUserByEmail(current, email).size();
+        } else {
+          all = getUser(current, pageNumber, 2);
+          records = (int) count("user");
+        }
+        int check = records % 2;
+        if (check != 0) {
+          records = (records - check) + 2;
+        }
+        StringBuilder sb2 = new StringBuilder();
+        for (User u : all) {
+          List<Role> listCurrentRoles = u.getRoles();
+          sb2.append(user.render(u, false,listCurrentRoles));
+          
+        }
+        Html body = userfilter.render(new Html(sb2),false,records, pageNumber, email);
+        json.put("breadcrumb", breadcrumb.toString());
+        json.put("navbar", sb.toString());
+        json.put("leftmenu", leftMenu.toString());
+        json.put("body", body.toString());
       }
       return ok(json);
     } else if ("role".equals(nav)) {
-      Set<Role> filter = new HashSet<Role>();
-      ObjectNode json = Json.newObject();
-      ArrayNode array = json.putArray("roles");
-
+      int pageNumber = 1;
+      Html leftMenu = leftmenu.render(request().getQueryString("nav") == null ? "role" : request().getQueryString("nav"), current.getId());
+      Html breadcrumb = groupBreadcrumb(request().getQueryString("nav") == null ? "role" : request().getQueryString("nav"), current.getId());
+      StringBuilder sb = new StringBuilder();
+      LinkedList<Group> parents = GroupDAO.getInstance(Application.dbName).buildParentTree(current);
+      for (Group parent : parents) {
+        sb.append(" / ").append(parent.getString("name"));
+      }
+      sb.append(" / ").append(current.getString("name"));
       BasicDBObject query = new BasicDBObject();
-      if (parameters.containsKey("name")) {
-        String name = parameters.get("name")[0];
-        query.put("$text", new BasicDBObject("$search", name));
-      } else {
-        for (Role r : current.getRoles()) {
-          array.add(r.getId());
-        }
+      String name = "";
+      List<Role> all;
+      int records = 0;
+      if(parameters.containsKey("page")){
+        pageNumber = Integer.parseInt(parameters.get("page")[0]);
+        
       }
-      filter.addAll(RoleDAO.getInstance(Application.dbName).find(query));
-      for (Role r : current.getRoles()) {
-        if (filter.contains(r)) array.add(r.getId());
+      if (parameters.containsKey("name") && !"".equals(parameters.get("name")[0]) && parameters.get("name")[0] != null) {
+        name = parameters.get("name")[0];
+       
+        all = getRoleByFilter(current, pageNumber, 10,name);
+        records = getAllRoleByName(current, name).size();
       }
+      else {
+        all = getRole(current, pageNumber, 10);
+        records= (int)count("role");
+      }
+      
+      int check = records % 10;
+      if(check != 0){
+        records =(records - check) + 10;
+      }
+     
+      StringBuilder sb2 = new StringBuilder();
+      for (Role r : all) {
+        List<Permission> listPermission = RoleDAO.getInstance(Application.dbName).getPermissions(r);
+        sb2.append(role.render(r, listPermission));
+      }
+      Html body = rolefilter.render(new Html(sb2), records, pageNumber,name);
+      ObjectNode json = Json.newObject();
+      json.put("breadcrumb", breadcrumb.toString());
+      json.put("navbar", sb.toString());
+      json.put("leftmenu", leftMenu.toString());
+      json.put("body", body.toString());
+      
       return ok(json);
     } else if ("feature".equals(nav)) {
       Set<Feature> filter = new HashSet<Feature>();
@@ -570,4 +851,5 @@ public class Organization extends Controller {
     
     return true;
   }
+  
 }

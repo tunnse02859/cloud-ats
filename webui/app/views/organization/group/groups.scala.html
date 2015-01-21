@@ -1,4 +1,4 @@
-@(rows : Html, system: Boolean)
+@(rows : Html, system: Boolean, records: Integer, currentGroup: org.ats.component.usersmgt.group.Group)
 @import org.ats.component.usersmgt.group._
 @import controllers.organization._
 
@@ -48,7 +48,19 @@
     </tr>
     @rows
   </tbody>
+  
 </table>
+<div class="pagination group" style="text-align: center;">
+<ul>
+<li><a class="prev" href="javascript:void(0);">Prev</a></li>
+@for(i<-1 to records/10){
+	<li><a class="pageNumber" ajax-url="@routes.Organization.pagination()" id = "@currentGroup.getId()" href="javascript:void(0);">@i</a></li>
+	
+}
+<li><a class="next"  href="javascript:void(0);">Next</a></li>
+</ul>
+</div>
 <script type="text/javascript">
 $('[rel="tooltip"]').tooltip({placement: 'right'});
+
 </script>

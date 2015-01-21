@@ -87,8 +87,6 @@ $(document).ready(function() {
           $(terminal).html(data);
         },
         error: function(e, data) {
-          console.log(e);
-          console.log(data);
         }
       });
     }
@@ -155,7 +153,6 @@ $(document).ready(function() {
       url: href,
       dataType: "html",
       success: function(data) {
-        console.log("success");
         if (destroy) {
           $(status).remove();
           $(properties).remove();
@@ -163,7 +160,6 @@ $(document).ready(function() {
         $("#pleaseWaitDialog").modal('hide');
       },
       error: function(error) {
-        console.log(error);
         $("#pleaseWaitDialog").modal('hide');
       }
     });

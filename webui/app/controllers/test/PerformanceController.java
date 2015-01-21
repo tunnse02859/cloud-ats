@@ -14,12 +14,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
 
+import org.ats.component.usersmgt.UserManagementException;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.jmeter.models.JMeterArgument;
@@ -29,6 +34,7 @@ import org.ats.jmeter.models.JMeterScript;
 import play.api.templates.Html;
 import play.mvc.Result;
 import play.mvc.With;
+import play.libs.Json;
 import scala.collection.mutable.StringBuilder;
 import views.html.test.*;
 
@@ -36,6 +42,9 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -46,8 +55,19 @@ import com.mongodb.DBObject;
 @Authorization(feature = "Performance", operation = "")
 public class PerformanceController extends TestController {
 
-  public static Result index() {
-    return ok(index.render(TestProjectModel.PERFORMANCE, body.render(TestProjectModel.PERFORMANCE)));
+  public static Result index() throws Exception {
+    int page = 1;
+    if(request().getQueryString("page") != null) {
+      page = Integer.parseInt(request().getQueryString("page"));
+    }
+    
+    String name = "";
+    if(request().getQueryString("name") != null) {
+      name = request().getQueryString("name");
+      return ok(index.render(TestProjectModel.PERFORMANCE,body.render(TestProjectModel.PERFORMANCE, TestController.countProjectByName(name),page,name)));
+    } else {
+      return ok(index.render(TestProjectModel.PERFORMANCE, body.render(TestProjectModel.PERFORMANCE, TestController.countProject(TestProjectModel.PERFORMANCE), page,null)));
+    }
   }
   
   public static Result report(String snapshotId) throws Exception {
@@ -152,5 +172,28 @@ public class PerformanceController extends TestController {
     maven.stop();
     return redirect(routes.PerformanceController.index());
   }
-  
+ public static Result filter() throws Exception {
+    
+    Map<String, String[]> parameters = request().queryString();
+    Set<TestProjectModel> filter = new HashSet<TestProjectModel>();
+    String name = parameters.get("name")[0];
+    BasicDBObject query = new BasicDBObject();
+    if(parameters.containsKey("name") && parameters.containsKey("creator")){
+      
+      if(!"".equalsIgnoreCase(name) ){
+        query.put("$text", new BasicDBObject("$search", name));
+      }
+    }
+    filter.addAll(TestProjectHelper.getProject(query));
+    List<TestProjectModel> projects = new ArrayList<TestProjectModel>(filter);
+    ArrayNode array = Json.newObject().arrayNode();
+    ObjectNode json = null;
+    for (TestProjectModel project : projects) {
+      json= Json.newObject();
+      json.put("id", project.getId());
+      array.add(json);
+    }
+    return ok(array);
+   
+  }
 }
