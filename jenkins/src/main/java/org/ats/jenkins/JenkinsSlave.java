@@ -136,12 +136,13 @@ public class JenkinsSlave {
           body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
           JSONObject json = new JSONObject(body);
           boolean offline = json.getBoolean("offline");
+          System.out.println("Jenkins slave offline status is: " + offline);
           
           if (offline) {
             if (System.currentTimeMillis() - start > timeout) return false;
             else continue;
           }
-          return offline;
+          return true;
         } catch (Exception e) {
           e.printStackTrace();
           if (System.currentTimeMillis() - start > timeout) return false;
