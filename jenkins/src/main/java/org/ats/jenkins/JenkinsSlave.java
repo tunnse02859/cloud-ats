@@ -105,7 +105,7 @@ public class JenkinsSlave {
     return json.getBoolean("offline");
   }
   
-  public boolean join() throws IOException {
+  public boolean join() throws Exception {
     CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     
@@ -123,6 +123,7 @@ public class JenkinsSlave {
           body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
           JSONObject json = new JSONObject(body);
           boolean offline = json.getBoolean("offline");
+          System.out.println("Jenkins Slave offline status is: " + offline);
           if (!offline)
             return true;
           else if (System.currentTimeMillis() - start < 30 * 1000)
@@ -130,7 +131,10 @@ public class JenkinsSlave {
           else 
             return false;
         } catch (Exception e) {
+          e.printStackTrace();
           if (System.currentTimeMillis() - start > 10 * 1000) return false;
+        } finally {
+          Thread.sleep(3000);
         }
       }
     }
