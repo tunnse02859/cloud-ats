@@ -51,6 +51,7 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsSlave;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -340,22 +341,29 @@ public class VMController extends Controller {
       
 //      VirtualMachineAPI.restoreVM(client, vmId, null);
     } else if ("destroy".equals(action)) {
-//      final VMModel vm = VMHelper.getVMByID(vmId);
-//
-//      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return forbidden(views.html.forbidden.render());
-//
-//      VMHelper.removeVM(vm);
-//      
-//      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-//      VMHelper.getKnife().deleteNode(vm.getName());
-//      
-//      try {
-//        new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-//      } catch (IOException e) {
-//        Logger.debug("Could not release jenkins node ", e);
-//      }
-//      
-//      VirtualMachineAPI.destroyVM(client, vmId, true);
+      
+      final VMModel vm = VMHelper.getVMByID(vmId);
+      
+      if (!hasPermission(vm.getGroup(), "Manage Test VM"))
+        return forbidden(views.html.forbidden.render());
+      
+      VMHelper.removeVM(vm);
+      
+      //remote node of chef server
+      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+      VMHelper.getKnife(jenkins).deleteNode(vm.getName());
+      
+      //remote node of jenkins server
+      try {
+        new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      } catch (IOException e) {
+        Logger.debug("Could not release jenkins node ", e);
+      }
+      
+      //delete virtual machine from azure
+      Future<OperationStatusResponse> response = azureClient.deleteVirtualMachineByName(vmId);
+      response.get();
+      Logger.info("Destroy vm " + vmId + "successfully");
       
     }
 
