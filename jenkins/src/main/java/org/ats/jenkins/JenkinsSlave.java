@@ -105,7 +105,16 @@ public class JenkinsSlave {
     return json.getBoolean("offline");
   }
   
+  /**
+   * The default timeout is 3 minutes
+   * @return
+   * @throws Exception
+   */
   public boolean join() throws Exception {
+    return this.join(3 * 60 * 1000);
+  }
+  
+  public boolean join(long timeout) throws Exception {
     CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpContext httpContext = new BasicHttpContext();
     
@@ -116,25 +125,26 @@ public class JenkinsSlave {
     
     String body = HttpClientUtil.getContentBodyAsString(res);
     if (body.length() == 0) {
-      //check status in 30 seconds
+      
       long start = System.currentTimeMillis();
+      
       while(true) {
         try {
+        //Wait 15s for next request
+          Thread.sleep(15 * 1000);
+          
           body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
           JSONObject json = new JSONObject(body);
           boolean offline = json.getBoolean("offline");
-          System.out.println("Jenkins Slave offline status is: " + offline);
-          if (!offline)
-            return true;
-          else if (System.currentTimeMillis() - start < 30 * 1000)
-            continue;
-          else 
-            return false;
+          
+          if (offline) {
+            if (System.currentTimeMillis() - start > timeout) return false;
+            else continue;
+          }
+          return offline;
         } catch (Exception e) {
           e.printStackTrace();
-          if (System.currentTimeMillis() - start > 10 * 1000) return false;
-        } finally {
-          Thread.sleep(3000);
+          if (System.currentTimeMillis() - start > timeout) return false;
         }
       }
     }

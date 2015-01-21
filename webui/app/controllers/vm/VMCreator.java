@@ -139,19 +139,19 @@ public class VMCreator {
             //sudo
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             //create jenkins slave
-            Logger.info("IP JENIN MASTER: "+jenkins.getPublicIP());
+            Logger.debug("IP JENIN MASTER: "+jenkins.getPublicIP());
             JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);           
             String inetAddress = vmModel.getPublicIP();
-            Logger.info("IP new vm: "+inetAddress);
+            Logger.debug("IP new vm: "+inetAddress);
             
             Map<String, String> env = new HashMap<String, String>();
             if ("Gui".equals(subfix)) env.put("DISPLAY", ":0");
             JenkinsSlave slave = new JenkinsSlave(master, inetAddress, env);
 
             if (slave.join()) {
-              Logger.info("Create slave " + inetAddress + " sucessfully");
+              Logger.debug("Create slave " + inetAddress + " sucessfully");
             } else {
-              Logger.info("Can not create slave" + inetAddress);
+              Logger.debug("Can not create slave" + inetAddress);
             }
             
             //run Jmeter
