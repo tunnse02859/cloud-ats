@@ -17,7 +17,8 @@ $(document).ready(function() {
      var tr = $("tr.vm-status-" + this.id);
      if ($(tr).length > 0) {
        var span = $(tr).find("td.status span.badge").html(this.status);
-       if(this.status == "Running") {
+       var ip = $(tr).find("td.ip span").text(this.ip);
+       if(this.status == "Ready") {
          $(span).removeClass();
          $(span).addClass("badge badge-green");
 		 $(tr).find(".btn.start").hide();

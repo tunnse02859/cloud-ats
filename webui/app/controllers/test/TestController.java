@@ -55,7 +55,6 @@ import org.gitlab.api.models.GitlabProject;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -69,13 +68,9 @@ import views.html.test.newproject;
 import views.html.test.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
 
 import controllers.Application;
 import controllers.vm.VMCreator;
@@ -523,7 +518,8 @@ public class TestController extends Controller {
               JMeterScriptHelper.updateJMeterScript(snapshot);
             }
 
-            VMModel vm = TestProjectModel.PERFORMANCE.equals(project.getType()) ? VMCreator.createNormalNonGuiVM(company) : VMCreator.createNormalGuiVM(company);
+            String vmName = TestProjectModel.PERFORMANCE.equals(project.getType()) ? VMCreator.createNormalNonGuiVM(company) : VMCreator.createNormalGuiVM(company); 
+            VMModel vm = VMHelper.getVMByName(vmName);
             job.put("vm_id", vm.getId());
             JenkinsJobHelper.updateJenkinsJob(job);
 

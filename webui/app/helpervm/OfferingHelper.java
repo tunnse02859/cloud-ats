@@ -34,8 +34,8 @@ public class OfferingHelper extends AbstractHelper {
   public static boolean createOffering(OfferingModel... offerings) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(offeringColumn);
-    WriteResult result = col.insert(offerings, WriteConcern.ACKNOWLEDGED);
-    return result.getError() == null;
+    col.insert(offerings, WriteConcern.ACKNOWLEDGED);
+    return true;
   }
   
   public static OfferingModel updateOffering(OfferingModel offering) {
@@ -64,8 +64,8 @@ public class OfferingHelper extends AbstractHelper {
   public static boolean removeOffering(OfferingModel offering) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(offeringColumn);
-    WriteResult result = col.remove(offering);
-    return result.getError() == null;
+    col.remove(offering);
+    return true;
   }
   
   public static OfferingModel getOffering(String id) {

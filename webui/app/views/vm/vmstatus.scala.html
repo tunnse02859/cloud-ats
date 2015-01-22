@@ -14,11 +14,11 @@
   <td>
     <span class="label label-blue">@vm.get("normal_name") @if(vm.get("normal_name") == null) { @vm.getName() }</span>
   </td>
-  <td><span class="label label-green">@vm.get("public_ip")</span></td>
+  <td class="ip"><span class="label label-green">@vm.get("public_ip")</span></td>
   <td><span class="label label-cyan" rel="tooltip" 
     title="CPU(@vm.getOffering().getNumberOfCpu()) @vm.getOffering().getCpuSpeed() MHz @vm.getOffering().getMemory() MB">
     @vm.getOffering().getName()</span></td>
-  <td class="status"><span class="badge"></span></td>
+  <td class="status"><span class="badge">@vm.getStatus()</span></td>
   <td>
     <a data-target="@vm.getId()" style="display: none;" class="start btn btn-mini btn-blue" href="@routes.VMController.vmAction("start", vm.getId())">Start</a>
     <a data-target="@vm.getId()" style="display: none;" class="stop btn btn-mini btn-orange" href="@routes.VMController.vmAction("stop", vm.getId())">Stop</a>

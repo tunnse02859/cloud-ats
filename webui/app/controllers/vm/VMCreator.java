@@ -6,6 +6,7 @@ package controllers.vm;
 import helpervm.OfferingHelper;
 import helpervm.VMHelper;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +18,6 @@ import java.util.concurrent.Future;
 
 import models.vm.OfferingModel;
 import models.vm.VMModel;
-import models.vm.VMModel.VMStatus;
 
 import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.group.Group;
@@ -32,7 +32,6 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.RoleInstance;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -42,11 +41,11 @@ import com.mongodb.BasicDBObject;
  */
 public class VMCreator {
   
-  public static VMModel createCompanySystemVM(Group company) throws Exception {
+  public static void createCompanySystemVM(Group company) throws Exception {
     
     AzureClient azureClient = VMHelper.getAzureClient();
     
-    String normalName = new StringBuilder().append(company.getString("name")).append("-jenkins").toString();
+    String normalName = new StringBuilder().append(company.getString("name")).append("-system").toString();
     String name = normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     
     Future<OperationStatusResponse> response = azureClient.createSystemVM(name);
@@ -56,19 +55,14 @@ public class VMCreator {
       Thread.sleep(3000);
     }
     OperationStatusResponse status = response.get();
-    Logger.info("Create system vm " + name + " has been " + status.getStatus());
-    
     
     RoleInstance vm = azureClient.getVirutalMachineByName(name);
+    VMModel vmModel = VMHelper.getVMByName(name);
+    vmModel.put("public_ip", vm.getIPAddress().getHostAddress());
+    VMHelper.updateVM(vmModel);
     
-    VMModel vmModel = new VMModel(vm.getRoleName(), name, company.getId(), "cats-sys-image", "cats-sys-image", 
-        vm.getIPAddress().getHostAddress(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
-    vmModel.put("system", true);
-    vmModel.put("jenkins", true);
-    vmModel.put("offering_id", VirtualMachineRoleSize.MEDIUM);
-    vmModel.put("normal_name", normalName);
-    VMHelper.createVM(vmModel);
-
+    Logger.info("Create system vm " + name + " has been " + status.getStatus());
+    
     List<OfferingModel> list = OfferingHelper.getEnableOfferings();
     Collections.sort(list, new Comparator<OfferingModel>() {
       @Override
@@ -79,20 +73,86 @@ public class VMCreator {
 
     OfferingModel defaultOffering = list.get(0);
     OfferingHelper.addDefaultOfferingForGroup(company.getId(), defaultOffering.getId());
-    return vmModel;
   }
   
-  public static VMModel createNormalGuiVM(Group company) throws Exception {
+  public static void destroyVM(VMModel vm) throws Exception {
+
+    String vmId = vm.getId();
+    
+    //remote node of chef server
+    VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
+    VMHelper.getKnife(jenkins).deleteNode(vm.getName());
+
+    //remove node of jenkins server
+    try {
+      new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+    } catch (IOException e) {
+      Logger.debug("Could not release jenkins node ", e);
+    }
+
+    //remove node from guacamole
+    boolean isGui = vm.getBoolean("gui");
+    Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
+    ChannelExec channel = (ChannelExec) session.openChannel("exec");
+    String command = "";
+    if (isGui) {
+      try {
+        channel = (ChannelExec) session.openChannel("exec");
+        command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
+            + vm.getPublicIP() + " 5900 '"
+            + VMHelper.getSystemProperty("default-password") + "' vnc 1";
+        channel.setCommand(command);
+        OutputStream out = channel.getOutputStream();
+        channel.connect();
+
+        out.write((jenkins.getPassword() + "\n").getBytes());
+        out.flush();
+        channel.disconnect();
+      } catch (Exception e) {
+        Logger.error("Exception when run:" + e.getMessage());
+      }
+
+      Logger.info("Command run add connection guacamole: " + command);
+
+    } else {
+
+      try {
+        channel = (ChannelExec) session.openChannel("exec");
+        command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
+            + vm.getPublicIP() + " 22 '"
+            + VMHelper.getSystemProperty("default-password") + "' ssh 1";
+        channel.setCommand(command);
+        OutputStream out = channel.getOutputStream();
+        channel.connect();
+
+        out.write((jenkins.getPassword() + "\n").getBytes());
+        out.flush();
+        channel.disconnect();
+      } catch (Exception e) {
+        Logger.error("Exception when run:" + e.getMessage());
+      }
+
+      Logger.info("Command run add connection guacamole: " + command);
+
+    }
+
+    //delete virtual machine from azure
+    AzureClient azureClient = VMHelper.getAzureClient();
+    azureClient.deleteVirtualMachineByName(vmId);
+    Logger.info("Destroying vm " + vmId);
+  }
+  
+  public static String createNormalGuiVM(Group company) throws Exception {
     return createNormalVM(company, "Gui", "cats-ui-image");
   }
   
-  public static VMModel createNormalNonGuiVM(Group company) throws Exception {
+  public static String createNormalNonGuiVM(Group company) throws Exception {
     return createNormalVM(company, "Non-Gui", "cats-non-ui-image");
   }
   
   public static Map<String, ConcurrentLinkedQueue<String>> QueueHolder = new HashMap<String, ConcurrentLinkedQueue<String>>();
 
-  public static VMModel createNormalVM(Group company, final String subfix, String template, final String ...recipes) throws Exception {
+  public static String createNormalVM(Group company, final String subfix, String template, final String ...recipes) throws Exception {
 
     AzureClient azureClient = VMHelper.getAzureClient();
     
@@ -115,44 +175,39 @@ public class VMCreator {
     Logger.info("Create " + subfix + " vm " + name + " has been " + status.getStatus());    
     
     //get vm by name
-    RoleInstance vm = azureClient.getVirutalMachineByName(name);    
-    final VMModel vmModel = new VMModel(vm.getRoleName(), name, company.getId(), template, template, 
-        vm.getIPAddress().getHostAddress(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
-    vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
-    vmModel.put("system", false);
-    vmModel.put("offering_id", offering.getId());
-    vmModel.setStatus(VMStatus.Initializing);
-    vmModel.put("normal_name", normalName);
-    VMHelper.createVM(vmModel);
+    final RoleInstance vm = azureClient.getVirutalMachineByName(name);
+    VMModel vmModel = VMHelper.getVMByName(name);
+    vmModel.put("public_ip", vm.getIPAddress().getHostAddress());
+    VMHelper.updateVM(vmModel);
 
     //Run recipes
     Thread thread = new Thread() {
       @Override
       public void run() {
         ConcurrentLinkedQueue<String> queue = QueueHolder.get(name);
+        String ip = vm.getIPAddress().getHostAddress();
         try {
-          queue.add("Checking SSHD on " + vmModel.getPublicIP());
-          if (SSHClient.checkEstablished(vmModel.getPublicIP(), 22, 300)) {
+          queue.add("Checking SSHD on " + ip);
+          if (SSHClient.checkEstablished(ip, 22, 300)) {
             
             queue.add("Connection is established");
-            Session session = SSHClient.getSession(vmModel.getPublicIP(), 22, vmModel.getUsername(), vmModel.getPassword());
+            Session session = SSHClient.getSession(ip, 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
             
             //sudo
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             //create jenkins slave
             Logger.debug("IP JENIN MASTER: "+jenkins.getPublicIP());
             JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);           
-            String inetAddress = vmModel.getPublicIP();
-            Logger.debug("IP new vm: "+inetAddress);
+            Logger.debug("IP new vm: " + ip);
             
             Map<String, String> env = new HashMap<String, String>();
             if ("Gui".equals(subfix)) env.put("DISPLAY", ":0");
-            JenkinsSlave slave = new JenkinsSlave(master, inetAddress, env);
+            JenkinsSlave slave = new JenkinsSlave(master, ip, env);
 
             if (slave.join()) {
-              Logger.debug("Create slave " + inetAddress + " sucessfully");
+              Logger.debug("Create slave " + ip + " sucessfully");
             } else {
-              Logger.debug("Can not create slave" + inetAddress);
+              Logger.debug("Can not create slave" + ip);
             }
             
             //run Jmeter
@@ -163,27 +218,26 @@ public class VMCreator {
               queue.add("Execute command: " + command);              
               channel.disconnect();
             }
-            Logger.info("End run register jmetter");
+            Logger.debug("End run register jmetter");
             //End            
             
-            Logger.info("Start bootstrap node");
+            Logger.debug("Starting bootstrap node");
             Knife knife = VMHelper.getKnife(jenkins);
-            knife.bootstrap(vmModel.getPublicIP(), vmModel.getName(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"), queue, recipes);
+            knife.bootstrap(ip, name, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"), queue, recipes);
             
             //register guacamole
-            
             if("Gui".equals(subfix)){
               session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());              
               String command = "";
               try {
                 channel = (ChannelExec) session.openChannel("exec");
                 command = "sudo -S -p '' /etc/guacamole/manage_con.sh " 
-                + vmModel.getPublicIP() + " 5900 '"+VMHelper.getSystemProperty("default-password") + "' vnc 0";                
+                + ip + " 5900 '"+VMHelper.getSystemProperty("default-password") + "' vnc 0";                
                 channel.setCommand(command);
                 OutputStream out = channel.getOutputStream();
                 channel.connect();
 
-                out.write((vmModel.getPassword() + "\n").getBytes());
+                out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
                 out.flush();
                 channel.disconnect();
               } catch (Exception e) {
@@ -201,23 +255,19 @@ public class VMCreator {
               try {
                 channel = (ChannelExec) session.openChannel("exec");
                 command = "sudo -S -p '' /etc/guacamole/manage_con.sh " 
-                + vmModel.getPublicIP() + " 22 '"+VMHelper.getSystemProperty("default-password") + "' ssh 0";                
+                + ip + " 22 '"+VMHelper.getSystemProperty("default-password") + "' ssh 0";                
                 channel.setCommand(command);
                 OutputStream out = channel.getOutputStream();
                 channel.connect();
 
-                out.write((vmModel.getPassword() + "\n").getBytes());
+                out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
                 out.flush();
                 channel.disconnect();
               } catch (Exception e) {
                 Logger.error("Exception when run:" + e.getMessage());
               }
-              
               Logger.info("Command run add connection guacamole: "+ command);
-              
-
             }
-
           } else {
             queue.add("Cloud not establish connection in 120s");
           }
@@ -229,12 +279,10 @@ public class VMCreator {
         }
       }
     };
+    
+    //
     thread.start();
-
-    return vmModel;
-
-    
-    
+    return name;
   }
   
   public static String getAvailableName(Group company, String subfix, int index) throws Exception {

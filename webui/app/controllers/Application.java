@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
 import interceptor.WizardInterceptor;
 
@@ -10,6 +11,7 @@ import java.util.Collection;
 
 import models.test.TestProjectModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
@@ -27,9 +29,6 @@ import org.ats.component.usersmgt.user.UserDAO;
 import play.Play;
 import play.data.DynamicForm;
 import play.data.Form;
-import play.libs.F.Function;
-import play.libs.F.Function0;
-import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -37,6 +36,7 @@ import views.html.index;
 import views.html.signin;
 import views.html.signup;
 
+import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
 import controllers.vm.VMCreator;
@@ -125,8 +125,20 @@ public class Application extends Controller {
       GroupDAO.getInstance(dbName).create(company);
       UserDAO.getInstance(dbName).create(admin);
       RoleDAO.getInstance(dbName).create(administration, vmRole, perfRole, funcRole);
+
+    //Create system vm
+      String normalName = new StringBuilder().append(company.getString("name")).append("-system").toString();
+      String name = VMCreator.normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
       
-      //Create system vm
+      VMModel vmModel = new VMModel(name, name, company.getId(), "cats-sys-image", "cats-sys-image", 
+          null, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+      vmModel.put("system", true);
+      vmModel.put("jenkins", true);
+      vmModel.put("offering_id", VirtualMachineRoleSize.MEDIUM);
+      vmModel.put("normal_name", normalName);
+      vmModel.setStatus(VMStatus.Initializing);
+      VMHelper.createVM(vmModel);
+      
       Thread thread = new Thread(new Runnable() {
         @Override
         public void run() {

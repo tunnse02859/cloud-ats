@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,10 +23,8 @@ import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
 
-import org.ats.component.usersmgt.UserManagementException;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
-import org.ats.jmeter.models.JMeterArgument;
 import org.ats.jmeter.models.JMeterSampler;
 import org.ats.jmeter.models.JMeterScript;
 
@@ -40,9 +37,7 @@ import views.html.test.*;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
@@ -156,7 +151,6 @@ public class PerformanceController extends TestController {
     List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("status", JenkinsJobStatus.Running.toString()).append("project_id", projectId));
     final JenkinsJobModel jobModel = jobs.get(0);
     VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
-    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
     String snapsortId = jobModel.getId();
     JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);

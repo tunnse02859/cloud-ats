@@ -27,7 +27,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 
 import controllers.Application;
 
@@ -46,7 +45,7 @@ public class VMHelper extends AbstractHelper {
   public static boolean createVM(VMModel... vms) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(vmColumn);
-    WriteResult result = col.insert(vms, WriteConcern.ACKNOWLEDGED);
+    col.insert(vms, WriteConcern.ACKNOWLEDGED);
     boolean exist = false;
     for (DBObject index : col.getIndexInfo()) {
       if ("VM Index".equals(index.get("name"))) exist = true;
@@ -55,7 +54,7 @@ public class VMHelper extends AbstractHelper {
       col.createIndex(new BasicDBObject("name", "text"));
       System.out.println("Create VM Index");
     }
-    return result.getError() == null;
+    return true;
   }
   
   public static VMModel updateVM(VMModel vm) {
@@ -68,8 +67,8 @@ public class VMHelper extends AbstractHelper {
   public static boolean removeVM(VMModel vm) {
     DB db = getDatabase();
     DBCollection col = db.getCollection(vmColumn);
-    WriteResult result = col.remove(vm);
-    return result.getError() == null;
+    col.remove(vm);
+    return true;
   }
   
   public static List<VMModel> getVMsByGroupID(String groupId) {
@@ -121,6 +120,12 @@ public class VMHelper extends AbstractHelper {
   public static VMModel getVMByID(String vmId) {
     DB vmDB = getDatabase();
     DBCursor cursor = vmDB.getCollection(vmColumn).find(new BasicDBObject("_id", vmId));
+    return cursor.hasNext() ? new VMModel().from(cursor.next()) : null;
+  }
+  
+  public static VMModel getVMByName(String vmName) {
+    DB vmDB = getDatabase();
+    DBCursor cursor = vmDB.getCollection(vmColumn).find(new BasicDBObject("name", vmName));
     return cursor.hasNext() ? new VMModel().from(cursor.next()) : null;
   }
   

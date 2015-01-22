@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -29,6 +28,7 @@ import javax.xml.xpath.XPathConstants;
 import models.vm.DefaultOfferingModel;
 import models.vm.OfferingModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,9 +62,6 @@ import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
-import play.libs.F.Function;
-import play.libs.F.Function0;
-import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -91,7 +88,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
-import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
@@ -331,92 +327,30 @@ public class VMController extends Controller {
 
     if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
     
-    final AzureClient azureClient = VMHelper.getAzureClient();
-
+    AzureClient azureClient = VMHelper.getAzureClient();
+    
+    VMModel vm = VMHelper.getVMByID(vmId);
+    
     if ("start".equals(action)) {
-      Future<OperationStatusResponse> response = azureClient.startVirtualMachineByName(vmId);
-      response.get();
-      Logger.debug("Start vm " + vmId + " successfully");
+      azureClient.startVirtualMachineByName(vmId);
+      Logger.info("Starting vm " + vmId);
+      
+      Thread.sleep(3000);
+      vm.setStatus(VMStatus.Starting);
+      VMHelper.updateVM(vm);
     } else if ("stop".equals(action)) {
-      Future<OperationStatusResponse> response = azureClient.stopVirtualMachineByName(vmId);      
-      response.get();
-      Logger.debug("Stop vm " + vmId + " successfully");
+      azureClient.stopVirtualMachineByName(vmId);      
+      Logger.info("Stoping vm " + vmId);
+      
+      Thread.sleep(3000);
+      vm.setStatus(VMStatus.Stopping);
+      VMHelper.updateVM(vm);
     } else if ("restore".equals(action)) {
-      
-//      VirtualMachineAPI.restoreVM(client, vmId, null);
+      //Unsupported for now
     } else if ("destroy".equals(action)) {
-      
-      final VMModel vm = VMHelper.getVMByID(vmId);
-      
-      if (!hasPermission(vm.getGroup(), "Manage Test VM"))
-        return forbidden(views.html.forbidden.render());
-      
+      if (!hasPermission(vm.getGroup(), "Manage Test VM")) return forbidden(views.html.forbidden.render());
       VMHelper.removeVM(vm);
-      
-      //remote node of chef server
-      VMModel jenkins = VMHelper.getVMsByGroupID(vm.getGroup().getId(), new BasicDBObject("jenkins", true)).get(0);
-      VMHelper.getKnife(jenkins).deleteNode(vm.getName());
-      
-      //remove node of jenkins server
-      try {
-        new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
-      } catch (IOException e) {
-        Logger.debug("Could not release jenkins node ", e);
-      }
-      
-      
-      //remove node from guacamole
-      
-      boolean isGui = vm.getBoolean("gui");
-      Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());
-      ChannelExec channel = (ChannelExec) session.openChannel("exec");
-      String command = "";
-      if (isGui) {
-        try {
-          channel = (ChannelExec) session.openChannel("exec");
-          command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
-              + vm.getPublicIP() + " 5900 '"
-              + VMHelper.getSystemProperty("default-password") + "' vnc 1";
-          channel.setCommand(command);
-          OutputStream out = channel.getOutputStream();
-          channel.connect();
-
-          out.write((jenkins.getPassword() + "\n").getBytes());
-          out.flush();
-          channel.disconnect();
-        } catch (Exception e) {
-          Logger.error("Exception when run:" + e.getMessage());
-        }
-
-        Logger.info("Command run add connection guacamole: " + command);
-
-      } else {
-
-        try {
-          channel = (ChannelExec) session.openChannel("exec");
-          command = "sudo -S -p '' /etc/guacamole/manage_con.sh "
-              + vm.getPublicIP() + " 22 '"
-              + VMHelper.getSystemProperty("default-password") + "' ssh 1";
-          channel.setCommand(command);
-          OutputStream out = channel.getOutputStream();
-          channel.connect();
-
-          out.write((jenkins.getPassword() + "\n").getBytes());
-          out.flush();
-          channel.disconnect();
-        } catch (Exception e) {
-          Logger.error("Exception when run:" + e.getMessage());
-        }
-
-        Logger.info("Command run add connection guacamole: " + command);
-
-      }
-      
-      //delete virtual machine from azure
-      Future<OperationStatusResponse> response = azureClient.deleteVirtualMachineByName(vmId);
-      response.get();
-      Logger.info("Destroy vm " + vmId + "successfully");
-      
+      VMCreator.destroyVM(vm);
     }
 
     return status(200);
@@ -537,7 +471,24 @@ public class VMController extends Controller {
   @With(VMWizardIterceptor.class)
   @Authorization(feature = "Virtual Machine", operation = "Manage Test VM")
   public static Result createrNormalVM(String groupId, final boolean gui) throws Exception {
+    
     final Group company = GroupDAO.getInstance(Application.dbName).findOne(groupId);
+    
+    OfferingModel offering = OfferingHelper.getDefaultOfferingOfGroup(company.getId()).getOffering();
+    
+    String subfix = gui ? "Gui" : "Non-Gui";
+    String template = gui ? "cats-ui-image" : "cats-non-ui-image";
+    String normalName = VMCreator.getAvailableName(company, subfix, 0);
+    String name = VMCreator.normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
+    
+    VMModel vmModel = new VMModel(name, name, company.getId(), template, template, 
+        null, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+    vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
+    vmModel.put("system", false);
+    vmModel.put("offering_id", offering.getId());
+    vmModel.setStatus(VMStatus.Initializing);
+    vmModel.put("normal_name", normalName);
+    VMHelper.createVM(vmModel);
     
     Thread thread = new Thread(new Runnable() {
       @Override
@@ -546,7 +497,7 @@ public class VMController extends Controller {
           VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
           JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
           if (jenkinsMaster.isReady()) {
-            VMModel vm =  gui  ? VMCreator.createNormalGuiVM(company): VMCreator.createNormalNonGuiVM(company);
+            if(gui) VMCreator.createNormalGuiVM(company); else VMCreator.createNormalNonGuiVM(company);
           }
         } catch (Exception e) {
           throw new RuntimeException(e);
@@ -555,7 +506,10 @@ public class VMController extends Controller {
     });
     thread.start();
     
-    return ok();
+    scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
+    sb.append(vmstatus.render(vmModel, false));
+    sb.append(vmproperties.render(vmModel, checkCurrentSystem(), null, false));
+    return ok(sb.toString());
   }
   
   @With(VMWizardIterceptor.class)
@@ -619,8 +573,4 @@ public class VMController extends Controller {
     } 
     return ok(html);
   }
-  
- 
-  
-  
 }

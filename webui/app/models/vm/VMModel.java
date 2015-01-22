@@ -115,6 +115,6 @@ public class VMModel extends BasicDBObject {
   }
   
   public static enum VMStatus {
-    Initializing, Ready, Running, Error
+    Initializing, Ready, Running, Error, Starting, Stopping, Stopped
   }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
@@ -82,13 +83,21 @@ public class VMStatusActor extends UntypedActor {
           if (vm == null) return;
           String status = null;
           if ("ReadyRole".equals(vm.getInstanceStatus())) {
-            status = "Running";
+            if (sel.getStatus() != VMStatus.Ready) {
+              sel.setStatus(VMStatus.Ready);
+              VMHelper.updateVM(sel);
+            }
+            status = VMStatus.Ready.toString();
           } else if ("StoppedDeallocated".equals(vm.getInstanceStatus()) || "StoppedVM".equals(vm.getInstanceStatus())) {
-            status = "Stopped";
+            if (sel.getStatus() != VMStatus.Stopped) {
+              sel.setStatus(VMStatus.Stopped);
+              VMHelper.updateVM(sel);
+            }
+            status = VMStatus.Stopped.toString();
           } else {
-            status = vm.getInstanceStatus();
+            status = sel.getStatus().toString();
           }          
-          array.add(Json.newObject().put("id", vm.getRoleName()).put("status", status));
+          array.add(Json.newObject().put("id", vm.getRoleName()).put("status", status).put("ip", vm.getIPAddress().getHostAddress()));
         }
         
         jsonObj.put("vms", array);
