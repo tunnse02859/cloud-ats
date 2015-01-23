@@ -3,7 +3,6 @@
  */
 package controllers.vm;
 
-import static akka.pattern.Patterns.ask;
 import helpervm.OfferingHelper;
 import helpervm.VMHelper;
 import interceptor.AuthenticationInterceptor;
@@ -14,13 +13,11 @@ import interceptor.WizardInterceptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathConstants;
@@ -41,7 +38,6 @@ import org.ats.cloudstack.model.VirtualMachine;
 import org.ats.common.html.HtmlParser;
 import org.ats.common.html.XPathUtil;
 import org.ats.common.http.HttpClientUtil;
-import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.Operation;
@@ -53,7 +49,6 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.jenkins.JenkinsMaster;
-import org.ats.jenkins.JenkinsSlave;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -67,8 +62,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import play.mvc.With;
-import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
 import utils.Util;
 import views.html.vm.alert;
 import views.html.vm.amazontemplate;
@@ -86,8 +79,6 @@ import azure.AzureClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.Session;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
@@ -160,7 +151,7 @@ public class VMController extends Controller {
       @Override
       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
         try {
-          Await.result(ask(VMLogActor.actor, new VMChannel(sessionId, groupId, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+          VMLogActor.addChannel(new VMChannel(sessionId, groupId, out));
         } catch (Exception e) {
           Logger.debug("Can not create akka for vm log actor", e);
         }

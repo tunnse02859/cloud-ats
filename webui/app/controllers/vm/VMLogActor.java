@@ -24,6 +24,7 @@ import play.libs.Json;
 import scala.concurrent.duration.Duration;
 import utils.LogBuilder;
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -35,16 +36,36 @@ import akka.actor.UntypedActor;
  */
 public class VMLogActor extends UntypedActor {
   
-  static ActorRef actor = Akka.system().actorOf(Props.create(VMLogActor.class));
+  private static ActorSystem system = null;
   
-  final static Cancellable canceler = Akka.system().scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
-      actor,
-      "Dequeue",
-      Akka.system().dispatcher(),
-      null);
-  
-  Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
+  static ActorRef actor =  null;
 
+  static Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
+  
+  public static void start() {
+    if (system == null) {
+      system = ActorSystem.create("vm-logs");
+      actor = system.actorOf(Props.create(VMLogActor.class));
+      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
+          actor,
+          "Dequeue",
+          Akka.system().dispatcher(),
+          null);
+    }
+    Logger.info("Started Akka system has named vm-logs");
+  }
+  
+  public static void stop() {
+    if (system != null) {
+      system.shutdown();
+    }
+    Logger.info("Shutdowned Akka system has named vm-logs");
+  }
+  
+  static void addChannel(VMChannel channel) {
+    channels.put(channel.sessionId, channel);
+  }
+  
   @Override
   public void onReceive(Object msg) throws Exception {
     if (msg instanceof VMChannel) {

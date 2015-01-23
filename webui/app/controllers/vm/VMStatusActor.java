@@ -35,7 +35,7 @@ public class VMStatusActor extends UntypedActor {
   
   private static ActorSystem system = null;
   
-  static ActorRef actor = Akka.system().actorOf(Props.create(VMStatusActor.class));
+  static ActorRef actor = null;
   
   static Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
   

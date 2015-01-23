@@ -4,6 +4,7 @@ import listener.DeleteGroupListener;
 
 import org.ats.component.usersmgt.EventExecutor;
 
+import controllers.vm.VMLogActor;
 import controllers.vm.VMStatusActor;
 import play.Application;
 import play.GlobalSettings;
@@ -30,6 +31,7 @@ public class Global extends GlobalSettings {
     JenkinsJobExecutor.getInstance().start();
     Logger.info("Application has started...");
     VMStatusActor.start();
+    VMLogActor.start();
   }
   
   @Override
@@ -39,6 +41,7 @@ public class Global extends GlobalSettings {
     JenkinsJobExecutor.getInstance().stop();
     Logger.info("Application shutdown...");
     VMStatusActor.stop();
+    VMLogActor.stop();
   }
 
 }
