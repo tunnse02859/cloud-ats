@@ -42,7 +42,7 @@ public class JMeterFactory {
     this(null);
   }
   
-  public GitlabProject createProject(GitlabAPI api, String companyName, String projectName) throws IOException, JSchException {
+  public GitlabProject createProject(GitlabAPI api, String companyName, String projectName, String username, String password) throws IOException, JSchException {
     GitlabProject project = api.getAPI().createProject(projectName);
     
     String url = project.getSshUrl().replace("git.sme.org", api.getHost());
@@ -62,7 +62,7 @@ public class JMeterFactory {
     sb.append("git remote add origin ").append(url).append(" && ");
     sb.append("git push -u origin master");
   
-    Session session = SSHClient.getSession(api.getHost(), 22, "ubuntu", "ubuntu");
+    Session session = SSHClient.getSession(api.getHost(), 22, username, password);
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
        
     channel.setCommand(sb.toString());

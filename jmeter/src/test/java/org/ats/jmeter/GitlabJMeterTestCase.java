@@ -24,7 +24,7 @@ public class GitlabJMeterTestCase extends AbstractGitlabTestCase {
   //@Test
   public void testJMeter() throws Exception {
     JMeterFactory factory = new JMeterFactory();
-    GitlabProject project = factory.createProject(api, "com.test", "jmeter");
+    GitlabProject project = factory.createProject(api, "com.test", "jmeter", "ubuntu", "ubuntu");
 
     String jmeterScript = factory.createJmeterScript("Cloud-ATS Login", 1, 100, 5, false, 0, 
         factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0),

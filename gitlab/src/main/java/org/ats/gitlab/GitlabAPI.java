@@ -33,7 +33,9 @@ public class GitlabAPI {
   
   public GitlabAPI(String hostUrl, String apiToken) {
    this.api = org.gitlab.api.GitlabAPI.connect(hostUrl, apiToken);
-   this.host = hostUrl.substring(hostUrl.indexOf("://") + 3);
+   String host = hostUrl.substring(hostUrl.indexOf("://") + 3);
+   if (host.indexOf(':') != -1) this.host = host.substring(0, host.indexOf(':'));
+   else this.host = host;
   }
   
   public GitlabAPI(org.gitlab.api.GitlabAPI api) throws IOException {

@@ -152,7 +152,7 @@ public class TestController extends Controller {
 
     String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
 
-    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP() + ":8082", gitlabToken);
 
     String gitName = testName + "-" + UUID.randomUUID();
 
@@ -163,7 +163,7 @@ public class TestController extends Controller {
     }
 
     if (TestProjectModel.PERFORMANCE.equals(testType)) {
-      gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
+      gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
     }
 
     String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
@@ -378,7 +378,7 @@ public class TestController extends Controller {
       }
 
       if (TestProjectModel.PERFORMANCE.equals(testType)) {
-        gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName);
+        gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
       }
 
       String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
