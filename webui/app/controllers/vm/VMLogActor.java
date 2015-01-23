@@ -13,21 +13,18 @@ import java.util.concurrent.TimeUnit;
 
 import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
-
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
 import play.Logger;
-import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
 import utils.LogBuilder;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.Cancellable;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -49,7 +46,7 @@ public class VMLogActor extends UntypedActor {
       system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
           actor,
           "Dequeue",
-          Akka.system().dispatcher(),
+          system.dispatcher(),
           null);
     }
     Logger.info("Started Akka system has named vm-logs");
@@ -59,7 +56,7 @@ public class VMLogActor extends UntypedActor {
     if (system != null) {
       system.shutdown();
     }
-    Logger.info("Shutdowned Akka system has named vm-logs");
+    Logger.info("Shutdown Akka system has named vm-logs");
   }
   
   static void addChannel(VMChannel channel) {

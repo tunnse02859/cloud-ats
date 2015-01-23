@@ -4,6 +4,8 @@ import listener.DeleteGroupListener;
 
 import org.ats.component.usersmgt.EventExecutor;
 
+import controllers.test.ProjectLogActor;
+import controllers.test.ProjectStatusActor;
 import controllers.vm.VMLogActor;
 import controllers.vm.VMStatusActor;
 import play.Application;
@@ -32,6 +34,8 @@ public class Global extends GlobalSettings {
     Logger.info("Application has started...");
     VMStatusActor.start();
     VMLogActor.start();
+    ProjectStatusActor.start();
+    ProjectLogActor.start();
   }
   
   @Override
@@ -42,6 +46,8 @@ public class Global extends GlobalSettings {
     Logger.info("Application shutdown...");
     VMStatusActor.stop();
     VMLogActor.stop();
+    ProjectStatusActor.stop();
+    ProjectLogActor.stop();
   }
 
 }

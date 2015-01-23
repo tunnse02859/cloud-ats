@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
 import play.Logger;
-import play.libs.Akka;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
@@ -47,7 +46,7 @@ public class VMStatusActor extends UntypedActor {
       system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
           actor,
           "Check",
-          Akka.system().dispatcher(),
+          system.dispatcher(),
           null);
     }
     Logger.info("Started Akka system has named vm-status");
@@ -57,7 +56,7 @@ public class VMStatusActor extends UntypedActor {
     if (system != null) {
       system.shutdown();
     }
-    Logger.info("Shutdowned Akka system has named vm-status");
+    Logger.info("Shutdown Akka system has named vm-status");
   }
   
   static void addChannel(VMChannel channel) {

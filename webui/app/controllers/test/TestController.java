@@ -3,7 +3,6 @@
  */
 package controllers.test;
 
-import static akka.pattern.Patterns.ask;
 import helpertest.JMeterScriptHelper;
 import helpertest.JenkinsJobHelper;
 import helpertest.TestProjectHelper;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import models.test.JenkinsJobModel;
 import models.test.JenkinsJobStatus;
@@ -61,8 +59,6 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import play.mvc.With;
-import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
 import views.html.test.index;
 import views.html.test.newproject;
 import views.html.test.project;
@@ -612,7 +608,7 @@ public class TestController extends Controller {
       @Override
       public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
         try {
-          Await.result(ask(ProjectLogActor.actor, new ProjectChannel(sessionId, currentUserId, type, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+          ProjectLogActor.addChannel(new ProjectChannel(sessionId, currentUserId, type, out));
         } catch (Exception e) {
           Logger.debug("Can not create akka for project log actor", e);
         }
@@ -625,7 +621,7 @@ public class TestController extends Controller {
       @Override
       public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
         try {
-          Await.result(ask(ProjectStatusActor.actor, new ProjectChannel(sessionId, currentUserId, type, out), 1000), Duration.create(1, TimeUnit.SECONDS));
+          ProjectStatusActor.addChannel(new ProjectChannel(sessionId, currentUserId, type, out));
         } catch (Exception e) {
           Logger.debug("Can not create akka for project status actor", e);
         }

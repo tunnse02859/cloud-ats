@@ -17,11 +17,11 @@ import models.test.TestProjectModel;
 import org.ats.component.usersmgt.group.Group;
 import org.ats.jmeter.models.JMeterScript;
 
-import play.libs.Akka;
+import play.Logger;
 import play.libs.Json;
 import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
-import akka.actor.Cancellable;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 
@@ -36,12 +36,32 @@ import com.mongodb.BasicDBObject;
  */
 public class ProjectStatusActor extends UntypedActor {
 
-  static ActorRef actor = Akka.system().actorOf(Props.create(ProjectStatusActor.class));
+  private static ActorSystem system = null;
   
-  final static Cancellable canceller = Akka.system().scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
-      actor, "Check", Akka.system().dispatcher(), null);
+  static ActorRef actor = null;
   
-  Map<String, ProjectChannel> channels = new HashMap<String, ProjectChannel>();
+  static Map<String, ProjectChannel> channels = new HashMap<String, ProjectChannel>();
+  
+  public static void start() {
+    if (system == null) {
+      system = ActorSystem.create("project-logs");
+      actor = system.actorOf(Props.create(ProjectStatusActor.class));
+      system.scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
+        actor, "Check", system.dispatcher(), null);
+    }
+    Logger.info("Started Akka system has named project-status");
+  }
+  
+  public static void stop() {
+    if (system != null) {
+      system.shutdown();
+    }
+    Logger.info("Shutdown Akka system has named project-status");
+  }
+  
+  static void addChannel(ProjectChannel channel) {
+    channels.put(channel.sessionId, channel);
+  }
   
   @Override
   public void onReceive(Object msg) throws Exception {
