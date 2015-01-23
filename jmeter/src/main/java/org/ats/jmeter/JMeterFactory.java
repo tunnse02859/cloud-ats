@@ -45,7 +45,9 @@ public class JMeterFactory {
   public GitlabProject createProject(GitlabAPI api, String companyName, String projectName, String username, String password) throws IOException, JSchException {
     GitlabProject project = api.getAPI().createProject(projectName);
     
-    String url = project.getSshUrl().replace("git.sme.org", api.getHost());
+    String sshUrl = project.getSshUrl();
+    String hostname = sshUrl.substring(sshUrl.indexOf('@') + 1, sshUrl.indexOf(':'));
+    String url = project.getSshUrl().replace(hostname, api.getHost());
     
     String hash = UUID.randomUUID().toString();
     

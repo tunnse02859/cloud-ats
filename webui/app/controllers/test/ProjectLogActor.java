@@ -51,7 +51,7 @@ public class ProjectLogActor extends UntypedActor {
     if (system == null) {
       system = ActorSystem.create("project-logs");
       actor = system.actorOf(Props.create(ProjectLogActor.class));
-      system.scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
+      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
         actor, "Dequeue", system.dispatcher(), null);
     }
     Logger.info("Started Akka system has named project-logs");

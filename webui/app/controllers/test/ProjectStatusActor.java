@@ -44,9 +44,9 @@ public class ProjectStatusActor extends UntypedActor {
   
   public static void start() {
     if (system == null) {
-      system = ActorSystem.create("project-logs");
+      system = ActorSystem.create("project-status");
       actor = system.actorOf(Props.create(ProjectStatusActor.class));
-      system.scheduler().schedule(Duration.create(100, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
+      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.SECONDS),
         actor, "Check", system.dispatcher(), null);
     }
     Logger.info("Started Akka system has named project-status");

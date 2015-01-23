@@ -273,7 +273,7 @@ public class TestController extends Controller {
     Group company = TestController.getCompany();
     VMModel jenkins = VMHelper.getVMs(new BasicDBObject("group_id", company.getId()).append("jenkins", true)).iterator().next();
     String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
-    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP() + ":8082", gitlabToken);
     
     int snapshotCount = JMeterScriptHelper.getJMeterScript(projectId).size() + 1;
     String commitMsg = "Snapshot " + snapshotCount;
@@ -311,14 +311,16 @@ public class TestController extends Controller {
     
     VMModel jenkins = VMHelper.getVMByID(project.getString("jenkins_id"));
     String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
-    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+    GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP() + ":8082", gitlabToken);
     gitlabAPI.deleteProject(project.getGitlabProjectId());
   }
   
   private static GitlabProject createGitProject(GitlabAPI api, String projectName) throws Exception {
     GitlabProject project = api.getAPI().createProject(projectName);
     
-    String url = project.getSshUrl().replace("git.sme.org", api.getHost());
+    String sshUrl = project.getSshUrl();
+    String hostname = sshUrl.substring(sshUrl.indexOf('@') + 1, sshUrl.indexOf(':'));
+    String url = project.getSshUrl().replace(hostname, api.getHost());
     
     String hash = UUID.randomUUID().toString();
     
@@ -367,7 +369,7 @@ public class TestController extends Controller {
 
       String gitlabToken = VMHelper.getSystemProperty("gitlab-api-token");
 
-      GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP(), gitlabToken);
+      GitlabAPI gitlabAPI = new GitlabAPI("http://" + jenkins.getPublicIP() + ":8082", gitlabToken);
 
       String gitName = testName + "-" + UUID.randomUUID();
 
@@ -744,6 +746,7 @@ public class TestController extends Controller {
   public static List<Group> getAvailableGroups(String testType, String currentUserId) throws UserManagementException {
     
     User currentUser = UserDAO.getInstance(Application.dbName).findOne(currentUserId);
+    if (currentUser == null) return Collections.emptyList();
     
     Feature feature = FeatureDAO.getInstance(Application.dbName).find(new BasicDBObject("name", testType)).iterator().next();
     Operation perfAdOperation = null;
