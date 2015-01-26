@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 
 import models.vm.OfferingModel;
 import models.vm.VMModel;
+import models.vm.VMModel.VMStatus;
 
 import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.group.Group;
@@ -177,8 +178,19 @@ public class VMCreator {
     //get vm by name
     final RoleInstance vm = azureClient.getVirutalMachineByName(name);
     VMModel vmModel = VMHelper.getVMByName(name);
-    vmModel.put("public_ip", vm.getIPAddress().getHostAddress());
-    VMHelper.updateVM(vmModel);
+    if (vmModel == null) {
+      vmModel = new VMModel(name, name, company.getId(), template, template, 
+          vm.getIPAddress().getHostAddress(), VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+      vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
+      vmModel.put("system", false);
+      vmModel.put("offering_id", offering.getId());
+      vmModel.setStatus(VMStatus.Initializing);
+      vmModel.put("normal_name", normalName);
+      VMHelper.createVM(vmModel);
+    } else {
+      vmModel.put("public_ip", vm.getIPAddress().getHostAddress());
+      VMHelper.updateVM(vmModel);
+    }
 
     //Run recipes
     Thread thread = new Thread() {
