@@ -101,7 +101,7 @@ public class TestController extends Controller {
     
     JMeterSampler[] samplers = new JMeterSampler[samplerCount];
     
-    for(int i = 0; i < samplerCount; i++) {
+    for (int i = 0; i < samplerCount; i++) {
       String prefix = "sampler[" + i + "]";
 
       int paramCount = 0;
@@ -673,7 +673,7 @@ public class TestController extends Controller {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
     List<TestProjectModel> projects = getListTestProject(type, group_id, userText);
     
-    for(int i = (page -1) * 10; i < projects.size() && i < (page * 10); i ++) {
+    for(int i = (page -1) * 10; i < projects.size() && i < (page * 10) && projects.size() > 0; i ++) {
       sb.append(project.render(projects.get(i)));
     }
    
@@ -700,6 +700,7 @@ public class TestController extends Controller {
     }
     
     List<TestProjectModel> projects = new ArrayList<TestProjectModel>(set);
+    
     return projects;
   }
   
