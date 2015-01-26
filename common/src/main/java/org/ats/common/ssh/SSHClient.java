@@ -57,7 +57,7 @@ public class SSHClient {
       }
 
       if (ptimestamp) {
-        command = "T " + (file.lastModified() / 1000) + " 0";
+        command = "T" + (file.lastModified() / 1000) + " 0";
         // The access time should be sent here,
         // but it is not accessible with JavaAPI ;-<
         command += (" " + (file.lastModified() / 1000) + " 0\n");
