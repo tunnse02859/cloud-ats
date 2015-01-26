@@ -103,6 +103,21 @@ public class VMCreator {
           out.flush();
           channel.disconnect();
           
+          
+          //restart service nginx
+          channel = (ChannelExec) session.openChannel("exec");
+          command = "sudo -S -p '' service nginx restart";              
+          Logger.info("Command restart service nginx:" + command);    
+          channel.setCommand(command);
+          out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+          out.flush();
+          SSHClient.printOut(System.out, channel);
+          channel.disconnect();
+          
+          
          //add jenkin to reverse proxy
           
           if (SSHClient.checkEstablished(vmSystemIp, 22, 300)){
@@ -119,9 +134,21 @@ public class VMCreator {
             out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
             out.flush();
             channel.disconnect();
+            
+            //restart jenkins service
+            channel = (ChannelExec) session.openChannel("exec");
+            command = "sudo -S -p '' service jenkins restart";                
+            Logger.info("Command  restart service jenkins:" + command);    
+            channel.setCommand(command);
+            out = channel.getOutputStream();
+            channel.connect();
+
+            out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+            out.flush();
+            channel.disconnect();
  
           }          
-                   
+          session.disconnect();         
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
