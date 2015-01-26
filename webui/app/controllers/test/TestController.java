@@ -338,7 +338,7 @@ public class TestController extends Controller {
     sb.append("git remote add origin ").append(url).append(" && ");
     sb.append("git push -u origin master");
   
-    Session session = SSHClient.getSession(api.getHost(), 22, "ubuntu", "ubuntu");
+    Session session = SSHClient.getSession(api.getHost(), 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
        
     channel.setCommand(sb.toString());
@@ -384,9 +384,12 @@ public class TestController extends Controller {
         gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
       }
 
-      String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+      String sshUrl = gitProject.getSshUrl();
+      String hostname = sshUrl.substring(sshUrl.indexOf('@') + 1, sshUrl.indexOf(':'));
+      
+      String gitSshUrl = gitProject.getSshUrl().replace(hostname, jenkins.getPublicIP());
 
-      String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
+      String gitHttpUrl = gitProject.getHttpUrl().replace(hostname, jenkins.getPublicIP());
 
       TestProjectModel project = new TestProjectModel(
           gitProject.getId(),
@@ -406,7 +409,7 @@ public class TestController extends Controller {
 
       try {
         if (TestProjectModel.FUNCTIONAL.equals(testType)) {
-          Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, "ubuntu", "ubuntu");
+          Session session = SSHClient.getSession(jenkins.getPublicIP(), 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
           ChannelExec channel = (ChannelExec) session.openChannel("exec");
 
           //clone project
