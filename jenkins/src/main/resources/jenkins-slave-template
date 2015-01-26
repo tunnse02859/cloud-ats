@@ -1,8 +1,15 @@
 Submit	Save
-_.credentialsId	2c6f0370-7705-40dc-a4f7-6ea649221c8c
+_.credentialsId	b8a369d5-314a-42d4-9f55-030f4095ab16
 _.numExecutors	1
 _.port	22
-_.remoteFS	/home/azureuser/.jenkins
+_.remoteFS	/home/ubuntu/.jenkins
+hudson-tools-ToolLocationNodeProperty	on
+locations.home	/usr/bin/git
+locations.home	/home/ubuntu/java/jdk1.7.0_51
+locations.home	/home/ubuntu/java/apache-maven-3.2.1
+locations.key	hudson.plugins.git.GitTool$DescriptorImpl@Default
+locations.key	hudson.model.JDK$DescriptorImpl@jdk1.7.0_51
+locations.key	hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.2.1
 mode	NORMAL
 retentionStrategy.keepUpWhenActive	on
 stapler-class	hudson.plugins.sshslaves.SSHLauncher

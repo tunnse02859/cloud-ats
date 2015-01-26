@@ -2,14 +2,15 @@
   "name": "%s", 
   "nodeDescription": "", 
   "numExecutors": "1", 
-  "remoteFS": "/home/azureuser/.jenkins", 
+  "remoteFS": "/home/ubuntu/.jenkins", 
   "labelString": "", 
   "mode": "NORMAL", 
   "": ["hudson.plugins.sshslaves.SSHLauncher", "hudson.slaves.RetentionStrategy$Always"], 
-  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "host": "%s", "credentialsId": "2c6f0370-7705-40dc-a4f7-6ea649221c8c", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": "", "maxNumRetries": "", "retryWaitTime": ""}, 
+  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "host": "%s", "credentialsId": "b8a369d5-314a-42d4-9f55-030f4095ab16", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": "", "maxNumRetries": "", "retryWaitTime": ""}, 
   "retentionStrategy": {"stapler-class": "hudson.slaves.RetentionStrategy$Always"}, 
   "nodeProperties": {
-    "stapler-class-bag": "true" 
+    "stapler-class-bag": "true", 
+    "hudson-tools-ToolLocationNodeProperty": {"locations": [{"key": "hudson.plugins.git.GitTool$DescriptorImpl@Default", "home": "/usr/bin/git"}, {"key": "hudson.model.JDK$DescriptorImpl@jdk1.7.0_51", "home": "/home/ubuntu/java/jdk1.7.0_51"}, {"key": "hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.2.1", "home": "/home/ubuntu/java/apache-maven-3.2.1"}]}
   }, 
   "type": "hudson.slaves.DumbSlave"
  }
