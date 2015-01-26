@@ -32,8 +32,20 @@ import com.mongodb.BasicDBObject;
 @Authorization(feature = "Functional", operation = "")
 public class FunctionalController extends TestController {
 
-  public static Result index() {
-    return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL,0,0,null)));
+  public static Result index() throws Exception{
+    int page = 1;
+    if(request().getQueryString("page") != null) {
+      page = Integer.parseInt(request().getQueryString("page"));
+    }
+    
+    String name = "";
+    if(request().getQueryString("name") != null) {
+      name = request().getQueryString("name");
+      return ok(index.render(TestProjectModel.FUNCTIONAL,body.render(TestProjectModel.FUNCTIONAL, TestController.countProjectByName(name),page,name)));
+    } else {
+      return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL, TestController.countProject(TestProjectModel.FUNCTIONAL), page,null)));
+    }
+   // return ok(index.render(TestProjectModel.FUNCTIONAL, body.render(TestProjectModel.FUNCTIONAL,0,0,null)));
   }
   
   public static Result report(String projectId) {

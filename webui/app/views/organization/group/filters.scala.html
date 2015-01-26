@@ -32,7 +32,6 @@
   </form>  
   </div>
 </div>
-          
 <table class="org-group table table-striped">
   <tbody>
     <tr>
@@ -51,12 +50,12 @@
 </table>
 <div class="pagination group" style="text-align: center;">
 <ul>
-<li><a class="prev" href="javascript:void(0);">Prev</a></li>
+<li @if(page==1){class="disabled"}><a class="prev" href="javascript:void(0);">Prev</a></li>
 @for(i<-1 to records/10){
 	<li @if(i == page){class="active"}><a class="pageNumberFilter"  ajax-url='@routes.Organization.filter("group")?page=@i' id = "@currentGroup.getId()" href="javascript:void(0);">@i</a></li>
 	
 }
-<li><a class="next"  href="javascript:void(0);">Next</a></li>
+<li @if(page==records/10){class="disabled"}><a class="next"  href="javascript:void(0);">Next</a></li>
 </ul>
 <input type="hidden" name="hidden_name" >
 <input type="hidden" name="hidden_level">

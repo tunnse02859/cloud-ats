@@ -176,6 +176,7 @@ $(document).ready(function(){
          data: formValue,
          success: function(data){
            updateByAjax(data);
+           
          },
          error: function() {
            location.reload();
@@ -248,9 +249,10 @@ $(document).ready(function(){
         method: "GET",
         url: ajaxURL,
         dataType: "json",
-        data: {"id" : id ,"current" : current},
+        //data: {"id" : id ,"current" : current},
         success: function(data) {
-          var oldElement = $('.table tbody').find('tr:not(:first)');
+          updateByAjax(data);
+         /* var oldElement = $('.table tbody').find('tr:not(:first)');
           $(oldElement).remove();
           
           $(data).each(function() {
@@ -276,11 +278,11 @@ $(document).ready(function(){
               "</td>"+
              "</tr>";
             
-            var currentElement = $('.table tbody').append(html);
-          });
+            var currentElement = $('.table tbody').append(html);*/
+          //});
         },error: function () {
           
-          location.reload();
+          //location.reload();
         }
      });
    }

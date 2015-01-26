@@ -54,7 +54,7 @@
 <ul>
 <li><a class="prev" href="javascript:void(0);">Prev</a></li>
 @for(i<-1 to records/10){
-	<li><a class="pageNumber" ajax-url="@routes.Organization.pagination()" id = "@currentGroup.getId()" href="javascript:void(0);">@i</a></li>
+	<li><a class="pageNumber" ajax-url='@routes.Organization.filter("group")?page=@i' id = "@currentGroup.getId()" href="javascript:void(0);">@i</a></li>
 	
 }
 <li><a class="next"  href="javascript:void(0);">Next</a></li>

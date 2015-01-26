@@ -682,13 +682,13 @@ public class TestController extends Controller {
     String group_id = request().getQueryString("group");
     String userText = request().getQueryString("user");
 
-    return ok(getProjectListHtml(type.toString(), group_id, userText,0));
+    return ok(getProjectListHtml(type.toString(), group_id, userText, 1));
   }
   
   public static Html getProjectListHtml(String type, String group_id, String userText, int page) throws UserManagementException {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
     List<TestProjectModel> projects = getListTestProject(type, group_id, userText);
-    
+    System.out.println(page);
     for(int i = (page -1) * 10; i < projects.size() && i < (page * 10) && projects.size() > 0; i ++) {
       sb.append(project.render(projects.get(i)));
     }
@@ -699,7 +699,6 @@ public class TestController extends Controller {
   public static Html getProjectListHtml(String type, String group_id, String userText, int page, String name) throws UserManagementException {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
     List<TestProjectModel> projects = getListTestProjectByName(type, group_id, userText, name);
-    
     for(int i = (page -1) * 10; i < projects.size() && i <(page * 10); i ++) {
       sb.append(project.render(projects.get(i)));
     }

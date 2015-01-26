@@ -25,7 +25,7 @@ GET     /portal/o               				controllers.organization.Organization.index(
 GET     /portal/o/b             				controllers.organization.Organization.body()
 GET     /portal/o/aj            				controllers.organization.Organization.indexAjax()
 GET     /portal/o/fl/:nav       				controllers.organization.Organization.filter(nav)
-GET     /portal/o/b/paginations	            	controllers.organization.Organization.pagination()
+#GET     /portal/o/b/paginations	            	controllers.organization.Organization.pagination()
 #GET     /portal/o/b/paginationsog/:feature		controllers.organization.Organization.pagination(nav: String)
 ############################# Group Action ###############################
 
