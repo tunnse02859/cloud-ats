@@ -43,7 +43,7 @@ public class VMStatusActor extends UntypedActor {
       system = ActorSystem.create("vm-status");
       actor = system.actorOf(Props.create(VMStatusActor.class));
       
-      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(1, SECONDS),
+      system.scheduler().schedule(Duration.create(3000, TimeUnit.MILLISECONDS), Duration.create(10, SECONDS),
           actor,
           "Check",
           system.dispatcher(),
@@ -70,6 +70,7 @@ public class VMStatusActor extends UntypedActor {
       channels.put(channel.sessionId, channel);
       getSender().tell("OK", getSelf());
     } else if (msg.equals("Check")) {
+      System.out.println(channels);
       for (VMChannel channel : channels.values()) {
         
         AzureClient azureClient = VMHelper.getAzureClient();

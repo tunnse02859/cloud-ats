@@ -43,7 +43,7 @@ public class VMLogActor extends UntypedActor {
     if (system == null) {
       system = ActorSystem.create("vm-logs");
       actor = system.actorOf(Props.create(VMLogActor.class));
-      system.scheduler().schedule(Duration.create(1000, TimeUnit.MILLISECONDS), Duration.create(500, TimeUnit.MILLISECONDS),
+      system.scheduler().schedule(Duration.create(3000, TimeUnit.MILLISECONDS), Duration.create(10, TimeUnit.SECONDS),
           actor,
           "Dequeue",
           system.dispatcher(),
