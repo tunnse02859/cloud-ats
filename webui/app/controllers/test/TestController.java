@@ -53,6 +53,7 @@ import org.gitlab.api.models.GitlabProject;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
+import play.libs.F.Callback0;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -611,6 +612,12 @@ public class TestController extends Controller {
       public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
         try {
           ProjectLogActor.addChannel(new ProjectChannel(sessionId, currentUserId, type, out));
+          in.onClose(new Callback0() {
+            @Override
+            public void invoke() throws Throwable {
+              ProjectLogActor.removeChannel(sessionId);
+            }
+          });
         } catch (Exception e) {
           Logger.debug("Can not create akka for project log actor", e);
         }
@@ -624,6 +631,12 @@ public class TestController extends Controller {
       public void onReady(play.mvc.WebSocket.In<JsonNode> in, play.mvc.WebSocket.Out<JsonNode> out) {
         try {
           ProjectStatusActor.addChannel(new ProjectChannel(sessionId, currentUserId, type, out));
+          in.onClose(new Callback0() {
+            @Override
+            public void invoke() throws Throwable {
+              ProjectStatusActor.removeChannel(sessionId);
+            }
+          });
         } catch (Exception e) {
           Logger.debug("Can not create akka for project status actor", e);
         }

@@ -68,6 +68,10 @@ public class ProjectLogActor extends UntypedActor {
     channels.put(channel.sessionId, channel);
   }
   
+  static void removeChannel(String sessionId) {
+    channels.remove(sessionId);
+  }
+  
   @Override
   public void onReceive(Object msg) throws Exception {
     if (msg instanceof ProjectChannel) {

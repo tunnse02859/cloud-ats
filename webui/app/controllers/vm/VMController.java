@@ -57,6 +57,7 @@ import play.Logger;
 import play.api.templates.Html;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.libs.F.Callback0;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -138,10 +139,17 @@ public class VMController extends Controller {
       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
         try {
           VMStatusActor.addChannel(new VMChannel(sessionId, groupId, out));
+          in.onClose(new Callback0() {
+            @Override
+            public void invoke() throws Throwable {
+              VMStatusActor.removeChannel(sessionId);
+            }
+          });
         } catch (Exception e) {
           Logger.debug("Can not create akka for vm status actor", e);
         }
       }
+      
     };
   }
   
@@ -152,6 +160,12 @@ public class VMController extends Controller {
       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
         try {
           VMLogActor.addChannel(new VMChannel(sessionId, groupId, out));
+          in.onClose(new Callback0() {
+            @Override
+            public void invoke() throws Throwable {
+              VMLogActor.removeChannel(sessionId);
+            }
+          });
         } catch (Exception e) {
           Logger.debug("Can not create akka for vm log actor", e);
         }

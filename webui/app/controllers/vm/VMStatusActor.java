@@ -63,6 +63,10 @@ public class VMStatusActor extends UntypedActor {
     channels.put(channel.sessionId, channel);
   }
   
+  static void removeChannel(String sessionId) {
+    channels.remove(sessionId);
+  }
+  
   @Override
   public void onReceive(Object msg) throws Exception {
     if (msg instanceof VMChannel) {
@@ -70,7 +74,6 @@ public class VMStatusActor extends UntypedActor {
       channels.put(channel.sessionId, channel);
       getSender().tell("OK", getSelf());
     } else if (msg.equals("Check")) {
-      System.out.println(channels);
       for (VMChannel channel : channels.values()) {
         
         AzureClient azureClient = VMHelper.getAzureClient();
