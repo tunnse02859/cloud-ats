@@ -58,6 +58,7 @@ public class VMCreator {
     OperationStatusResponse status = response.get();
     
     RoleInstance vm = azureClient.getVirutalMachineByName(name);
+    
     VMModel vmModel = VMHelper.getVMByName(name);
     vmModel.put("public_ip", vm.getIPAddress().getHostAddress());
     VMHelper.updateVM(vmModel);
@@ -74,6 +75,60 @@ public class VMCreator {
 
     OfferingModel defaultOffering = list.get(0);
     OfferingHelper.addDefaultOfferingForGroup(company.getId(), defaultOffering.getId());
+    
+    //add to reverse proxy 
+    final String vmSystemName = name;
+    final String vmSystemIp = vm.getIPAddress().getHostAddress();
+    Thread thread = new Thread(new Runnable() {
+      @Override
+      public void run() {       
+        
+        try {
+          
+        //add guacamole to reverse proxy   
+          
+          Logger.info("VMName:"+vmSystemName + " ip:"+vmSystemIp );
+          Session session = SSHClient.getSession("127.0.0.1", 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+          ChannelExec channel = (ChannelExec) session.openChannel("exec");
+          
+          channel = (ChannelExec) session.openChannel("exec");
+          String command = "sudo -S -p '' /etc/nginx/sites-available/manage_location.sh "
+              + vmSystemIp + " " + vmSystemName + " 0";
+          Logger.info("Command add to reverse proxy:" + command);    
+          channel.setCommand(command);
+          OutputStream out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+          out.flush();
+          channel.disconnect();
+          
+         //add jenkin to reverse proxy
+          
+          if (SSHClient.checkEstablished(vmSystemIp, 22, 300)){
+            session = SSHClient.getSession(vmSystemIp, 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+            channel = (ChannelExec) session.openChannel("exec");
+            
+            channel = (ChannelExec) session.openChannel("exec");
+            command = "sudo -S -p '' /etc/guacamole/change_prefix_jenkin.sh " + vmSystemName;
+            Logger.info("Command add to reverse proxy:" + command);    
+            channel.setCommand(command);
+            out = channel.getOutputStream();
+            channel.connect();
+
+            out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+            out.flush();
+            channel.disconnect();
+ 
+          }          
+                   
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+    thread.start();
+    
   }
   
   public static void destroyVM(VMModel vm) throws Exception {
