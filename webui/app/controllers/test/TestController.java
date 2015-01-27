@@ -167,9 +167,12 @@ public class TestController extends Controller {
       gitProject = factory.createProject(gitlabAPI, company.getString("name"), gitName, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
     }
 
-    String gitSshUrl = gitProject.getSshUrl().replace("git.sme.org", jenkins.getPublicIP());
+    String sshUrl = gitProject.getSshUrl();
+    String hostname = sshUrl.substring(sshUrl.indexOf('@') + 1, sshUrl.indexOf(':'));
+    
+    String gitSshUrl = gitProject.getSshUrl().replace(hostname, jenkins.getPublicIP());
 
-    String gitHttpUrl = gitProject.getHttpUrl().replace("git.sme.org", jenkins.getPublicIP());
+    String gitHttpUrl = gitProject.getHttpUrl().replace(hostname, jenkins.getPublicIP());
 
     TestProjectModel project = new TestProjectModel(
         gitProject.getId(),

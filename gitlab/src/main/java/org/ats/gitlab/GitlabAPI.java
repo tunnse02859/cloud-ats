@@ -92,7 +92,7 @@ public class GitlabAPI {
   
   public void deleteProject(Integer projectId) throws IOException {
     String tailUrl = GitlabProject.URL + "/" + projectId;
-    api.retrieve().method("DELETE").to(tailUrl, Void.class);
+    api.retrieve().method("DELETE").to(tailUrl, Boolean.class);
   }
   
   public List<GitlabTree> getTree(GitlabProject project, GitlabTree tree, String branch) throws IOException {

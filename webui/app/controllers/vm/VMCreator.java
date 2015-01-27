@@ -293,10 +293,10 @@ public class VMCreator {
             //sudo
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             //create jenkins slave
-            Logger.debug("IP JENIN MASTER: "+jenkins.getPublicIP());
-            String subfix = jenkins.getName() + "/jenkins";
-            JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);           
-            Logger.debug("IP new vm: " + ip);
+            Logger.debug("Ip Jenkins Master: "+jenkins.getPublicIP());
+            String jenkins_subfix = jenkins.getName() + "/jenkins";
+            JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", jenkins_subfix, 8080);           
+            Logger.debug("Ip new vm: " + ip);
             
             Map<String, String> env = new HashMap<String, String>();
             if ("Gui".equals(subfix)) env.put("DISPLAY", ":0");
@@ -313,7 +313,8 @@ public class VMCreator {
               String command = "nohup jmeter-start > jmeter-server.log 2>&1 &";
               channel.setCommand(command);
               channel.connect();            
-              queue.add("Execute command: " + command);              
+              queue.add("Execute command: " + command);
+              SSHClient.printOut(queue, channel);
               channel.disconnect();
             }
             
@@ -334,42 +335,38 @@ public class VMCreator {
             out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
             out.flush();
             
+            //disconnect session
+            session.disconnect();
+            
             Logger.debug("Starting bootstrap node");
             Knife knife = VMHelper.getKnife(jenkins);
             knife.bootstrap(ip, name, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"), queue, recipes);
             
             //register guacamole
             if("Gui".equals(subfix)){
-              session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());              
-              command = "";
-              channel = (ChannelExec) session.openChannel("exec");
               command = "sudo -S -p '' /etc/guacamole/manage_con.sh " 
                   + ip + " 5900 '"+VMHelper.getSystemProperty("default-password") + "' vnc 0";                
-              channel.setCommand(command);
-              out = channel.getOutputStream();
-              channel.connect();
-
-              out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
-              out.flush();
-              channel.disconnect();
-              queue.add("Command run add connection guacamole: "+ command);
+            } else if ("Non-Gui".equals(subfix)) {
+              command = "sudo -S -p '' /etc/guacamole/manage_con.sh " 
+                  + ip + " 22 '"+VMHelper.getSystemProperty("default-password") + "' ssh 0";             
             }
             
-            if("Non-Gui".equals(subfix)){
-              session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());              
-              command = "";
-              channel = (ChannelExec) session.openChannel("exec");
-              command = "sudo -S -p '' /etc/guacamole/manage_con.sh " 
-                  + ip + " 22 '"+VMHelper.getSystemProperty("default-password") + "' ssh 0";                
-              channel.setCommand(command);
-              out = channel.getOutputStream();
-              channel.connect();
+            session = SSHClient.getSession(jenkins.getPublicIP(), 22, jenkins.getUsername(), jenkins.getPassword());              
+            channel = (ChannelExec) session.openChannel("exec");
+            channel.setCommand(command);
+            out = channel.getOutputStream();
+            channel.connect();
 
-              out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
-              out.flush();
-              channel.disconnect();
-              queue.add("Command run add connection guacamole: "+ command);
-            }
+            out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+            out.flush();
+            channel.disconnect();
+            session.disconnect();
+            queue.add("Command run add connection guacamole: "+ command);
+            
+            //Update vm status to Ready
+            VMModel vmModel = VMHelper.getVMByName(name);
+            vmModel.setStatus(VMStatus.Ready);
+            VMHelper.updateVM(vmModel);
           } else {
             queue.add("Cloud not establish connection in 120s");
           }
