@@ -170,7 +170,8 @@ public class VMCreator {
 
     //remove node of jenkins server
     try {
-      new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+      String subfix = jenkins.getName() + "/jenkins";
+      new JenkinsSlave( new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080), vm.getPublicIP()).release();
     } catch (IOException e) {
       Logger.debug("Could not release jenkins node ", e);
     }
@@ -293,7 +294,8 @@ public class VMCreator {
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             //create jenkins slave
             Logger.debug("IP JENIN MASTER: "+jenkins.getPublicIP());
-            JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);           
+            String subfix = jenkins.getName() + "/jenkins";
+            JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);           
             Logger.debug("IP new vm: " + ip);
             
             Map<String, String> env = new HashMap<String, String>();

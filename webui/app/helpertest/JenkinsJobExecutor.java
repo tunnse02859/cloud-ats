@@ -108,8 +108,9 @@ public class JenkinsJobExecutor {
             VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
 
             TestProjectModel project = TestProjectHelper.getProjectById(jobModel.getString("project_id"));
-
-            JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+            
+            String subfix = jenkins.getName() + "/jenkins";
+            JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);
 
             runTest(project, jenkinsMaster, jobModel, vm);
           }
@@ -144,7 +145,8 @@ public class JenkinsJobExecutor {
         }
         
         try {
-          new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+          String subfix = jenkins.getName() + "/jenkins";
+          new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080), vm.getPublicIP()).release();
         } catch (IOException e) {
           Logger.debug("Could not release jenkins node ", e);
         }

@@ -151,7 +151,8 @@ public class PerformanceController extends TestController {
     List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("status", JenkinsJobStatus.Running.toString()).append("project_id", projectId));
     final JenkinsJobModel jobModel = jobs.get(0);
     VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+    String subfix = jenkins.getName() + "/jenkins";
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);
     String snapsortId = jobModel.getId();
     JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);
     maven.stop();
@@ -161,11 +162,13 @@ public class PerformanceController extends TestController {
   public static Result stopSnapsort(String snapsortId) throws Exception {
     final JenkinsJobModel jobModel = JenkinsJobHelper.getJobById(snapsortId);
     VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+    String subfix = jenkins.getName() + "/jenkins";
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);
     JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);
     maven.stop();
     return redirect(routes.PerformanceController.index());
   }
+  
  public static Result filter() throws Exception {
     
     Map<String, String[]> parameters = request().queryString();

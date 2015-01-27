@@ -92,7 +92,8 @@ public class JenkinsJobHelper {
     List<JenkinsJobModel> jobs = getJobs(new BasicDBObject("_id", snapshotId));
     for (JenkinsJobModel job : jobs) {
       VMModel master = VMHelper.getVMByID(job.getString("jenkins_id"));
-      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(new JenkinsMaster(master.getPublicIP(), "http", 8080), job.getId(), null, null, null, null, null);
+      String subfix = master.getName() + "/jenkins";
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(new JenkinsMaster(master.getPublicIP(), "http", subfix, 8080), job.getId(), null, null, null, null, null);
       jenkinsJob.delete();
       removeJenkinsJob(job);
     }
@@ -102,7 +103,8 @@ public class JenkinsJobHelper {
     List<JenkinsJobModel> jobs = getJobs(new BasicDBObject("project_id", projectId));
     for (JenkinsJobModel job : jobs) {
       VMModel master = VMHelper.getVMByID(job.getString("jenkins_id"));
-      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(new JenkinsMaster(master.getPublicIP(), "http", 8080), job.getId(), null, null, null, null, null);
+      String subfix = master.getName() + "/jenkins";
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(new JenkinsMaster(master.getPublicIP(), "http", subfix, 8080), job.getId(), null, null, null, null, null);
       jenkinsJob.delete();
       removeJenkinsJob(job);
     }

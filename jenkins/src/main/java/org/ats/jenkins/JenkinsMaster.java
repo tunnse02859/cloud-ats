@@ -32,11 +32,15 @@ public class JenkinsMaster {
   private int port;
   
   /** .*/
+  private String subfix;
+  
+  /** .*/
   private String[] systemNodes = { "master", "chef-workstation" };
   
-  public JenkinsMaster(String masterHost, String scheme, int port) {
+  public JenkinsMaster(String masterHost, String scheme, String subfix, int port) {
     this.masterHost = masterHost;
     this.scheme = scheme;
+    this.subfix = subfix;
     this.port = port;
   }
   
@@ -84,7 +88,9 @@ public class JenkinsMaster {
   
   public String buildURL(String actionURL) {
     StringBuilder sb = new StringBuilder(scheme);
-    sb.append("://").append(masterHost).append(":").append(port).append("/").append(actionURL);
+    sb.append("://").append(masterHost).append(":").append(port).append("/");
+    if (subfix != null && !subfix.isEmpty()) sb.append(subfix).append("/");
+    sb.append(actionURL);
     return sb.toString();
   }
   

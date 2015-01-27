@@ -44,7 +44,8 @@ public class DeleteGroupListener implements EventListener {
             VMHelper.removeVM(vm);
             VirtualMachineAPI.destroyVM(VMHelper.getCloudStackClient(), vm.getId(), true);
             if (!vm.getBoolean("system")) {
-              new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", 8080), vm.getPublicIP()).release();
+              String subfix = jenkins.getName() + "/jenkins";
+              new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", subfix,8080), vm.getPublicIP()).release();
               VMHelper.getKnife(jenkins).deleteNode(vm.getName());
             }
           }

@@ -500,7 +500,8 @@ public class VMController extends Controller {
       public void run() {
         try {
           VMModel jenkins = VMHelper.getVMsByGroupID(company.getId(), new BasicDBObject("jenkins", true)).get(0);
-          JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", 8080);
+          String subfix = jenkins.getName() + "/jenkins";
+          JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);
           if (jenkinsMaster.isReady()) {
             if(gui) VMCreator.createNormalGuiVM(company); else VMCreator.createNormalNonGuiVM(company);
           }

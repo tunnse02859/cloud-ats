@@ -28,7 +28,7 @@ public class JenkinsMasterTestCase extends AbstractVMTestCase {
   
   @Override
   public void setUp() throws Exception {
-    master = new JenkinsMaster("git.sme.org", "http", 8080);
+    master = new JenkinsMaster("git.sme.org", "http", null, 8080);
   }
   
   @Override
