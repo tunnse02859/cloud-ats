@@ -120,7 +120,7 @@ public class VMCreator {
           
          //add jenkin to reverse proxy
           
-          if (SSHClient.checkEstablished(vmSystemIp, 22, 300)){
+          if (SSHClient.checkEstablished(vmSystemIp, 22, 300)) {
             session = SSHClient.getSession(vmSystemIp, 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
             channel = (ChannelExec) session.openChannel("exec");
             
@@ -133,6 +133,7 @@ public class VMCreator {
 
             out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
             out.flush();
+            SSHClient.printOut(System.out, channel);
             channel.disconnect();
             
             //restart jenkins service
@@ -145,6 +146,7 @@ public class VMCreator {
 
             out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
             out.flush();
+            SSHClient.printOut(System.out, channel);
             channel.disconnect();
  
           }          
