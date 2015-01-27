@@ -70,9 +70,10 @@ public class PerformanceController extends TestController {
     TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("_id", snapshotId)).iterator().next();
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
-    String report1 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ResponseTimesOverTime.png" ;
-    String report2 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/ThreadsStateOverTime.png" ;
-    String report3 = "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/jmeter/results/TransactionsPerSecond.png" ;
+    String subfix = jenkins.getName() + "/jenkins";
+    String report1 = "http://cloud-ats.cloudapp.net/" + subfix +"/job/" + job.getId() + "/ws/target/jmeter/results/ResponseTimesOverTime.png" ;
+    String report2 = "http://cloud-ats.cloudapp.net/" + subfix +"/job/" + job.getId() + "/ws/target/jmeter/results/ThreadsStateOverTime.png" ;
+    String report3 = "http://cloud-ats.cloudapp.net/" + subfix +"/job/" + job.getId() + "/ws/target/jmeter/results/TransactionsPerSecond.png" ;
     
     String name = project.getName() + " / " + snapshot.getString("commit");
     return ok(report_perf.render(name, report1, report2, report3));
