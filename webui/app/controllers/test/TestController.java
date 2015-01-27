@@ -691,7 +691,6 @@ public class TestController extends Controller {
   public static Html getProjectListHtml(String type, String group_id, String userText, int page) throws UserManagementException {
     scala.collection.mutable.StringBuilder sb = new scala.collection.mutable.StringBuilder();
     List<TestProjectModel> projects = getListTestProject(type, group_id, userText);
-    System.out.println(page);
     for(int i = (page -1) * 10; i < projects.size() && i < (page * 10) && projects.size() > 0; i ++) {
       sb.append(project.render(projects.get(i)));
     }
