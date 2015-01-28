@@ -6,10 +6,9 @@ package controllers.test;
 import helpertest.JMeterScriptHelper;
 import helpertest.TestProjectHelper;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import models.test.TestProjectModel;
@@ -40,7 +39,7 @@ public class ProjectStatusActor extends UntypedActor {
   
   static ActorRef actor = null;
   
-  static Map<String, ProjectChannel> channels = new HashMap<String, ProjectChannel>();
+  static ConcurrentHashMap<String, ProjectChannel> channels = new ConcurrentHashMap<String, ProjectChannel>();
   
   public static void start() {
     if (system == null) {

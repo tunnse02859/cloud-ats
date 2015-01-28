@@ -6,8 +6,7 @@ package controllers.vm;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import helpervm.VMHelper;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import models.vm.VMModel;
@@ -36,7 +35,7 @@ public class VMStatusActor extends UntypedActor {
   
   static ActorRef actor = null;
   
-  static Map<String, VMChannel> channels = new HashMap<String, VMChannel>();
+  static ConcurrentHashMap<String, VMChannel> channels = new ConcurrentHashMap<String, VMChannel>();
   
   public static void start() {
     if (system == null) {

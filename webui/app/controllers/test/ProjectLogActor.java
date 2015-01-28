@@ -8,11 +8,10 @@ import helpertest.JenkinsJobHelper;
 import helpertest.TestProjectHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +44,7 @@ public class ProjectLogActor extends UntypedActor {
 
   static ActorRef actor = null;
   
-  static Map<String, ProjectChannel> channels = new HashMap<String, ProjectChannel>();
+  static ConcurrentHashMap<String, ProjectChannel> channels = new ConcurrentHashMap<String, ProjectChannel>();
   
   public static void start() {
     if (system == null) {
