@@ -486,7 +486,7 @@ public class VMController extends Controller {
     String normalName = VMCreator.getAvailableName(company, subfix, 0);
     String name = VMCreator.normalizeVMName(new StringBuilder(normalName).append("-").append(company.getId()).toString());
     
-    VMModel vmModel = new VMModel(name, name, company.getId(), template, template, 
+    final VMModel vmModel = new VMModel(name, name, company.getId(), template, template, 
         null, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
     vmModel.put("gui", "Non-Gui".equals(subfix) ? false : true);
     vmModel.put("system", false);
@@ -506,6 +506,7 @@ public class VMController extends Controller {
             if(gui) VMCreator.createNormalGuiVM(company); else VMCreator.createNormalNonGuiVM(company);
           }
         } catch (Exception e) {
+          VMHelper.createVM(vmModel);
           throw new RuntimeException(e);
         }
       }

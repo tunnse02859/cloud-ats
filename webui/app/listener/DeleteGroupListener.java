@@ -6,11 +6,14 @@ package listener;
 import helpervm.OfferingHelper;
 import helpervm.VMHelper;
 
+import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import models.vm.VMModel;
 
 import org.ats.cloudstack.VirtualMachineAPI;
+import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.Event;
 import org.ats.component.usersmgt.EventExecutedException;
 import org.ats.component.usersmgt.EventListener;
@@ -20,6 +23,9 @@ import org.ats.jenkins.JenkinsSlave;
 
 import play.Logger;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
+import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -35,22 +41,55 @@ public class DeleteGroupListener implements EventListener {
       if ("delete-group".equals(event.getType())) {
         Group group = new Group().from(event.getSource());
         if (group.getInt("level") > 1) return;
-        
-        List<VMModel> list = VMHelper.getVMsByGroupID(group.getId(), new BasicDBObject("jenkins", true));
-        if (list.size() == 1) { 
-          VMModel jenkins = list.get(0);
-          List<VMModel> vms = VMHelper.getVMsByGroupID(group.getId());
-          for (VMModel vm : vms) {
-            VMHelper.removeVM(vm);
-            VirtualMachineAPI.destroyVM(VMHelper.getCloudStackClient(), vm.getId(), true);
-            if (!vm.getBoolean("system")) {
-              String subfix = jenkins.getName() + "/jenkins";
-              new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", subfix,8080), vm.getPublicIP()).release();
-              VMHelper.getKnife(jenkins).deleteNode(vm.getName());
-            }
-          }
+
+        final List<VMModel> vms = VMHelper.getVMsByGroupID(group.getId());
+        Session session = SSHClient.getSession("127.0.0.1", 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+        for (VMModel vm : vms) {
+          VMHelper.removeVM(vm);
+          if (!vm.getBoolean("system")) continue;
+          
+          ChannelExec channel = (ChannelExec) session.openChannel("exec");
+          String command = "sudo -S -p '' /etc/nginx/sites-available/manage_location.sh "
+              + vm.getPublicIP() + " " + vm.getName() + " 1";
+          Logger.info("Command add to reverse proxy:" + command);    
+          channel.setCommand(command);
+          OutputStream out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+          out.flush();
+          channel.disconnect();
+          
+        //restart service nginx
+          channel = (ChannelExec) session.openChannel("exec");
+          command = "sudo -S -p '' service nginx restart";              
+          Logger.info("Command restart service nginx:" + command);    
+          channel.setCommand(command);
+          out = channel.getOutputStream();
+          channel.connect();
+
+          out.write((VMHelper.getSystemProperty("default-password") + "\n").getBytes());
+          out.flush();
+          SSHClient.printOut(System.out, channel);
+          channel.disconnect();
         }
+        session.disconnect();
         
+        Thread thread = new Thread(new Runnable() {
+          @Override
+          public void run() {
+            for (VMModel vm : vms) {
+              try {
+                Future<OperationStatusResponse> response = VMHelper.getAzureClient().deleteVirtualMachineByName(vm.getId());
+                OperationStatusResponse result = response.get();
+                Logger.debug("Deleted vm " + vm.getId() + " is " + result.getStatus());
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          };
+        }); thread.start();
+
         OfferingHelper.removeDefaultOfferingOfGroup(group.getId());
       }
     } catch (Exception e) {

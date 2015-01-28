@@ -87,11 +87,10 @@ public class VMCreator {
           
         //add guacamole to reverse proxy   
           
-          Logger.info("VMName:"+vmSystemName + " ip:"+vmSystemIp );
+          Logger.debug("VMName:" + vmSystemName + " ip:" + vmSystemIp );
           Session session = SSHClient.getSession("127.0.0.1", 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
           ChannelExec channel = (ChannelExec) session.openChannel("exec");
           
-          channel = (ChannelExec) session.openChannel("exec");
           String command = "sudo -S -p '' /etc/nginx/sites-available/manage_location.sh "
               + vmSystemIp + " " + vmSystemName + " 0";
           Logger.info("Command add to reverse proxy:" + command);    
