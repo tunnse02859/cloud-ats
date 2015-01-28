@@ -20,23 +20,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.xml.xpath.XPathConstants;
-
 import models.vm.DefaultOfferingModel;
 import models.vm.OfferingModel;
 import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.ats.cloudstack.CloudStackAPI;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.cloudstack.ServiceOfferingAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
 import org.ats.cloudstack.model.ServiceOffering;
 import org.ats.cloudstack.model.VirtualMachine;
-import org.ats.common.html.HtmlParser;
-import org.ats.common.html.XPathUtil;
+import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
@@ -49,9 +46,6 @@ import org.ats.component.usersmgt.role.RoleDAO;
 import org.ats.component.usersmgt.user.User;
 import org.ats.component.usersmgt.user.UserDAO;
 import org.ats.jenkins.JenkinsMaster;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import play.Logger;
 import play.api.templates.Html;
@@ -298,21 +292,14 @@ public class VMController extends Controller {
   
   @With(VMWizardIterceptor.class)
   public static Result viewConsoleURL(String vmId) {
-    String cloudstackApiUrl = VMHelper.getSystemProperty("cloudstack-api-url");
-    String cloudstackUsername = VMHelper.getSystemProperty("cloudstack-username");
-    String cloudstackPassword = VMHelper.getSystemProperty("cloudstack-password");
-
+    
+    VMModel vm =VMHelper.getVMByID(vmId);
+    VMModel jenkins = VMHelper.getVMsByGroupID(session("group_id"), new BasicDBObject("system", true).append("jenkins", true)).get(0);
+    
     try {
-      CloseableHttpClient client = CloudStackAPI.login(VMHelper.getCloudStackClient(), cloudstackUsername, cloudstackPassword);
-      String cloudstackConsoleUrl = cloudstackApiUrl.substring(0, cloudstackApiUrl.lastIndexOf('/') + 1) + "console?cmd=access&vm=" + vmId;
-      String response = HttpClientUtil.fetch(client, cloudstackConsoleUrl);
-
-      HtmlParser parser = new HtmlParser();
-      Document doc = parser.parseWellForm(response);
-      NodeList nodeList = (NodeList)XPathUtil.read(doc, "/html/frameset/frame", XPathConstants.NODESET);
-      Node node = nodeList.item(0);
       response().setContentType("html");
-      String src = node.getAttributes().getNamedItem("src").getNodeValue();
+      String protocal = vm.getBoolean("gui") ? "vnc" : "ssh";
+      String src = "http://cloud-ats.cloudapp.net/" + jenkins.getName() + "/guacamole/#/client/c/" + protocal + "_node_" + vm.getPublicIP();
       return ok(terminal.render(src));
     } catch (Exception e) {
       Logger.debug("Has error when view vm remote console", e);

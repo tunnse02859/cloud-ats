@@ -29,6 +29,7 @@ import models.test.JenkinsJobStatus;
 import models.test.TestProjectModel;
 import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
+import azure.AzureClient;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -141,6 +142,7 @@ public class JenkinsJobExecutor {
         try {
           VMHelper.getKnife(jenkins).deleteNode(vm.getName());
         } catch (Exception e) {
+          e.printStackTrace();
           Logger.debug("Cloud not release chef node", e);
         }
         
@@ -148,13 +150,15 @@ public class JenkinsJobExecutor {
           String subfix = jenkins.getName() + "/jenkins";
           new JenkinsSlave(new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080), vm.getPublicIP()).release();
         } catch (IOException e) {
+          e.printStackTrace();
           Logger.debug("Could not release jenkins node ", e);
         }
 
-        CloudStackClient client = VMHelper.getCloudStackClient();
         try {
-          VirtualMachineAPI.destroyVM(client, vm.getId(), true);
-        } catch (IOException e) {
+          AzureClient client = VMHelper.getAzureClient();
+          client.deleteVirtualMachineByName(vm.getName());
+        } catch (Exception e) {
+          e.printStackTrace();
           Logger.debug("Cloud not destroy vm", e);
         }
         
