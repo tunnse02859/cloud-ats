@@ -5,10 +5,10 @@ _.port	22
 _.remoteFS	/home/azureuser/.jenkins
 hudson-tools-ToolLocationNodeProperty	on
 locations.home	/usr/bin/git
-locations.home	/usr/lib/jvm/java-7-openjdk-amd64/jre
+locations.home	/home/azureuser/jdk_1.7
 locations.home	/usr/share/maven
 locations.key	hudson.plugins.git.GitTool$DescriptorImpl@Default
-locations.key	hudson.model.JDK$DescriptorImpl@jdk1.7.0_51
+locations.key	hudson.model.JDK$DescriptorImpl@jdk1.7
 locations.key	hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.0.5
 mode	NORMAL
 retentionStrategy.keepUpWhenActive	on

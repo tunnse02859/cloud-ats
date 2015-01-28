@@ -10,7 +10,7 @@
   "retentionStrategy": {"stapler-class": "hudson.slaves.RetentionStrategy$Always"}, 
   "nodeProperties": {
     "stapler-class-bag": "true", 
-    "hudson-tools-ToolLocationNodeProperty": {"locations": [{"key": "hudson.plugins.git.GitTool$DescriptorImpl@Default", "home": "/usr/bin/git"}, {"key": "hudson.model.JDK$DescriptorImpl@jdk1.7.0_51", "home": "/usr/lib/jvm/java-7-openjdk-amd64/jre"}, {"key": "hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.0.5", "home": "/usr/share/maven"}]}
+    "hudson-tools-ToolLocationNodeProperty": {"locations": [{"key": "hudson.plugins.git.GitTool$DescriptorImpl@Default", "home": "/usr/bin/git"}, {"key": "hudson.model.JDK$DescriptorImpl@jdk1.7", "home": "/home/azureuser/jdk_1.7"}, {"key": "hudson.tasks.Maven$MavenInstallation$DescriptorImpl@maven3.0.5", "home": "/usr/share/maven"}]}
   }, 
   "type": "hudson.slaves.DumbSlave"
  }
