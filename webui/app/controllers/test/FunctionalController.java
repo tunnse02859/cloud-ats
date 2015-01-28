@@ -52,7 +52,9 @@ public class FunctionalController extends TestController {
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("project_id", projectId)).iterator().next();
     TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
-    return ok(report_func.render(project.getName(), "http://" + jenkins.getPublicIP() + ":8080/job/" + job.getId() + "/ws/target/surefire-reports/html/index.html"));
+    String subfix = jenkins.getName() + "/jenkins";
+    
+    return ok(report_func.render(project.getName(), "http://cloud-ats.cloudapp.net/" + subfix + "/job/" + job.getId() + "/ws/target/surefire-reports/html/index.html"));
   }
   
   public static Result createProjectByUpload(boolean run) throws Exception {
