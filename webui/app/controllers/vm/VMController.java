@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import models.vm.DefaultOfferingModel;
@@ -26,15 +27,12 @@ import models.vm.VMModel;
 import models.vm.VMModel.VMStatus;
 
 import org.apache.cloudstack.api.ApiConstants.VMDetails;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
 import org.ats.cloudstack.CloudStackClient;
 import org.ats.cloudstack.ServiceOfferingAPI;
 import org.ats.cloudstack.VirtualMachineAPI;
 import org.ats.cloudstack.model.ServiceOffering;
 import org.ats.cloudstack.model.VirtualMachine;
-import org.ats.common.http.HttpClientFactory;
-import org.ats.common.http.HttpClientUtil;
+import org.ats.common.ssh.SSHClient;
 import org.ats.component.usersmgt.UserManagementException;
 import org.ats.component.usersmgt.feature.Feature;
 import org.ats.component.usersmgt.feature.Operation;
@@ -74,6 +72,9 @@ import azure.AzureClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
+import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.VirtualMachineRoleSize;
 import com.mongodb.BasicDBObject;
 
@@ -319,20 +320,67 @@ public class VMController extends Controller {
 
     if (! hasRightPermission(vmId)) return forbidden(views.html.forbidden.render());
     
-    AzureClient azureClient = VMHelper.getAzureClient();
+    final AzureClient azureClient = VMHelper.getAzureClient();
     
-    VMModel vm = VMHelper.getVMByID(vmId);
+    final VMModel vm = VMHelper.getVMByID(vmId);
     
     if ("start".equals(action)) {
-      azureClient.startVirtualMachineByName(vmId);
       Logger.info("Starting vm " + vmId);
+      
+      Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Future<OperationStatusResponse> response = azureClient.startVirtualMachineByName(vmId);
+            OperationStatusResponse status = response.get();
+            String ip = vm.getPublicIP();
+            if (!vm.getBoolean("gui")) {
+              
+              Logger.debug("Checking SSHD on " + ip);
+              if (SSHClient.checkEstablished(ip, 22, 300)) {
+                
+                Logger.debug("Connection is established");
+                Session session = SSHClient.getSession(ip, 22, VMHelper.getSystemProperty("default-user"), VMHelper.getSystemProperty("default-password"));
+                ChannelExec channel = (ChannelExec) session.openChannel("exec");
+                String command = "nohup jmeter-start > jmeter-server.log 2>&1 &";
+                channel.setCommand(command);
+                channel.connect();            
+                Logger.debug("Execute command: " + command);
+                SSHClient.printOut(System.out, channel);
+                channel.disconnect();
+              }
+            }
+            
+            Logger.info("Started vm" + vmId + " " + status.getStatus());
+            
+            vm.setStatus(VMStatus.Ready);
+            VMHelper.updateVM(vm);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }); thread.start();
       
       Thread.sleep(3000);
       vm.setStatus(VMStatus.Starting);
       VMHelper.updateVM(vm);
     } else if ("stop".equals(action)) {
-      azureClient.stopVirtualMachineByName(vmId);      
       Logger.info("Stoping vm " + vmId);
+      
+      Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Future<OperationStatusResponse> response = azureClient.stopVirtualMachineByName(vmId);
+            OperationStatusResponse status =  response.get();
+            vm.setStatus(VMStatus.Stopped);
+            VMHelper.updateVM(vm);
+            Logger.info("Stopped vm" + vmId + " " + status.getStatus());
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }); thread.start();
       
       Thread.sleep(3000);
       vm.setStatus(VMStatus.Stopping);

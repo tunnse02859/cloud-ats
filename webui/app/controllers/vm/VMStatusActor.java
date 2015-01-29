@@ -85,13 +85,15 @@ public class VMStatusActor extends UntypedActor {
           if (vm == null) return;
           String status = null;
           if ("ReadyRole".equals(vm.getInstanceStatus())) {
-            if (sel.getStatus() != VMStatus.Ready) {
+            if (sel.getStatus() == VMStatus.Initializing) {
               sel.setStatus(VMStatus.Ready);
               VMHelper.updateVM(sel);
+              status = VMStatus.Ready.toString();
+            } else {
+              status = sel.getStatus().toString();
             }
-            status = VMStatus.Ready.toString();
           } else if ("StoppedDeallocated".equals(vm.getInstanceStatus()) || "StoppedVM".equals(vm.getInstanceStatus())) {
-            if (sel.getStatus() != VMStatus.Stopped) {
+            if (sel.getStatus() != VMStatus.Stopped && sel.getStatus() != VMStatus.Stopping) {
               sel.setStatus(VMStatus.Stopped);
               VMHelper.updateVM(sel);
             }
