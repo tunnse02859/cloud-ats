@@ -90,7 +90,7 @@ $(document).ready(function() {
   $("body").on("click", ".project.finish", function(e) {
     var projectName = $('input[name=name]').val();
     var file = $('input[name=uploaded]').val();
-    if(projectName && file && !projectNameWizard){
+    if(projectName && file){
       $("#pleaseWaitDialog").modal();
     }
   });
