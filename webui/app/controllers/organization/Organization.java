@@ -577,7 +577,7 @@ public class Organization extends Controller {
   public static List<User> getUser (Group group, int currentPage, int size, boolean system) throws UserManagementException{
       
       if(!system){
-        List<User> listUser = new ArrayList<User>(group.getUsers());
+        List<User> listUser = listUserVisible();
         List<User> all = new ArrayList<User>();
         
         for (int i =(currentPage-1)*size; ((i < currentPage *size) && i < listUser.size()); i ++) {
