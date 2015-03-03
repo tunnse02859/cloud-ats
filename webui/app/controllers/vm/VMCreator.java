@@ -149,7 +149,11 @@ public class VMCreator {
             channel.disconnect();
  
           }          
-          session.disconnect();         
+          session.disconnect();
+          
+          VMModel vmModel = VMHelper.getVMByName(vmSystemName);
+          vmModel.setStatus(VMStatus.Ready);
+          VMHelper.updateVM(vmModel);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
