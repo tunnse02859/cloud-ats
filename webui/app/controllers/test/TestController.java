@@ -282,10 +282,14 @@ public class TestController extends Controller {
     int snapshotCount = JMeterScriptHelper.getJMeterScript(projectId).size() + 1;
     String commitMsg = "Snapshot " + snapshotCount;
     
-    gitlabAPI.updateFile(project.getGitlabProjectId(), 
-        "src/test/jmeter/script.jmx", "master", 
-        scriptContent, commitMsg);
-    
+    try {
+      gitlabAPI.updateFile(project.getGitlabProjectId(), 
+          "src/test/jmeter/script.jmx", "master", 
+          scriptContent, commitMsg);
+    }
+    catch (IOException e) {
+      return redirect(routes.PerformanceController.index());
+    }
     List<GitlabCommit> commits = gitlabAPI.getCommits(project.getGitlabProjectId(), "master");
     GitlabCommit commit = null;
     for (GitlabCommit self : commits) {
