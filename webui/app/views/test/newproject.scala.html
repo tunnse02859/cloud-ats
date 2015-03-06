@@ -24,7 +24,7 @@
   </div>
   <form class="form-horizontal" method="post" enctype="multipart/form-data"
   @if("Performance" == t){ action="@controllers.test.routes.PerformanceController.createProjectByUpload(false)" }
-  @if("Functional" == t){ action="@controllers.test.routes.FunctionalController.createProjectByUpload(false)" } 
+  @if("Functional" == t){ action="@controllers.test.routes.FunctionalController.createProjectByUpload(false)" onsubmit="return check();"} 
   >
   
   <div class="step-content">
@@ -134,7 +134,11 @@
       <div class="row-fluid">
       
       <div class="span5">
-      
+      @if("Functional" == t) {
+	      <div class="alert fileinfo" style="display: none;">
+			    <strong>Warning!</strong> You have to choose tar.gz file !
+	    	</div>
+    	}
       <div class="control-group">
         <label for="name" class="control-label">Test Project Name</label>
         <div class="controls">
@@ -180,11 +184,41 @@
 
 @if("Functional" == t) {
 <script type="text/javascript">
+
+function check() {
+
+  	var allocate = $('#step3').find('input[name=uploaded]');
+	 	var file = $(allocate).val();
+
+	 	if (file.match(".tar.gz$")) {
+		return true;
+	 	}
+	 	else {
+		 	$('.alert.fileinfo').show();
+	 	 	return false;
+	 	}
+}
 $(document).ready(function() {
   /* Wizard
   ================================================== */
+
+ 
+
+//Click create project finish
+  $("body").on("click", ".project.finish", function(e) {
+    var projectName = $('input[name=name]').val();
+    var file = $('input[name=uploaded]').val();
+    if(projectName && file && file.match(".tar.gz$")) {
+      $("#pleaseWaitDialog").modal();
+    }
+  });
+  
   $('.use-wizard.disabled').on('click', function(){
  		return false;
+ 	});
+
+ 	$('.project.btn.finish').on('click', function() {
+ 	 
  	});
   $('.project.wizard').on('change', function (e, data) {
     if (data.direction === 'next') {
@@ -213,6 +247,7 @@ $(document).ready(function() {
   });
   
   $('.project.btn.finish').on('finished', function (e, data) {
+    
   });
   
   $('.project.btn.prev').on('click', function () {
@@ -237,7 +272,16 @@ $(document).ready(function() {
 $(document).ready(function() {
   /* Wizard
   ================================================== */
- 	
+
+  //Click create project finish
+  $("body").on("click", ".project.finish", function(e) {
+    var projectName = $('input[name=name]').val();
+    var file = $('input[name=uploaded]').val();
+    if(projectName && file){
+      $("#pleaseWaitDialog").modal();
+    }
+  });
+  
   $('.project.wizard').on('change', function (e, data) {
     if (data.direction === 'next') {
       $('.project.btn.prev').removeAttr('disabled');

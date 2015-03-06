@@ -86,15 +86,7 @@ $(document).ready(function() {
     e.preventDefault();
   });
   
-  //Click create project finish
-  $("body").on("click", ".project.finish", function(e) {
-    var projectName = $('input[name=name]').val();
-    var file = $('input[name=uploaded]').val();
-    if(projectName && file){
-      $("#pleaseWaitDialog").modal();
-    }
-  });
-  
+ 
   //when user press enter , click search button
   $("body").on("keypress", ".test-filter .form-search input.name", function(e) {
     if ($(this).val() && e.which == 13) {
