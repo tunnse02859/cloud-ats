@@ -177,6 +177,7 @@
     <input type="button" value="Previous" class="project prev btn" disabled="disabled">
     <input type="button" value="Next" class=" project next btn btn-primary">
     <input type="submit" value="Finish" class="project finish btn btn-blue" style="display: none;">
+    <input type="button" value="Cancel" class="project cancel btn btn-red">
   </div>
   
   </form>
@@ -202,7 +203,10 @@ $(document).ready(function() {
   /* Wizard
   ================================================== */
 
- 
+ 	$("body").on("click", ".project.cancel", function() {
+
+ 	 window.location.href = '@controllers.test.routes.FunctionalController.index()';
+ 	});
 
 //Click create project finish
   $("body").on("click", ".project.finish", function(e) {
@@ -273,6 +277,10 @@ $(document).ready(function() {
   /* Wizard
   ================================================== */
 
+  $("body").on("click", ".project.cancel", function() {
+
+		window.location.href = '@controllers.test.routes.PerformanceController.index()';
+  });
   //Click create project finish
   $("body").on("click", ".project.finish", function(e) {
     var projectName = $('input[name=name]').val();
