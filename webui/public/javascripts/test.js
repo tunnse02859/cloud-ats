@@ -20,6 +20,11 @@ $(document).ready(function() {
   
   //clear report
   $("body").on("click", "a.btn.report", function(ev) {
+    
+    var check = $(this).parent().find(".disabled");
+    if(check.length) {
+      return false;
+    }
     ev.preventDefault();
     var target = $(this).attr("data-target");
     var modal = $(target);
