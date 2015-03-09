@@ -141,10 +141,20 @@
       <input type="button" value="Previous" class="performance prev btn" disabled="disabled">
       <input type="button" value="Next" class=" performance next btn btn-primary">
       <input type="submit" value="Finish" class="performance finish btn btn-blue " style="display: none;">
+      <input type="button" value="Cancel" class="performance cancel btn btn-red">
     </div>
   </form>
 </div>
+<script>
 
+$(document).ready(function () {
+
+  $("body").on("click", ".performance.cancel", function() {
+
+ 	 window.location.href = '@controllers.test.routes.PerformanceController.index()';
+ 	});
+});
+</script>
 <script id="show-param-tmpl" type="text/template">
   <a class="btn btn-mini show-param"><i class="icon-plus"></i> Parameters</a>
 </script>
