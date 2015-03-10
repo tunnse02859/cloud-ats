@@ -51,6 +51,10 @@ public class FunctionalController extends TestController {
   public static Result report(String projectId) {
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("project_id", projectId)).iterator().next();
     TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    
+    if (project == null) {
+      return redirect(routes.FunctionalController.index());
+    }
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
     String subfix = jenkins.getName() + "/jenkins";
     
@@ -64,11 +68,20 @@ public class FunctionalController extends TestController {
   
   public static Result runProject(String projectId) throws Exception {
     final TestProjectModel project = TestProjectHelper.getProjectById( projectId);
+    if (project == null) {
+      return redirect(routes.FunctionalController.index());
+    }
     TestController.run(project, projectId);
     return redirect(routes.FunctionalController.index());
   }
   
   public static Result deleteProject(String projectId) throws IOException {
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    
+    if (project == null) {
+      return redirect(routes.FunctionalController.index());
+    }
+    
     TestController.delete(projectId);
     return redirect(routes.FunctionalController.index());
   }

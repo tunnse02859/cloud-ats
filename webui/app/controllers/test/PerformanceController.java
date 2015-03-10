@@ -37,7 +37,8 @@ import views.html.test.*;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
-
+import com.mongodb.DBObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
@@ -68,6 +69,10 @@ public class PerformanceController extends TestController {
   public static Result report(String snapshotId) throws Exception {
     JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapshotId);
     TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
+    
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
     JenkinsJobModel job = JenkinsJobHelper.getJobs(new BasicDBObject("_id", snapshotId)).iterator().next();
     VMModel jenkins = VMHelper.getVMByID(job.getString("jenkins_id"));
     String subfix = jenkins.getName() + "/jenkins";
@@ -98,6 +103,10 @@ public class PerformanceController extends TestController {
   
   public static Result runProject(String projectId) throws Exception {
     TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
     JMeterScript snapshot = JMeterScriptHelper.getLastestCommit(project.getId());    
     TestController.run(project, snapshot.getString("_id"));
     return redirect(routes.PerformanceController.index());
@@ -106,6 +115,10 @@ public class PerformanceController extends TestController {
   public static Result runSnapshot(String snapshotId) throws Exception {
     JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapshotId);
     TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
+    
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
     TestController.run(project, snapshot.getString("_id"));
     return redirect(routes.PerformanceController.index());
   }
@@ -113,32 +126,29 @@ public class PerformanceController extends TestController {
   public static Result updateProject(String projectId) throws IOException {
     TestProjectModel project = TestProjectHelper.getProjectById(projectId);
     
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
+    
     String type = project.getType();
     
     List<JMeterScript> jmeter = JMeterScriptHelper.getJMeterScript(projectId);
-    JMeterScript jmeterModel= null;
-    BasicDBObject query = new BasicDBObject();
-    query.append("index", jmeter.size());
-    DBCursor cursor = JMeterScriptHelper.getCollection().find(query);
-    if(!cursor.hasNext()) {
-      Collections.emptyList();
-    }
-    while( cursor.hasNext()){
-      jmeterModel = new JMeterScript().from(cursor.next());
-    }
+    Collections.sort(jmeter, new Comparator<JMeterScript>() {
+      public int compare(JMeterScript o1, JMeterScript o2) {
+        return o1.getInt("index") - o2.getInt("index");
+      }
+    });
     
-    JMeterSampler[] samplers = jmeterModel.getSamplers();
-    List<JMeterSampler> listSample = new ArrayList<JMeterSampler>();
-    
-    for (JMeterSampler sampler : samplers) {
-     
-      listSample.add(sampler);
-    }
-    
-    return ok(index.render(type, views.html.test.updatewizard.render(project,jmeterModel,listSample)));
+    JMeterScript jmeterModel = jmeter.get(jmeter.size() - 1);
+    return ok(index.render(type, views.html.test.updatewizard.render(project,jmeterModel,jmeterModel.getSamplers())));
   }
   
   public static Result deleteProject(String projectId) throws IOException {
+    
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
     TestController.delete(projectId);
     return redirect(routes.PerformanceController.index());
   }
@@ -149,11 +159,18 @@ public class PerformanceController extends TestController {
   }
   
   public static Result stopProject(String projectId) throws Exception {
+    
     List<JenkinsJobModel> jobs = JenkinsJobHelper.getJobs(new BasicDBObject("status", JenkinsJobStatus.Running.toString()).append("project_id", projectId));
     final JenkinsJobModel jobModel = jobs.get(0);
     VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
+    TestProjectModel project = TestProjectHelper.getProjectById(projectId);
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
+    
     String subfix = jenkins.getName() + "/jenkins";
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkins.getPublicIP(), "http", subfix, 8080);
+    
     String snapsortId = jobModel.getId();
     JenkinsMavenJob maven = new JenkinsMavenJob(jenkinsMaster, snapsortId, null, null, null, null, null);
     maven.stop();
@@ -161,6 +178,13 @@ public class PerformanceController extends TestController {
   }
   
   public static Result stopSnapsort(String snapsortId) throws Exception {
+    
+    JMeterScript snapshot = JMeterScriptHelper.getJMeterScriptById(snapsortId);
+    TestProjectModel project = TestProjectHelper.getProjectById(snapshot.getString("project_id"));
+    
+    if (project == null) {
+      return redirect(routes.PerformanceController.index());
+    }
     final JenkinsJobModel jobModel = JenkinsJobHelper.getJobById(snapsortId);
     VMModel jenkins = VMHelper.getVMByID(jobModel.getString("jenkins_id"));
     String subfix = jenkins.getName() + "/jenkins";
