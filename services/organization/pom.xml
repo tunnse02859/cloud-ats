@@ -5,45 +5,34 @@
 
 	<parent>
 		<groupId>org.ats</groupId>
-		<artifactId>cloud</artifactId>
+		<artifactId>cloud-services</artifactId>
 		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>cloud-common</artifactId>
+	<artifactId>cloud-organizaion</artifactId>
   <packaging>jar</packaging>
 
 	<dependencies>
+
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-common</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.jcraft</groupId>
-			<artifactId>jsch</artifactId>
-		</dependency>
-
-		<!-- http client -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-database</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>net.sourceforge.nekohtml</groupId>
-			<artifactId>nekohtml</artifactId>
-		</dependency>
-		<!-- end -->
 
 		<dependency>
 			<groupId>junit</groupId>

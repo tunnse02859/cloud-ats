@@ -5,7 +5,7 @@
   <groupId>org.ats</groupId>
   <artifactId>cloud</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0.0-Alpha-1-SNAPSHOT</version>
 
 
 	<dependencyManagement>
@@ -15,9 +15,22 @@
 			<dependency>
 				<groupId>org.ats</groupId>
 				<artifactId>cloud-common</artifactId>
-				<version>0.1-SNAPSHOT</version>
+				<version>1.0.0-Alpha-1-SNAPSHOT</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>org.ats</groupId>
+				<artifactId>cloud-database</artifactId>
+				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ats</groupId>
+				<artifactId>cloud-organization</artifactId>
+				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+			</dependency>
+			<!--
+
 			<dependency>
 			  <groupId>org.ats</groupId>
 				<artifactId>cloud-cloudstack</artifactId>
@@ -61,12 +74,15 @@
 				<artifactId>cloud-jmeter</artifactId>
 				<version>0.1-SNAPSHOT</version>
 			</dependency>
+			-->
 
+			<!--
 			<dependency>
 				<groupId>org.apache.jclouds</groupId>
 				<artifactId>jclouds-all</artifactId>
 				<version>1.7.2</version>
 			</dependency>
+			-->
 
 			<dependency>
 				<groupId>org.mongodb</groupId>
@@ -104,11 +120,13 @@
 				<version>1.0.1</version>
 			</dependency>
 
+			<!--
 			<dependency>
 				<groupId>org.apache.cloudstack</groupId>
 				<artifactId>cloud-api</artifactId>
 				<version>4.3.0</version>
 			</dependency>
+			-->
 
 			<!-- http client -->
 			<dependency>
@@ -130,7 +148,7 @@
 			</dependency>
 			<!-- end -->
 
-			<!-- Jenkins api -->
+			<!-- Jenkins api
 			<dependency>
 				<groupId>org.jenkins-ci.main</groupId>
 				<artifactId>cli</artifactId>
@@ -148,7 +166,7 @@
 				<artifactId>ssh-slaves</artifactId>
 				<version>1.6</version>
 			</dependency>
-			<!-- End Jenkins dependencies -->
+			End Jenkins dependencies -->
 
 
 			<!-- GitLab -->
@@ -156,6 +174,12 @@
 				<groupId>org.gitlab</groupId>
 				<artifactId>java-gitlab-api</artifactId>
 				<version>1.1.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.inject</groupId>
+				<artifactId>guice</artifactId>
+				<version>3.0</version>
 			</dependency>
 
 			<dependency>
@@ -170,11 +194,7 @@
 
 	<modules>
 		<module>common</module>
-		<module>jenkins</module>
-		<module>components</module>
-		<module>cloudstack</module>
-		<module>jmeter</module>
-		<module>gitlab</module>
+		<module>services</module>
 	</modules>
 
 	<repositories>

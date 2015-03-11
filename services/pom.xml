@@ -6,14 +6,15 @@
 	<parent>
 		<groupId>org.ats</groupId>
 		<artifactId>cloud</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>cloud-components</artifactId>
+	<artifactId>cloud-services</artifactId>
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>users-mgt</module>
+		<module>database</module>
+		<module>organization</module>
 	</modules>
 
 </project>
