@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.data.common.MongoPageList;
-import org.ats.services.data.common.PageList;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;

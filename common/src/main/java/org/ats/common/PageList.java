@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.data.common;
+package org.ats.common;
 
 import java.io.Serializable;
 import java.util.List;

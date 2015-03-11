@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.ats.services.organization.entities.Role;
 import org.ats.services.organization.entities.Role.Permission;
+import org.ats.services.organization.entities.Space.SpaceRef;
+import org.ats.services.organization.entities.Tenant.TenantRef;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,18 +48,19 @@ public class EntityTestCase {
   @Test
   public void testUser() {
     User user = new User("haint@cloud-ats.net", "Hai", "Nguyen");
-    Tenant.Reference tenant = new Tenant.Reference("admin", "Admin");
+    Tenant.TenantRef tenant = new TenantRef("admin");
     user.setTenant(tenant);
-    Tenant.Reference ref = user.getTanent();
-    Assert.assertEquals(tenant, ref);
+    
+    TenantRef ref = user.getTanent();
+    Assert.assertEquals(tenant.getId(), ref.getId());
     
     for (int i = 0; i < 100; i++) {
-      user.joinSpace(new Space.Reference("space" + i, "space" + i));
+      user.joinSpace(new SpaceRef("space" + i));
     }
     
-    List<Space.Reference> spaces = user.getSpaces();
+    List<Space.SpaceRef> spaces = user.getSpaces();
     Assert.assertEquals(100, spaces.size());
-    Assert.assertEquals("space0", spaces.get(0).getName());
-    Assert.assertEquals("space99", spaces.get(99).getName());
+    Assert.assertEquals("space0", spaces.get(0).getId());
+    Assert.assertEquals("space99", spaces.get(99).getId());
   }
 }

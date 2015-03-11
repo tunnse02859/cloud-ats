@@ -3,6 +3,8 @@
  */
 package org.ats.services.organization.entities;
 
+import org.ats.services.data.common.Reference;
+
 import com.mongodb.BasicDBObject;
 
 /**
@@ -15,21 +17,16 @@ public class Space extends BasicDBObject {
   /** .*/
   private static final long serialVersionUID = 1L;
 
+  public static class SpaceRef extends Reference<Space> {
 
-  @SuppressWarnings("serial")
-  public static class Reference extends BasicDBObject {
-    
-    public Reference(String id, String name) {
-      this.put("_id", id);
-      this.put("name", name);
+    public SpaceRef(String id) {
+      super(id);
+    }
+
+    @Override
+    public Space getInstance() {
+      return null;
     }
     
-    public String getId() {
-      return this.getString("_id");
-    }
-    
-    public String getName() {
-      return this.getString("name");
-    }
   }
 }

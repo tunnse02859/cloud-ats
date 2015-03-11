@@ -6,9 +6,10 @@ package org.ats.services.organization;
 import java.util.Date;
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.data.common.PageList;
 import org.ats.services.organization.entities.Space;
+import org.ats.services.organization.entities.Space.SpaceRef;
 import org.ats.services.organization.entities.User;
 
 import com.google.inject.Inject;
@@ -34,13 +35,11 @@ public class UserService extends AbstractMongoCRUD<User> {
     //create index for spaces, tenant and created_date
     this.col.createIndex(new BasicDBObject("created_date", 1)
       .append("spaces._id", 1)
-      .append("spaces.name", 1)
-      .append("tenant._id", 1)
-      .append("tenant.name", 1));
+      .append("tenant._id", 1));
   }
   
-  public PageList<User> getUsersInSpace(Space.Reference space) {
-    BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", space));
+  public PageList<User> getUsersInSpace(SpaceRef space) {
+    BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", space.toJSon()));
     return query(query);
   }
   

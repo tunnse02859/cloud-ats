@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.ats.services.organization.entities.Space.SpaceRef;
+import org.ats.services.organization.entities.Tenant.TenantRef;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -48,42 +52,42 @@ public class User extends BasicDBObject {
     return this.getString("last_name");
   }
   
-  public void setTenant(Tenant.Reference tenant) {
-    this.put("tenant", tenant);
+  public void setTenant(TenantRef tenant) {
+    this.put("tenant", tenant.toJSon());
   }
   
-  public void joinSpace(Space.Reference space) {
+  public void joinSpace(SpaceRef space) {
     Object obj = this.get("spaces");
     BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    spaces.add(space);
+    spaces.add(space.toJSon());
     this.put("spaces", spaces);
   }
   
-  public void leaveSpace(Space.Reference space) {
+  public void leaveSpace(SpaceRef space) {
     Object obj = this.get("spaces");
     BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    spaces.remove(space);
+    spaces.remove(space.toJSon());
     this.put("spaces", spaces);
   }
   
-  public List<Space.Reference> getSpaces() {
+  public List<SpaceRef> getSpaces() {
     Object obj = this.get("spaces");
     BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    List<Space.Reference> list = new ArrayList<Space.Reference>();
+    List<SpaceRef> list = new ArrayList<SpaceRef>();
     for (int i = 0; i < spaces.size(); i++) {
-      list.add((Space.Reference) spaces.get(i));
+      list.add(new SpaceRef(((BasicDBObject) spaces.get(i)).getString("_id")));
     }
     return list;
   }
   
-  public boolean inSpace(Space.Reference space) {
+  public boolean inSpace(SpaceRef space) {
     Object obj = this.get("spaces");
     BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    return spaces.contains(space);
+    return spaces.contains(space.toJSon());
   }
   
-  public Tenant.Reference getTanent() {
-    return (Tenant.Reference) this.get("tenant");
+  public TenantRef getTanent() {
+    return new TenantRef(((BasicDBObject)this.get("tenant")).getString("_id"));
   }
   
 }

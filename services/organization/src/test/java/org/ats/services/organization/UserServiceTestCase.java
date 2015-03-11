@@ -6,8 +6,8 @@ package org.ats.services.organization;
 import java.util.List;
 
 import org.ats.common.MapBuilder;
-import org.ats.services.data.common.PageList;
-import org.ats.services.organization.entities.Space;
+import org.ats.common.PageList;
+import org.ats.services.organization.entities.Space.SpaceRef;
 import org.ats.services.organization.entities.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -80,10 +80,10 @@ public class UserServiceTestCase extends AbstractTestCase {
     PageList<User> pages = userService.list();
     Assert.assertEquals(10, pages.totalPage());
     
-    pages = userService.getUsersInSpace(new Space.Reference("space0", "space0"));
+    pages = userService.getUsersInSpace(new SpaceRef("space0"));
     Assert.assertEquals(100, pages.count());
     
-    pages = userService.getUsersInSpace(new Space.Reference("foo", "foo"));
+    pages = userService.getUsersInSpace(new SpaceRef("foo"));
     Assert.assertEquals(0, pages.count());
   }
   
@@ -94,7 +94,7 @@ public class UserServiceTestCase extends AbstractTestCase {
       String lastName = "fsoft";
       User user = new User(email, firstName, lastName);
       for (int j = 0; j < 100; j++) {
-        user.joinSpace(new Space.Reference("space" + j, "space" + j));
+        user.joinSpace(new SpaceRef("space" + j));
       }
       userService.create(user);
     }

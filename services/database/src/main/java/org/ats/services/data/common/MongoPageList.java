@@ -3,6 +3,8 @@
  */
 package org.ats.services.data.common;
 
+import org.ats.common.PageList;
+
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 

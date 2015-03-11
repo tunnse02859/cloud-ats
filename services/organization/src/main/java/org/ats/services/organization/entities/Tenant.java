@@ -5,6 +5,8 @@ package org.ats.services.organization.entities;
 
 import java.util.UUID;
 
+import org.ats.services.data.common.Reference;
+
 import com.mongodb.BasicDBObject;
 
 /**
@@ -30,20 +32,16 @@ public class Tenant extends BasicDBObject {
     return this.getString("name");
   }
   
-  @SuppressWarnings("serial")
-  public static class Reference extends BasicDBObject {
-    
-    public Reference(String id, String name) {
-      this.put("_id", id);
-      this.put("name", name);
+  public static class TenantRef extends Reference<Tenant> {
+
+    public TenantRef(String id) {
+      super(id);
+    }
+
+    @Override
+    public Tenant getInstance() {
+      return null;
     }
     
-    public String getId() {
-      return this.getString("_id");
-    }
-    
-    public String getName() {
-      return this.getString("name");
-    }
   }
 }
