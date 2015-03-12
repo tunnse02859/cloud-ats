@@ -22,27 +22,35 @@ public class EntityTestCase {
   @Test
   public void testRole() {
     Role role = new Role("role1");
-    Permission perm1 = new Permission("*:perm1@*");
-    Permission perm2 = new Permission("*:perm2@*");
+    Permission perm1 = new Permission.Builder().feature("feature1").action("action1").tenant("tenant").space("*").build();
+    Permission perm2 = new Permission.Builder().feature("feature2").action("action2").tenant("tenant").space("*").build();
     role.addPermission(perm1, perm2);
     
-    Assert.assertTrue(role.hasPermisison("*:perm1@*"));
-    Assert.assertTrue(role.hasPermisison("*:perm2@*"));
+    Assert.assertTrue(role.hasPermisison("feature1:action1@tenant:*"));
+    Assert.assertTrue(role.hasPermisison("feature2:action2@tenant:*"));
     Assert.assertFalse(role.hasPermisison("foo"));
+    
+    Assert.assertEquals("feature1", perm1.getFeature().getId());
+    Assert.assertEquals("action1", perm1.getAction().getId());
+    Assert.assertEquals("tenant", perm1.getTenant().getId());
+    Assert.assertEquals(Space.ANY, perm1.getSpace());
+    
+    SpaceRef space = new SpaceRef("space");
+    role.setSpace(space);
+    space = role.getSpace();
+    Assert.assertEquals("space", space.getId());
     
     List<Permission> list = role.getPermissions();
     Assert.assertEquals(2, list.size());
     Assert.assertTrue(list.contains(perm1));
     Assert.assertTrue(list.contains(perm2));
+
+    Assert.assertEquals("[ { \"rule\" : \"feature1:action1@tenant:*\"} , { \"rule\" : \"feature2:action2@tenant:*\"}]", role.get("permissions").toString());
     
-    String json ="{ \"_id\" : \"" + role.getId() + "\" , \"name\" : \"role1\" , \"permissions\" : [ { \"rule\" : \"*:perm1@*\"} , { \"rule\" : \"*:perm2@*\"}]}";
-    Assert.assertEquals(json, role.toString());
-    Assert.assertEquals("[ { \"rule\" : \"*:perm1@*\"} , { \"rule\" : \"*:perm2@*\"}]", role.get("permissions").toString());
-    
-    role.removePermission("*:perm1@*");
-    Assert.assertFalse(role.hasPermisison("*:perm1@*"));
-    Assert.assertTrue(role.hasPermisison("*:perm2@*"));
-    Assert.assertEquals("[ { \"rule\" : \"*:perm2@*\"}]", role.get("permissions").toString());
+    role.removePermission("feature2:action2@tenant:*");
+    Assert.assertFalse(role.hasPermisison("feature2:action2@tenant:*"));
+    Assert.assertTrue(role.hasPermisison("feature1:action1@tenant:*"));
+    Assert.assertEquals("[ { \"rule\" : \"feature1:action1@tenant:*\"}]", role.get("permissions").toString());
   }
   
   @Test

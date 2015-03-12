@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.common.MongoPageList;
+import org.ats.services.data.common.Reference;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -85,6 +86,11 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
   public PageList<T> search(String text) {
     DBObject query = new BasicDBObject("$text", new BasicDBObject("$search", text));
     return buildPageList(10, col, query);
+  }
+  
+  public PageList<T> findIn(String field, Reference<?> ref) {
+    BasicDBObject query = new BasicDBObject(field, new BasicDBObject("$elemMatch", ref.toJSon()));
+    return query(query);
   }
   
   

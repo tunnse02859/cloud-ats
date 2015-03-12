@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.ats.services.data.common.Reference;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.entities.Space.SpaceRef;
 import org.ats.services.organization.entities.Tenant.TenantRef;
 
+import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -90,4 +92,19 @@ public class User extends BasicDBObject {
     return new TenantRef(((BasicDBObject)this.get("tenant")).getString("_id"));
   }
   
+  public static class UserRef extends Reference<User> {
+    
+    @Inject
+    private UserService service;
+
+    public UserRef(String id) {
+      super(id);
+    }
+
+    @Override
+    public User get() {
+      return service.get(id);
+    }
+    
+  }
 }

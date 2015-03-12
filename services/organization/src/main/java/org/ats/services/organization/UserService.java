@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.organization.entities.Space;
 import org.ats.services.organization.entities.Space.SpaceRef;
+import org.ats.services.organization.entities.Tenant.TenantRef;
 import org.ats.services.organization.entities.User;
 
 import com.google.inject.Inject;
@@ -38,8 +38,12 @@ public class UserService extends AbstractMongoCRUD<User> {
       .append("tenant._id", 1));
   }
   
-  public PageList<User> getUsersInSpace(SpaceRef space) {
-    BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", space.toJSon()));
+  public PageList<User> findUsersInSpace(SpaceRef space) {
+    return findIn("spaces",  space);
+  }
+  
+  public PageList<User> findUserInTenant(TenantRef tenant) {
+    BasicDBObject query = new BasicDBObject("tenant", tenant.toJSon());
     return query(query);
   }
   

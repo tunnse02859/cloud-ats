@@ -6,7 +6,9 @@ package org.ats.services.organization.entities;
 import java.util.UUID;
 
 import org.ats.services.data.common.Reference;
+import org.ats.services.organization.TenantService;
 
+import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -33,14 +35,17 @@ public class Tenant extends BasicDBObject {
   }
   
   public static class TenantRef extends Reference<Tenant> {
+    
+    @Inject
+    private TenantService service;
 
     public TenantRef(String id) {
       super(id);
     }
 
     @Override
-    public Tenant getInstance() {
-      return null;
+    public Tenant get() {
+      return service.get(id);
     }
     
   }

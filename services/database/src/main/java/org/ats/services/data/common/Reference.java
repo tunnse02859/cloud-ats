@@ -19,7 +19,7 @@ public abstract class Reference<T extends DBObject> {
     this.id = id;
   }
   
-  public abstract T getInstance();
+  public abstract T get();
   
   public String getId() {
     return this.id;

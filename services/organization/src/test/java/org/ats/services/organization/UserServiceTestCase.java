@@ -80,10 +80,10 @@ public class UserServiceTestCase extends AbstractTestCase {
     PageList<User> pages = userService.list();
     Assert.assertEquals(10, pages.totalPage());
     
-    pages = userService.getUsersInSpace(new SpaceRef("space0"));
+    pages = userService.findUsersInSpace(new SpaceRef("space0"));
     Assert.assertEquals(100, pages.count());
     
-    pages = userService.getUsersInSpace(new SpaceRef("foo"));
+    pages = userService.findUsersInSpace(new SpaceRef("foo"));
     Assert.assertEquals(0, pages.count());
   }
   
