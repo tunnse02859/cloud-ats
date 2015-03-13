@@ -3,8 +3,15 @@
  */
 package org.ats.services.organization;
 
-import org.ats.services.organization.entities.Tenant;
+import java.util.logging.Logger;
 
+import org.ats.services.data.MongoDBService;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.fatory.TenantFactory;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 /**
@@ -12,9 +19,30 @@ import com.mongodb.DBObject;
  *
  * Mar 10, 2015
  */
+@Singleton
 public class TenantService extends AbstractMongoCRUD<Tenant> {
+  
+  /** .*/
+  private final String COL_NAME = "org-tenant";
+  
+  /** .*/
+  private TenantFactory factory;
+  
+  @Inject
+  TenantService(MongoDBService mongo, Logger logger, TenantFactory factory) {
+    this.col = mongo.getDatabase().getCollection(COL_NAME);
+    this.logger = logger;
+    this.factory = factory;
+    
+    this.createTextIndex("_id");
+    this.col.createIndex(new BasicDBObject("created_date", 1));
+    this.col.createIndex(new BasicDBObject("features._id", 1));
+  }
 
   public Tenant transform(DBObject source) {
-    return null;
+    Tenant tenant = this.factory.create((String) source.get("_id"));
+    tenant.put("created_date", source.get("created_date"));
+    tenant.put("features", source.get("features"));
+    return tenant;
   }
 }

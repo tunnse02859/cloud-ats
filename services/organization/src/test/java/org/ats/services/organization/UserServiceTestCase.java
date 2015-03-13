@@ -7,10 +7,15 @@ import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
-import org.ats.services.organization.entities.Role.RoleRef;
-import org.ats.services.organization.entities.Space.SpaceRef;
-import org.ats.services.organization.entities.Tenant.TenantRef;
-import org.ats.services.organization.entities.User;
+import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
+import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
+import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.fatory.UserReferenceFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.TenantReference;
+import org.ats.services.organization.entity.reference.UserReference;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,18 +26,46 @@ import org.junit.Test;
  */
 public class UserServiceTestCase extends AbstractTestCase {
   
+  /** .*/
   private UserService userService;
   
-  @Override
+  /** .*/
+  private UserFactory userFactory;
+  
+  /** .*/
+  private UserReferenceFactory userRefFactory;
+  
+  /** .*/
+  private TenantReferenceFactory tenantRefFactory;
+  
+  /** .*/
+  private SpaceReferenceFactory spaceRefFactory;
+  
+  /** .*/
+  private RoleReferenceFactory roleRefFactory;
+  
   public void init() throws Exception {
     super.init();
-    this.userService = injector.getInstance(UserService.class);
+    
+  //
+  this.userService = injector.getInstance(UserService.class);
+  this.userFactory = injector.getInstance(UserFactory.class);
+  this.userRefFactory = injector.getInstance(UserReferenceFactory.class);
+  
+  //
+  this.tenantRefFactory = injector.getInstance(TenantReferenceFactory.class);
+  
+  //
+  this.spaceRefFactory = injector.getInstance(SpaceReferenceFactory.class);
+  
+  //
+  this.roleRefFactory = injector.getInstance(RoleReferenceFactory.class);
   }
-
+  
   @Test
   public void testCRUD() throws Exception {
     
-    User user = new User("cloud@fsoft.com.vn", "fsu1", "bu11");
+    User user = this.userFactory.create("cloud@fsoft.com.vn", "fsu1", "bu11");
     userService.create(user);
     Assert.assertEquals(1, userService.count());
     
@@ -62,7 +95,7 @@ public class UserServiceTestCase extends AbstractTestCase {
     Assert.assertEquals("user1@fsoft.com.vn", page1.get(0).getEmail());
     Assert.assertEquals("user10@fsoft.com.vn", page1.get(9).getEmail());
     
-    userService.create(new User("haint@cloud-ats.net", "Hai", "Nguyen"));
+    userService.create(userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen"));
     Assert.assertEquals(124, userService.count());
     
     //test sort by created_date
@@ -87,10 +120,10 @@ public class UserServiceTestCase extends AbstractTestCase {
     PageList<User> pages = userService.list();
     Assert.assertEquals(10, pages.totalPage());
     
-    pages = userService.findUsersInSpace(new SpaceRef("space0"));
+    pages = userService.findUsersInSpace(spaceRefFactory.create("space0"));
     Assert.assertEquals(100, pages.count());
     
-    pages = userService.findUsersInSpace(new SpaceRef("foo"));
+    pages = userService.findUsersInSpace(spaceRefFactory.create("foo"));
     Assert.assertEquals(0, pages.count());
   }
   
@@ -98,7 +131,7 @@ public class UserServiceTestCase extends AbstractTestCase {
   public void testFindUserInRole() {
     initUser(100);
     
-    PageList<User> pages = userService.findIn("roles", new RoleRef("role1"));
+    PageList<User> pages = userService.findIn("roles", roleRefFactory.create("role1"));
     Assert.assertEquals(100, pages.count());
     User user = pages.next().get(0);
     
@@ -116,19 +149,31 @@ public class UserServiceTestCase extends AbstractTestCase {
     Assert.assertEquals(100, pages.count());
   }
   
+  @Test
+  public void testReference() {
+    User user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
+    userService.create(user);
+    
+    UserReference ref = userRefFactory.create("haint@cloud-ats.net");
+    user = ref.get();
+    Assert.assertEquals("haint@cloud-ats.net", user.getEmail());
+    Assert.assertEquals("Hai", user.getFirstName());
+    Assert.assertEquals("Nguyen", user.getLastName());
+  }
+  
   private void initUser(int total) {
     for (int i = 1; i <= total; i++) {
       String email = "user" + i + "@fsoft.com.vn";
       String firstName = "user" + i;
       String lastName = "fsoft";
-      User user = new User(email, firstName, lastName);
+      User user = userFactory.create(email, firstName, lastName);
       
-      TenantRef tenant = new TenantRef("Fsoft");
-      RoleRef role1 = new RoleRef("role1");
-      RoleRef role2 = new RoleRef("role2");
+      TenantReference tenant = tenantRefFactory.create("Fsoft");
+      RoleReference role1 = roleRefFactory.create("role1");
+      RoleReference role2 = roleRefFactory.create("role2");
       
       for (int j = 0; j < 100; j++) {
-        user.joinSpace(new SpaceRef("space" + j));
+        user.joinSpace(spaceRefFactory.create("space" + j));
       }
       
       user.setTenant(tenant);

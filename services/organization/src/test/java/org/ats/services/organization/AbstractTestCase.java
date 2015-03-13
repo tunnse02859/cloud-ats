@@ -27,9 +27,10 @@ public class AbstractTestCase {
   public void init() throws Exception {
     System.setProperty(DatabaseModule.DB_CONF, "");
     Injector injector = Guice.createInjector(new DatabaseModule(), new OrganizationServiceModule());
-    this.mongoService = injector.getInstance(MongoDBService.class);
-    this.injector = injector;
     
+    this.mongoService = injector.getInstance(MongoDBService.class);
+    
+    this.injector = injector;
     //cleanup database
     this.mongoService.dropDatabase();
   }

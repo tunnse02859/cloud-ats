@@ -1,19 +1,24 @@
 /**
  * 
  */
-package org.ats.services.organization.entities;
+package org.ats.services.organization.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.ats.services.data.common.Reference;
-import org.ats.services.organization.entities.Feature.Action;
-import org.ats.services.organization.entities.Feature.FeatureRef;
-import org.ats.services.organization.entities.Space.SpaceRef;
-import org.ats.services.organization.entities.Tenant.TenantRef;
+import org.ats.services.organization.entity.Feature.Action;
+import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
+import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
+import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -24,10 +29,28 @@ import com.mongodb.BasicDBObject;
  */
 @SuppressWarnings("serial")
 public class Role  extends BasicDBObject {
+  
+  /** .*/
+  private SpaceReferenceFactory spaceFactory;
 
-  public Role(String name) {
+  @Inject
+  Role(SpaceReferenceFactory spaceFactory, @Assisted String name) {
     this.put("_id", UUID.randomUUID().toString());
     this.setName(name);
+    this.put("created_date", new Date());
+    this.spaceFactory = spaceFactory;
+  }
+  
+  public void setName(String name) {
+    this.put("name", name);
+  }
+  
+  public String getName() {
+    return this.getString("name");
+  }
+  
+  public String getId() {
+    return this.getString("_id");
   }
   
   public void setDescription(String desc) {
@@ -38,13 +61,13 @@ public class Role  extends BasicDBObject {
     return this.getString("desc");
   }
   
-  public void setSpace(SpaceRef space) {
+  public void setSpace(SpaceReference space) {
     this.put("space", space.toJSon());
   }
   
-  public SpaceRef getSpace() {
+  public SpaceReference getSpace() {
     Object obj = this.get("space");
-    return obj == null ? null : new SpaceRef(((BasicDBObject) obj).getString("_id"));
+    return obj == null ? null : spaceFactory.create(((BasicDBObject) obj).getString("_id"));
   }
   
   public void addPermission(Permission... perms) {
@@ -83,18 +106,6 @@ public class Role  extends BasicDBObject {
     return Collections.unmodifiableList(list);
   }
   
-  public void setName(String name) {
-    this.put("name", name);
-  }
-  
-  public String getName() {
-    return this.getString("name");
-  }
-  
-  public String getId() {
-    return this.getString("_id");
-  }
-  
   /**
    * 
    * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -105,8 +116,21 @@ public class Role  extends BasicDBObject {
    */
   public static class Permission extends BasicDBObject {
     
-    public Permission(String rule) {
+    /** .*/
+    private TenantReferenceFactory tenantFactory;
+    
+    /** .*/
+    private SpaceReferenceFactory spaceFactory;
+    
+    /** .*/
+    private FeatureReferenceFactory featureFactory;
+    
+    @Inject
+    Permission(TenantReferenceFactory tenantFactory, SpaceReferenceFactory spaceFactory, FeatureReferenceFactory featureFactory, @Assisted String rule) {
       this.put("rule", rule);
+      this.tenantFactory = tenantFactory;
+      this.spaceFactory = spaceFactory;
+      this.featureFactory = featureFactory;
     }
     
     public String getRule() {
@@ -117,24 +141,24 @@ public class Role  extends BasicDBObject {
       this.put("rule", rule);
     }
     
-    public TenantRef getTenant() {
+    public TenantReference getTenant() {
       String rule = getRule();
       String tenantId = rule.substring(rule.indexOf('@') + 1, rule.lastIndexOf(':'));
-      return new TenantRef(tenantId);
+      return this.tenantFactory.create(tenantId);
     }
     
-    public SpaceRef getSpace() {
+    public Reference<Space> getSpace() {
       String rule = getRule();
       String  spaceId = rule.substring(rule.lastIndexOf(':') + 1); 
       if ("*".equals(spaceId)) return Space.ANY;
-      return new SpaceRef(spaceId);
+      return spaceFactory.create(spaceId);
     }
     
-    public FeatureRef getFeature() {
+    public Reference<Feature> getFeature() {
       String rule = getRule();
       String featureId = rule.substring(0, rule.indexOf(':'));
       if ("*".equals(featureId)) return Feature.ANY;
-      return new FeatureRef(featureId);
+      return featureFactory.create(featureId);
     }
     
     public Action getAction() {
@@ -181,25 +205,13 @@ public class Role  extends BasicDBObject {
         return this;
       }
       
-      public Permission build() {
-        return new Permission(new StringBuilder()
+      public String build() {
+        return new StringBuilder()
           .append(feature).append(":").append(action)
           .append("@")
           .append(tenant).append(":").append(space)
-          .toString());
+          .toString();
       }
-    }
-  }
-  
-  public static class RoleRef extends Reference<Role> {
-
-    public RoleRef(String id) {
-      super(id);
-    }
-
-    @Override
-    public Role get() {
-      return null;
     }
   }
 }

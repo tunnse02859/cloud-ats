@@ -1,17 +1,22 @@
 /**
  * 
  */
-package org.ats.services.organization.entities;
+package org.ats.services.organization.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.ats.services.data.common.Reference;
-import org.ats.services.organization.entities.Role.RoleRef;
-import org.ats.services.organization.entities.Tenant.TenantRef;
+import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
+import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -24,12 +29,25 @@ import com.mongodb.BasicDBObject;
 public class Space extends BasicDBObject {
 
   /** .*/
-  public static final SpaceRef ANY = new SpaceRef("*");
+  public static final Reference<Space> ANY = new Reference<Space>("*") {
+    @Override
+    public Space get() { return null; }
+  };
   
-  public Space(String name, String description) {
+  /** .*/
+  private TenantReferenceFactory tenantFactory;
+  
+  /** .*/
+  private RoleReferenceFactory roleFactory;
+  
+  @Inject
+  Space(TenantReferenceFactory tenantFactory, RoleReferenceFactory roleFactory, @Assisted String name) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
-    this.put("desc", description);
+    this.put("created_date", new Date());
+    
+    this.tenantFactory = tenantFactory;
+    this.roleFactory = roleFactory;
   }
   
   public String getId() {
@@ -48,20 +66,20 @@ public class Space extends BasicDBObject {
     return this.getString("desc");
   }
   
-  public void setTenant(TenantRef tenant) {
+  public void setTenant(TenantReference tenant) {
     this.put("tenant", tenant.toJSon());
   }
   
-  public void addRole(RoleRef... roles) {
+  public void addRole(RoleReference... roles) {
     Object obj = this.get("roles");
     BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    for (RoleRef role : roles) {
+    for (RoleReference role : roles) {
       list.add(role.toJSon());
     }
     this.put("roles", list);
   }
   
-  public void removeRole(RoleRef role) {
+  public void removeRole(RoleReference role) {
     Object obj = this.get("roles");
     if (obj == null) return;
     
@@ -70,39 +88,26 @@ public class Space extends BasicDBObject {
     this.put("roles", list);
   }
   
-  public boolean hasRole(RoleRef role) {
+  public boolean hasRole(RoleReference role) {
     Object obj = this.get("roles");
     return obj == null ? false : ((BasicDBList) obj).contains(role.toJSon());
   }
   
-  public List<RoleRef> getRoles() {
+  public List<RoleReference> getRoles() {
     Object obj = this.get("roles");
     if (obj ==  null) return Collections.emptyList();
     
     BasicDBList list = (BasicDBList) obj;
-    List<RoleRef> roles = new ArrayList<RoleRef>();
+    List<RoleReference> roles = new ArrayList<RoleReference>();
     for (int i = 0; i < list.size(); i++) {
-      roles.add(new RoleRef(((BasicDBObject) list.get(i)).getString("_id")));
+      roles.add(this.roleFactory.create(((BasicDBObject) list.get(i)).getString("_id")));
     }
     
     return Collections.unmodifiableList(roles);
   }
   
-  public TenantRef getTenant() {
+  public TenantReference getTenant() {
     Object obj = this.get("tenant");
-    return obj == null ? null : new TenantRef(((BasicDBObject) obj).getString("_id"));
-  }
-  
-  public static class SpaceRef extends Reference<Space> {
-
-    public SpaceRef(String id) {
-      super(id);
-    }
-
-    @Override
-    public Space get() {
-      return null;
-    }
-    
+    return obj == null ? null : this.tenantFactory.create(((BasicDBObject) obj).getString("_id"));
   }
 }

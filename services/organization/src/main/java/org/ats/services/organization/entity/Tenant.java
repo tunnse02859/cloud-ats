@@ -1,17 +1,18 @@
 /**
  * 
  */
-package org.ats.services.organization.entities;
+package org.ats.services.organization.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-import org.ats.services.data.common.Reference;
-import org.ats.services.organization.TenantService;
-import org.ats.services.organization.entities.Feature.FeatureRef;
+import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -20,13 +21,17 @@ import com.mongodb.BasicDBObject;
  *
  * Mar 9, 2015
  */
+@SuppressWarnings("serial")
 public class Tenant extends BasicDBObject {
 
   /** .*/
-  private static final long serialVersionUID = 1L;
+  private FeatureReferenceFactory featureFactory;
   
-  public Tenant(String name) {
+  @Inject
+  Tenant(FeatureReferenceFactory featureFactory, @Assisted String name) {
     this.put("_id", name);
+    this.put("created_date", new Date());
+    this.featureFactory = featureFactory;
   }
 
   public String getId() {
@@ -37,16 +42,16 @@ public class Tenant extends BasicDBObject {
     return getId();
   }
   
-  public void addFeature(FeatureRef... features) {
+  public void addFeature(FeatureReference... features) {
     Object obj = this.get("features");
     BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    for (FeatureRef feature : features) {
+    for (FeatureReference feature : features) {
       list.add(feature.toJSon());
     }
     this.put("features", list);
   }
   
-  public void removeFeature(FeatureRef feature) {
+  public void removeFeature(FeatureReference feature) {
     Object obj = this.get("features");
     if (obj == null) return;
     
@@ -55,37 +60,21 @@ public class Tenant extends BasicDBObject {
     this.put("features", list);
   }
   
-  public boolean hasFeature(FeatureRef feature) {
+  public boolean hasFeature(FeatureReference feature) {
     Object obj = this.get("features");
     return obj == null ? false : ((BasicDBList) obj).contains(feature.toJSon());
   }
   
-  public List<FeatureRef> getFeatures() {
+  public List<FeatureReference> getFeatures() {
     Object obj = this.get("features");
     if (obj == null) return Collections.emptyList();
     
-    List<FeatureRef> features = new ArrayList<FeatureRef>();
+    List<FeatureReference> features = new ArrayList<FeatureReference>();
     BasicDBList list = (BasicDBList) obj;
     for (int i = 0; i < list.size(); i++) {
-      features.add(new FeatureRef(((BasicDBObject) list.get(i)).getString("_id")));
+      features.add(featureFactory.create(((BasicDBObject) list.get(i)).getString("_id")));
     }
     
     return Collections.unmodifiableList(features);
-  }
-  
-  public static class TenantRef extends Reference<Tenant> {
-    
-    @Inject
-    private TenantService service;
-
-    public TenantRef(String id) {
-      super(id);
-    }
-
-    @Override
-    public Tenant get() {
-      return service.get(id);
-    }
-    
   }
 }

@@ -1,14 +1,17 @@
 /**
  * 
  */
-package org.ats.services.organization.entities;
+package org.ats.services.organization.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.ats.services.data.common.Reference;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -20,13 +23,15 @@ import com.mongodb.BasicDBObject;
 @SuppressWarnings("serial")
 public class Feature extends BasicDBObject {
   
-  public static final FeatureRef ANY = new FeatureRef("*");
-  
-  public Feature(String name, String... actions) {
+  public static final Reference<Feature> ANY = new Reference<Feature>("*") {
+    @Override
+    public Feature get() { return null; }
+  };
+
+  @Inject
+  Feature(@Assisted String name) {
     this.put("_id", name);
-    for (String action : actions) {
-      addAction(new Action(action));
-    }
+    this.put("created_date", new Date());
   }
   
   public void addAction(Action... actions) {
@@ -88,18 +93,6 @@ public class Feature extends BasicDBObject {
     
     public String getDescription() {
       return this.getString("desc");
-    }
-  }
-
-  public static class FeatureRef extends Reference<Feature> {
-    
-    public FeatureRef(String id) {
-      super(id);
-    }
-
-    @Override
-    public Feature get() {
-      return null;
     }
   }
 }
