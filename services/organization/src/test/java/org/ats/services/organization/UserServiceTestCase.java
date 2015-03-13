@@ -7,7 +7,9 @@ import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.services.organization.entities.Role.RoleRef;
 import org.ats.services.organization.entities.Space.SpaceRef;
+import org.ats.services.organization.entities.Tenant.TenantRef;
 import org.ats.services.organization.entities.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,7 +41,6 @@ public class UserServiceTestCase extends AbstractTestCase {
     
     User updatedUser = userService.get(user.getEmail());
     Assert.assertEquals("fsoft.fsu1", updatedUser.getFirstName());
-    Assert.assertEquals(user, updatedUser);
     
     userService.delete(user);
     Assert.assertEquals(0, userService.count());
@@ -72,6 +73,12 @@ public class UserServiceTestCase extends AbstractTestCase {
     
     Assert.assertEquals("user121@fsoft.com.vn", page13.get(0).getEmail());
     Assert.assertEquals("haint@cloud-ats.net", page13.get(3).getEmail());
+    
+    User user = userService.get("user1@fsoft.com.vn");
+    Assert.assertNotNull(user.getTanent());
+    Assert.assertEquals("Fsoft", user.getTanent().getId());
+    Assert.assertEquals(100, user.getSpaces().size());
+    Assert.assertEquals(2, user.getRoles().size());
   }
   
   @Test
@@ -87,15 +94,45 @@ public class UserServiceTestCase extends AbstractTestCase {
     Assert.assertEquals(0, pages.count());
   }
   
+  @Test
+  public void testFindUserInRole() {
+    initUser(100);
+    
+    PageList<User> pages = userService.findIn("roles", new RoleRef("role1"));
+    Assert.assertEquals(100, pages.count());
+    User user = pages.next().get(0);
+    
+    Assert.assertEquals(2, user.getRoles().size());
+  }
+  
+  @Test
+  public void testSearch() {
+    initUser(100);
+    
+    PageList<User> pages = userService.search("user1");
+    Assert.assertEquals(1, pages.count());
+    
+    pages = userService.search("fsoft");
+    Assert.assertEquals(100, pages.count());
+  }
+  
   private void initUser(int total) {
     for (int i = 1; i <= total; i++) {
       String email = "user" + i + "@fsoft.com.vn";
       String firstName = "user" + i;
       String lastName = "fsoft";
       User user = new User(email, firstName, lastName);
+      
+      TenantRef tenant = new TenantRef("Fsoft");
+      RoleRef role1 = new RoleRef("role1");
+      RoleRef role2 = new RoleRef("role2");
+      
       for (int j = 0; j < 100; j++) {
         user.joinSpace(new SpaceRef("space" + j));
       }
+      
+      user.setTenant(tenant);
+      user.addRole(role1, role2);
       userService.create(user);
     }
   }

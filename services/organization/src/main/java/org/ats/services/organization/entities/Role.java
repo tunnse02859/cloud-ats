@@ -4,6 +4,7 @@
 package org.ats.services.organization.entities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +43,8 @@ public class Role  extends BasicDBObject {
   }
   
   public SpaceRef getSpace() {
-    return new SpaceRef(((BasicDBObject) this.get("space")).getString("_id"));
+    Object obj = this.get("space");
+    return obj == null ? null : new SpaceRef(((BasicDBObject) obj).getString("_id"));
   }
   
   public void addPermission(Permission... perms) {
@@ -54,32 +56,31 @@ public class Role  extends BasicDBObject {
     this.put("permissions", permissions);
   }
   
-  public boolean hasPermisison(String rule) {
-    Permission perm = new Permission(rule);
+  public boolean hasPermisison(Permission perm) {
     Object obj = this.get("permissions");
     return obj == null ? false : ((BasicDBList) obj).contains(perm);
   }
   
-  public void removePermission(String rule) {
-    this.removePermission(new Permission(rule));
-  }
-  
   public void removePermission(Permission perm) {
     Object obj = this.get("permissions");
-    BasicDBList permissions = obj == null ? new BasicDBList() : (BasicDBList) obj ;
+    if (obj == null) return;
+    
+    BasicDBList permissions = (BasicDBList) obj ;
     permissions.remove(perm);
     this.put("permissions", permissions);
   }
   
   public List<Permission> getPermissions() {
     Object obj = this.get("permissions");
-    BasicDBList permissions = obj == null ? new BasicDBList() : (BasicDBList) obj ;
+    if (obj == null) return Collections.emptyList();
     
+    BasicDBList permissions = (BasicDBList) obj ;
     List<Role.Permission> list = new ArrayList<Role.Permission>();
     for (int i = 0; i < permissions.size(); i++) {
       list.add((Permission) permissions.get(i));
     }
-    return list;
+    
+    return Collections.unmodifiableList(list);
   }
   
   public void setName(String name) {

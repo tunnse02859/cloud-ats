@@ -4,6 +4,7 @@
 package org.ats.services.organization.entities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.ats.services.data.common.Reference;
@@ -28,20 +29,20 @@ public class Feature extends BasicDBObject {
     }
   }
   
-  public void addAction(Action action) {
+  public void addAction(Action... actions) {
     Object obj = this.get("actions");
-    BasicDBList actions = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    actions.add(action);
-    this.put("actions", actions);
-  }
-  
-  public void removeAction(String action) {
-    this.removeAction(new Action(action));
+    BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    for (Action action : actions) {
+      list.add(action);
+    }
+    this.put("actions", list);
   }
   
   public void removeAction(Action action) {
     Object obj = this.get("actions");
-    BasicDBList actions = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    if (obj == null) return;
+    
+    BasicDBList actions = (BasicDBList) obj;
     actions.remove(action);
     this.put("actions", actions);
   }
@@ -54,12 +55,15 @@ public class Feature extends BasicDBObject {
   
   public List<Action> getActions() {
     Object obj = this.get("actions");
-    BasicDBList actions = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    if (obj == null) return Collections.emptyList();
+    
+    BasicDBList actions = (BasicDBList) obj;
     List<Action> list = new ArrayList<Action>();
     for (int i = 0; i < actions.size(); i++) {
       list.add((Action) actions.get(i));
     }
-    return list;
+    
+    return Collections.unmodifiableList(list);
   }
   
   public static class Action extends BasicDBObject {

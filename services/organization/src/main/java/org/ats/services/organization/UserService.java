@@ -32,10 +32,11 @@ public class UserService extends AbstractMongoCRUD<User> {
     this.logger = logger;
     this.createTextIndex("email", "first_name", "last_name");
     
-    //create index for spaces, tenant and created_date
-    this.col.createIndex(new BasicDBObject("created_date", 1)
-      .append("spaces._id", 1)
-      .append("tenant._id", 1));
+    //create index for spaces, tenant, role and created_date
+    this.col.createIndex(new BasicDBObject("created_date", 1));
+    this.col.createIndex(new BasicDBObject("tenant._id", 1));
+    this.col.createIndex(new BasicDBObject("spaces._id", 1));
+    this.col.createIndex(new BasicDBObject("roles._id", 1));
   }
   
   public PageList<User> findUsersInSpace(SpaceRef space) {
@@ -54,6 +55,9 @@ public class UserService extends AbstractMongoCRUD<User> {
     Date created_date = (Date) source.get("created_date");
     User user = new User(email, firstName, lastName);
     user.put("created_date", created_date);
+    user.put("tenant", source.get("tenant"));
+    user.put("spaces", source.get("spaces"));
+    user.put("roles", source.get("roles"));
     return user;
   }
 }

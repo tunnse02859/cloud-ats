@@ -4,11 +4,13 @@
 package org.ats.services.organization.entities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.ats.services.data.common.Reference;
 import org.ats.services.organization.UserService;
+import org.ats.services.organization.entities.Role.RoleRef;
 import org.ats.services.organization.entities.Space.SpaceRef;
 import org.ats.services.organization.entities.Tenant.TenantRef;
 
@@ -67,29 +69,68 @@ public class User extends BasicDBObject {
   
   public void leaveSpace(SpaceRef space) {
     Object obj = this.get("spaces");
-    BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    if (obj == null) return;
+    
+    BasicDBList spaces = (BasicDBList) obj;
     spaces.remove(space.toJSon());
     this.put("spaces", spaces);
   }
   
   public List<SpaceRef> getSpaces() {
     Object obj = this.get("spaces");
-    BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    if (obj == null) return Collections.emptyList();
+    BasicDBList spaces = (BasicDBList) obj;
     List<SpaceRef> list = new ArrayList<SpaceRef>();
     for (int i = 0; i < spaces.size(); i++) {
       list.add(new SpaceRef(((BasicDBObject) spaces.get(i)).getString("_id")));
     }
-    return list;
+    return Collections.unmodifiableList(list);
   }
   
   public boolean inSpace(SpaceRef space) {
     Object obj = this.get("spaces");
-    BasicDBList spaces = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    return spaces.contains(space.toJSon());
+    return obj == null ? false : ((BasicDBList) obj).contains(space.toJSon());
   }
   
   public TenantRef getTanent() {
-    return new TenantRef(((BasicDBObject)this.get("tenant")).getString("_id"));
+    Object obj = this.get("tenant");
+    return obj == null ? null : new TenantRef(((BasicDBObject)this.get("tenant")).getString("_id"));
+  }
+  
+  public void addRole(RoleRef... roles) {
+    Object obj = this.get("roles");
+    BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    for (RoleRef role : roles) {
+      list.add(role.toJSon());
+    }
+    this.put("roles", list);
+  }
+  
+  public void removeRole(RoleRef role) {
+    Object obj = this.get("roles");
+    if (obj == null) return;
+    
+    BasicDBList list = (BasicDBList) obj;
+    list.remove(role.toJSon());
+    this.put("roles", list);
+  }
+  
+  public boolean hasRole(RoleRef role) {
+    Object obj = this.get("roles");
+    return obj == null ? false : ((BasicDBList) obj).contains(role.toJSon());
+  }
+  
+  public List<RoleRef> getRoles() {
+    Object obj = this.get("roles");
+    if (obj ==  null) return Collections.emptyList();
+    
+    BasicDBList list = (BasicDBList) obj;
+    List<RoleRef> roles = new ArrayList<RoleRef>();
+    for (int i = 0; i < list.size(); i++) {
+      roles.add(new RoleRef(((BasicDBObject) list.get(i)).getString("_id")));
+    }
+    
+    return Collections.unmodifiableList(roles);
   }
   
   public static class UserRef extends Reference<User> {
