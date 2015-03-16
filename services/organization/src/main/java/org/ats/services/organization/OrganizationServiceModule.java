@@ -17,6 +17,7 @@ import org.ats.services.organization.entity.fatory.UserReferenceFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Names;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -52,6 +53,9 @@ public class OrganizationServiceModule extends AbstractModule {
     
     //bind context
     bind(OrganizationContext.class);
+    
+    //bind authentication service
+    bind(AuthenticationService.class).annotatedWith(Names.named("Mongo")).to(MongoAuthenticationService.class);
   }
 
 }

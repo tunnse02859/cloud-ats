@@ -7,7 +7,9 @@ import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -36,14 +38,13 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     this.factory = factory;
+    this.context = context;
     
     this.createTextIndex("name");
     //
     this.col.createIndex(new BasicDBObject("created_date", 1));
     this.col.createIndex(new BasicDBObject("tenant._id", 1));
     this.col.createIndex(new BasicDBObject("roles._id", 1));
-    //
-    this.context = context;
   }
 
   public Space transform(DBObject source) {
@@ -56,9 +57,29 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     return space;
   }
   
-  public OrganizationContext goTo(Space space) {
-    context.setSpace(space);
-    return context;
+  public OrganizationContext goTo(SpaceReference ref) {
+    if (ref == null) throw new NullPointerException("The space could not be null");
+
+    User user = this.context.getUser();
+    if (user == null) {
+      logger.info("The user has not logged yet");
+      return null;
+    }
+    
+    Space space = ref.get();
+    if (space == null) {
+      logger.info("The space " + ref.getId() + " does not exist");
+      return null;
+    }
+    
+    if (user.getSpaces().contains(ref)) {
+      context.setSpace(space);
+      logger.info("The user " + user.getEmail() + " has jumped to space " + space.getName());
+      return context;
+    }
+    
+    logger.info("The user " + user.getEmail() + " does not belong to space " + space.getName());
+    return null;
   }
 
 }

@@ -15,6 +15,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -46,6 +49,8 @@ public class OrganizationContextTestCase extends AbstractTestCase {
   
   private User user;
   
+  private AuthenticationService authService;
+  
   @Override
   @BeforeClass
   public void init() throws Exception {
@@ -63,6 +68,8 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     
     this.context = this.injector.getInstance(OrganizationContext.class);
     
+    this.authService = this.injector.getInstance(Key.get(AuthenticationService.class, Names.named("Mongo")));
+    
     this.tenant = tenantFactory.create("Fsoft");
     this.tenantService.create(this.tenant);
     
@@ -77,25 +84,41 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     this.userService.create(this.user);
   }
   
-  @Test(threadPoolSize = 10, invocationCount = 10, timeOut = 1000)
+  @Test(threadPoolSize = 2, invocationCount = 2, timeOut = 1000)
   public void testLoginAndLogout() {
     
     Assert.assertNull(this.context.getUser());
     Assert.assertNull(this.context.getSpace());
     Assert.assertNull(this.context.getTenant());
     
-    this.userService.logIn("haint@cloud-ats.net", "12345");
-    this.spaceService.goTo(this.space);
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(space.getId()));
     
     Assert.assertNotNull(this.context.getUser());
     Assert.assertNotNull(this.context.getSpace());
     Assert.assertNotNull(this.context.getTenant());
     
-    User user = this.userService.logOut();
+    User user = this.authService.logOut();
     
     Assert.assertNull(this.context.getUser());
     Assert.assertNull(this.context.getSpace());
     Assert.assertNull(this.context.getTenant());
     Assert.assertEquals("haint@cloud-ats.net", user.getEmail());
+  }
+  
+  @Test
+  public void testGotoSpace() {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    
+    try {
+      this.spaceService.goTo(null);
+      Assert.fail();
+    } catch (NullPointerException e) {
+      
+    }
+    
+    Assert.assertNull(this.spaceService.goTo(spaceRefFactory.create("foo")));
+    OrganizationContext context = this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    Assert.assertEquals(this.context.getSpace().getId(), context.getSpace().getId());
   }
 }

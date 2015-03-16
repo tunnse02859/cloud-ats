@@ -29,4 +29,14 @@ public abstract class Reference<T extends DBObject> {
     return new BasicDBObject("_id", id);
   }
   
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj instanceof Reference) {
+      Reference<?> that = (Reference<?>) obj;
+      return this.getId().equals(that.getId());
+    }
+    return false;
+  }
+  
 }

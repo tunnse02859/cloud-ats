@@ -32,15 +32,11 @@ public class UserService extends AbstractMongoCRUD<User> {
   /** .*/
   private UserFactory factory;
   
-  /** .*/
-  private OrganizationContext context;
-  
   @Inject
-  UserService(MongoDBService mongo, Logger logger, UserFactory userFactory, OrganizationContext context) {
+  UserService(MongoDBService mongo, Logger logger, UserFactory userFactory) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     this.factory = userFactory;
-    this.context = context;
     
     //create text index
     this.createTextIndex("_id", "first_name", "last_name");
@@ -52,7 +48,7 @@ public class UserService extends AbstractMongoCRUD<User> {
     this.col.createIndex(new BasicDBObject("roles._id", 1));
   }
   
-  public boolean logIn(String username, String password) {
+  /*public boolean logIn(String username, String password) {
     User user = this.get(username);
     if (user == null) return false;
     if (password.equals(user.getPassword())) {
@@ -69,7 +65,7 @@ public class UserService extends AbstractMongoCRUD<User> {
     context.setSpace(null);
     context.setTenant(null);
     return user;
-  }
+  }*/
   
   public PageList<User> findUsersInSpace(SpaceReference space) {
     return findIn("spaces",  space);
