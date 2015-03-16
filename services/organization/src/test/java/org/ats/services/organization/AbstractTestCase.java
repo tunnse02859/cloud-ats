@@ -5,7 +5,6 @@ package org.ats.services.organization;
 
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
-import org.junit.Before;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,7 +22,6 @@ public class AbstractTestCase {
   /** .*/
   protected MongoDBService mongoService;
   
-  @Before
   public void init() throws Exception {
     System.setProperty(DatabaseModule.DB_CONF, "");
     Injector injector = Guice.createInjector(new DatabaseModule(), new OrganizationServiceModule());

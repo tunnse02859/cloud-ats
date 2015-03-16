@@ -50,6 +50,14 @@ public class User extends BasicDBObject {
     this.tenantFactory = tenantFactory;
   }
   
+  public void setPassword(String password) {
+    this.put("password", password);
+  }
+  
+  public String getPassword() {
+    return this.getString("password");
+  }
+  
   public String getEmail() {
     return this.getString("_id");
   }

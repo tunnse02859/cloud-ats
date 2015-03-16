@@ -23,11 +23,11 @@ import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
-import org.ats.services.organization.entity.fatory.UserReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -38,7 +38,7 @@ public class EntityTestCase extends AbstractTestCase {
 
   /** .*/
   private UserFactory userFactory;
-  private UserReferenceFactory userRefFactory;
+//  private UserReferenceFactory userRefFactory;
 
   /** .*/
   private TenantFactory tenantFactory;
@@ -60,12 +60,13 @@ public class EntityTestCase extends AbstractTestCase {
   private PermissionFactory permFactory;
 
   @Override
+  @BeforeMethod
   public void init() throws Exception {
     super.init();
 
     //
     this.userFactory = injector.getInstance(UserFactory.class);
-    this.userRefFactory = injector.getInstance(UserReferenceFactory.class);
+//    this.userRefFactory = injector.getInstance(UserReferenceFactory.class);
 
     //
     this.tenantFactory = injector.getInstance(TenantFactory.class);

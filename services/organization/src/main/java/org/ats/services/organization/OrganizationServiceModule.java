@@ -49,6 +49,9 @@ public class OrganizationServiceModule extends AbstractModule {
     bind(SpaceService.class);
     bind(RoleService.class);
     bind(FeatureService.class);
+    
+    //bind context
+    bind(OrganizationContext.class);
   }
 
 }

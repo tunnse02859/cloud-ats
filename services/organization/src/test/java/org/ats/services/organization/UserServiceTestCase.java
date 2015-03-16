@@ -16,8 +16,9 @@ import org.ats.services.organization.entity.fatory.UserReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -44,6 +45,8 @@ public class UserServiceTestCase extends AbstractTestCase {
   /** .*/
   private RoleReferenceFactory roleRefFactory;
   
+  @Override
+  @BeforeMethod
   public void init() throws Exception {
     super.init();
     

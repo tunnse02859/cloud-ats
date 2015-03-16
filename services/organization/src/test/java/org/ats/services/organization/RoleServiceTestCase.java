@@ -3,15 +3,15 @@
  */
 package org.ats.services.organization;
 
-import junit.framework.Assert;
-
 import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Role.Permission;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -27,6 +27,7 @@ public class RoleServiceTestCase extends AbstractTestCase {
   private PermissionFactory permFactory;
 
   @Override
+  @BeforeMethod
   public void init() throws Exception {
     super.init();
     this.service = injector.getInstance(RoleService.class);

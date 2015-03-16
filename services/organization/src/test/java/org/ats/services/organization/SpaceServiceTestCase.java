@@ -3,13 +3,13 @@
  */
 package org.ats.services.organization;
 
-import junit.framework.Assert;
-
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -31,6 +31,7 @@ public class SpaceServiceTestCase extends AbstractTestCase {
   private RoleReferenceFactory roleRefFactory;
   
   @Override
+  @BeforeMethod
   public void init() throws Exception {
     super.init();
     this.spaceService = this.injector.getInstance(SpaceService.class);

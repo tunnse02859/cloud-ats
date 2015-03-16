@@ -3,12 +3,12 @@
  */
 package org.ats.services.organization;
 
-import junit.framework.Assert;
-
 import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -22,6 +22,7 @@ public class FeatureServiceTestCase extends AbstractTestCase {
   private FeatureFactory factory;
 
   @Override
+  @BeforeMethod
   public void init() throws Exception {
     super.init();
     this.service = this.injector.getInstance(FeatureService.class);

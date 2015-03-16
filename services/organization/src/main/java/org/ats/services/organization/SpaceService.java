@@ -28,16 +28,22 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   /** .*/
   private SpaceFactory factory;
   
+  /** .*/
+  private OrganizationContext context;
+  
   @Inject
-  SpaceService(MongoDBService mongo, Logger logger, SpaceFactory factory) {
+  SpaceService(MongoDBService mongo, Logger logger, SpaceFactory factory, OrganizationContext context) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     this.factory = factory;
     
     this.createTextIndex("name");
+    //
     this.col.createIndex(new BasicDBObject("created_date", 1));
     this.col.createIndex(new BasicDBObject("tenant._id", 1));
     this.col.createIndex(new BasicDBObject("roles._id", 1));
+    //
+    this.context = context;
   }
 
   public Space transform(DBObject source) {
@@ -48,6 +54,11 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     space.put("tenant", source.get("tenant"));
     space.put("roles", source.get("roles"));
     return space;
+  }
+  
+  public OrganizationContext goTo(Space space) {
+    context.setSpace(space);
+    return context;
   }
 
 }
