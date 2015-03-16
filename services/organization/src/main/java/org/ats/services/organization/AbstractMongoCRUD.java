@@ -63,7 +63,7 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
   
   public T get(String id) {
     DBObject source = this.col.findOne(new BasicDBObject("_id", id));
-    return transform(source);
+    return source == null ? null : transform(source);
   }
   
   public PageList<T> list() {

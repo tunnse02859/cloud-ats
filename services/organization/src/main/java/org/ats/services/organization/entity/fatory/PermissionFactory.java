@@ -12,6 +12,6 @@ import org.ats.services.organization.entity.Role.Permission;
  */
 public interface PermissionFactory {
 
-  public Permission create(String role);
+  public Permission create(String rule);
   
 }

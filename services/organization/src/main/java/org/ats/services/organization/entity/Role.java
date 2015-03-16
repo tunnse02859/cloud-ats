@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.ats.services.data.common.Reference;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
+import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
@@ -32,13 +33,17 @@ public class Role  extends BasicDBObject {
   
   /** .*/
   private SpaceReferenceFactory spaceFactory;
+  
+  /** .*/
+  private PermissionFactory permFactory;
 
   @Inject
-  Role(SpaceReferenceFactory spaceFactory, @Assisted String name) {
+  Role(SpaceReferenceFactory spaceFactory, PermissionFactory permFactory, @Assisted String name) {
     this.put("_id", UUID.randomUUID().toString());
     this.setName(name);
     this.put("created_date", new Date());
     this.spaceFactory = spaceFactory;
+    this.permFactory = permFactory;
   }
   
   public void setName(String name) {
@@ -100,7 +105,7 @@ public class Role  extends BasicDBObject {
     BasicDBList permissions = (BasicDBList) obj ;
     List<Role.Permission> list = new ArrayList<Role.Permission>();
     for (int i = 0; i < permissions.size(); i++) {
-      list.add((Permission) permissions.get(i));
+      list.add(permFactory.create(((BasicDBObject) permissions.get(i)).getString("rule")));
     }
     
     return Collections.unmodifiableList(list);

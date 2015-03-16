@@ -34,6 +34,14 @@ public class Feature extends BasicDBObject {
     this.put("created_date", new Date());
   }
   
+  public String getId() {
+    return this.getString("_id");
+  }
+  
+  public String getName() {
+    return getId();
+  }
+  
   public void addAction(Action... actions) {
     Object obj = this.get("actions");
     BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
@@ -65,7 +73,7 @@ public class Feature extends BasicDBObject {
     BasicDBList actions = (BasicDBList) obj;
     List<Action> list = new ArrayList<Action>();
     for (int i = 0; i < actions.size(); i++) {
-      list.add((Action) actions.get(i));
+      list.add(new Action(((BasicDBObject)actions.get(i)).getString("_id")));
     }
     
     return Collections.unmodifiableList(list);
