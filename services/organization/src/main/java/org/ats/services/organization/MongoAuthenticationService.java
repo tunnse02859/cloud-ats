@@ -5,6 +5,8 @@ package org.ats.services.organization;
 
 import java.util.logging.Logger;
 
+import org.ats.services.OrganizationContext;
+import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 
 import com.google.inject.Inject;

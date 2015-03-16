@@ -3,6 +3,8 @@
  */
 package org.ats.services.organization;
 
+import org.ats.services.OrganizationContext;
+import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;

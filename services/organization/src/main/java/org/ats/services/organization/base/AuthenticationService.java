@@ -1,8 +1,9 @@
 /**
  * 
  */
-package org.ats.services.organization;
+package org.ats.services.organization.base;
 
+import org.ats.services.OrganizationContext;
 import org.ats.services.organization.entity.User;
 
 /**

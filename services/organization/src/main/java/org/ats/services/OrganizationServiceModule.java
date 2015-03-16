@@ -1,8 +1,15 @@
 /**
  * 
  */
-package org.ats.services.organization;
+package org.ats.services;
 
+import org.ats.services.organization.FeatureService;
+import org.ats.services.organization.MongoAuthenticationService;
+import org.ats.services.organization.RoleService;
+import org.ats.services.organization.SpaceService;
+import org.ats.services.organization.TenantService;
+import org.ats.services.organization.UserService;
+import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;

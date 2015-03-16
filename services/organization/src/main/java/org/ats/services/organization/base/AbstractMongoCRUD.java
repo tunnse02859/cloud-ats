@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.organization;
+package org.ats.services.organization.base;
 
 import java.util.ArrayList;
 import java.util.List;

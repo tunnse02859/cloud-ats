@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;

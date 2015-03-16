@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.organization;
+package org.ats.services;
 
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;

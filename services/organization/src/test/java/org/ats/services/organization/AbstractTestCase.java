@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization;
 
+import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 
