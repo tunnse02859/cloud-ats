@@ -30,6 +30,7 @@ public class AbstractTestCase {
     this.mongoService = injector.getInstance(MongoDBService.class);
     
     this.injector = injector;
+    
     //cleanup database
     this.mongoService.dropDatabase();
   }

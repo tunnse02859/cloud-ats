@@ -93,22 +93,25 @@ public class EntityTestCase extends AbstractTestCase {
     Role role = roleFactory.create("role1");
     Permission perm1 = permFactory.create(new Permission.Builder().feature("feature1").action("action1").tenant("tenant").space("*").build());
     Permission perm2 = permFactory.create(new Permission.Builder().feature("feature2").action("action2").tenant("tenant").space("*").build());
-    role.addPermission(perm1, perm2);
-
+    try {
+      role.addPermission(perm1, perm2);
+      Assert.fail();
+    } catch (IllegalStateException e) {
+      SpaceReference space = spaceRefFactory.create("space");
+      role.setSpace(space);
+      space = role.getSpace();
+      Assert.assertEquals("space", space.getId());
+      role.addPermission(perm1, perm2);
+    }
+    
     Assert.assertTrue(role.hasPermisison(permFactory.create("feature1:action1@tenant:*")));
     Assert.assertTrue(role.hasPermisison(permFactory.create("feature2:action2@tenant:*")));
     Assert.assertFalse(role.hasPermisison(permFactory.create("foo")));
 
-    System.out.println(perm1);
     Assert.assertEquals("feature1", perm1.getFeature().getId());
     Assert.assertEquals("action1", perm1.getAction().getId());
     Assert.assertEquals("tenant", perm1.getTenant().getId());
     Assert.assertEquals(Space.ANY, perm1.getSpace());
-
-    SpaceReference space = spaceRefFactory.create("space");
-    role.setSpace(space);
-    space = role.getSpace();
-    Assert.assertEquals("space", space.getId());
 
     List<Permission> list = role.getPermissions();
     Assert.assertEquals(2, list.size());

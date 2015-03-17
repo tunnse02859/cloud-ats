@@ -76,11 +76,19 @@ public class Role  extends BasicDBObject {
   }
   
   public void addPermission(Permission... perms) {
+    if (getSpace() == null) throw new IllegalStateException("The role must to set a space before to add a permission");
+    
     Object obj = this.get("permissions");
     BasicDBList permissions = obj == null ? new BasicDBList() : (BasicDBList) obj ;
+    
     for (Permission perm : perms) {
+      
+      if (!(getSpace().equals(perm.getSpace()) || "*".equals(perm.getSpace().getId())))
+        throw new IllegalArgumentException("The permission " + perm.getRule() + " is ilegal on space " + getSpace().getId());
+      
       permissions.add(perm);
     }
+    
     this.put("permissions", permissions);
   }
   

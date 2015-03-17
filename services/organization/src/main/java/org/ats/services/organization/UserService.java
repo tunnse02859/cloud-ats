@@ -49,25 +49,6 @@ public class UserService extends AbstractMongoCRUD<User> {
     this.col.createIndex(new BasicDBObject("roles._id", 1));
   }
   
-  /*public boolean logIn(String username, String password) {
-    User user = this.get(username);
-    if (user == null) return false;
-    if (password.equals(user.getPassword())) {
-      context.setUser(user);
-      context.setTenant(user.getTanent().get());
-      return true;
-    }
-    return false;
-  }
-  
-  public User logOut() {
-    User user = context.getUser();
-    context.setUser(null);
-    context.setSpace(null);
-    context.setTenant(null);
-    return user;
-  }*/
-  
   public PageList<User> findUsersInSpace(SpaceReference space) {
     return findIn("spaces",  space);
   }
