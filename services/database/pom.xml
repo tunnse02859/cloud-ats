@@ -4,12 +4,12 @@
 
 
 	<parent>
-		<groupId>org.ats</groupId>
+		<groupId>org.ats.services</groupId>
 		<artifactId>cloud-services</artifactId>
 		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>cloud-database</artifactId>
+	<artifactId>database</artifactId>
   <packaging>jar</packaging>
 
 	<dependencies>

@@ -9,6 +9,7 @@
 		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
+	<groupId>org.ats.services</groupId>
 	<artifactId>cloud-services</artifactId>
 	<packaging>pom</packaging>
 

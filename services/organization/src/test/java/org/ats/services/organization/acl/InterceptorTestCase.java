@@ -172,6 +172,7 @@ public class InterceptorTestCase {
     } catch (UnAuthorizationException e) {
       Assert.fail();
     } catch (UnAuthenticatedException e) {
+      //
     }
     
     this.authService.logIn("haint@cloud-ats.net", "12345");
@@ -196,6 +197,7 @@ public class InterceptorTestCase {
       this.service.bar();
       Assert.fail();
     } catch (UnAuthorizationException e) {
+      //
     } catch (UnAuthenticatedException e) {
       Assert.fail();
     }
@@ -205,10 +207,10 @@ public class InterceptorTestCase {
     barRole.addPermission(permFactory.create("barFeature:barAction@*:*"));
     roleService.create(barRole);
 //    
-//    this.user.addRole(roleRefFactory.create(barRole.getId()));
-//    this.userService.update(this.user);
-//    this.context.setUser(this.user);
-//    
-//    Assert.assertEquals("bar", this.service.bar());
+    this.user.addRole(roleRefFactory.create(barRole.getId()));
+    this.userService.update(this.user);
+    this.context.setUser(this.user);
+    
+    Assert.assertEquals("bar", this.service.bar());
   }
 }
