@@ -1,0 +1,22 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# for testing only
+GET     /test                           @controllers.Application.index()
+GET     /test/create                    @controllers.Application.createUser()
+
+################################## RESTful API ######################################
+
+# Return current context
+GET     /api/v1/context                 @controllers.AuthenticationController.current()
+
+# Authenticate users
+POST    /api/v1/user/login              @controllers.AuthenticationController.login()
+GET     /api/v1/user/logout             @controllers.AuthenticationController.logout()
+GET     /api/v1/user/register           @controllers.AuthenticationController.register()
+
+#
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
