@@ -66,48 +66,62 @@ public class RoleServiceTestCase extends AbstractTestCase {
     service.create(role);
     
     role = service.get(role.getId());
-    Assert.assertEquals(3, role.getPermissions().size());
+    Assert.assertEquals(role.getPermissions().size(), 3);
     
     role.removePermission(permFactory.create("feature1:action1@tenant:space"));
     service.update(role);
     role = service.get(role.getId());
-    Assert.assertEquals(2, role.getPermissions().size());
+    Assert.assertEquals(role.getPermissions().size(), 2);
     
     Permission perm = permFactory.create("*:*@tenant:space");
-    Assert.assertEquals(Feature.ANY, perm.getFeature());
-    Assert.assertEquals(Action.ANY, perm.getAction());
-    Assert.assertEquals("tenant", perm.getTenant().getId());
-    Assert.assertEquals("space", perm.getSpace().getId());
+    Assert.assertEquals(perm.getFeature(), Feature.ANY);
+    Assert.assertEquals(perm.getAction(), Action.ANY);
+    Assert.assertEquals(perm.getTenant().getId(), "tenant");
+    Assert.assertEquals(perm.getSpace().getId(), "space");
     Assert.assertTrue(role.getPermissions().contains(perm));
 
     service.delete(role.getId());
-    Assert.assertEquals(0, service.count());
+    Assert.assertEquals(service.count(), 0);
     Assert.assertNull(service.get(role.getId()));
   }
   
   @Test
   public void testList() {
     initRole(32);
-    Assert.assertEquals(32, service.count());
+    Assert.assertEquals(service.count(), 32);
     
     PageList<Role> list = service.list();
-    Assert.assertEquals(32, list.count());
+    Assert.assertEquals(list.count(), 32);
     
-    Assert.assertEquals(4, list.totalPage());
+    Assert.assertEquals(list.totalPage(), 4);
     
     List<Role> roles = list.getPage(4);
     
-    Assert.assertEquals(2, roles.size());
+    Assert.assertEquals(roles.size(), 2);
     
-    Assert.assertEquals("role31", roles.get(0).getName());
+    Assert.assertEquals(roles.get(0).getName(), "role test31");
     
-    Role role = factory.create("role_test");
+    Role role = factory.create("role test");
     
     service.create(role);
     
-    Assert.assertEquals(33, service.count());
+    Assert.assertEquals(service.count(), 33);
     
     Assert.assertTrue(service.get(role.getId()).getPermissions().isEmpty());
+    
+  }
+  
+  @Test
+  public void testSearch() {
+    initRole(53);
+    PageList<Role> list = service.search("\"role test1\"");
+    Assert.assertEquals(list.count(), 11);
+    
+    list = service.search("empty");
+    Assert.assertEquals(list.count(), 0);
+    
+    list = service.search("role");
+    Assert.assertEquals(list.count(), 53);
     
   }
   
@@ -122,13 +136,13 @@ public class RoleServiceTestCase extends AbstractTestCase {
     RoleReference rolRef = roleRef.create(role.getId());
     
     role = rolRef.get();
-    Assert.assertEquals("test reference", role.getName());
+    Assert.assertEquals(role.getName(), "test reference");
   }
   
   private void initRole(int total) {
     for (int i =1; i <= total; i ++) {
       
-      String roleName = "role" + i;
+      String roleName = "role test" + i;
       Role role = factory.create(roleName);
       
       SpaceReference refSpace1 = spaceFactory.create("space1");

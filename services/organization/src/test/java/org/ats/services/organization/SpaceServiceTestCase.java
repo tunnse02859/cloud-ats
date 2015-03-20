@@ -62,13 +62,13 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     spaceService.create(space);
     
     space = spaceService.get(space.getId());
-    Assert.assertEquals(3, space.getRoles().size());
-    Assert.assertEquals("fsoft", space.getTenant().getId());
+    Assert.assertEquals(space.getRoles().size(), 3);
+    Assert.assertEquals(space.getTenant().getId(), "fsoft");
     
     space.removeRole(roleRefFactory.create("guest"));
     spaceService.update(space);
     space = spaceService.get(space.getId());
-    Assert.assertEquals(2, space.getRoles().size());
+    Assert.assertEquals(space.getRoles().size(), 2);
     
     spaceService.delete(space);
     Assert.assertNull(spaceService.get(space.getId()));
@@ -80,58 +80,66 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     initSpace(54);
     
     //compare real spaces with spaces in database
-    Assert.assertEquals(54, spaceService.count());
+    Assert.assertEquals(spaceService.count(), 54);
     
     PageList<Space> list = spaceService.list();
-    Assert.assertEquals(54, list.count());
+    Assert.assertEquals(list.count(), 54);
     
     //check total page with page size = 10
-    Assert.assertEquals(6, list.totalPage());
+    Assert.assertEquals(list.totalPage(), 6);
     
     //check the first space in page 3
     List<Space> page3 = list.getPage(3);
-    Assert.assertEquals("Fsu1_space21", page3.get(0).getName());
+    Assert.assertEquals(page3.get(0).getName(), "Fsu1 space21");
     
     //check total records after creating new space
     Space newSpace = spaceFactory.create("spaceFinal");
     spaceService.create(newSpace);
-    Assert.assertEquals(55, spaceService.count());
+    Assert.assertEquals(spaceService.count(), 55);
     
     //check total records after deleting above space
     String id = newSpace.getId();
     spaceService.delete(id);
-    Assert.assertEquals(54, spaceService.count());
+    Assert.assertEquals(spaceService.count(), 54);
     
   }
   
   @Test
   public void testSearch() {
     initSpace(55);
-    Space newSpace = spaceFactory.create("Fsu1_Trinh");
+    Space newSpace = spaceFactory.create("Fsu1 Trinh");
     // add role for this space
     RoleReference role1 = roleRefFactory.create("role1");
     newSpace.addRole(role1);
     // save to database
     spaceService.create(newSpace);
     
-    PageList<Space> list = spaceService.search("Fsu1_Trinh");
+    PageList<Space> list = spaceService.search("trinh");
     
-    Assert.assertEquals(1, list.count());
+    Assert.assertEquals(list.count(), 1);
+    
+    PageList<Space> fullList = spaceService.search("Fsu1");
+    
+    Assert.assertEquals(fullList.count(), 56);
+    
+    PageList<Space> emptyList = spaceService.search("Fsu1_Trinh");
+    Assert.assertEquals(emptyList.count(), 0);
+    
     Space newSpace1 = spaceFactory.create("Fsu1_Trinh");
     list = spaceService.search("Fsu1_Trinh");
     spaceService.create(newSpace1);
     
-    Assert.assertEquals(2, list.count());
+    Assert.assertEquals(list.count(), 1);
   }
   
   @Test
   public void testFindSpaceInRole() {
     initSpace(54);
     PageList<Space> list = spaceService.findIn("roles", roleRefFactory.create("role1"));
-    Assert.assertEquals(54, list.count());
+    Assert.assertEquals(list.count(), 54);
     
     Space space = list.next().get(0);
-    Assert.assertEquals(2, space.getRoles().size());
+    Assert.assertEquals(space.getRoles().size(), 2);
     
   }
   
@@ -150,9 +158,9 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     String id = newSpace.getId();
     SpaceReference ref = spaceRefFactory.create(id);
     newSpace = ref.get();
-    Assert.assertEquals("Fsu1_Trinh", newSpace.getName());
+    Assert.assertEquals(newSpace.getName(), "Fsu1_Trinh");
     
-    Assert.assertEquals("role1", newSpace.getRoles().get(0).getId());
+    Assert.assertEquals(newSpace.getRoles().get(0).getId(), "role1");
   }
   
   
@@ -160,7 +168,7 @@ public class SpaceServiceTestCase extends AbstractTestCase {
 
   	for (int i = 1; i <= total; i++) {
   		
-      String nameSpace = "Fsu1_space" + i;
+      String nameSpace = "Fsu1 space" + i;
   
       Space space = spaceFactory.create(nameSpace);
   

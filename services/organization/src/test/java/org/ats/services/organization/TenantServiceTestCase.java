@@ -57,33 +57,33 @@ public class TenantServiceTestCase extends AbstractTestCase {
     service.create(fsoft);
     
     fsoft = service.get("fsoft");
-    Assert.assertEquals(3, fsoft.getFeatures().size());
+    Assert.assertEquals(fsoft.getFeatures().size(), 3);
     
     fsoft.removeFeature(featureRefFactory.create("Dashboard"));
     service.update(fsoft);
     fsoft = service.get("fsoft");
-    Assert.assertEquals(2, fsoft.getFeatures().size());
+    Assert.assertEquals(fsoft.getFeatures().size(), 2);
     
     TenantReference ref = tenantRefFactory.create("fsoft");
     fsoft = ref.get();
-    Assert.assertEquals(2, fsoft.getFeatures().size());
+    Assert.assertEquals(fsoft.getFeatures().size(), 2);
     
     service.delete(fsoft);
-    Assert.assertEquals(0, service.count());
+    Assert.assertEquals(service.count(), 0);
   }
   
   @Test
   public void testList() {
     initTenant(53);
-    Assert.assertEquals(53, service.count());
+    Assert.assertEquals(service.count(), 53);
     
     Tenant newTenant = tenantFactory.create("newTenant");
     service.create(newTenant);
-    Assert.assertEquals(54, service.count());
+    Assert.assertEquals(service.count(), 54);
     
     String id = newTenant.getId();
     service.delete(id);
-    Assert.assertEquals(53, service.count());
+    Assert.assertEquals(service.count(), 53);
     
   }
   
@@ -91,12 +91,12 @@ public class TenantServiceTestCase extends AbstractTestCase {
   public void testSearch() {
     initTenant(53);
     PageList<Tenant> list = service.search("Tenant2");
-    Assert.assertEquals(1, list.count());
+    Assert.assertEquals(list.count(), 1);
     
     service.delete("Tenant3");
     
     list = service.search("Tenant3");
-    Assert.assertEquals(0, list.count());
+    Assert.assertEquals(list.count(), 0);
     
   }
   
@@ -106,10 +106,10 @@ public class TenantServiceTestCase extends AbstractTestCase {
     initTenant(53);
     PageList<Tenant> list = service.findIn("features", featureRefFactory.create("performance"));
     
-    Assert.assertEquals(53, list.count());
+    Assert.assertEquals(list.count(), 53);
     
     Tenant tenant = list.next().get(0);
-    Assert.assertEquals(3, tenant.getFeatures().size());
+    Assert.assertEquals(tenant.getFeatures().size(), 3);
   }
   
   @Test
@@ -121,7 +121,7 @@ public class TenantServiceTestCase extends AbstractTestCase {
     TenantReference ref = tenantRefFactory.create(newTenant.getId());
     newTenant = ref.get();
     
-    Assert.assertEquals("newTenant", newTenant.getId());
+    Assert.assertEquals(newTenant.getId(), "newTenant");
   }
   
   private void initTenant(int total) {

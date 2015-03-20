@@ -66,64 +66,64 @@ public class UserServiceTestCase extends AbstractTestCase {
     
     User user = this.userFactory.create("cloud@fsoft.com.vn", "fsu1", "bu11");
     userService.create(user);
-    Assert.assertEquals(1, userService.count());
+    Assert.assertEquals(userService.count(), 1);
     
     user.setFirstName("fsoft.fsu1");
     userService.update(user);
     
     User updatedUser = userService.get(user.getEmail());
-    Assert.assertEquals("fsoft.fsu1", updatedUser.getFirstName());
+    Assert.assertEquals(updatedUser.getFirstName(), "fsoft.fsu1");
     
     userService.delete(user);
-    Assert.assertEquals(0, userService.count());
+    Assert.assertEquals(userService.count(), 0);
   }
   
   @Test
   public void testList() throws Exception {
     initUser(123);
-    Assert.assertEquals(123, userService.count());
+    Assert.assertEquals(userService.count(), 123);
     
     PageList<User> list = userService.list();
-    Assert.assertEquals(123, list.count());
-    Assert.assertEquals(13, list.totalPage());
+    Assert.assertEquals(list.count(), 123);
+    Assert.assertEquals(list.totalPage(), 13);
     Assert.assertTrue(list.hasNext());
     Assert.assertNull(list.previous());
     
     List<User> page1 = list.next();
-    Assert.assertEquals(10, page1.size());
-    Assert.assertEquals("user1@fsoft.com.vn", page1.get(0).getEmail());
-    Assert.assertEquals("user10@fsoft.com.vn", page1.get(9).getEmail());
+    Assert.assertEquals(page1.size(), 10);
+    Assert.assertEquals(page1.get(0).getEmail(), "user1@fsoft.com.vn");
+    Assert.assertEquals(page1.get(9).getEmail(), "user10@fsoft.com.vn");
     
     userService.create(userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen"));
-    Assert.assertEquals(124, userService.count());
+    Assert.assertEquals(userService.count(), 124);
     
     //test sort by created_date
     list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     
     List<User> page13 = list.getPage(13);
-    Assert.assertEquals(4, page13.size());
+    Assert.assertEquals(page13.size(), 4);
     
-    Assert.assertEquals("user121@fsoft.com.vn", page13.get(0).getEmail());
-    Assert.assertEquals("haint@cloud-ats.net", page13.get(3).getEmail());
+    Assert.assertEquals(page13.get(0).getEmail(), "user121@fsoft.com.vn");
+    Assert.assertEquals(page13.get(3).getEmail(), "haint@cloud-ats.net");
     
     User user = userService.get("user1@fsoft.com.vn");
     Assert.assertNotNull(user.getTanent());
-    Assert.assertEquals("Fsoft", user.getTanent().getId());
-    Assert.assertEquals(100, user.getSpaces().size());
-    Assert.assertEquals(2, user.getRoles().size());
+    Assert.assertEquals(user.getTanent().getId(), "Fsoft");
+    Assert.assertEquals(user.getSpaces().size(), 100);
+    Assert.assertEquals(user.getRoles().size(), 2);
   }
   
   @Test
   public void testFindUserInSpace() {
     initUser(100);
     PageList<User> pages = userService.list();
-    Assert.assertEquals(10, pages.totalPage());
+    Assert.assertEquals(pages.totalPage(), 10);
     
     pages = userService.findUsersInSpace(spaceRefFactory.create("space0"));
-    Assert.assertEquals(100, pages.count());
+    Assert.assertEquals(pages.count(), 100);
     
     pages = userService.findUsersInSpace(spaceRefFactory.create("foo"));
-    Assert.assertEquals(0, pages.count());
+    Assert.assertEquals(pages.count(), 0);
   }
   
   @Test
@@ -131,10 +131,10 @@ public class UserServiceTestCase extends AbstractTestCase {
     initUser(100);
     
     PageList<User> pages = userService.findIn("roles", roleRefFactory.create("role1"));
-    Assert.assertEquals(100, pages.count());
+    Assert.assertEquals(pages.count(), 100);
     User user = pages.next().get(0);
     
-    Assert.assertEquals(2, user.getRoles().size());
+    Assert.assertEquals(user.getRoles().size(), 2);
   }
   
   @Test
@@ -142,10 +142,10 @@ public class UserServiceTestCase extends AbstractTestCase {
     initUser(100);
     
     PageList<User> pages = userService.search("user1");
-    Assert.assertEquals(1, pages.count());
+    Assert.assertEquals(pages.count(), 1);
     
     pages = userService.search("fsoft");
-    Assert.assertEquals(100, pages.count());
+    Assert.assertEquals(pages.count(), 100);
   }
   
   @Test
@@ -155,9 +155,9 @@ public class UserServiceTestCase extends AbstractTestCase {
     
     UserReference ref = userRefFactory.create("haint@cloud-ats.net");
     user = ref.get();
-    Assert.assertEquals("haint@cloud-ats.net", user.getEmail());
-    Assert.assertEquals("Hai", user.getFirstName());
-    Assert.assertEquals("Nguyen", user.getLastName());
+    Assert.assertEquals(user.getEmail(), "haint@cloud-ats.net");
+    Assert.assertEquals(user.getFirstName(), "Hai");
+    Assert.assertEquals(user.getLastName(), "Nguyen");
   }
   
   private void initUser(int total) {
