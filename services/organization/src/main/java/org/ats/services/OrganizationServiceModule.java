@@ -12,6 +12,7 @@ import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.acl.UserACLInterceptor;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
@@ -25,9 +26,9 @@ import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.fatory.UserReferenceFactory;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.matcher.Matchers;
-import com.google.inject.name.Names;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -65,7 +66,8 @@ public class OrganizationServiceModule extends AbstractModule {
     bind(OrganizationContext.class);
     
     //bind authentication service
-    bind(AuthenticationService.class).annotatedWith(Names.named("Mongo")).to(MongoAuthenticationService.class);
+    bind(new TypeLiteral<AuthenticationService<User>>(){})
+      .to(new TypeLiteral<MongoAuthenticationService>(){});
     
     //interceptor
     bindInterceptor(

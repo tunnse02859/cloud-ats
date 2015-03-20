@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.inject.Key;
-import com.google.inject.name.Names;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -70,7 +70,7 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     
     this.context = this.injector.getInstance(OrganizationContext.class);
     
-    this.authService = this.injector.getInstance(Key.get(AuthenticationService.class, Names.named("Mongo")));
+    this.authService = this.injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     
     this.tenant = tenantFactory.create("Fsoft");
     this.tenantService.create(this.tenant);

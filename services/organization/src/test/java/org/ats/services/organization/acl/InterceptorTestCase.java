@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.name.Names;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -84,7 +84,7 @@ public class InterceptorTestCase {
   private User user;
   
   /** .*/
-  private AuthenticationService authService;
+  private AuthenticationService<User> authService;
   
   /** .*/
   private MongoDBService mongoService;
@@ -127,7 +127,7 @@ public class InterceptorTestCase {
     
     this.context = this.injector.getInstance(OrganizationContext.class);
     
-    this.authService = this.injector.getInstance(Key.get(AuthenticationService.class, Names.named("Mongo")));
+    this.authService = this.injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     
     Feature foo = featureFactory.create("fooFeature");
     foo.addAction(new Action("fooAction"));
