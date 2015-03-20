@@ -51,7 +51,7 @@ public class OrganizationContextTestCase extends AbstractTestCase {
   
   private User user;
   
-  private AuthenticationService authService;
+  private AuthenticationService<User> authService;
   
   @Override
   @BeforeClass

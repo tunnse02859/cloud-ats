@@ -19,7 +19,7 @@ import com.google.inject.name.Names;
 public class DatabaseModule extends AbstractModule {
   
   /** .*/
-  private final Properties configuration;
+  private Properties configuration;
   
   /** .*/
   public static final String DB_CONF = "ats.cloud.db.conf";
@@ -33,8 +33,16 @@ public class DatabaseModule extends AbstractModule {
   /** .*/
   public static final String DB_NAME = "ats.cloud.db.name";
   
+  public DatabaseModule(String configPath) throws FileNotFoundException, IOException {
+    buildConfiguration(configPath);
+  }
+  
   public DatabaseModule() throws FileNotFoundException, IOException {
     String configPath = System.getProperty(DB_CONF);
+    buildConfiguration(configPath);
+  }
+  
+  private void buildConfiguration(String configPath) throws FileNotFoundException, IOException {
     Properties configuration = new Properties();
     if (configPath != null && !configPath.isEmpty()) configuration.load(new FileInputStream(configPath));
     

@@ -37,8 +37,9 @@ public class UserACLInterceptor implements MethodInterceptor {
   public Object invoke(MethodInvocation invocation) throws Throwable {
     OrganizationContext context = provider.get();
     if (context.getUser() == null) throw new UnAuthenticatedException("You need logging to perform this action");
-    
+
     Authorized rule = invocation.getMethod().getAnnotation(Authorized.class);
+    if (rule == null) return invocation.proceed();;
     
     UnAuthorizationException e = new UnAuthorizationException("The user " + context.getUser().getEmail() + " does not have permission to perform " + invocation.getMethod());
     

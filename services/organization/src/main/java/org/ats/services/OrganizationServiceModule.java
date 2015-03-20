@@ -10,7 +10,6 @@ import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
-import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.acl.UserACLInterceptor;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
@@ -71,7 +70,7 @@ public class OrganizationServiceModule extends AbstractModule {
     //interceptor
     bindInterceptor(
         Matchers.annotatedWith(Authenticated.class), 
-        Matchers.annotatedWith(Authorized.class), 
+        Matchers.any(), 
         new UserACLInterceptor(getProvider(OrganizationContext.class)));
   }
 

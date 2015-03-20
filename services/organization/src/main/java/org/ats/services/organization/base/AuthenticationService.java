@@ -3,7 +3,6 @@
  */
 package org.ats.services.organization.base;
 
-import org.ats.services.OrganizationContext;
 import org.ats.services.organization.entity.User;
 
 /**
@@ -11,9 +10,22 @@ import org.ats.services.organization.entity.User;
  *
  * Mar 16, 2015
  */
-public interface AuthenticationService {
-
-  public OrganizationContext logIn(String username, String password);
+public abstract class AuthenticationService<T> {
   
-  public User logOut();
+  /** .*/
+  public static final String AUTH_TOKEN_HEADER = "X-AUTH-TOKEN";
+
+  /** .*/
+  public static final String SPACE_HEADER = "X-SPACE";
+  
+  /** .*/
+  public static final String AUTH_TOKEN = "authToken";
+
+  public abstract String logIn(String username, String password);
+  
+  public abstract User logOut();
+  
+  public abstract String createToken(T user);
+  
+  public abstract T findByAuthToken(String token);
 }
