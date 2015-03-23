@@ -3,6 +3,8 @@
  */
 package org.ats.services.organization.base;
 
+import java.util.Set;
+
 import org.ats.common.PageList;
 
 import com.mongodb.DBObject;
@@ -23,6 +25,10 @@ public interface MongoCRUD<T extends DBObject> {
   public void delete(T obj);
   
   public T get(String id);
+  
+  public T get(String id, String... mixins);
+  
+  public T get(String id, Set<String> mixins);
   
   public PageList<T> list();
   

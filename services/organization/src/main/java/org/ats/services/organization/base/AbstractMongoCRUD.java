@@ -6,10 +6,12 @@ package org.ats.services.organization.base;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
+import org.ats.common.SetBuilder;
 import org.ats.services.data.common.MongoPageList;
 import org.ats.services.data.common.Reference;
 
@@ -66,6 +68,21 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
     return source == null ? null : transform(source);
   }
   
+ public T get(String id, String... mixins) {
+   return get(id, new SetBuilder<String>(mixins).build());
+ }
+  
+  public T get(String id, Set<String> mixins) {
+    DBObject source = this.col.findOne(new BasicDBObject("_id", id));
+    if (source == null) return null;
+    
+    T entity = transform(source);
+    for (String mixin : mixins) {
+      entity.put(mixin, source.get(mixin));
+    }
+    return entity;
+  }
+  
   public PageList<T> list() {
     return list(10);
   }
@@ -118,9 +135,14 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
         List<T> list = new ArrayList<T>();
         while(cursor.hasNext()) {
           DBObject source = cursor.next();
-          list.add(transform(source));
+          T entity = transform(source);
+          if (this.mixins != null && this.mixins.size() > 0) {
+            for (String mixin : this.mixins) {
+              entity.put(mixin, source.get(mixin));
+            }
+          }
+          list.add(entity);
         }
-        
         return list;
       }
     };
