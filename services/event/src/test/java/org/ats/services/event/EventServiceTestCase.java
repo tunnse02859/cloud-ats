@@ -28,8 +28,8 @@ public class EventServiceTestCase {
   private EventFactory<String> factory;
   
   @BeforeMethod
-  public void init() {
-    injector = Guice.createInjector(new MockModule());
+  public void init() throws Exception {
+    injector = Guice.createInjector(new MockModule(), new EventModule("src/test/resources/event.conf"));
     service = injector.getInstance(EventService.class);
     factory = injector.getInstance(Key.get(new TypeLiteral<EventFactory<String>>(){}));
   }
@@ -52,10 +52,9 @@ public class EventServiceTestCase {
     service.setInjector(injector);
     service.start();
     event.broadcast();
-
-    service.addActor(MockActor.class);
-    event.broadcast();
     
+    Assert.assertEquals(service.getActors().size(), 1);
+
     service.setSender(MockSender.class);
     event.broadcast();
   }

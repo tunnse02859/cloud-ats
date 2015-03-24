@@ -4,9 +4,7 @@
 package org.ats.services.event;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import akka.actor.Actor;
@@ -18,6 +16,7 @@ import akka.actor.Props;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -37,7 +36,7 @@ public class EventService {
   private Injector injector;
 
   /** .*/
-  private Set<Class<? extends Actor>> clazzes;
+  private Map<Class<? extends Actor>, String> clazzes;
   
   /** .*/
   private Map<Class<? extends Actor>, ActorRef> actors;
@@ -46,9 +45,9 @@ public class EventService {
   private Logger logger;
 
   @Inject
-  EventService(Logger logger) {
-    clazzes = new HashSet<Class<? extends Actor>>();
+  EventService(Logger logger, @Named("ats.cloud.event.actors") Map<Class<? extends Actor>, String> clazzes) {
     this.logger = logger;
+    this.clazzes = clazzes;
     this.actors = new HashMap<Class<? extends Actor>, ActorRef>();
   }
 
@@ -56,14 +55,24 @@ public class EventService {
     this.injector = injector;
   }
 
-  public void addActor(Class<? extends Actor> clazz) {
-    clazzes.add(clazz);
+  public void addActor(Class<? extends Actor> clazz, String name) {
+    clazzes.put(clazz, name);
+  }
+  
+  public Map<Class<? extends Actor>, ActorRef> getActors() {
+    return actors;
   }
 
   public void process(Event<?> event) {
     if (system == null) throw new IllegalStateException("The event service is not started");
-    for (Class<? extends Actor> clazz : clazzes) {
-      ActorRef actor = actors.get(clazz) == null ? system.actorOf(Props.create(GenericDependencyInjector.class, injector, clazz)) : actors.get(clazz);
+    for (Map.Entry<Class<? extends Actor>, String> entry : clazzes.entrySet()) {
+      Class<? extends Actor> clazz = entry.getKey();
+      String name = entry.getValue();
+      
+      ActorRef actor = 
+          actors.get(clazz) == null ? 
+              system.actorOf(Props.create(GenericDependencyInjector.class, injector, clazz), name) : actors.get(clazz);
+              
       actors.put(clazz, actor);
       actor.tell(event, sender);
     }
