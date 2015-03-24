@@ -66,6 +66,18 @@ public class MockService {
     return "space";
   }
   
+  @Authorized(tenant = "fsoft", feature = "barFeature", action = "fooAction")
+  public void incorrectBar() {
+  }
+  
+  @Authorized(tenant = "fsoft", feature = "fooFeature", action = "barAction")
+  public void incorrectAct() {
+  }
+  
+  @Authorized(tenant = "fsoft", feature = "foo2Feature", action = "foo2Action")
+  public void incorrectPermiss() {
+    
+  }
 }
 
 
