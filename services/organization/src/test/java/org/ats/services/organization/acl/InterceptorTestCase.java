@@ -156,9 +156,17 @@ public class InterceptorTestCase {
     this.user.setTenant(tenantRefFactory.create(this.tenant.getId()));
     this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
     this.user.setPassword("12345");
+<<<<<<< HEAD
     this.user.addRole(roleRefFactory.create(fooRole.getId()));
 
+=======
+    this.user.addRole(roleRefFactory.create(fooRole.getId()));   
+>>>>>>> Continue unit test Interceptor
     this.userService.create(this.user);
+    
+    
+    
+    
   }
 
   @AfterMethod
@@ -183,6 +191,7 @@ public class InterceptorTestCase {
 
   @Test
   public void testBar() throws Exception {
+<<<<<<< HEAD
     try {
       this.service.bar();
       Assert.fail();
@@ -203,11 +212,19 @@ public class InterceptorTestCase {
       Assert.fail();
     }
 
+=======
+    login();    
+>>>>>>> Continue unit test Interceptor
     Role barRole = roleFactory.create("barRole");
-    barRole.setSpace(spaceRefFactory.create(this.space.getId()));
+    barRole.setSpace(spaceRefFactory.create(space.getId()));
     barRole.addPermission(permFactory.create("barFeature:barAction@*:*"));
+<<<<<<< HEAD
     roleService.create(barRole);
     //    
+=======
+    this.roleService.create(barRole);
+//    
+>>>>>>> Continue unit test Interceptor
     this.user.addRole(roleRefFactory.create(barRole.getId()));
     this.userService.update(this.user);
     this.context.setUser(this.user);
@@ -405,6 +422,7 @@ public class InterceptorTestCase {
 
   @Test
   public void testIncorrectBar() throws Exception {
+<<<<<<< HEAD
     try {
       this.service.bar();
       Assert.fail();
@@ -423,6 +441,9 @@ public class InterceptorTestCase {
     } catch (UnAuthenticatedException e) {
       Assert.fail();
     }
+=======
+    login();
+>>>>>>> Continue unit test Interceptor
     try {
       this.service.incorrectBar();
     } catch (UnAuthorizationException e) {
@@ -449,7 +470,30 @@ public class InterceptorTestCase {
     } catch (UnAuthorizationException e) {
     }
   }
+<<<<<<< HEAD
 
+=======
+  
+  @Test
+  public void testIncorrectFeature() {
+    login();
+    try {
+      this.service.incorrectFeature();
+    } catch (UnAuthorizationException e) {
+    }
+  }
+  
+  @Test
+  public void testIncorrectSpace() {
+    login();
+    try {
+      this.service.incorrectSpace();
+    } catch (UnAuthorizationException e) {
+    }
+  }
+  
+  //function for authenticated
+>>>>>>> Continue unit test Interceptor
   public void login() {
     try {
       this.service.bar();

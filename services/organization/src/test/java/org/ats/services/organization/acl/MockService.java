@@ -76,7 +76,21 @@ public class MockService {
   
   @Authorized(tenant = "fsoft", feature = "foo2Feature", action = "foo2Action")
   public void incorrectPermiss() {
+  }
+  
+  @Authorized(tenant = "fsoft", feature = "barFeature")
+  public void incorrectFeature(){
     
+  }
+  
+  @Authorized(tenant = "fsoft", feature = "fooFeature", action = "fooAction", space = "2015abc")
+  public void incorrectSpace() {
+   
+  }
+  
+  @Authorized(tenant = "fsoft", feature = "bar3Feature", action = "bar3Action")
+  public String multiSpace() {
+    return "success";
   }
 }
 
