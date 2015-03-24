@@ -21,7 +21,7 @@ public class UserReference extends Reference<User> {
   private UserService service;
 
   @Inject
-  UserReference(UserService service, @Assisted String id) {
+  UserReference(UserService service, @Assisted("id") String id) {
     super(id);
     this.service = service;
   }

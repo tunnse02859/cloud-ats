@@ -14,16 +14,17 @@ import org.ats.services.organization.acl.UserACLInterceptor;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
-import org.ats.services.organization.entity.fatory.UserReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
+import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -49,11 +50,11 @@ public class OrganizationServiceModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(PermissionFactory.class));
 
     //Bind entity reference factory
-    install(new FactoryModuleBuilder().build(UserReferenceFactory.class));
-    install(new FactoryModuleBuilder().build(TenantReferenceFactory.class));
-    install(new FactoryModuleBuilder().build(SpaceReferenceFactory.class));
-    install(new FactoryModuleBuilder().build(RoleReferenceFactory.class));
-    install(new FactoryModuleBuilder().build(FeatureReferenceFactory.class));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<UserReference>>(){}));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
 
     //Bind services 
     bind(UserService.class);

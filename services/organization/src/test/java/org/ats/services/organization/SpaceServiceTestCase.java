@@ -4,12 +4,16 @@
 package org.ats.services.organization;
 
 import org.ats.services.organization.entity.Space;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -25,10 +29,10 @@ public class SpaceServiceTestCase extends AbstractTestCase {
   private SpaceFactory spaceFactory;
   
   /** .*/
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   /** .*/
-  private RoleReferenceFactory roleRefFactory;
+  private ReferenceFactory<RoleReference> roleRefFactory;
   
   @Override
   @BeforeMethod
@@ -36,8 +40,8 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     super.init();
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
-    this.tenantRefFactory = this.injector.getInstance(TenantReferenceFactory.class);
-    this.roleRefFactory = this.injector.getInstance(RoleReferenceFactory.class);
+    this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    this.roleRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
   }
   
   @Test

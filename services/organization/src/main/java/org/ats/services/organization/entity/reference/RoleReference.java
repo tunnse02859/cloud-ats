@@ -21,7 +21,7 @@ public class RoleReference extends Reference<Role> {
   private RoleService service;
   
   @Inject
-  RoleReference(RoleService service, @Assisted String id) {
+  RoleReference(RoleService service, @Assisted("id") String id) {
     super(id);
     this.service = service;
   }

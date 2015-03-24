@@ -20,15 +20,16 @@ import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -49,17 +50,17 @@ public class InterceptorTestCase {
   /** .*/
   private FeatureService featureService;
   private FeatureFactory featureFactory;
-  private FeatureReferenceFactory featureRefFactory;
+  private ReferenceFactory<FeatureReference> featureRefFactory;
   
   /** .*/
   private TenantService tenantService;
   private TenantFactory tenantFactory;
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   /** .*/
   private SpaceService spaceService;
   private SpaceFactory spaceFactory;
-  private SpaceReferenceFactory spaceRefFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
   
   /** .*/
   private UserService userService;
@@ -68,7 +69,7 @@ public class InterceptorTestCase {
   /** .*/
   private RoleService roleService;
   private RoleFactory roleFactory;
-  private RoleReferenceFactory roleRefFactory;
+  private ReferenceFactory<RoleReference> roleRefFactory;
   private PermissionFactory permFactory;
   
   /** .*/
@@ -107,19 +108,19 @@ public class InterceptorTestCase {
     
     this.featureService = this.injector.getInstance(FeatureService.class);
     this.featureFactory = this.injector.getInstance(FeatureFactory.class);
-    this.featureRefFactory = this.injector.getInstance(FeatureReferenceFactory.class);
+    this.featureRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     
     this.tenantService = this.injector.getInstance(TenantService.class);
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
-    this.tenantRefFactory = this.injector.getInstance(TenantReferenceFactory.class);
+    this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
-    this.spaceRefFactory = this.injector.getInstance(SpaceReferenceFactory.class);
+    this.spaceRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
     
     this.roleService = this.injector.getInstance(RoleService.class);
     this.roleFactory = this.injector.getInstance(RoleFactory.class);
-    this.roleRefFactory = this.injector.getInstance(RoleReferenceFactory.class);
+    this.roleRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
     this.permFactory = this.injector.getInstance(PermissionFactory.class);
     
     this.userService = this.injector.getInstance(UserService.class);

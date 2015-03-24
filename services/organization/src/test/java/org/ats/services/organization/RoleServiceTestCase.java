@@ -8,11 +8,15 @@ import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Role.Permission;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -27,7 +31,7 @@ public class RoleServiceTestCase extends AbstractTestCase {
   
   private PermissionFactory permFactory;
   
-  private SpaceReferenceFactory spaceFactory;
+  private ReferenceFactory<SpaceReference> spaceFactory;
 
   @Override
   @BeforeMethod
@@ -36,7 +40,7 @@ public class RoleServiceTestCase extends AbstractTestCase {
     this.service = injector.getInstance(RoleService.class);
     this.factory = injector.getInstance(RoleFactory.class);
     this.permFactory = injector.getInstance(PermissionFactory.class);
-    this.spaceFactory = injector.getInstance(SpaceReferenceFactory.class);
+    this.spaceFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
   }
   
   @Test

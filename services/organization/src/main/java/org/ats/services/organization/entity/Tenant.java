@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.FeatureReference;
 
 import com.google.inject.Inject;
@@ -25,10 +25,10 @@ import com.mongodb.BasicDBObject;
 public class Tenant extends BasicDBObject {
 
   /** .*/
-  private FeatureReferenceFactory featureFactory;
+  private ReferenceFactory<FeatureReference> featureFactory;
   
   @Inject
-  Tenant(FeatureReferenceFactory featureFactory, @Assisted String name) {
+  Tenant(ReferenceFactory<FeatureReference> featureFactory, @Assisted String name) {
     this.put("_id", name);
     this.put("created_date", new Date());
     this.featureFactory = featureFactory;

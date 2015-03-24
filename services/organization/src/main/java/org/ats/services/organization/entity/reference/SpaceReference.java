@@ -21,7 +21,7 @@ public class SpaceReference extends Reference<Space> {
   private SpaceService service;
 
   @Inject
-  SpaceReference(SpaceService service, @Assisted String id) {
+  SpaceReference(SpaceService service, @Assisted("id") String id) {
     super(id);
     this.service = service;
   }

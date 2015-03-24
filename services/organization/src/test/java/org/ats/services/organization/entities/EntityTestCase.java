@@ -14,20 +14,22 @@ import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -42,19 +44,19 @@ public class EntityTestCase extends AbstractTestCase {
 
   /** .*/
   private TenantFactory tenantFactory;
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
 
   /** .*/
   private SpaceFactory spaceFactory;
-  private SpaceReferenceFactory spaceRefFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
 
   /** .*/
   private RoleFactory roleFactory;
-  private RoleReferenceFactory roleRefFactory;
+  private ReferenceFactory<RoleReference> roleRefFactory;
 
   /** .*/
   private FeatureFactory featureFactory;
-  private FeatureReferenceFactory featureRefFactory;
+  private ReferenceFactory<FeatureReference> featureRefFactory;
   
   /** .*/
   private PermissionFactory permFactory;
@@ -70,19 +72,19 @@ public class EntityTestCase extends AbstractTestCase {
 
     //
     this.tenantFactory = injector.getInstance(TenantFactory.class);
-    this.tenantRefFactory = injector.getInstance(TenantReferenceFactory.class);
+    this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
 
     //
     this.spaceFactory = injector.getInstance(SpaceFactory.class);
-    this.spaceRefFactory = injector.getInstance(SpaceReferenceFactory.class);
+    this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
 
     //
     this.roleFactory = injector.getInstance(RoleFactory.class);
-    this.roleRefFactory = injector.getInstance(RoleReferenceFactory.class);
+    this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
 
     //
     this.featureFactory = injector.getInstance(FeatureFactory.class);
-    this.featureRefFactory = injector.getInstance(FeatureReferenceFactory.class);
+    this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     
     //
     this.permFactory = injector.getInstance(PermissionFactory.class);

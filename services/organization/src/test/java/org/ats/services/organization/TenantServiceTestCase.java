@@ -5,13 +5,16 @@ package org.ats.services.organization;
 
 
 import org.ats.services.organization.entity.Tenant;
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -27,10 +30,10 @@ public class TenantServiceTestCase extends AbstractTestCase {
   private TenantFactory factory;
   
   /** .*/
-  private FeatureReferenceFactory featureRefFactory;
+  private ReferenceFactory<FeatureReference> featureRefFactory;
   
   /** .*/
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   @Override
   @BeforeMethod
@@ -38,8 +41,8 @@ public class TenantServiceTestCase extends AbstractTestCase {
     super.init();
     this.service = this.injector.getInstance(TenantService.class);
     this.factory = this.injector.getInstance(TenantFactory.class);
-    this.featureRefFactory = this.injector.getInstance(FeatureReferenceFactory.class);
-    this.tenantRefFactory = this.injector.getInstance(TenantReferenceFactory.class);
+    this.featureRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
+    this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
   }
   
   @Test

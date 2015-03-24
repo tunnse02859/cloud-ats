@@ -8,11 +8,12 @@ import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,13 +32,13 @@ public class OrganizationContextTestCase extends AbstractTestCase {
   
   private TenantFactory tenantFactory;
   
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   private SpaceService spaceService;
   
   private SpaceFactory spaceFactory;
   
-  private SpaceReferenceFactory spaceRefFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
   
   private UserService userService;
   
@@ -59,11 +60,11 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     super.init();
     this.tenantService = this.injector.getInstance(TenantService.class);
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
-    this.tenantRefFactory = this.injector.getInstance(TenantReferenceFactory.class);
+    this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
-    this.spaceRefFactory = this.injector.getInstance(SpaceReferenceFactory.class);
+    this.spaceRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
     
     this.userService = this.injector.getInstance(UserService.class);
     this.userFactory = this .injector.getInstance(UserFactory.class);

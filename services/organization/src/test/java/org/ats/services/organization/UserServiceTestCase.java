@@ -8,17 +8,18 @@ import java.util.List;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
-import org.ats.services.organization.entity.fatory.UserReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -34,16 +35,16 @@ public class UserServiceTestCase extends AbstractTestCase {
   private UserFactory userFactory;
   
   /** .*/
-  private UserReferenceFactory userRefFactory;
+  private ReferenceFactory<UserReference> userRefFactory;
   
   /** .*/
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   /** .*/
-  private SpaceReferenceFactory spaceRefFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
   
   /** .*/
-  private RoleReferenceFactory roleRefFactory;
+  private ReferenceFactory<RoleReference> roleRefFactory;
   
   @Override
   @BeforeMethod
@@ -53,16 +54,11 @@ public class UserServiceTestCase extends AbstractTestCase {
   //
   this.userService = injector.getInstance(UserService.class);
   this.userFactory = injector.getInstance(UserFactory.class);
-  this.userRefFactory = injector.getInstance(UserReferenceFactory.class);
-  
-  //
-  this.tenantRefFactory = injector.getInstance(TenantReferenceFactory.class);
-  
-  //
-  this.spaceRefFactory = injector.getInstance(SpaceReferenceFactory.class);
-  
-  //
-  this.roleRefFactory = injector.getInstance(RoleReferenceFactory.class);
+
+  this.userRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<UserReference>>(){}));
+  this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+  this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
+  this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
   }
   
   @Test

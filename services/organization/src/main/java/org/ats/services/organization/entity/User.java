@@ -8,9 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -29,16 +27,16 @@ import com.mongodb.BasicDBObject;
 public class User extends BasicDBObject {
   
   /** .*/
-  private RoleReferenceFactory roleFactory;
+  private ReferenceFactory<RoleReference> roleFactory;
   
   /** .*/
-  private SpaceReferenceFactory spaceFactory;
+  private ReferenceFactory<SpaceReference> spaceFactory;
   
   /** .*/
-  private TenantReferenceFactory tenantFactory;
+  private ReferenceFactory<TenantReference> tenantFactory;
   
   @Inject
-  User(RoleReferenceFactory roleFactory, SpaceReferenceFactory spaceFactory, TenantReferenceFactory tenantFactory,
+  User(ReferenceFactory<RoleReference> roleFactory, ReferenceFactory<SpaceReference> spaceFactory, ReferenceFactory<TenantReference> tenantFactory,
       @Assisted("email") String email, @Assisted("firstName") String firstName,  @Assisted("lastName") String lastName) {
     this.put("_id", email);
     this.put("first_name", firstName);

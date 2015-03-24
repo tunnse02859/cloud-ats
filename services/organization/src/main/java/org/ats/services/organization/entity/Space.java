@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.ats.services.data.common.Reference;
-import org.ats.services.organization.entity.fatory.RoleReferenceFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
@@ -35,13 +34,13 @@ public class Space extends BasicDBObject {
   };
   
   /** .*/
-  private TenantReferenceFactory tenantFactory;
+  private ReferenceFactory<TenantReference> tenantFactory;
   
   /** .*/
-  private RoleReferenceFactory roleFactory;
+  private ReferenceFactory<RoleReference> roleFactory;
   
   @Inject
-  Space(TenantReferenceFactory tenantFactory, RoleReferenceFactory roleFactory, @Assisted String name) {
+  Space(ReferenceFactory<TenantReference> tenantFactory, ReferenceFactory<RoleReference> roleFactory, @Assisted String name) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("created_date", new Date());

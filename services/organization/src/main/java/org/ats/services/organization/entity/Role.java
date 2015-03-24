@@ -11,10 +11,9 @@ import java.util.UUID;
 
 import org.ats.services.data.common.Reference;
 import org.ats.services.organization.entity.Feature.Action;
-import org.ats.services.organization.entity.fatory.FeatureReferenceFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
@@ -32,13 +31,13 @@ import com.mongodb.BasicDBObject;
 public class Role  extends BasicDBObject {
   
   /** .*/
-  private SpaceReferenceFactory spaceFactory;
+  private ReferenceFactory<SpaceReference> spaceFactory;
   
   /** .*/
   private PermissionFactory permFactory;
 
   @Inject
-  Role(SpaceReferenceFactory spaceFactory, PermissionFactory permFactory, @Assisted String name) {
+  Role(ReferenceFactory<SpaceReference> spaceFactory, PermissionFactory permFactory, @Assisted String name) {
     this.put("_id", UUID.randomUUID().toString());
     this.setName(name);
     this.put("created_date", new Date());
@@ -130,16 +129,16 @@ public class Role  extends BasicDBObject {
   public static class Permission extends BasicDBObject {
     
     /** .*/
-    private TenantReferenceFactory tenantFactory;
+    private ReferenceFactory<TenantReference> tenantFactory;
     
     /** .*/
-    private SpaceReferenceFactory spaceFactory;
+    private ReferenceFactory<SpaceReference> spaceFactory;
     
     /** .*/
-    private FeatureReferenceFactory featureFactory;
+    private ReferenceFactory<FeatureReference> featureFactory;
     
     @Inject
-    Permission(TenantReferenceFactory tenantFactory, SpaceReferenceFactory spaceFactory, FeatureReferenceFactory featureFactory, @Assisted String rule) {
+    Permission(ReferenceFactory<TenantReference> tenantFactory, ReferenceFactory<SpaceReference> spaceFactory, ReferenceFactory<FeatureReference> featureFactory, @Assisted String rule) {
       this.put("rule", rule);
       this.tenantFactory = tenantFactory;
       this.spaceFactory = spaceFactory;
