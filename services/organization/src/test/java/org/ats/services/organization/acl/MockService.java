@@ -26,8 +26,50 @@ public class MockService {
     return "public";
   }
   
-  @Authorized(tenant = "viettel", feature = "barFeature", action = "barAction")
+  @Authorized(tenant = "viettel", feature = "featureViettel", action = "barAction")
   public String viettel() {
     return "viettel";
   }
+  
+  @Authorized(tenant = "viettel", feature = "featureViettel1", action = "barAction")
+  public String viettel1() {
+    return "viettel1";
+  }
+  
+  @Authorized(tenant = "viettel", feature = "featureViettel", action = "fooAction")
+  public String viettel2() {
+    return "viettel2";
+  }
+  
+  @Authorized(tenant = "viettel", feature = "featureViettel", action = "actionViettel")
+  public String viettel3() {
+    return "viettel3";
+  }
+  
+  @Authorized(feature = "featureViettel", action = "actionViettel")
+  public String viettelDefaultTenant() {
+    return "viettelDefault";
+  }
+  
+  @Authorized(tenant = "viettel", feature = "featureViettel")
+  public String viettelDefaultAction() {
+    return "DefaultAction";
+  }
+  
+  @Authorized(tenant = "viettel", action = "actionViettel")
+  public String viettelDefaultFeature() {
+    return "DefaultFeature";
+  }
+  
+  @Authorized(tenant = "viettel", feature = "featureViettel", action = "barAction")
+  public String defaultspace() {
+    return "space";
+  }
+  
 }
+
+
+
+
+
+

@@ -251,7 +251,7 @@ public class InterceptorTestCase {
   public void testTenant() {
     
     System.out.println("Test Tenant ");
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "barFeature:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
    
     try {
       
@@ -283,7 +283,7 @@ public class InterceptorTestCase {
   public void testFeature() {
     
     System.out.println("Test Feature ");
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "fooFeature:barAction@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     
     try {
       
@@ -298,7 +298,7 @@ public class InterceptorTestCase {
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
     
     try {
-      this.service.viettel();
+      this.service.viettel1();
       Assert.fail();
     } catch (UnAuthorizationException e) {
       
@@ -310,14 +310,86 @@ public class InterceptorTestCase {
   }
   
   @Test
+  public void testDefaultTenant() {
+    
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    
+    Assert.assertEquals("viettelDefault", this.service.viettelDefaultTenant());
+    
+    this.user.setTenant(tenantRefFactory.create("mobi"));
+    this.userService.update(this.user);
+    
+    Assert.assertEquals("viettelDefault", this.service.viettelDefaultTenant());
+    
+  }
+  
+  @Test
+  public void testDefaultAction() {
+    
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    
+    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
+    
+    Assert.assertEquals("DefaultAction", this.service.viettelDefaultAction());
+    User user = this.userService.get("tuanhq_vt@viettel");
+
+    user.setTenant(tenantRefFactory.create("mobi"));
+    this.userService.update(user);
+    try {
+      this.service.viettelDefaultAction();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
+   
+  }
+  
+  @Test
+  public void testDefaultFeature() {
+    
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    
+    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
+    Assert.assertEquals("DefaultFeature", this.service.viettelDefaultFeature());
+    
+    Tenant  tenant = this.tenantService.get("viettel");
+    
+    tenant.addFeature(featureRefFactory.create("featureMobi"));
+    tenant.removeFeature(featureRefFactory.create("featureViettel"));
+    this.tenantService.update(tenant);
+    
+    Assert.assertEquals("DefaultFeature", this.service.viettelDefaultFeature());
+    
+  }
+  
+  @Test
+  public void testSpace() {
+    
+    createUser("viettel", "dev", "featureViettel", "barAction", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
+    
+    Assert.assertEquals("space", this.service.defaultspace());
+    User user = userService.get("tuanhq_vt@viettel");
+    user.leaveSpace(spaceRefFactory.create("dev"));
+    user.joinSpace(spaceRefFactory.create("test"));
+    
+    userService.update(user);
+    System.out.println(user.getSpaces().size());
+    Assert.assertEquals("space", this.service.defaultspace());
+  }
+  
+  @Test
   public void testAction() {
     
     System.out.println("Test Action");
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "fooFeature:fooAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
     
     try {
       
-      this.service.viettel();
+      this.service.viettel3();
       Assert.fail();
     } catch (UnAuthorizationException e) {
       Assert.fail();
@@ -327,20 +399,13 @@ public class InterceptorTestCase {
     
     this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
     
-   /* try {
-      this.service.viettel();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      
-    } catch (UnAuthenticatedException e) {
-      Assert.fail();
-    }
-   */
+    Assert.assertEquals("DefaultAction", this.service.viettelDefaultAction());
   }
+  
   public void createUser(String tenantId, String spaceId, String featureName, String actionName, String roleName, String perm, String userName,String firstName, String lastName, String pass) {
     
     Feature foo = featureFactory.create(featureName);
-    foo.addAction(new Action(actionName));
+    foo.addAction(new Action(actionName),new Action("fooAction"), new Action("barAction"));
     this.featureService.create(foo);
     
     Tenant tenant = tenantFactory.create(tenantId);
