@@ -25,4 +25,9 @@ public class MockService {
   public String publicMethod() {
     return "public";
   }
+  
+  @Authorized(tenant = "viettel", feature = "barFeature", action = "barAction")
+  public String viettel() {
+    return "viettel";
+  }
 }

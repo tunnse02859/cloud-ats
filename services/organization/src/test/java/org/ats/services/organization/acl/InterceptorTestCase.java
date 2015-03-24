@@ -214,4 +214,156 @@ public class InterceptorTestCase {
     
     Assert.assertEquals("bar", this.service.bar());
   }
+  
+  /**
+   * testPublic to test with user has no roles
+   */
+  
+  @Test
+  public void testPublic () {
+    
+    try {
+      this.service.publicMethod();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      Assert.fail();
+    } catch (UnAuthenticatedException e) {
+      
+    }
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(space.getId()));
+    
+    Assert.assertEquals("public", this.service.publicMethod());
+    
+    Tenant tenant = tenantFactory.create("cloudTeam");
+    
+    this.user.setTenant(tenantRefFactory.create(tenant.getId()));
+    
+    userService.update(this.user);
+    
+    Assert.assertEquals("public", this.service.publicMethod());
+    
+    
+  }
+  
+  @Test
+  public void testTenant() {
+    
+    System.out.println("Test Tenant ");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "barFeature:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+   
+    try {
+      
+      this.service.bar();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      Assert.fail();
+    } catch (UnAuthenticatedException e) {
+      
+    }
+    
+    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
+    
+    try {
+      this.service.bar();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
+    
+    Assert.assertEquals("viettel", this.service.viettel());
+    Assert.assertEquals("public", this.service.publicMethod());
+  }
+  
+  
+  @Test
+  public void testFeature() {
+    
+    System.out.println("Test Feature ");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "fooFeature:barAction@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    
+    try {
+      
+      this.service.viettel();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      Assert.fail();
+    } catch (UnAuthenticatedException e) {
+      
+    }
+    
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    
+    try {
+      this.service.viettel();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
+    
+    Assert.assertEquals("public", this.service.publicMethod());
+  }
+  
+  @Test
+  public void testAction() {
+    
+    System.out.println("Test Action");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "fooFeature:fooAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    
+    try {
+      
+      this.service.viettel();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      Assert.fail();
+    } catch (UnAuthenticatedException e) {
+      
+    }
+    
+    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
+    
+   /* try {
+      this.service.viettel();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
+   */
+  }
+  public void createUser(String tenantId, String spaceId, String featureName, String actionName, String roleName, String perm, String userName,String firstName, String lastName, String pass) {
+    
+    Feature foo = featureFactory.create(featureName);
+    foo.addAction(new Action(actionName));
+    this.featureService.create(foo);
+    
+    Tenant tenant = tenantFactory.create(tenantId);
+    tenant.addFeature(featureRefFactory.create(foo.getId()));
+    this.tenantService.create(tenant);
+    
+    Space space = spaceFactory.create(spaceId);
+    space.setTenant(tenantRefFactory.create(tenant.getId()));
+    this.spaceService.create(space);
+    
+    Role fooRole = roleFactory.create(roleName);
+    fooRole.setSpace(spaceRefFactory.create(space.getId()));
+    fooRole.addPermission(permFactory.create(perm));
+    this.roleService.create(fooRole);
+    
+    User user = userFactory.create(userName, firstName, lastName);
+    user.setTenant(tenantRefFactory.create(tenant.getId()));
+    user.joinSpace(spaceRefFactory.create(space.getId()));
+    user.setPassword(pass);
+    user.addRole(roleRefFactory.create(fooRole.getId()));
+    
+    this.userService.create(user);
+    
+  }
+  
 }
