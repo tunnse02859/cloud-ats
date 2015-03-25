@@ -31,13 +31,13 @@ public class UserService extends AbstractMongoCRUD<User> {
   private final String COL_NAME = "org-user";
   
   /** .*/
+  @Inject
   private UserFactory factory;
   
   @Inject
-  UserService(MongoDBService mongo, Logger logger, UserFactory userFactory) {
+  UserService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
-    this.factory = userFactory;
     
     //create text index
     this.createTextIndex("_id", "first_name", "last_name");

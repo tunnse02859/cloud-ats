@@ -7,6 +7,7 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.EventModule;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
@@ -98,7 +99,7 @@ public class InterceptorTestCase {
 
   @BeforeMethod
   public void init() throws Exception {
-    Injector injector = Guice.createInjector(new MockModule(), new DatabaseModule(), new OrganizationServiceModule());
+    Injector injector = Guice.createInjector(new MockModule(), new DatabaseModule(), new EventModule(), new OrganizationServiceModule());
     this.injector = injector;
     
     this.mongoService = injector.getInstance(MongoDBService.class);

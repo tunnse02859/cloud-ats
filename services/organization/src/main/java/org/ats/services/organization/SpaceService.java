@@ -30,17 +30,17 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   private final String COL_NAME = "org-space";
   
   /** .*/
+  @Inject
   private SpaceFactory factory;
   
   /** .*/
+  @Inject
   private OrganizationContext context;
   
   @Inject
-  SpaceService(MongoDBService mongo, Logger logger, SpaceFactory factory, OrganizationContext context) {
+  SpaceService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
-    this.factory = factory;
-    this.context = context;
     
     this.createTextIndex("name");
     //

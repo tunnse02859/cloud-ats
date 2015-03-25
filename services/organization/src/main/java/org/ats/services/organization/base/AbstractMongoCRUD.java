@@ -47,7 +47,7 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
     return this.col.count();
   }
   
-  public void create(T obj) {
+  public void create(T... obj) {
     this.col.insert(obj);
   }
   

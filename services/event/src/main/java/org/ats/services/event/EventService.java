@@ -30,7 +30,7 @@ public class EventService {
   private ActorSystem system;
   
   /** .*/
-  private ActorRef sender;
+  private ActorRef listener;
 
   /** .*/
   private Injector injector;
@@ -42,11 +42,11 @@ public class EventService {
   private Map<Class<? extends Actor>, ActorRef> actors;
 
   /** .*/
+  @Inject
   private Logger logger;
 
   @Inject
-  EventService(Logger logger, @Named("ats.cloud.event.actors") Map<Class<? extends Actor>, String> clazzes) {
-    this.logger = logger;
+  EventService(@Named("ats.cloud.event.actors") Map<Class<? extends Actor>, String> clazzes) {
     this.clazzes = clazzes;
     this.actors = new HashMap<Class<? extends Actor>, ActorRef>();
   }
@@ -74,16 +74,21 @@ public class EventService {
               system.actorOf(Props.create(GenericDependencyInjector.class, injector, clazz), name) : actors.get(clazz);
               
       actors.put(clazz, actor);
-      actor.tell(event, sender);
+      actor.tell(event, listener);
+      logger.info("Process event " + event.toString());
     }
   }
   
-  public void setSender(Class<? extends Actor> sender) {
-    this.sender = system.actorOf(Props.create(sender), "sender");
+  public void setListener(Props props) {
+    this.listener = system.actorOf(props, "listener");
   }
   
-  public ActorRef getSender() {
-    return sender;
+  public void setListener(Class<? extends Actor> listener) {
+    this.listener = system.actorOf(Props.create(GenericDependencyInjector.class, injector, listener), "listener");
+  }
+  
+  public ActorRef getListener() {
+    return listener;
   }
 
   public void start() {

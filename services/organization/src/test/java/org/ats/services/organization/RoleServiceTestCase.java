@@ -6,6 +6,7 @@ package org.ats.services.organization;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.services.event.EventService;
 import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
@@ -29,6 +30,8 @@ import com.google.inject.TypeLiteral;
  */
 public class RoleServiceTestCase extends AbstractTestCase {
   
+  private EventService eventService;
+  
   private RoleService service;
   
   private RoleFactory factory;
@@ -47,6 +50,11 @@ public class RoleServiceTestCase extends AbstractTestCase {
     this.permFactory = injector.getInstance(PermissionFactory.class);
     this.spaceFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
     this.roleRef = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
+    
+    //start event service
+    this.eventService = injector.getInstance(EventService.class);
+    this.eventService.setInjector(injector);
+    this.eventService.start();
   }
   
   @Test

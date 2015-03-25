@@ -30,6 +30,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>event</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
 		</dependency>
@@ -39,13 +44,10 @@
 			<artifactId>guice-assistedinject</artifactId>
 		</dependency>
 
-		<!--
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<groupId>com.typesafe.akka</groupId>
+			<artifactId>akka-actor_2.11</artifactId>
 		</dependency>
-		-->
 
 		<dependency>
 			<groupId>org.testng</groupId>

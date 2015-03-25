@@ -53,7 +53,7 @@ public class EventServiceTestCase {
     
     Assert.assertEquals(service.getActors().size(), 1);
 
-    service.setSender(MockSender.class);
+    service.setListener(MockSender.class);
     event.broadcast();
   }
   

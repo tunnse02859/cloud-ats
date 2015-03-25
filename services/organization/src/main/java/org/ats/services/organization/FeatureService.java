@@ -27,13 +27,13 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
   private final String COL_NAME = "org-feature";
   
   /** .*/
+  @Inject
   private FeatureFactory factory;
   
   @Inject
-  FeatureService(MongoDBService mongo, Logger logger, FeatureFactory factory) {
+  FeatureService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
-    this.factory = factory;
     
     this.createTextIndex("_id");
     this.col.createIndex(new BasicDBObject("created_date", 1));

@@ -24,24 +24,20 @@ import com.google.inject.Singleton;
 public class MongoAuthenticationService extends AuthenticationService<User> {
   
   /** .*/
+  @Inject
   private UserService service;
   
   /** .*/
+  @Inject
   private OrganizationContext context;
   
   /** .*/
+  @Inject
   private Logger logger;
   
   /** .*/
   private final Map<String, User> userAuthenticated = new HashMap<String, User>();
   
-  @Inject
-  MongoAuthenticationService(UserService service, OrganizationContext context, Logger logger) {
-    this.service = service;
-    this.context = context;
-    this.logger = logger;
-  }
-
   @Override
   public String logIn(String username, String password) {
     User user = service.get(username);

@@ -40,4 +40,10 @@ public class Event {
   public String getName() {
     return eventName;
   }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("{ ").append(eventName).append(" : ").append(source).append(" }");
+    return sb.toString();
+  }
 }

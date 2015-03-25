@@ -16,7 +16,7 @@ import com.mongodb.DBObject;
  */
 public interface MongoCRUD<T extends DBObject> {
 
-  public void create(T obj);
+  public void create(T... obj);
   
   public void update(T obj);
   

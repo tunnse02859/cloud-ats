@@ -27,13 +27,13 @@ public class TenantService extends AbstractMongoCRUD<Tenant> {
   private final String COL_NAME = "org-tenant";
   
   /** .*/
+  @Inject
   private TenantFactory factory;
   
   @Inject
-  TenantService(MongoDBService mongo, Logger logger, TenantFactory factory) {
+  TenantService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
-    this.factory = factory;
     
     this.createTextIndex("_id");
     this.col.createIndex(new BasicDBObject("created_date", 1));

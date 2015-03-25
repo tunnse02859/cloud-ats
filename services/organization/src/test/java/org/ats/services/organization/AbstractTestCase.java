@@ -6,6 +6,8 @@ package org.ats.services.organization;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,13 +25,22 @@ public class AbstractTestCase {
   /** .*/
   protected MongoDBService mongoService;
   
+  /** .*/
+  protected EventService eventService;
+  
   public void init() throws Exception {
     System.setProperty(DatabaseModule.DB_CONF, "");
-    Injector injector = Guice.createInjector(new DatabaseModule(), new OrganizationServiceModule());
+    System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
+    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule());
     
     this.mongoService = injector.getInstance(MongoDBService.class);
     
     this.injector = injector;
+    
+    //start event service
+    eventService = injector.getInstance(EventService.class);
+    eventService.setInjector(injector);
+    eventService.start();
     
     //cleanup database
     this.mongoService.dropDatabase();
