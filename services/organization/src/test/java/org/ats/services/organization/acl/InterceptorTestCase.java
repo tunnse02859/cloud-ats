@@ -389,6 +389,7 @@ public class InterceptorTestCase {
     login();
     try {
       this.service.incorrectBar();
+      Assert.fail();
     } catch (UnAuthorizationException e) {
     }
   }
@@ -410,6 +411,7 @@ public class InterceptorTestCase {
       this.userService.update(this.user);
       this.context.setUser(this.user);
       this.service.incorrectPermiss();
+      Assert.fail();
     } catch (UnAuthorizationException e) {
     }
   }
@@ -419,6 +421,7 @@ public class InterceptorTestCase {
     login();
     try {
       this.service.incorrectFeature();
+      Assert.fail();
     } catch (UnAuthorizationException e) {
     }
   }
@@ -428,6 +431,7 @@ public class InterceptorTestCase {
     login();
     try {
       this.service.incorrectSpace();
+      Assert.fail();
     } catch (UnAuthorizationException e) {
     }
   }
@@ -439,7 +443,7 @@ public class InterceptorTestCase {
   }
   
   //function for authenticated
-  public void login() {
+  private void login() {
     try {
       this.service.bar();
       Assert.fail();
