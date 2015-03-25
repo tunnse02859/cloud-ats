@@ -156,17 +156,9 @@ public class InterceptorTestCase {
     this.user.setTenant(tenantRefFactory.create(this.tenant.getId()));
     this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
     this.user.setPassword("12345");
-<<<<<<< HEAD
     this.user.addRole(roleRefFactory.create(fooRole.getId()));
-
-=======
     this.user.addRole(roleRefFactory.create(fooRole.getId()));   
->>>>>>> Continue unit test Interceptor
     this.userService.create(this.user);
-    
-    
-    
-    
   }
 
   @AfterMethod
@@ -174,7 +166,7 @@ public class InterceptorTestCase {
     this.authService.logOut();
   }
 
-  //@Test
+  @Test
   public void testFoo() throws Exception {
     try {
       this.service.foo();
@@ -188,55 +180,21 @@ public class InterceptorTestCase {
     this.spaceService.goTo(spaceRefFactory.create(space.getId()));
     Assert.assertEquals(this.service.foo(), "foo");
   }
-<<<<<<< HEAD
 
   @Test
-=======
-  
-  //@Test
->>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testBar() throws Exception {
-<<<<<<< HEAD
-    try {
-      this.service.bar();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      Assert.fail();
-    } catch (UnAuthenticatedException e) {
-    }
-
-    this.authService.logIn("haint@cloud-ats.net", "12345");
-    this.spaceService.goTo(spaceRefFactory.create(space.getId()));
-
-    try {
-      this.service.bar();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      //
-    } catch (UnAuthenticatedException e) {
-      Assert.fail();
-    }
-
-=======
     login();    
->>>>>>> Continue unit test Interceptor
     Role barRole = roleFactory.create("barRole");
     barRole.setSpace(spaceRefFactory.create(space.getId()));
     barRole.addPermission(permFactory.create("barFeature:barAction@*:*"));
-<<<<<<< HEAD
     roleService.create(barRole);
-    //    
-=======
-    this.roleService.create(barRole);
-//    
->>>>>>> Continue unit test Interceptor
+
     this.user.addRole(roleRefFactory.create(barRole.getId()));
     this.userService.update(this.user);
     this.context.setUser(this.user);
 
     Assert.assertEquals(this.service.bar(), "bar");
   }
-<<<<<<< HEAD
 
   /**
    * testPublic to test with user has no roles
@@ -427,45 +385,15 @@ public class InterceptorTestCase {
   }
 
   @Test
-=======
-  
-  //@Test
->>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testIncorrectBar() throws Exception {
-<<<<<<< HEAD
-    try {
-      this.service.bar();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      Assert.fail();
-    } catch (UnAuthenticatedException e) {
-    }
-
-    this.authService.logIn("haint@cloud-ats.net", "12345");
-    this.spaceService.goTo(spaceRefFactory.create(space.getId()));
-    try {
-      this.service.bar();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      //
-    } catch (UnAuthenticatedException e) {
-      Assert.fail();
-    }
-=======
     login();
->>>>>>> Continue unit test Interceptor
     try {
       this.service.incorrectBar();
     } catch (UnAuthorizationException e) {
     }
   }
-<<<<<<< HEAD
 
   @Test
-=======
-  
-  //@Test
->>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testIncorrectPermiss() {
     login();
     try {
@@ -485,11 +413,8 @@ public class InterceptorTestCase {
     } catch (UnAuthorizationException e) {
     }
   }
-<<<<<<< HEAD
-
-=======
   
-  //@Test
+  @Test
   public void testIncorrectFeature() {
     login();
     try {
@@ -498,7 +423,7 @@ public class InterceptorTestCase {
     }
   }
   
-  //@Test
+  @Test
   public void testIncorrectSpace() {
     login();
     try {
@@ -514,7 +439,6 @@ public class InterceptorTestCase {
   }
   
   //function for authenticated
->>>>>>> Continue unit test Interceptor
   public void login() {
     try {
       this.service.bar();
