@@ -63,7 +63,7 @@ public class EventService {
     return actors;
   }
 
-  public void process(Event<?> event) {
+  public void process(Event event) {
     if (system == null) throw new IllegalStateException("The event service is not started");
     for (Map.Entry<Class<? extends Actor>, String> entry : clazzes.entrySet()) {
       Class<? extends Actor> clazz = entry.getKey();

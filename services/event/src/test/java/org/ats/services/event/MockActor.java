@@ -19,7 +19,7 @@ public class MockActor extends UntypedActor {
   @Override
   public void onReceive(Object message) throws Exception {
     if (message instanceof Event) {
-      Event<?> event = (Event<?>) (message);
+      Event event = (Event) (message);
       if (!"deadLetters".equals(getSender().path().name())) {
         getSender().tell(service.foo() + " " + event.getSource(), getSelf());
       }

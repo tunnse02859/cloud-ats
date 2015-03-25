@@ -11,10 +11,10 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Mar 23, 2015
  */
-public class Event<T> {
+public class Event {
 
   /** .*/
-  protected T source;
+  protected Object source;
   
   /** .*/
   private EventService service;
@@ -23,7 +23,7 @@ public class Event<T> {
   private String eventName;
   
   @Inject
-  Event(EventService service, @Assisted("source") T source, @Assisted("eventName") String eventName) {
+  Event(EventService service, @Assisted("source") Object source, @Assisted("eventName") String eventName) {
     this.source = source;
     this.service = service;
     this.eventName = eventName;
@@ -33,7 +33,7 @@ public class Event<T> {
     this.service.process(this);
   }
   
-  public T getSource() {
+  public Object getSource() {
     return source;
   }
   

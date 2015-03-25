@@ -10,7 +10,7 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Mar 23, 2015
  */
-public interface EventFactory<T> {
+public interface EventFactory {
 
-  public Event<T> create(@Assisted("source") T source, @Assisted("eventName") String eventName);
+  public Event create(@Assisted("source") Object source, @Assisted("eventName") String eventName);
 }

@@ -11,8 +11,6 @@ import akka.actor.UntypedActor;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -25,18 +23,18 @@ public class EventServiceTestCase {
   
   private EventService service;
   
-  private EventFactory<String> factory;
+  private EventFactory factory;
   
   @BeforeMethod
   public void init() throws Exception {
     injector = Guice.createInjector(new MockModule(), new EventModule("src/test/resources/event.conf"));
     service = injector.getInstance(EventService.class);
-    factory = injector.getInstance(Key.get(new TypeLiteral<EventFactory<String>>(){}));
+    factory = injector.getInstance(EventFactory.class);
   }
   
   @Test
   public void test() throws Exception {
-    Event<String> event = factory.create("Hello world", "foo");
+    Event event = factory.create("Hello world", "foo");
     try {
       event.broadcast();
       Assert.fail("Could not process event then event service is not started");

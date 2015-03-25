@@ -15,6 +15,7 @@ import akka.actor.Actor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 
 /**
@@ -63,6 +64,7 @@ public class EventModule extends AbstractModule {
       .annotatedWith(Names.named("ats.cloud.event.actors")).toInstance(clazzes);
     
     bind(EventService.class);
+    install(new FactoryModuleBuilder().build(EventFactory.class));
   }
   
 }
