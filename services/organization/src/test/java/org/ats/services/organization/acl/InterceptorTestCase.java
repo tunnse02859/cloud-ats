@@ -244,13 +244,12 @@ public class InterceptorTestCase {
     
     Assert.assertEquals(this.service.publicMethod(), "public");
     
-    
   }
   
   @Test
   public void testTenant() {
     
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@viettel:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
    
     try {
       
@@ -277,11 +276,10 @@ public class InterceptorTestCase {
     Assert.assertEquals(this.service.publicMethod(), "public");
   }
   
-  
   @Test
   public void testFeature() {
     
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@viettel:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     
     try {
       
@@ -310,7 +308,7 @@ public class InterceptorTestCase {
   @Test
   public void testDefaultTenant() {
     
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@*:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@viettel:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
     
     Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
@@ -319,6 +317,33 @@ public class InterceptorTestCase {
     this.userService.update(this.user);
     
     Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
+    
+    this.authService.logOut();
+    //
+    this.userService.delete("trinhtv3@viettel");
+    this.tenantService.delete("viettel");
+    this.featureService.delete("featureViettel");
+    createUser("mobi", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    
+    Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
+    
+    this.authService.logOut();
+    //
+    this.userService.delete("trinhtv3@viettel");
+    this.tenantService.delete("mobi");
+    this.featureService.delete("featureViettel");
+    createUser("mobi", "dev", "featureMobi", "actionViettel", "roleViettel", "featureMobi:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    
+    try {
+      this.service.viettelDefaultTenant();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
     
   }
   
@@ -329,16 +354,14 @@ public class InterceptorTestCase {
     this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
     
     Assert.assertEquals(this.service.viettelDefaultAction(), "DefaultAction");
-    User user = this.userService.get("tuanhq_vt@viettel");
-
-    user.setTenant(tenantRefFactory.create("mobi"));
     
-    this.userService.update(user);
-    user = this.userService.get("tuanhq_vt@viettel");
     this.authService.logOut();
-
-    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
-    this.context.setUser(user);
+    
+    this.userService.delete("tuanhq_vt@viettel");
+    this.tenantService.delete("viettel");
+    this.featureService.delete("featureViettel");
+    createUser("mobi", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
     try {
       this.service.viettelDefaultAction();
       Assert.fail();
@@ -347,13 +370,13 @@ public class InterceptorTestCase {
     } catch (UnAuthenticatedException e) {
       Assert.fail();
     }
-   
+    
   }
   
   @Test
   public void testDefaultFeature() {
     
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
+    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@viettel:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
     
     this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
     Assert.assertEquals(this.service.viettelDefaultFeature(), "DefaultFeature");
@@ -365,6 +388,23 @@ public class InterceptorTestCase {
     
     this.tenantService.update(tenant);
     Assert.assertEquals(this.service.viettelDefaultFeature(), "DefaultFeature");
+    
+    this.authService.logOut();
+    
+    this.userService.delete("tuanhq_vt@viettel");
+    this.tenantService.delete("viettel");
+    this.featureService.delete("featureViettel");
+    createUser("mobi", "dev", "featureViettel", "actionMobi", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    
+    try {
+      this.service.viettelDefaultFeature();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+      
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
     
   }
   
@@ -383,26 +423,7 @@ public class InterceptorTestCase {
     Assert.assertEquals(this.service.defaultspace(), "space");
   }
   
-  @Test
-  public void testAction() {
-    
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:barAction@*:*", "tuanhq_vt@viettel", "Tuan", "Hoang", "tuanhq");
-    
-    try {
-      
-      this.service.viettel3();
-      Assert.fail();
-    } catch (UnAuthorizationException e) {
-      Assert.fail();
-    } catch (UnAuthenticatedException e) {
-      
-    }
-    
-    this.authService.logIn("tuanhq_vt@viettel", "tuanhq");
-    
-    Assert.assertEquals(this.service.viettelDefaultAction(), "DefaultAction");
-  }
-  
+  // create new User
   public void createUser(String tenantId, String spaceId, String featureName, String actionName, String roleName, String perm, String userName,String firstName, String lastName, String pass) {
     
     Feature foo = featureFactory.create(featureName);
