@@ -174,7 +174,7 @@ public class InterceptorTestCase {
     this.authService.logOut();
   }
 
-  @Test
+  //@Test
   public void testFoo() throws Exception {
     try {
       this.service.foo();
@@ -188,8 +188,13 @@ public class InterceptorTestCase {
     this.spaceService.goTo(spaceRefFactory.create(space.getId()));
     Assert.assertEquals(this.service.foo(), "foo");
   }
+<<<<<<< HEAD
 
   @Test
+=======
+  
+  //@Test
+>>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testBar() throws Exception {
 <<<<<<< HEAD
     try {
@@ -231,6 +236,7 @@ public class InterceptorTestCase {
 
     Assert.assertEquals(this.service.bar(), "bar");
   }
+<<<<<<< HEAD
 
   /**
    * testPublic to test with user has no roles
@@ -421,6 +427,10 @@ public class InterceptorTestCase {
   }
 
   @Test
+=======
+  
+  //@Test
+>>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testIncorrectBar() throws Exception {
 <<<<<<< HEAD
     try {
@@ -449,8 +459,13 @@ public class InterceptorTestCase {
     } catch (UnAuthorizationException e) {
     }
   }
+<<<<<<< HEAD
 
   @Test
+=======
+  
+  //@Test
+>>>>>>> Continue Write unit test for Interceptor, add more test case
   public void testIncorrectPermiss() {
     login();
     try {
@@ -474,7 +489,7 @@ public class InterceptorTestCase {
 
 =======
   
-  @Test
+  //@Test
   public void testIncorrectFeature() {
     login();
     try {
@@ -483,13 +498,19 @@ public class InterceptorTestCase {
     }
   }
   
-  @Test
+  //@Test
   public void testIncorrectSpace() {
     login();
     try {
       this.service.incorrectSpace();
     } catch (UnAuthorizationException e) {
     }
+  }
+  
+  @Test
+  public void testPublicMethod() {
+    login();
+    Assert.assertEquals(this.service.publicMethod(), "public");
   }
   
   //function for authenticated
@@ -510,7 +531,6 @@ public class InterceptorTestCase {
       this.service.bar();
       Assert.fail();
     } catch (UnAuthorizationException e) {
-      //
     } catch (UnAuthenticatedException e) {
       Assert.fail();
     }

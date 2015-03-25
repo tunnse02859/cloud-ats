@@ -83,14 +83,9 @@ public class MockService {
     
   }
   
-  @Authorized(tenant = "fsoft", feature = "fooFeature", action = "fooAction", space = "2015abc")
+  @Authorized(tenant = "fsoft", feature = "fooFeature", action = "fooAction", space = "FSU1")
   public void incorrectSpace() {
    
-  }
-  
-  @Authorized(tenant = "fsoft", feature = "bar3Feature", action = "bar3Action")
-  public String multiSpace() {
-    return "success";
   }
 }
 
