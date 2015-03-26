@@ -7,9 +7,12 @@ import java.util.logging.Logger;
 
 import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.Event;
+import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 
@@ -38,6 +41,12 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   private OrganizationContext context;
   
   @Inject
+  private EventFactory eventFactory;
+  
+  @Inject
+  private ReferenceFactory<SpaceReference> refFactory;
+  
+  @Inject
   SpaceService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -47,6 +56,21 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     this.col.createIndex(new BasicDBObject("created_date", 1));
     this.col.createIndex(new BasicDBObject("tenant._id", 1));
     this.col.createIndex(new BasicDBObject("roles._id", 1));
+  }
+  
+  @Override
+  public void delete(Space obj) {
+    super.delete(obj);
+    Event event = eventFactory.create(obj, "delete-space");
+    event.broadcast();
+  }
+  
+  @Override
+  public void delete(String id) {
+    super.delete(id);
+    SpaceReference ref = refFactory.create(id);
+    Event event = eventFactory.create(ref, "delete-space-ref");
+    event.broadcast();
   }
 
   public Space transform(DBObject source) {
