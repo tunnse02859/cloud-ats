@@ -61,7 +61,7 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
   
   public void delete(String id) {
     this.col.remove(new BasicDBObject("_id", id)); 
-   }
+  }
   
   public T get(String id) {
     DBObject source = this.col.findOne(new BasicDBObject("_id", id));

@@ -6,9 +6,13 @@ package org.ats.services.organization;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.Event;
+import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,6 +34,14 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
   @Inject
   private FeatureFactory factory;
   
+  /** .*/
+  @Inject
+  private ReferenceFactory<FeatureReference> refFactory;
+  
+  /** .*/
+  @Inject
+  private EventFactory eventFactory;
+  
   @Inject
   FeatureService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
@@ -45,6 +57,23 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
     feature.put("created_date", source.get("created_date"));
     feature.put("actions", source.get("actions"));
     return feature;
+  }
+  
+  @Override
+  public void delete(Feature obj) {
+    super.delete(obj);
+    Event event = eventFactory.create(obj, "delete-feature");
+    event.broadcast();
+    
+  }
+  
+  @Override
+  public void delete(String id) {
+    super.delete(id);
+    FeatureReference ref = refFactory.create(id);
+    Event event = eventFactory.create(ref, "delete-feature-ref");
+    event.broadcast();
+    
   }
 
 }

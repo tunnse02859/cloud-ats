@@ -6,6 +6,7 @@ package org.ats.services.organization.event;
 import java.util.logging.Logger;
 
 import org.ats.services.organization.AbstractTestCase;
+import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
@@ -14,12 +15,14 @@ import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -55,6 +58,10 @@ public class EventTestCase extends AbstractTestCase {
   
   private UserService userService;
   private UserFactory userFactory;
+
+  private FeatureFactory featureFactory;
+  private ReferenceFactory<FeatureReference> featureRefFactory;
+  private FeatureService featureService;
   
   @Override @BeforeMethod
   public void init() throws Exception {
@@ -75,6 +82,9 @@ public class EventTestCase extends AbstractTestCase {
     this.userService = injector.getInstance(UserService.class);
     this.userFactory = injector.getInstance(UserFactory.class);
     
+    this.featureFactory = injector.getInstance(FeatureFactory.class);
+    this.featureService = injector.getInstance(FeatureService.class);
+    this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     initData();
   }
   
@@ -160,12 +170,63 @@ public class EventTestCase extends AbstractTestCase {
     
   }
 
+  @Test
+  public void testDeleteFeature() throws InterruptedException {
+    
+    Tenant tenant = tenantService.list().next().get(0);
+    Assert.assertEquals(tenant.getFeatures().size(), 3);
+    
+    eventService.setListener(DeleteFeatureListener.class);
+    
+    featureService.delete("functional");
+    
+    Assert.assertEquals(featureService.count(), 2);
+    
+    featureService.delete("performace");
+    
+    Assert.assertEquals(featureService.count(), 1);
+  }
+  
+  static class DeleteFeatureListener extends UntypedActor {
+    
+    @Inject Logger logger;
+    
+    @Inject UserService featureService;
+    
+    @Inject TenantService tenantService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        logger.info("processed delete feature reference " + ref.toJSon());
+        
+        Assert.assertEquals(tenantService.findIn("features", ref).count(), 0);
+      }
+    }
+    
+  }
   private Role admin;
   private Role tester;
   
   private void initData() {
     Tenant tenant = tenantFactory.create("Fsoft");
+    
+    FeatureReference feature1 = featureRefFactory.create("performace");
+    FeatureReference feature2 = featureRefFactory.create("functional");
+    FeatureReference feature3 = featureRefFactory.create("organization");
+    
+    featureService.create(featureFactory.create(feature1.getId()), featureFactory.create(feature2.getId()), featureFactory.create(feature3.getId()));
+    tenant.addFeature(feature1, feature2, feature3);
     tenantService.create(tenant);
+    
+    Tenant tenant1 = tenantFactory.create("Fsoft1");
+    tenant1.addFeature(feature1, feature2, feature3);
+    tenantService.create(tenant1);
+    
+    Tenant tenant2 = tenantFactory.create("Fsoft2");
+    tenant2.addFeature(feature1, feature2, feature3);
+    tenantService.create(tenant2);
     
     Space space = spaceFactory.create("FSU1.BU11");
     space.setTenant(tenantRefFactory.create(tenant.getId()));
@@ -186,6 +247,8 @@ public class EventTestCase extends AbstractTestCase {
     user.setTenant(tenantRefFactory.create(tenant.getId()));
     user.joinSpace(spaceRefFactory.create(space.getId()));
     user.addRole(roleRefFactory.create(admin.getId()), roleRefFactory.create(tester.getId()));
+    
     userService.create(user);
   }
+  
 }

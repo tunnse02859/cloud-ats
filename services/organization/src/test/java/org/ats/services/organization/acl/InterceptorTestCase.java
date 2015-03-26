@@ -8,6 +8,7 @@ import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
@@ -130,6 +131,11 @@ public class InterceptorTestCase {
     this.context = this.injector.getInstance(OrganizationContext.class);
 
     this.authService = this.injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
+    
+    //start event service
+    EventService eventService = injector.getInstance(EventService.class);
+    eventService.setInjector(injector);
+    eventService.start();
 
     Feature foo = featureFactory.create("fooFeature");
     foo.addAction(new Action("fooAction"));
@@ -369,10 +375,10 @@ public class InterceptorTestCase {
 
     this.authService.logOut();
 
-    this.userService.delete("tuanhq_vt@viettel");
-    this.tenantService.delete("viettel");
-    this.featureService.delete("featureViettel");
-    createUser("mobi", "dev", "featureViettel", "actionMobi", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    //this.userService.delete("tuanhq_vt@viettel");
+    //this.tenantService.delete("viettel");
+    //this.featureService.delete("featureViettel");
+    createUser("mobi", "dev", "*", "actionMobi", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
 
     try {
