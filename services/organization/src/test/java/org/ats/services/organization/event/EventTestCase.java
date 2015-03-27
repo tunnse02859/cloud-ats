@@ -215,6 +215,40 @@ public class EventTestCase extends AbstractTestCase {
     
     Assert.assertEquals(userService.count(), 0);
   }
+  
+  @Test
+  public void testDeleteTenant() throws InterruptedException {
+    
+    Assert.assertEquals(tenantService.count(), 3);
+    
+    Assert.assertEquals(userService.count(), 1);
+    
+    eventService.setListener(DeleteTenantListenter.class);
+    tenantService.delete("Fsoft");
+    Assert.assertEquals(tenantService.count(), 2);
+    
+  }
+  
+  static class DeleteTenantListenter extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject private UserService userService;
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof TenantReference) {
+        
+        TenantReference ref = (TenantReference) message;
+        
+        logger.info("processed delete tenant reference "+ ref.toJSon());
+        Assert.assertEquals(userService.findIn("tenant", ref).count(), 0);
+      }
+      
+    }
+    
+  }
+  
   private Role admin;
   private Role tester;
   

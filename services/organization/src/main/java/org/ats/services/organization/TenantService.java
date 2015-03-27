@@ -6,9 +6,13 @@ package org.ats.services.organization;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.Event;
+import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
+import org.ats.services.organization.entity.reference.TenantReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,6 +35,12 @@ public class TenantService extends AbstractMongoCRUD<Tenant> {
   private TenantFactory factory;
   
   @Inject
+  private EventFactory eventFactory;
+  
+  @Inject
+  private ReferenceFactory<TenantReference> tenantRefFactory;
+  
+  @Inject
   TenantService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -46,4 +56,26 @@ public class TenantService extends AbstractMongoCRUD<Tenant> {
     tenant.put("features", source.get("features"));
     return tenant;
   }
+  
+  @Override
+  public void delete(Tenant tenant) {
+    super.delete(tenant);
+    
+    Event event = eventFactory.create(tenant, "delete-tenant");
+    event.broadcast();
+    
+  }
+  
+  @Override
+  public void delete(String id) {
+    super.delete(id);
+    
+    TenantReference ref = tenantRefFactory.create(id);
+    Event event = eventFactory.create(ref, "delete-tenant-ref");
+    event.broadcast();
+    
+  }
 }
+
+
+
