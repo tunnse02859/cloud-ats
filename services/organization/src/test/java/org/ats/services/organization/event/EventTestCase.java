@@ -200,11 +200,20 @@ public class EventTestCase extends AbstractTestCase {
       if (message instanceof FeatureReference) {
         FeatureReference ref = (FeatureReference) message;
         logger.info("processed delete feature reference " + ref.toJSon());
-        
         Assert.assertEquals(tenantService.findIn("features", ref).count(), 0);
       }
     }
     
+  }
+  
+  @Test
+  public void testDeleteUser() throws InterruptedException {
+    User user = userService.list().next().get(0);
+    Assert.assertEquals(userService.count(), 1);
+    
+    userService.delete(user);
+    
+    Assert.assertEquals(userService.count(), 0);
   }
   private Role admin;
   private Role tester;
