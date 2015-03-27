@@ -1,6 +1,5 @@
 package org.ats.services.organization.event;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -11,22 +10,11 @@ import org.ats.common.PageList;
 import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.UserService;
-import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
-
-
-
-
-
-
-
-
-
-
 
 import akka.actor.UntypedActor;
 
@@ -44,8 +32,7 @@ public class DeleteSpaceActor extends UntypedActor{
   @Inject
   private RoleService roleService;
   
-  @Inject
-  private ReferenceFactory<RoleReference> roleRefFactory;
+  private Space space;
   
   @Override
   public void onReceive(Object message) throws Exception {
@@ -54,7 +41,7 @@ public class DeleteSpaceActor extends UntypedActor{
     if(message instanceof Event) {
       Event event = (Event) message;
       if("delete-space".equals(event.getName())) {
-        Space space = (Space) event.getSource();
+        space = (Space) event.getSource();
         SpaceReference ref = spaceRefFactory.create(space.getId());
         process(ref);
       } else if("delete-space-ref".equals(event.getName())) {
@@ -68,8 +55,7 @@ public class DeleteSpaceActor extends UntypedActor{
   }
 
   private void process(SpaceReference reference) {
-    PageList<User> listUser = userService.findIn("spaces", reference);
-    
+    PageList<User> listUser = userService.findUsersInSpace(reference);
     listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listUser.hasNext()) {
       List<User> users = listUser.next();
@@ -79,18 +65,8 @@ public class DeleteSpaceActor extends UntypedActor{
       }
     }
     
-    PageList<Role> listRole = roleService.findIn("roles", reference);
-    listRole.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    
-    List<RoleReference> holder = new ArrayList<RoleReference>();
-    while(listRole.hasNext()) {
-      List<Role> roles = listRole.next();
-      for(Role role:roles) {
-        holder.add(roleRefFactory.create(role.getId()));
-      }
-    }
-    
-    for (RoleReference ref : holder) {
+    List<RoleReference> listRoles = space.getRoles();
+    for(RoleReference ref:listRoles) {
       roleService.delete(ref.getId());
     }
     

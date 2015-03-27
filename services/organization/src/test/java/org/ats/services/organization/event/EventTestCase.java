@@ -95,6 +95,28 @@ public class EventTestCase extends AbstractTestCase {
     Assert.assertEquals(roleService.count(), 0);
   }
   
+  @Test
+  public void testDeleteSpace() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    Space space = null;
+    space = spaceFactory.create("FSU1.Z8");
+    space.setTenant(tenantRefFactory.create(tenant.getId()));
+    spaceService.create(space);
+    
+    space = spaceFactory.create("FHO");
+    space.setTenant(tenantRefFactory.create(tenant.getId()));
+    spaceService.create(space);
+    
+    space = spaceService.list().next().get(0);
+    Assert.assertEquals(space.getRoles().size(), 2);
+    
+    eventService.setListener(DeleteSpaceListener.class);
+    space = spaceService.list().next().get(0);
+    spaceService.delete(space);
+    Assert.assertEquals(spaceService.list().next().size(), 2);
+    
+  }
+  
   static class DeleteRoleListener extends UntypedActor {
     
     @Inject Logger logger;
@@ -112,6 +134,28 @@ public class EventTestCase extends AbstractTestCase {
         Assert.assertEquals(spaceService.findIn("roles", ref).count(), 0);
         Assert.assertEquals(userService.findIn("roles", ref).count(), 0);
       }
+    }
+    
+  }
+  
+  static class DeleteSpaceListener extends UntypedActor {
+    
+    @Inject Logger logger;
+    
+    @Inject RoleService roleService;
+    
+    @Inject UserService userService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      if (message instanceof SpaceReference) {
+        SpaceReference ref = (SpaceReference) message;
+        logger.info("processed delete space reference " + ref.toJSon());
+        
+        Assert.assertEquals(roleService.list().next().size(), 0);
+        Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+      }
+      
     }
     
   }
