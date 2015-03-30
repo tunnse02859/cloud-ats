@@ -5,6 +5,7 @@ package org.ats.services.organization;
 
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.Event;
@@ -15,6 +16,7 @@ import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -106,6 +108,11 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     
     logger.info("The user " + user.getEmail() + " does not belong to space " + space.getName());
     return null;
+  }
+  
+  public PageList<Space> findSpaceInTenant(TenantReference tenant) {
+    BasicDBObject query = new BasicDBObject("tenant", tenant.toJSon());
+    return query(query);
   }
 
 }

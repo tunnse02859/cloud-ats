@@ -6,7 +6,9 @@ import java.util.List;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
+import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -20,6 +22,9 @@ public class DeleteTenantActor extends UntypedActor{
 
   @Inject
   private UserService userService;
+  
+  @Inject
+  private SpaceService spaceService;
   
   @Inject
   private ReferenceFactory<TenantReference> tenantRefFactory;
@@ -63,6 +68,19 @@ public class DeleteTenantActor extends UntypedActor{
     for (User user : holder) {
       
       userService.delete(user);
+    }
+    
+    PageList<Space> listSpace = spaceService.findSpaceInTenant(ref);
+    listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    List<Space> holderSpace = new ArrayList<Space>();
+    while(listSpace.hasNext()) {
+      
+      for (Space space : listSpace.next()) {
+        holderSpace.add(space);
+      }
+    }
+    for (Space space : holderSpace) {
+      spaceService.delete(space);
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {

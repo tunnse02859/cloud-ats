@@ -234,6 +234,7 @@ public class EventTestCase extends AbstractTestCase {
     @Inject Logger logger;
     
     @Inject private UserService userService;
+    @Inject private SpaceService spaceService;
     @Override
     public void onReceive(Object message) throws Exception {
       
@@ -242,7 +243,8 @@ public class EventTestCase extends AbstractTestCase {
         TenantReference ref = (TenantReference) message;
         
         logger.info("processed delete tenant reference "+ ref.toJSon());
-        Assert.assertEquals(userService.findIn("tenant", ref).count(), 0);
+        Assert.assertEquals(userService.findUserInTenant(ref).count(), 0);
+        Assert.assertEquals(spaceService.findSpaceInTenant(ref).count(), 0);
       }
       
     }
@@ -274,6 +276,9 @@ public class EventTestCase extends AbstractTestCase {
     Space space = spaceFactory.create("FSU1.BU11");
     space.setTenant(tenantRefFactory.create(tenant.getId()));
     
+    Space space1 = spaceFactory.create("FSU1.Bu12");
+    space1.setTenant(tenantRefFactory.create(tenant.getId()));
+    
     admin = roleFactory.create("admin");
     admin.setSpace(spaceRefFactory.create(space.getId()));
     admin.addPermission(permFactory.create("*:*@Fsoft:*"));
@@ -283,7 +288,7 @@ public class EventTestCase extends AbstractTestCase {
     tester.addPermission(permFactory.create("test:*@Fsoft:" + space.getId()));
     
     space.addRole(roleRefFactory.create(admin.getId()), roleRefFactory.create(tester.getId()));
-    spaceService.create(space);
+    spaceService.create(space, space1);
     roleService.create(admin, tester);
     
     User user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
