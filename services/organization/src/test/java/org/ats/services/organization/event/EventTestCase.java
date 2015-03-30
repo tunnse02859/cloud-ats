@@ -108,22 +108,30 @@ public class EventTestCase extends AbstractTestCase {
   @Test
   public void testDeleteSpace() throws InterruptedException {
     Tenant tenant = tenantService.get("Fsoft");
+    
+    Assert.assertEquals(spaceService.list().next().size(), 2);
+    
     Space space = null;
     space = spaceFactory.create("FSU1.Z8");
     space.setTenant(tenantRefFactory.create(tenant.getId()));
     spaceService.create(space);
     
+    Assert.assertEquals(spaceService.list().next().size(), 3);
+    
     space = spaceFactory.create("FHO");
     space.setTenant(tenantRefFactory.create(tenant.getId()));
     spaceService.create(space);
     
+    Assert.assertEquals(spaceService.list().next().size(), 4);
+    
     space = spaceService.list().next().get(0);
+    Assert.assertEquals(space.getName(), "FSU1.BU11");
     Assert.assertEquals(space.getRoles().size(), 2);
     
     eventService.setListener(DeleteSpaceListener.class);
-    space = spaceService.list().next().get(0);
     spaceService.delete(space);
-    Assert.assertEquals(spaceService.list().next().size(), 2);
+    
+    Assert.assertEquals(spaceService.list().next().size(), 3);
     
   }
   
