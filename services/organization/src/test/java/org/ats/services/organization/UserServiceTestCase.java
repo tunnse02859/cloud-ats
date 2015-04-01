@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -158,6 +159,17 @@ public class UserServiceTestCase extends AbstractTestCase {
     Assert.assertEquals(user.getEmail(), "haint@cloud-ats.net");
     Assert.assertEquals(user.getFirstName(), "Hai");
     Assert.assertEquals(user.getLastName(), "Nguyen");
+  }
+  
+  @Test
+  public void testDeleteByQuery() {
+    initUser(100);
+    
+    userService.deleteBy(new BasicDBObject("first_name", "user1"));
+    Assert.assertEquals(userService.count(), 99);
+    
+    userService.deleteBy(new BasicDBObject("last_name", "fsoft"));
+    Assert.assertEquals(userService.count(), 0);
   }
   
   private void initUser(int total) {

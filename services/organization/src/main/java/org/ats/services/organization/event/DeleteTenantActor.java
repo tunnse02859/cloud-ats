@@ -1,23 +1,22 @@
 package org.ats.services.organization.event;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
+import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
-import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.TenantReference;
 
 import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 public class DeleteTenantActor extends UntypedActor{
 
@@ -26,6 +25,9 @@ public class DeleteTenantActor extends UntypedActor{
   
   @Inject
   private SpaceService spaceService;
+  
+  @Inject
+  private RoleService roleService;
   
   @Inject
   private ReferenceFactory<TenantReference> tenantRefFactory;
@@ -55,34 +57,23 @@ public class DeleteTenantActor extends UntypedActor{
   }
 
   private void process(TenantReference ref) {
+
+    //Delete all user in tenant
+    userService.deleteBy(new BasicDBObject("tenant", ref.toJSon()));
     
-    PageList<User> listUser = userService.findUserInTenant(ref);
-    listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    
-    List<User> holder = new ArrayList<User>();
-    while(listUser.hasNext()) {
-      for (User user : listUser.next()) {
-        holder.add(user);
-      }
-    }
-    
-    for (User user : holder) {
-      userService.delete(user);
-    }
-    
+    //Delete all role in tenant's spaces
     PageList<Space> listSpace = spaceService.findSpaceInTenant(ref);
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    
-    List<Space> holderSpace = new ArrayList<Space>();
     while(listSpace.hasNext()) {
       for (Space space : listSpace.next()) {
-        holderSpace.add(space);
+        roleService.deleteBy(new BasicDBObject("space", new BasicDBObject("_id", space.getId())));
       }
     }
-    for (Space space : holderSpace) {
-      spaceService.delete(space);
-    }
     
+    //Delete all tenant's space
+    spaceService.deleteBy(new BasicDBObject("tenant", ref.toJSon()));
+    
+    //notify to listener
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref, getSelf());
     }
