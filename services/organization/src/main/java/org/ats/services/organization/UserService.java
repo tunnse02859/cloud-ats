@@ -8,15 +8,11 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.event.Event;
-import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
-import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,12 +33,6 @@ public class UserService extends AbstractMongoCRUD<User> {
   /** .*/
   @Inject
   private UserFactory factory;
-  
-  @Inject
-  private EventFactory eventFactory;
-  
-  @Inject
-  private ReferenceFactory<UserReference> userRefFactory;
   
   @Inject
   UserService(MongoDBService mongo, Logger logger) {
@@ -77,23 +67,4 @@ public class UserService extends AbstractMongoCRUD<User> {
     user.put("roles", source.get("roles"));
     return user;
   }
-  
-  @Override
-  public void delete(User user) {
-    super.delete(user);
-    
-    Event event = eventFactory.create(user, "delete-user");
-    event.broadcast();
-  }
-  
-  @Override
-  public void delete(String id) {
-    super.delete(id);
-    
-    UserReference ref = userRefFactory.create(id);
-    Event event = eventFactory.create(ref, "delete-user-ref");
-    event.broadcast();
-    
-  }
-  
 }

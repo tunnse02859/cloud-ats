@@ -215,16 +215,6 @@ public class EventTestCase extends AbstractTestCase {
   }
   
   @Test
-  public void testDeleteUser() throws InterruptedException {
-    User user = userService.list().next().get(0);
-    Assert.assertEquals(userService.count(), 1);
-    
-    userService.delete(user);
-    
-    Assert.assertEquals(userService.count(), 0);
-  }
-  
-  @Test
   public void testDeleteTenant() throws InterruptedException {
     
     Assert.assertEquals(tenantService.count(), 3);
