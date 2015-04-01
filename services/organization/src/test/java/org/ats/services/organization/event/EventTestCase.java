@@ -170,7 +170,7 @@ public class EventTestCase extends AbstractTestCase {
         SpaceReference ref = (SpaceReference) message;
         logger.info("processed delete space reference " + ref.toJSon());
         
-        Assert.assertEquals(roleService.list().next().size(), 0);
+        Assert.assertEquals(roleService.count(), 0);
         Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
       }
       

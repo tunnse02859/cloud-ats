@@ -2,6 +2,7 @@ package org.ats.services.organization.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -29,52 +30,51 @@ public class DeleteTenantActor extends UntypedActor{
   @Inject
   private ReferenceFactory<TenantReference> tenantRefFactory;
   
+  @Inject 
+  private Logger logger;
+  
   @Override
   public void onReceive(Object message) throws Exception {
 
+    logger.info("Recieved event " + message);
+    
     if (message instanceof Event) {
-      
       Event event = (Event) message;
       if ("delete-tenant".equals(event.getName())) {
-        
         Tenant tenant = (Tenant) event.getSource();
         TenantReference ref = tenantRefFactory.create(tenant.getId());
-        
         process(ref);
       } else if ("delete-tenant-ref".equals(event.getName())) {
-        
         TenantReference ref = (TenantReference) event.getSource();
         process(ref);
-        
-      } else unhandled(message);
-      
+      } else {
+        unhandled(message);
+      }
     }
+    
   }
 
   private void process(TenantReference ref) {
     
     PageList<User> listUser = userService.findUserInTenant(ref);
-    
     listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     
     List<User> holder = new ArrayList<User>();
     while(listUser.hasNext()) {
-      
       for (User user : listUser.next()) {
         holder.add(user);
-        
       }
     }
+    
     for (User user : holder) {
-      
       userService.delete(user);
     }
     
     PageList<Space> listSpace = spaceService.findSpaceInTenant(ref);
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    
     List<Space> holderSpace = new ArrayList<Space>();
     while(listSpace.hasNext()) {
-      
       for (Space space : listSpace.next()) {
         holderSpace.add(space);
       }
