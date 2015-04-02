@@ -42,8 +42,6 @@ public class DeleteSpaceActor extends UntypedActor{
   @Override
   public void onReceive(Object message) throws Exception {
 
-    logger.info("Recieved event " + message);
-    
     if(message instanceof Event) {
       Event event = (Event) message;
       if("delete-space".equals(event.getName())) {
@@ -61,6 +59,9 @@ public class DeleteSpaceActor extends UntypedActor{
   }
 
   private void process(SpaceReference reference) {
+    
+    logger.info("Process event source: " + reference);
+    
     PageList<User> listUser = userService.findUsersInSpace(reference);
     listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listUser.hasNext()) {

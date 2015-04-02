@@ -38,8 +38,6 @@ public class DeleteTenantActor extends UntypedActor{
   @Override
   public void onReceive(Object message) throws Exception {
 
-    logger.info("Recieved event " + message);
-    
     if (message instanceof Event) {
       Event event = (Event) message;
       if ("delete-tenant".equals(event.getName())) {
@@ -57,6 +55,8 @@ public class DeleteTenantActor extends UntypedActor{
   }
 
   private void process(TenantReference ref) {
+    
+    logger.info("Process event source: " + ref);
 
     //Delete all user in tenant
     userService.deleteBy(new BasicDBObject("tenant", ref.toJSon()));

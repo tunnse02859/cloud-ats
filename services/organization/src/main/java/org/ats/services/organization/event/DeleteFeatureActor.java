@@ -31,8 +31,6 @@ public class DeleteFeatureActor extends UntypedActor {
   @Override
   public void onReceive(Object message) throws Exception {
 
-    logger.info("Recieved event " + message);
-
     if (message instanceof Event) {
       Event event = (Event) message;
       if ("delete-feature".equals(event.getName())) {
@@ -49,6 +47,8 @@ public class DeleteFeatureActor extends UntypedActor {
   }
   
   private void process(FeatureReference ref) {
+    
+    logger.info("Process event source: " + ref);
     
     PageList<Tenant> listTenant = tenantService.findIn("features", ref);
     listTenant.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());

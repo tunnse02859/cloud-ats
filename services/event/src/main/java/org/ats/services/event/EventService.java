@@ -75,7 +75,6 @@ public class EventService {
               
       actors.put(clazz, actor);
       actor.tell(event, listener);
-      logger.info("Process event " + event.toString());
     }
   }
   

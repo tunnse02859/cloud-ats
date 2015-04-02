@@ -97,9 +97,10 @@ public class InterceptorTestCase {
 
   /** .*/
   private MockService service;
-
+  
   @BeforeMethod
   public void init() throws Exception {
+    System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     Injector injector = Guice.createInjector(new MockModule(), new DatabaseModule(), new EventModule(), new OrganizationServiceModule());
     this.injector = injector;
 
@@ -163,7 +164,6 @@ public class InterceptorTestCase {
     this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
     this.user.setPassword("12345");
     this.user.addRole(roleRefFactory.create(fooRole.getId()));
-    this.user.addRole(roleRefFactory.create(fooRole.getId()));   
     this.userService.create(this.user);
   }
 
@@ -185,6 +185,22 @@ public class InterceptorTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(space.getId()));
     Assert.assertEquals(this.service.foo(), "foo");
+
+    Assert.assertEquals(this.tenant.getFeatures().size(), 2);
+    this.featureService.delete("fooFeature");
+    
+    Thread.sleep(3000);
+    this.tenant = this.tenantService.get(this.tenant.getId());
+    Assert.assertEquals(this.tenant.getFeatures().size(), 1);
+    this.context.setTenant(tenant);
+    
+    try {
+      this.service.foo();
+      Assert.fail();
+    } catch (UnAuthorizationException e) {
+    } catch (UnAuthenticatedException e) {
+      Assert.fail();
+    }
   }
 
   @Test

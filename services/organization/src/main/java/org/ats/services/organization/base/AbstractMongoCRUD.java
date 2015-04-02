@@ -19,6 +19,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.MapReduceCommand;
+import com.mongodb.MapReduceOutput;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -65,6 +67,10 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
   
   public void delete(String id) {
     this.col.remove(new BasicDBObject("_id", id)); 
+  }
+  
+  public MapReduceOutput mapreduce(MapReduceCommand cmd) {
+    return this.col.mapReduce(cmd);
   }
   
   public T get(String id) {

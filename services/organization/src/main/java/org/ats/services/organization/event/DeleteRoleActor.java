@@ -43,8 +43,6 @@ public class DeleteRoleActor extends UntypedActor {
   @Override
   public void onReceive(Object message) throws Exception {
     
-    logger.info("Recieved event " + message);
-    
     if (message instanceof Event) {
       Event event = (Event) message;
       if ("delete-role".equals(event.getName())) {
@@ -61,6 +59,9 @@ public class DeleteRoleActor extends UntypedActor {
   }
   
   private void process(RoleReference reference) {
+    
+    logger.info("Process event source: " + reference);
+    
     PageList<Space> listSpace = spaceService.findIn("roles", reference);
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listSpace.hasNext()) {

@@ -15,6 +15,8 @@ import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Role.Permission;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 
 import com.google.inject.Inject;
@@ -27,34 +29,38 @@ import com.google.inject.Provider;
  */
 public class UserACLInterceptor implements MethodInterceptor {
   
-  private Provider<OrganizationContext> provider;
+  private Provider<OrganizationContext> context;
+  
+  private Provider<ReferenceFactory<FeatureReference>> featureRefFactory;
   
   @Inject
-  public UserACLInterceptor(Provider<OrganizationContext> provider) {
-    this.provider = provider;
+  public UserACLInterceptor(Provider<OrganizationContext> context, Provider<ReferenceFactory<FeatureReference>> featureRefFactory) {
+    this.context = context;
+    this.featureRefFactory = featureRefFactory;
   }
   
   public Object invoke(MethodInvocation invocation) throws Throwable {
-    OrganizationContext context = provider.get();
-    if (context.getUser() == null) throw new UnAuthenticatedException("You need logging to perform this action");
+    if (context.get().getUser() == null) throw new UnAuthenticatedException("You need logging to perform this action");
 
     Authorized rule = invocation.getMethod().getAnnotation(Authorized.class);
     if (rule == null) return invocation.proceed();;
     
-    UnAuthorizationException e = new UnAuthorizationException("The user " + context.getUser().getEmail() + " does not have permission to perform " + invocation.getMethod());
+    UnAuthorizationException e = new UnAuthorizationException("The user " + context.get().getUser().getEmail() + " does not have permission to perform " + invocation.getMethod());
     
     String tenant = rule.tenant();
-    if (!"*".equals(tenant) && !tenant.equals(context.getTenant().getName())) 
+    if (!"*".equals(tenant) && !tenant.equals(context.get().getTenant().getName())) 
       throw e;
 
     String space = rule.space();
-    if (!"*".equals(space) && !space.equals(context.getSpace().getName()))
+    if (!"*".equals(space) && !space.equals(context.get().getSpace().getName()))
       throw e;
     
     String feature = rule.feature();
-    if ("*".equals(feature)) return invocation.proceed();
+    if ("*".equals(feature)) {
+      return invocation.proceed();
+    }
 
-    User user = context.getUser();
+    User user = context.get().getUser();
     
     boolean hasFeature = false;
     List<Permission> cache = new ArrayList<Permission>();
@@ -65,10 +71,12 @@ public class UserACLInterceptor implements MethodInterceptor {
 
       for (Permission perm : role.getPermissions()) {
         Reference<?> featureRef = perm.getFeature();
-        if (featureRef == Feature.ANY) {
-          return invocation.proceed();
-        } else if (feature.equals(featureRef.getId())) {
-          hasFeature = true;
+        if(context.get().getTenant().getFeatures().contains(featureRefFactory.get().create(feature))) {
+          if (featureRef == Feature.ANY) {
+            return invocation.proceed();
+          } else if (feature.equals(featureRef.getId())) {
+            hasFeature = true;
+          }
         }
       }
       

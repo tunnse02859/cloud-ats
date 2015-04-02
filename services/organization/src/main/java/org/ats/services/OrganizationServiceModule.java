@@ -27,6 +27,7 @@ import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.matcher.Matchers;
@@ -74,7 +75,7 @@ public class OrganizationServiceModule extends AbstractModule {
     bindInterceptor(
         Matchers.annotatedWith(Authenticated.class), 
         Matchers.any(), 
-        new UserACLInterceptor(getProvider(OrganizationContext.class)));
+        new UserACLInterceptor(getProvider(OrganizationContext.class), getProvider(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}))));
   }
 
 }
