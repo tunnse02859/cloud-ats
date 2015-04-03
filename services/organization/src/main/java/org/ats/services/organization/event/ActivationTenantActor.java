@@ -90,6 +90,89 @@ public class ActivationTenantActor extends UntypedActor {
   
   private void activationProcessing(TenantReference ref) {
     
+    PageList<DBObject> listSpace = activationService.findSpaceIntoInActiveTenant(ref);
+    
+    // restore spaces
+    listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    List<DBObject> list = new ArrayList<DBObject>();
+    
+    while(listSpace.hasNext()) {
+      
+      for (DBObject source : listSpace.next()) {
+        
+        Space space = spaceService.transform(source);
+        
+        
+        // restore role
+        SpaceReference refSpace = spaceRefFactory.create(space.getId());
+        PageList<DBObject> listRole = activationService.findRoleIntoInActiveSpace(refSpace);
+        
+        List<DBObject> listRoleObject = new ArrayList<DBObject>();
+        
+        
+        
+        while (listRole.hasNext()) {
+          
+          for (DBObject sourceRole : listRole.next()) {
+            
+            Role role = roleService.transform(sourceRole);
+            
+            listRoleObject.add(role);
+            
+            if (listRoleObject.size() == 1000) {
+              roleService.restoreRole(listRoleObject);
+              listRoleObject.clear();
+            }
+          }
+        }
+        
+        if (listRoleObject.size() > 0) {
+          roleService.restoreRole(listRoleObject);
+        }
+        // continue restore spaces
+        list.add(space);
+        if (list.size() == 1000) {
+          spaceService.restoreSpace(list);
+          list.clear();
+        }
+      }
+    }
+    
+    if (list.size() > 0) {
+      spaceService.restoreSpace(list);
+    }
+    
+    PageList<DBObject> listUser = activationService.findUserIntoInActiveTenant(ref);
+    
+    list = new ArrayList<DBObject>();
+    while (listUser.hasNext()) {
+      
+      for (DBObject source : listUser.next()) {
+        
+        User user = userService.transform(source);
+        
+        list.add(user);
+        
+        if (list.size() == 1000) {
+          userService.restoreUser(list);
+          
+          list.clear();
+        }
+      }
+    }
+    
+    if (list.size() > 0) {
+      userService.restoreUser(list);
+    }
+    
+    // clear actived tenant in inactived collection
+    
+    activationService.deleteTenant(ref.get());
+    
+    if (!"deadLetters".equals(getSender().path().name())) {
+      getSender().tell(ref, getSelf());
+    }
+    
   }
   
   private void inactivationProcessing(TenantReference ref) throws InterruptedException {
@@ -161,7 +244,7 @@ public class ActivationTenantActor extends UntypedActor {
     
     while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0 &&
         spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0) {
-      Thread.sleep(3000);
+     // Thread.sleep(3000);
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {

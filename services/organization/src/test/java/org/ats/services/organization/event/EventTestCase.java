@@ -44,27 +44,27 @@ import com.google.inject.TypeLiteral;
  */
 public class EventTestCase extends AbstractTestCase {
   
-  private TenantService tenantService;
-  private TenantFactory tenantFactory;
-  private ReferenceFactory<TenantReference> tenantRefFactory;
+  protected TenantService tenantService;
+  protected TenantFactory tenantFactory;
+  protected ReferenceFactory<TenantReference> tenantRefFactory;
   
-  private SpaceService spaceService;
-  private SpaceFactory spaceFactory;
-  private ReferenceFactory<SpaceReference> spaceRefFactory;
+  protected SpaceService spaceService;
+  protected SpaceFactory spaceFactory;
+  protected ReferenceFactory<SpaceReference> spaceRefFactory;
   
-  private RoleService roleService;
-  private RoleFactory roleFactory;
-  private ReferenceFactory<RoleReference> roleRefFactory;
-  private PermissionFactory permFactory;
+  protected RoleService roleService;
+  protected RoleFactory roleFactory;
+  protected ReferenceFactory<RoleReference> roleRefFactory;
+  protected PermissionFactory permFactory;
   
-  private UserService userService;
-  private UserFactory userFactory;
+  protected UserService userService;
+  protected UserFactory userFactory;
 
-  private FeatureFactory featureFactory;
-  private ReferenceFactory<FeatureReference> featureRefFactory;
-  private FeatureService featureService;
+  protected FeatureFactory featureFactory;
+  protected ReferenceFactory<FeatureReference> featureRefFactory;
+  protected FeatureService featureService;
   
-  private ActivationService activationService;
+  protected ActivationService activationService;
   
   @Override @BeforeMethod
   public void init() throws Exception {
@@ -253,82 +253,7 @@ public class EventTestCase extends AbstractTestCase {
     
   }
   
-  @Test
-  public void testActivationUser() {
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
-    Assert.assertEquals(userService.count(), 1);
-    
-    activationService.inActiveUser("haint@cloud-ats.net");
-    
-    Assert.assertEquals(userService.count(), 0);
-    Assert.assertEquals(activationService.countInActiveUser(), 1);
-    
-    activationService.activeUser("haint@cloud-ats.net");
-    
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
-    Assert.assertEquals(userService.count(), 1);
-  }
-  
-  @Test
-  public void testActivationTenant() {
-    
-    Tenant tenant = tenantService.get("Fsoft");
-    
-    Assert.assertEquals(activationService.countInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
-    Assert.assertEquals(tenantService.count(), 3);
-    Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
-    Assert.assertEquals(roleService.count(), 2);
-    Assert.assertEquals(userService.count(), 1);
-    eventService.setListener(ActivationTenantListener.class);
-    
-    activationService.inActiveTenant("Fsoft");
-    
-  }
-  
-  static class ActivationTenantListener extends UntypedActor {
-
-    @Inject
-    private ActivationService activationService;
-    
-    @Inject private TenantService tenantService;
-    
-    @Inject private UserService userService;
-    
-    @Inject private RoleService roleService;
-    
-    @Inject private SpaceService spaceService;
-    
-    @Inject private Logger logger;
-    
-    @Override
-    public void onReceive(Object message) throws Exception {
-      
-      if (message instanceof TenantReference) {
-        TenantReference ref = (TenantReference) message;
-        
-        logger.info("processed inactive tenant : "+ ref.toJSon());
-        Assert.assertEquals(activationService.countInActiveTenant(), 1);
-        
-        Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 2);
-        
-        Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 2);
-        
-        Assert.assertEquals(activationService.countInActiveUser(), 1);
-        
-        Assert.assertEquals(tenantService.count(), 2);
-        
-        Assert.assertEquals(userService.count(), 0);
-        
-        Assert.assertEquals(roleService.count(), 0);
-        
-        Assert.assertEquals(spaceService.count(), 0);
-      }
-    }
-    
-  }
+ 
   private Role admin;
   private Role tester;
   

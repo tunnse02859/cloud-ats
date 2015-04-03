@@ -4,6 +4,7 @@
 package org.ats.services.organization;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -66,5 +67,9 @@ public class UserService extends AbstractMongoCRUD<User> {
     user.put("spaces", source.get("spaces"));
     user.put("roles", source.get("roles"));
     return user;
+  }
+  
+  public void restoreUser(List<DBObject> list) {
+    this.col.insert(list);
   }
 }

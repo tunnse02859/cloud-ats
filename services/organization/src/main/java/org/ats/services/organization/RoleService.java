@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
@@ -77,4 +78,7 @@ public class RoleService extends AbstractMongoCRUD<Role> {
     return role;
   }
 
+  public void restoreRole(List<DBObject> list) {
+    this.col.insert(list);
+  }
 }

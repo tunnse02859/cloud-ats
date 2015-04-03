@@ -3,10 +3,14 @@
  */
 package org.ats.services.organization;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.data.common.MongoPageList;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.organization.entity.Feature;
@@ -16,12 +20,14 @@ import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 /**
@@ -58,6 +64,8 @@ public class ActivationService {
   
   @Inject
   private TenantService tenantService;
+  @Inject
+  private SpaceService spaceService;
   
   @Inject
   public ActivationService(MongoDBService mongo, Logger logger) {
@@ -81,7 +89,7 @@ public class ActivationService {
   
   public void inActiveTenant(String id) {
     
-    Tenant tenant = tenantService.transform(tenantService.get(id));
+    Tenant tenant = tenantService.get(id);
     this.tenantCol.insert(tenant);
     
     TenantReference ref = tenantRefFactory.create(id);
@@ -99,6 +107,14 @@ public class ActivationService {
   public void activeTenant(String id) {
     
     DBObject source = this.tenantCol.findOne(new BasicDBObject("_id", id));
+    Tenant tenant = tenantService.transform(source);
+    tenantService.create(tenant);
+
+    TenantReference ref = tenantRefFactory.create(id);
+    
+    Event event = eventFactory.create(ref, "active-ref-tenant");
+    
+    event.broadcast();
   }
   
   public void inActiveSpace(Space obj) {
@@ -124,9 +140,7 @@ public class ActivationService {
  
   public void moveUser(UserReference ref) {
     
-    DBObject source = userService.get(ref.getId());
-    
-    User user = userService.transform(source);
+    User user = userService.get(ref.getId());
     this.userCol.insert(user);
     
   }
@@ -180,10 +194,70 @@ public class ActivationService {
   public void moveSpace(List<DBObject> list) {
     
     this.spaceCol.insert(list);
-    /*for (Space space : list) {
-      
-      this.spaceCol.insert(space);
-    }*/
-    
   }
+  
+  public void deleteTenant(Tenant tenant) {
+    this.tenantCol.remove(tenant);
+  }
+  
+  public PageList<DBObject> findSpaceIntoInActiveTenant(TenantReference ref) {
+    
+    BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
+    
+    return query(query, this.spaceCol);
+  }
+  
+  public PageList<DBObject> findUserIntoInActiveTenant(TenantReference ref) {
+    BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
+    
+    return query(query, this.userCol);
+  }
+  
+  public PageList<DBObject> findRoleIntoInActiveSpace(SpaceReference ref) {
+    
+    BasicDBObject query = new BasicDBObject("space", ref.toJSon());
+    
+    return query(query, this.roleCole);
+  }
+  public PageList<DBObject> query(DBObject query, DBCollection col) {
+    return query(query, 10, col);
+  }
+
+  public PageList<DBObject> query(DBObject query, int pageSize, DBCollection col) {
+    return buildPageList(pageSize, col, query);
+  }
+  
+  @SuppressWarnings("serial")
+  protected PageList<DBObject> buildPageList(int pageSize, DBCollection col, DBObject query) {
+    return new MongoPageList<DBObject>(pageSize, col, query) {
+      @Override
+      protected List<DBObject> get(int from) {
+        DBObject sortable = null;
+        
+        if (this.sortableKeys != null && this.sortableKeys.size() > 0) {
+          sortable = new BasicDBObject();
+          for (Map.Entry<String, Boolean> entry : this.sortableKeys.entrySet()) {
+            sortable.put(entry.getKey(), entry.getValue() ? 1 : -1);
+          }
+        }
+        
+        DBCursor cursor = null;
+        if (sortable != null) {
+          cursor = this.col.find(query).sort(sortable).skip(from).limit(pageSize);
+        } else {
+          cursor = this.col.find(query).skip(from).limit(pageSize);
+        }
+        
+        List<DBObject> list = new ArrayList<DBObject>();
+        while(cursor.hasNext()) {
+          DBObject source = cursor.next();
+          
+            list.add(source);
+          } 
+        
+        return list;
+      }
+    };
+  }
+  
 }

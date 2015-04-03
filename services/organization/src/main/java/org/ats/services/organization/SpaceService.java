@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -115,4 +116,8 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     return query(query);
   }
 
+  public void restoreSpace(List<DBObject> list) {
+    
+    this.col.insert(list);
+  }
 }
