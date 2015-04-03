@@ -269,6 +269,44 @@ public class EventTestCase extends AbstractTestCase {
     Assert.assertEquals(userService.count(), 1);
   }
   
+  @Test
+  public void testActivationTenant() {
+    
+    Tenant tenant = tenantService.get("Fsoft");
+    
+    Assert.assertEquals(activationService.countInActiveTenant(), 0);
+    Assert.assertEquals(tenantService.count(), 3);
+    Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
+    
+    eventService.setListener(ActivationTenantListener.class);
+    
+    activationService.inActiveTenant("Fsoft");
+    
+   // Assert.assertEquals(tenantService.count(), 2);
+    
+   
+  }
+  
+  static class ActivationTenantListener extends UntypedActor {
+
+    @Inject
+    private ActivationService activationService;
+    
+    @Inject private TenantService tenantService;
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof TenantReference) {
+        TenantReference ref = (TenantReference) message;
+        
+        
+        Assert.assertEquals(activationService.countInActiveTenant(), 1);
+        
+        Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 2);
+      }
+    }
+    
+  }
   private Role admin;
   private Role tester;
   

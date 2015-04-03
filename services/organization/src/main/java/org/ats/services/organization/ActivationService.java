@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
@@ -13,7 +14,9 @@ import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.Inject;
@@ -44,7 +47,16 @@ public class ActivationService {
   private ReferenceFactory<UserReference> userRefFactory;
   
   @Inject
+  private ReferenceFactory<TenantReference> tenantRefFactory;
+  
+  @Inject
+  private TenantFactory tenantFactory;
+  
+  @Inject
   private UserService userService;
+  
+  @Inject
+  private TenantService tenantService;
   
   @Inject
   public ActivationService(MongoDBService mongo, Logger logger) {
@@ -67,10 +79,19 @@ public class ActivationService {
   
   public void inActiveTenant(String id) {
     
+    Tenant tenant = tenantService.transform(tenantService.get(id));
+    this.tenantCol.insert(tenant);
+    
+    TenantReference ref = tenantRefFactory.create(id);
+    Event event = eventFactory.create(ref, "inactive-ref-tenant");
+    event.broadcast();
+    
   }
   
   public void inActiveTenant(Tenant obj) {
     
+    Event event = eventFactory.create(obj, "inactive-tenant");
+    event.broadcast();
   }
   
   public void inActiveSpace(Space obj) {
@@ -107,6 +128,14 @@ public class ActivationService {
     return this.userCol.count();
   }
   
+  public long countInActiveTenant() {
+    return this.tenantCol.count();
+    
+  }
+  
+  public long countSpaceIntoInActiveTenant() {
+    return this.spaceCol.count();
+  }
   public void activeUser(User obj) {
     
   }
@@ -126,6 +155,15 @@ public class ActivationService {
   public void restoreUser(String id) {
     
     this.userCol.remove(new BasicDBObject("_id", id));
+    
+  }
+  
+  public void moveSpace(List<Space> list) {
+    
+    for (Space space : list) {
+      
+      this.spaceCol.insert(space);
+    }
     
   }
 }
