@@ -5,7 +5,9 @@ package org.ats.services.organization.event;
 
 import java.util.logging.Logger;
 
+import org.ats.services.event.EventService;
 import org.ats.services.organization.AbstractTestCase;
+import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
@@ -26,6 +28,7 @@ import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
+import org.ats.services.organization.entity.reference.UserReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -63,6 +66,8 @@ public class EventTestCase extends AbstractTestCase {
   private ReferenceFactory<FeatureReference> featureRefFactory;
   private FeatureService featureService;
   
+  private ActivationService activationService;
+  
   @Override @BeforeMethod
   public void init() throws Exception {
     super.init();
@@ -85,6 +90,7 @@ public class EventTestCase extends AbstractTestCase {
     this.featureFactory = injector.getInstance(FeatureFactory.class);
     this.featureService = injector.getInstance(FeatureService.class);
     this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
+    this.activationService = injector.getInstance(ActivationService.class);
     initData();
   }
   
@@ -249,6 +255,38 @@ public class EventTestCase extends AbstractTestCase {
     
   }
   
+  @Test
+  public void testInActiveUser() {
+    Assert.assertEquals(activationService.countInActiveUser(), 0);
+    
+    eventService.setListener(InActiveUserListener.class);
+    activationService.inActiveUser("haint@cloud-ats.net");
+    
+  }
+  
+  static class InActiveUserListener extends UntypedActor {
+
+    @Inject
+    private Logger logger;
+    
+    @Inject
+    private ActivationService activationService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof UserReference) {
+        UserReference ref = (UserReference) message;
+        logger.info("processed move user "+ ref.toJSon());
+        
+        Assert.assertEquals(activationService.countInActiveUser(), 1);
+        
+      }
+      
+    }
+    
+    
+  }
   private Role admin;
   private Role tester;
   

@@ -3,6 +3,7 @@
  */
 package org.ats.services;
 
+import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.MongoAuthenticationService;
 import org.ats.services.organization.RoleService;
@@ -63,7 +64,7 @@ public class OrganizationServiceModule extends AbstractModule {
     bind(SpaceService.class);
     bind(RoleService.class);
     bind(FeatureService.class);
-    
+    bind(ActivationService.class);
     //bind context
     bind(OrganizationContext.class);
     
