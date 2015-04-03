@@ -5,7 +5,6 @@ package org.ats.services.organization.event;
 
 import java.util.logging.Logger;
 
-import org.ats.services.event.EventService;
 import org.ats.services.organization.AbstractTestCase;
 import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
@@ -28,7 +27,6 @@ import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
-import org.ats.services.organization.entity.reference.UserReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -256,37 +254,21 @@ public class EventTestCase extends AbstractTestCase {
   }
   
   @Test
-  public void testInActiveUser() {
+  public void testActivationUser() {
     Assert.assertEquals(activationService.countInActiveUser(), 0);
+    Assert.assertEquals(userService.count(), 1);
     
-    eventService.setListener(InActiveUserListener.class);
     activationService.inActiveUser("haint@cloud-ats.net");
     
+    Assert.assertEquals(userService.count(), 0);
+    Assert.assertEquals(activationService.countInActiveUser(), 1);
+    
+    activationService.activeUser("haint@cloud-ats.net");
+    
+    Assert.assertEquals(activationService.countInActiveUser(), 0);
+    Assert.assertEquals(userService.count(), 1);
   }
   
-  static class InActiveUserListener extends UntypedActor {
-
-    @Inject
-    private Logger logger;
-    
-    @Inject
-    private ActivationService activationService;
-    
-    @Override
-    public void onReceive(Object message) throws Exception {
-      
-      if (message instanceof UserReference) {
-        UserReference ref = (UserReference) message;
-        logger.info("processed move user "+ ref.toJSon());
-        
-        Assert.assertEquals(activationService.countInActiveUser(), 1);
-        
-      }
-      
-    }
-    
-    
-  }
   private Role admin;
   private Role tester;
   

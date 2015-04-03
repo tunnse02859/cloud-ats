@@ -28,11 +28,6 @@ import com.mongodb.DBObject;
  */
 public class ActivationService {
 
-//  private final String COL_INACTIVE_FEATURE = "inactived-feature";
-//  private final String COL_INACTIVE_TENANT = "inactived-tenant";
-//  private final String COL_INACTIVE_SPACE = "inactived-space";
-//  private final String COL_INACTIVE_USER = "inactived-user";
-  
   private DBCollection featureCol;
   private DBCollection tenantCol;
   private DBCollection userCol;
@@ -88,16 +83,15 @@ public class ActivationService {
   
   public void inActiveUser(User obj) {
     
-    Event event = eventFactory.create(obj, "inactive-user");
-    event.broadcast();
   }
   
   public void inActiveUser(String id) {
     logger.info("inactive user has id : " + id);
     
     UserReference ref = userRefFactory.create(id);
-    Event event = eventFactory.create(ref, "inactive-ref-user");
-    event.broadcast();
+    moveUser(ref);
+    
+    userService.delete(id);
   }
  
   public void moveUser(UserReference ref) {
@@ -115,22 +109,23 @@ public class ActivationService {
   
   public void activeUser(User obj) {
     
-    Event event = eventFactory.create(obj, "active-user");
-    event.broadcast();
   }
   
   public void activeUser(String id) {
     
     logger.info("active user has id : "+ id);
     
-    UserReference ref = userRefFactory.create(id);
-    Event event = eventFactory.create(ref, "active-ref-user");
-    event.broadcast();
+    DBObject object = this.userCol.findOne(new BasicDBObject("_id", id));
+    User user = userService.transform(object);
+    userService.create(user);
+    
+    restoreUser(id);
+    
   }
   
-  public void restoreUser(UserReference ref) {
+  public void restoreUser(String id) {
     
-    this.userCol.remove(new BasicDBObject("_id", ref.getId()));
+    this.userCol.remove(new BasicDBObject("_id", id));
     
   }
 }
