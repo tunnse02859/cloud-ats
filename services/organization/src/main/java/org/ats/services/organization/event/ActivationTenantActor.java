@@ -4,18 +4,22 @@
 package org.ats.services.organization.event;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
 import org.ats.services.organization.ActivationService;
+import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
+import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
 import com.google.inject.Inject;
@@ -36,6 +40,16 @@ public class ActivationTenantActor extends UntypedActor {
   
   @Inject
   private SpaceService spaceService;
+  
+  @Inject
+  private UserService userService;
+  
+  @Inject
+  private RoleService roleService;
+  
+  @Inject
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
+  
   @Inject private TenantService tenantService;
   
   @Inject private ActivationService activationService;
@@ -78,16 +92,40 @@ public class ActivationTenantActor extends UntypedActor {
     
   }
   
-  private void inactivationProcessing(TenantReference ref) {
+  private void inactivationProcessing(TenantReference ref) throws InterruptedException {
     
     System.out.println(ref.getId());
     PageList<Space> listSpace = spaceService.findSpaceInTenant(ref);
     
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    List<Space> list = new ArrayList<Space>();
+    List<DBObject> list = new ArrayList<DBObject>();
+    
+    // moving spaces
     while(listSpace.hasNext()) {
       
       for (Space space : listSpace.next()) {
+        
+        // moving role in moved space
+        SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+        System.out.println(space.getId());
+        PageList<Role> listRole = roleService.query(new BasicDBObject("space", spaceRef.toJSon()));
+        
+        List<DBObject> listRoleObject = new ArrayList<DBObject>(1000);
+        
+        while(listRole.hasNext()) {
+          for (Role role : listRole.next()) {
+            
+            listRoleObject.add(role);
+            if (listRoleObject.size() == 1000) {
+              activationService.moveRole(listRoleObject);
+            }
+          }
+        }
+        if (listRoleObject.size() > 0) {
+          activationService.moveRole(listRoleObject);
+        }
+        
+        // continue handle for moving spaces
         list.add(space);
         if (list.size() == 1000) {
           activationService.moveSpace(list);
@@ -100,12 +138,36 @@ public class ActivationTenantActor extends UntypedActor {
       activationService.moveSpace(list);
     }
     
+    // moving user
+    PageList<User> listUser = userService.findUserInTenant(ref);
+    list = new ArrayList<DBObject>(1000);
+    while (listUser.hasNext()) {
+      for (User user : listUser.next()) {
+        
+        list.add(user);
+        if (list.size() == 1000) {
+          activationService.moveUser(list);
+        }
+      }
+    }
+    
+    if (list.size() > 0) {
+      activationService.moveUser(list);
+    }
+
+    // delete tenant
+    tenantService.delete(ref.getId());
+    //
+    
+    while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0 &&
+        spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0) {
+      Thread.sleep(3000);
+    }
+    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref, getSelf());
     }
     
-    tenantService.delete(ref.getId());
-    //
   }
 
 }

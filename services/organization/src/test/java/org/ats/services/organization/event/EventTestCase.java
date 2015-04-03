@@ -275,16 +275,17 @@ public class EventTestCase extends AbstractTestCase {
     Tenant tenant = tenantService.get("Fsoft");
     
     Assert.assertEquals(activationService.countInActiveTenant(), 0);
+    Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 0);
+    Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 0);
+    Assert.assertEquals(activationService.countInActiveUser(), 0);
     Assert.assertEquals(tenantService.count(), 3);
     Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
-    
+    Assert.assertEquals(roleService.count(), 2);
+    Assert.assertEquals(userService.count(), 1);
     eventService.setListener(ActivationTenantListener.class);
     
     activationService.inActiveTenant("Fsoft");
     
-   // Assert.assertEquals(tenantService.count(), 2);
-    
-   
   }
   
   static class ActivationTenantListener extends UntypedActor {
@@ -293,16 +294,37 @@ public class EventTestCase extends AbstractTestCase {
     private ActivationService activationService;
     
     @Inject private TenantService tenantService;
+    
+    @Inject private UserService userService;
+    
+    @Inject private RoleService roleService;
+    
+    @Inject private SpaceService spaceService;
+    
+    @Inject private Logger logger;
+    
     @Override
     public void onReceive(Object message) throws Exception {
       
       if (message instanceof TenantReference) {
         TenantReference ref = (TenantReference) message;
         
-        
+        logger.info("processed inactive tenant : "+ ref.toJSon());
         Assert.assertEquals(activationService.countInActiveTenant(), 1);
         
         Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 2);
+        
+        Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 2);
+        
+        Assert.assertEquals(activationService.countInActiveUser(), 1);
+        
+        Assert.assertEquals(tenantService.count(), 2);
+        
+        Assert.assertEquals(userService.count(), 0);
+        
+        Assert.assertEquals(roleService.count(), 0);
+        
+        Assert.assertEquals(spaceService.count(), 0);
       }
     }
     

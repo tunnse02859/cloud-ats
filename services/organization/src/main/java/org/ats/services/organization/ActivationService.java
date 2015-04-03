@@ -35,6 +35,7 @@ public class ActivationService {
   private DBCollection tenantCol;
   private DBCollection userCol;
   private DBCollection spaceCol;
+  private DBCollection roleCole;
   private Logger logger;
   
   @Inject
@@ -65,6 +66,7 @@ public class ActivationService {
     this.tenantCol = mongo.getDatabase().getCollection("inactived-tenant");
     this.userCol = mongo.getDatabase().getCollection("inactived-user");
     this.spaceCol = mongo.getDatabase().getCollection("inactived-space");
+    this.roleCole = mongo.getDatabase().getCollection("inactived-role");
     
     this.logger = logger;
   }
@@ -92,6 +94,11 @@ public class ActivationService {
     
     Event event = eventFactory.create(obj, "inactive-tenant");
     event.broadcast();
+  }
+  
+  public void activeTenant(String id) {
+    
+    DBObject source = this.tenantCol.findOne(new BasicDBObject("_id", id));
   }
   
   public void inActiveSpace(Space obj) {
@@ -136,6 +143,10 @@ public class ActivationService {
   public long countSpaceIntoInActiveTenant() {
     return this.spaceCol.count();
   }
+  
+  public long countRoleIntoInActiveTenant(){
+    return this.roleCole.count();
+  };
   public void activeUser(User obj) {
     
   }
@@ -158,12 +169,21 @@ public class ActivationService {
     
   }
   
-  public void moveSpace(List<Space> list) {
+  public void moveUser(List<DBObject> list) {
     
-    for (Space space : list) {
+    this.userCol.insert(list);
+  }
+  
+  public void moveRole(List<DBObject> list) {
+    this.roleCole.insert(list);
+  }
+  public void moveSpace(List<DBObject> list) {
+    
+    this.spaceCol.insert(list);
+    /*for (Space space : list) {
       
       this.spaceCol.insert(space);
-    }
+    }*/
     
   }
 }
