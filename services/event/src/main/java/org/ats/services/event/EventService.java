@@ -79,11 +79,11 @@ public class EventService {
   }
   
   public void setListener(Props props) {
-    this.listener = system.actorOf(props, "listener");
+    this.listener = system.actorOf(props);
   }
   
   public void setListener(Class<? extends Actor> listener) {
-    this.listener = system.actorOf(Props.create(GenericDependencyInjector.class, injector, listener), "listener");
+    this.listener = system.actorOf(Props.create(GenericDependencyInjector.class, injector, listener));
   }
   
   public ActorRef getListener() {
