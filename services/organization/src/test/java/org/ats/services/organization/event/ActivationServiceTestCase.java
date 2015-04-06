@@ -6,11 +6,13 @@ package org.ats.services.organization.event;
 import java.util.logging.Logger;
 
 import org.ats.services.organization.ActivationService;
+import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -143,4 +145,65 @@ public class ActivationServiceTestCase extends EventTestCase {
     
   }
   
+  public void testInactiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    
+    eventService.setListener(inactiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    
+  }
+  
+  static class inactiveFeatureListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject 
+    private TenantService tenantService;
+    
+    @Inject
+    private FeatureService featureService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        logger.info("processed inactive feature reference "+ ref.toJSon());
+        
+        Assert.assertEquals(featureService.count(), 2);
+        Assert.assertEquals(tenantService.findIn("features", ref).count(),0);
+      }
+      
+    }
+    
+  }
+  
+  @Test
+  public void testActiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    eventService.setListener(ActiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(1).get());
+    activationService.activeFeature("performace");
+    
+  }
+  
+  static class ActiveFeatureListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject private TenantService tenantService;
+    
+    @Inject private FeatureService featureService;
+    
+    public void onReceive(Object message) throws Exception {
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        if(featureService.get(ref.getId()) != null) {
+          Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+        }
+      }
+      
+    }
+    
+  }
 }

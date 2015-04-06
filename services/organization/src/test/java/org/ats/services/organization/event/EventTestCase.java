@@ -12,6 +12,7 @@ import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
@@ -253,7 +254,8 @@ public class EventTestCase extends AbstractTestCase {
     
   }
   
- 
+  
+  
   private Role admin;
   private Role tester;
   
@@ -263,6 +265,9 @@ public class EventTestCase extends AbstractTestCase {
     FeatureReference feature1 = featureRefFactory.create("performace");
     FeatureReference feature2 = featureRefFactory.create("functional");
     FeatureReference feature3 = featureRefFactory.create("organization");
+    
+    
+    
     
     featureService.create(featureFactory.create(feature1.getId()), featureFactory.create(feature2.getId()), featureFactory.create(feature3.getId()));
     tenant.addFeature(feature1, feature2, feature3);

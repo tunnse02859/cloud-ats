@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.data.common.MongoPageList;
@@ -24,6 +25,7 @@ import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
+import org.ats.services.organization.entity.reference.FeatureReference;
 
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
@@ -38,6 +40,12 @@ import com.mongodb.DBObject;
  */
 public class ActivationService {
 
+  @Inject
+  private FeatureService featureService;
+  
+  @Inject
+  private ReferenceFactory<FeatureReference> refFactory;
+  
   private DBCollection featureCol;
   private DBCollection tenantCol;
   private DBCollection userCol;
@@ -82,11 +90,79 @@ public class ActivationService {
   }
   
   public void inActiveFeature(String id) {
+    System.out.println("-----3");
+    FeatureReference ref = refFactory.create(id);
+    Feature feature = featureService.get(id);
+    if(ref.get() != null) {
+      this.featureCol.insert(feature);
+      PageList<Tenant> listTenant = tenantService.findIn("features", ref);
+      listTenant.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
+      List<Tenant> holder = new ArrayList<Tenant>();
+      while(listTenant.hasNext()) {
+        for(Tenant tenant:listTenant.next()) {
+          holder.add(tenant);
+        }
+      }
+      for(Tenant tenant:holder) {
+        DBObject tenantObj = this.tenantCol.findOne(new BasicDBObject("_id",tenant.getId()));
+        if(tenantObj == null) {
+          this.tenantCol.insert(tenant);
+        }
+      }
+      Event event = eventFactory.create(ref, "inactive-feature-ref");
+      event.broadcast();
+    } else {
+      logger.info("Feature is inactived not available");
+    }
     
   }
   
   public void inActiveFeature(Feature obj) {
+    FeatureReference ref = refFactory.create(obj.getId());
+    if(ref.get() != null) {
+      this.featureCol.insert(obj);
+      PageList<Tenant> listTenant = tenantService.findIn("features", ref);
+      listTenant.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
+      List<Tenant> holder = new ArrayList<Tenant>();
+      while(listTenant.hasNext()) {
+        for(Tenant tenant:listTenant.next()) {
+          holder.add(tenant);
+        }
+      }
+      for(Tenant tenant:holder) {
+        DBObject tenantObj = this.tenantCol.findOne(new BasicDBObject("_id",tenant.getId()));
+        if(tenantObj == null) {
+          this.tenantCol.insert(tenant);
+        }
+      }
+      Event event = eventFactory.create(obj, "inactive-feature");
+      event.broadcast();
+    } else {
+      logger.info("Feature is inactived not available");
+    }
     
+  }
+  
+  public void activeFeature(String id) {
+    DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",id));
+    if(dbObj != null) {
+      Feature feature = featureService.transform(dbObj);
+      FeatureReference ref = refFactory.create(feature.getId());
+      Event event = eventFactory.create(ref, "active-feature-ref");
+      event.broadcast();
+    } else {
+      logger.info("Feature is actived not available");
+    }
+  }
+  
+  public void activeFeature(Feature obj) {
+    DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",obj.getId()));
+    if(dbObj != null) {
+      Event event = eventFactory.create(obj, "active-feature");
+      event.broadcast();
+    } else {
+      logger.info("Feature is actived not available");
+    }
   }
   
   public void inActiveTenant(String id) {
