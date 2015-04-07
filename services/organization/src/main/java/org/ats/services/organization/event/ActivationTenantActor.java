@@ -174,6 +174,10 @@ public class ActivationTenantActor extends UntypedActor {
     
     activationService.deleteTenant(ref.getId());
     
+    while (activationService.countInActiveTenant() != 0 && activationService.countSpaceIntoInActiveTenant() != 0) {
+
+    }
+    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref, getSelf());
     }
@@ -245,7 +249,7 @@ public class ActivationTenantActor extends UntypedActor {
     
     while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0 &&
         spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0) {
-     // Thread.sleep(3000);
+
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {

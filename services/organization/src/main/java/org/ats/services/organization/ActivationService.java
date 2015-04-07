@@ -65,6 +65,7 @@ public class ActivationService {
   
   @Inject
   private TenantService tenantService;
+  
   @Inject
   private SpaceService spaceService;
   
@@ -91,11 +92,17 @@ public class ActivationService {
   public void inActiveTenant(String id) {
     
     Tenant tenant = tenantService.get(id);
-    this.tenantCol.insert(tenant);
     
-    TenantReference ref = tenantRefFactory.create(id);
-    Event event = eventFactory.create(ref, "inactive-ref-tenant");
-    event.broadcast();
+    if (tenant != null) {
+      this.tenantCol.insert(tenant);
+      
+      TenantReference ref = tenantRefFactory.create(id);
+      Event event = eventFactory.create(ref, "inactive-ref-tenant");
+      event.broadcast();
+    } else {
+      
+      logger.info("Tenant to inactived is not available");
+    }
     
   }
   
@@ -108,14 +115,18 @@ public class ActivationService {
   public void activeTenant(String id) {
     
     DBObject source = this.tenantCol.findOne(new BasicDBObject("_id", id));
-    Tenant tenant = tenantService.transform(source);
-    tenantService.create(tenant);
+    
+    if (source != null) {
+      Tenant tenant = tenantService.transform(source);
+      tenantService.create(tenant);
 
-    TenantReference ref = tenantRefFactory.create(id);
+      TenantReference ref = tenantRefFactory.create(id);
+      Event event = eventFactory.create(ref, "active-ref-tenant");
+      event.broadcast();
+    } else {
+      logger.info("Tenant to active is not available");
+    }
     
-    Event event = eventFactory.create(ref, "active-ref-tenant");
-    
-    event.broadcast();
   }
   
   public void inActiveSpace(Space obj) {
@@ -161,7 +172,8 @@ public class ActivationService {
   
   public long countRoleIntoInActiveTenant(){
     return this.roleCol.count();
-  };
+  }
+  
   public void activeUser(User obj) {
     
   }
@@ -192,6 +204,7 @@ public class ActivationService {
   public void moveRole(List<DBObject> list) {
     this.roleCol.insert(list);
   }
+  
   public void moveSpace(List<DBObject> list) {
     
     this.spaceCol.insert(list);
@@ -204,6 +217,7 @@ public class ActivationService {
   public void deleteTenant(String id) {
     this.tenantCol.remove(new BasicDBObject("_id", id));
   }
+  
   public void deleteRole(Role role) {
     
     this.roleCol.remove(role);
@@ -216,6 +230,7 @@ public class ActivationService {
   public void deleteUser(User user) {
     this.userCol.remove(user);
   }
+  
   public PageList<DBObject> findSpaceIntoInActiveTenant(TenantReference ref) {
     
     BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
@@ -235,6 +250,7 @@ public class ActivationService {
     
     return query(query, this.roleCol);
   }
+  
   public PageList<DBObject> query(DBObject query, DBCollection col) {
     return query(query, 10, col);
   }

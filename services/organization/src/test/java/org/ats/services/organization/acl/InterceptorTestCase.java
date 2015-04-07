@@ -320,15 +320,15 @@ public class InterceptorTestCase {
 
     this.authService.logOut();
     //
-    this.userService.delete("trinhtv3@viettel");
-    this.tenantService.delete("viettel");
-    this.featureService.delete("featureViettel");
-    createUser("mobi", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
-    this.authService.logIn("trinhtv3@viettel", "trinhtran");
+    //this.userService.delete("trinhtv3@viettel");
+   // this.tenantService.delete("viettel");
+   // this.featureService.delete("featureViettel");
+  //  createUser("mobi", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+   // this.authService.logIn("trinhtv3@viettel", "trinhtran");
 
-    Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
+    //Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
 
-    this.authService.logOut();
+   // this.authService.logOut();
     //
     this.userService.delete("trinhtv3@viettel");
     this.tenantService.delete("mobi");
