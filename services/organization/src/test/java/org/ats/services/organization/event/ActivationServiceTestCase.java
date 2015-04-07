@@ -51,7 +51,7 @@ public class ActivationServiceTestCase extends EventTestCase {
   }
   
   @Test
-  public void testActivationTenant() {
+  public void testInActivationTenant() {
     
     Tenant tenant = tenantService.get("Fsoft");
     
@@ -63,13 +63,13 @@ public class ActivationServiceTestCase extends EventTestCase {
     Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
     Assert.assertEquals(roleService.count(), 2);
     Assert.assertEquals(userService.count(), 1);
-    eventService.setListener(ActivationTenantListener.class);
+    eventService.setListener(InActivationTenantListener.class);
     
     activationService.inActiveTenant("Fsoft");
     
   }
   
-  static class ActivationTenantListener extends UntypedActor {
+  static class InActivationTenantListener extends UntypedActor {
 
     @Inject
     private ActivationService activationService;
@@ -107,6 +107,38 @@ public class ActivationServiceTestCase extends EventTestCase {
         
         Assert.assertEquals(spaceService.count(), 0);
       }
+    }
+   
+  }
+  @Test
+  public void testActivationTenant() {
+    
+    activationService.inActiveTenant("Fsoft");
+    eventService.setListener(ActivationTenantListener.class);
+    while (tenantService.count() != 2) {
+      
+    }
+    activationService.activeTenant("Fsoft");
+  }
+  
+  static class ActivationTenantListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject private TenantService tenantService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof TenantReference) {
+        TenantReference ref = (TenantReference) message;
+        
+        logger.info("actived tenant "+ ref.toJSon());
+        
+        Assert.assertEquals(tenantService.count(), 3);
+        
+      }
+      
     }
     
   }

@@ -14,6 +14,7 @@ import org.ats.services.data.common.MongoPageList;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.organization.entity.Feature;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
@@ -41,7 +42,7 @@ public class ActivationService {
   private DBCollection tenantCol;
   private DBCollection userCol;
   private DBCollection spaceCol;
-  private DBCollection roleCole;
+  private DBCollection roleCol;
   private Logger logger;
   
   @Inject
@@ -74,7 +75,7 @@ public class ActivationService {
     this.tenantCol = mongo.getDatabase().getCollection("inactived-tenant");
     this.userCol = mongo.getDatabase().getCollection("inactived-user");
     this.spaceCol = mongo.getDatabase().getCollection("inactived-space");
-    this.roleCole = mongo.getDatabase().getCollection("inactived-role");
+    this.roleCol = mongo.getDatabase().getCollection("inactived-role");
     
     this.logger = logger;
   }
@@ -159,7 +160,7 @@ public class ActivationService {
   }
   
   public long countRoleIntoInActiveTenant(){
-    return this.roleCole.count();
+    return this.roleCol.count();
   };
   public void activeUser(User obj) {
     
@@ -189,7 +190,7 @@ public class ActivationService {
   }
   
   public void moveRole(List<DBObject> list) {
-    this.roleCole.insert(list);
+    this.roleCol.insert(list);
   }
   public void moveSpace(List<DBObject> list) {
     
@@ -200,6 +201,21 @@ public class ActivationService {
     this.tenantCol.remove(tenant);
   }
   
+  public void deleteTenant(String id) {
+    this.tenantCol.remove(new BasicDBObject("_id", id));
+  }
+  public void deleteRole(Role role) {
+    
+    this.roleCol.remove(role);
+  }
+  
+  public void deleteSpace(Space space) {
+    this.spaceCol.remove(space);
+  }
+  
+  public void deleteUser(User user) {
+    this.userCol.remove(user);
+  }
   public PageList<DBObject> findSpaceIntoInActiveTenant(TenantReference ref) {
     
     BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
@@ -217,7 +233,7 @@ public class ActivationService {
     
     BasicDBObject query = new BasicDBObject("space", ref.toJSon());
     
-    return query(query, this.roleCole);
+    return query(query, this.roleCol);
   }
   public PageList<DBObject> query(DBObject query, DBCollection col) {
     return query(query, 10, col);
