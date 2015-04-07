@@ -58,20 +58,10 @@ public class DeleteSpaceActor extends UntypedActor{
 
   }
 
-  private void process(SpaceReference reference) {
+  private void process(SpaceReference reference) throws InterruptedException {
     
     logger.info("Process event source: " + reference);
     
-    PageList<User> listUser = userService.findUsersInSpace(reference);
-    listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    while(listUser.hasNext()) {
-      List<User> users = listUser.next();
-      for(User user:users) {
-        user.leaveSpace(reference);
-        userService.update(user);
-      }
-    }
-
     PageList<Role> listRole = roleService.query(new BasicDBObject("space", reference.toJSon()));
     List<RoleReference> holder = new ArrayList<RoleReference>();
     while (listRole.hasNext()) {
@@ -84,8 +74,22 @@ public class DeleteSpaceActor extends UntypedActor{
     for(RoleReference ref : holder) {
       roleService.delete(ref.getId());
     }
+    
+    PageList<User> listUser = userService.findUsersInSpace(reference);
+    listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    while(listUser.hasNext()) {
+      List<User> users = listUser.next();
+      for(User user:users) {
+        user.leaveSpace(reference);
+        userService.update(user);
+      }
+    }
 
     //send processed event to listener
+    while(userService.findUsersInSpace(reference).count() != 0 && roleService.query(new BasicDBObject("space", reference.toJSon())).count() != 0) {
+      Thread.sleep(3000);
+    }
+    System.out.println("----1"+getSender().path().name());
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(reference, getSelf());
     }

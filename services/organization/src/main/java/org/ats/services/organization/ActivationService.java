@@ -22,6 +22,7 @@ import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
@@ -43,9 +44,6 @@ public class ActivationService {
   @Inject
   private FeatureService featureService;
   
-  @Inject
-  private ReferenceFactory<FeatureReference> refFactory;
-  
   private DBCollection featureCol;
   private DBCollection tenantCol;
   private DBCollection userCol;
@@ -60,22 +58,34 @@ public class ActivationService {
   private UserFactory userFactory;
   
   @Inject
+  private ReferenceFactory<FeatureReference> featureRefFactory;
+  
+  @Inject
+  private ReferenceFactory<RoleReference> roleRefFactory;
+  
+  @Inject
   private ReferenceFactory<UserReference> userRefFactory;
   
   @Inject
   private ReferenceFactory<TenantReference> tenantRefFactory;
   
   @Inject
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
+  
+  @Inject
   private TenantFactory tenantFactory;
+  
+  @Inject 
+  private RoleService roleService;
+  
+  @Inject
+  private SpaceService spaceService;
   
   @Inject
   private UserService userService;
   
   @Inject
   private TenantService tenantService;
-  
-  @Inject
-  private SpaceService spaceService;
   
   @Inject
   public ActivationService(MongoDBService mongo, Logger logger) {
@@ -90,11 +100,14 @@ public class ActivationService {
   }
   
   public void inActiveFeature(String id) {
-    System.out.println("-----3");
-    FeatureReference ref = refFactory.create(id);
+    FeatureReference ref = featureRefFactory.create(id);
     Feature feature = featureService.get(id);
     if(ref.get() != null) {
+      
+      //Insert feature into inactive-feature
       this.featureCol.insert(feature);
+      
+      //Insert tenant into inactive-tenant
       PageList<Tenant> listTenant = tenantService.findIn("features", ref);
       listTenant.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
       List<Tenant> holder = new ArrayList<Tenant>();
@@ -118,7 +131,7 @@ public class ActivationService {
   }
   
   public void inActiveFeature(Feature obj) {
-    FeatureReference ref = refFactory.create(obj.getId());
+    FeatureReference ref = featureRefFactory.create(obj.getId());
     if(ref.get() != null) {
       this.featureCol.insert(obj);
       PageList<Tenant> listTenant = tenantService.findIn("features", ref);
@@ -147,7 +160,7 @@ public class ActivationService {
     DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",id));
     if(dbObj != null) {
       Feature feature = featureService.transform(dbObj);
-      FeatureReference ref = refFactory.create(feature.getId());
+      FeatureReference ref = featureRefFactory.create(feature.getId());
       Event event = eventFactory.create(ref, "active-feature-ref");
       event.broadcast();
     } else {
@@ -206,11 +219,98 @@ public class ActivationService {
   }
   
   public void inActiveSpace(Space obj) {
-    
+    SpaceReference ref = spaceRefFactory.create(obj.getId());
+    if(ref.get() != null) {
+      
+      //Insert space into inactive-space
+      this.spaceCol.insert(obj);
+      
+      //Insert role into inactive-role
+      PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
+      List<RoleReference> holder = new ArrayList<RoleReference>();
+      while (listRole.hasNext()) {
+        List<Role> roles = listRole.next();
+        for (Role role : roles) {
+          holder.add(roleRefFactory.create(role.getId()));
+        }
+      }
+
+      for(RoleReference reference : holder) {
+        this.roleCol.insert(reference.get());
+      }
+      
+      //Insert user into inactive-user
+      PageList<User> listUser = userService.findUsersInSpace(ref);
+      listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+      while(listUser.hasNext()) {
+        List<User> users = listUser.next();
+        for(User user:users) {
+          this.userCol.insert(user);
+        }
+      }
+      Event event = eventFactory.create(obj, "inactive-space");
+      event.broadcast();
+    } else {
+      logger.info("Space is inactived not available");
+    }
   }
   
   public void inActiveSpace(String id) {
-    
+    SpaceReference ref = spaceRefFactory.create(id);
+    if(ref.get() != null) {
+      Space space = spaceService.get(id);
+      //Insert space into inactive-space
+      this.spaceCol.insert(space);
+      
+      //Insert role into inactive-role
+      PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
+      List<RoleReference> holder = new ArrayList<RoleReference>();
+      while (listRole.hasNext()) {
+        List<Role> roles = listRole.next();
+        for (Role role : roles) {
+          holder.add(roleRefFactory.create(role.getId()));
+        }
+      }
+
+      for(RoleReference reference : holder) {
+        this.roleCol.insert(reference.get());
+      }
+      
+      //Insert user into inactive-user
+      PageList<User> listUser = userService.findUsersInSpace(ref);
+      listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+      while(listUser.hasNext()) {
+        List<User> users = listUser.next();
+        for(User user:users) {
+          this.userCol.insert(user);
+        }
+      }
+      Event event = eventFactory.create(ref, "inactive-space-ref");
+      event.broadcast();
+    } else {
+      logger.info("Space is inactived not available");
+    }
+  }
+  
+  public void activeSpace(String id) {
+    DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",id));
+    if(dbObj != null) {
+      SpaceReference ref = spaceRefFactory.create(id);
+      Event event = eventFactory.create(ref, "active-space-ref");
+      event.broadcast();
+    } else {
+      logger.info("Space is actived not available");
+    }
+  }
+  
+  public void activeSpace(Space obj) {
+    DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",obj.getId()));
+    if(dbObj != null) {
+      Event event = eventFactory.create(obj, "active-space");
+      event.broadcast();
+    } else {
+      logger.info("Space is actived not available");
+    }
   }
   
   public void inActiveUser(User obj) {

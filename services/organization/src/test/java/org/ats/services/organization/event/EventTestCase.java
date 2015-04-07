@@ -255,6 +255,141 @@ public class EventTestCase extends AbstractTestCase {
   }
   
   
+  static class ActivationTenantListener extends UntypedActor {
+
+    @Inject
+    private ActivationService activationService;
+    
+    @Inject private TenantService tenantService;
+    
+    @Inject private UserService userService;
+    
+    @Inject private RoleService roleService;
+    
+    @Inject private SpaceService spaceService;
+    
+    @Inject private Logger logger;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof TenantReference) {
+        TenantReference ref = (TenantReference) message;
+        
+        logger.info("processed inactive tenant : "+ ref.toJSon());
+        Assert.assertEquals(activationService.countInActiveTenant(), 1);
+        
+        Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 2);
+        
+        Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 2);
+        
+        Assert.assertEquals(activationService.countInActiveUser(), 1);
+        
+        Assert.assertEquals(tenantService.count(), 2);
+        
+        Assert.assertEquals(userService.count(), 0);
+        
+        Assert.assertEquals(roleService.count(), 0);
+        
+        Assert.assertEquals(spaceService.count(), 0);
+      }
+    }
+  }
+    
+    
+  public void testInactiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    
+    eventService.setListener(inactiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    
+  }
+  
+  static class inactiveFeatureListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject 
+    private TenantService tenantService;
+    
+    @Inject
+    private FeatureService featureService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        logger.info("processed inactive feature reference "+ ref.toJSon());
+        
+        Assert.assertEquals(featureService.count(), 2);
+        Assert.assertEquals(tenantService.findIn("features", ref).count(),0);
+      }
+      
+    }
+    
+  }
+  
+  @Test
+  public void testActiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    eventService.setListener(ActiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(1).get());
+    activationService.activeFeature("performace");
+    
+  }
+  
+  static class ActiveFeatureListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject private TenantService tenantService;
+    
+    @Inject private FeatureService featureService;
+    
+    public void onReceive(Object message) throws Exception {
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        logger.info("processed active feature reference "+ ref.toJSon());
+        if(featureService.get(ref.getId()) != null) {
+          Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+        }
+      }
+      
+    }
+    
+  }
+  
+  @Test
+  public void testInactiveSpace() throws InterruptedException {
+    Space space = spaceService.list().next().get(0);
+    eventService.setListener(InactiveSpaceListener.class);
+    activationService.inActiveSpace(space);
+    Assert.assertEquals(roleService.count(), 2);
+  }
+  static class InactiveSpaceListener extends UntypedActor {
+
+    @Inject
+    private Logger logger;
+    
+    @Inject
+    private UserService userService;
+    
+    @Inject
+    private RoleService roleService;
+    
+    @Override
+    public void onReceive(Object message) throws Exception {
+      if(message instanceof SpaceReference) {
+        SpaceReference ref = (SpaceReference) message;
+        logger.info("processed inactive space reference "+ ref.toJSon());
+        Assert.assertEquals(roleService.count(), 0);
+        Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+      }
+      
+    }
+    
+  }
   
   private Role admin;
   private Role tester;
