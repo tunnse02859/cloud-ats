@@ -15,6 +15,7 @@ import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,27 +29,33 @@ import com.google.inject.Inject;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class ActivationServiceTestCase extends EventTestCase {
+public class ActivationServiceTestCase extends AbstractEventTestCase {
 
+  
   @Override @BeforeMethod
   public void init() throws Exception {
     super.init();
-    
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    Thread.sleep(5000);
   }
   
   @Test
   public void testActivationUser() {
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
+    
+    Assert.assertEquals(activationService.countTenant(), 0);
     Assert.assertEquals(userService.count(), 1);
     
     activationService.inActiveUser("haint@cloud-ats.net");
     
     Assert.assertEquals(userService.count(), 0);
-    Assert.assertEquals(activationService.countInActiveUser(), 1);
+    Assert.assertEquals(activationService.countUser(), 1);
     
     activationService.activeUser("haint@cloud-ats.net");
     
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
+    Assert.assertEquals(activationService.countUser(), 0);
     Assert.assertEquals(userService.count(), 1);
   }
   
@@ -58,9 +65,9 @@ public class ActivationServiceTestCase extends EventTestCase {
     Tenant tenant = tenantService.get("Fsoft");
     
     Assert.assertEquals(activationService.countInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 0);
-    Assert.assertEquals(activationService.countInActiveUser(), 0);
+    Assert.assertEquals(activationService.countRole(), 0);
+    Assert.assertEquals(activationService.countSpace(), 0);
+    Assert.assertEquals(activationService.countUser(), 0);
     Assert.assertEquals(tenantService.count(), 3);
     Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
     Assert.assertEquals(roleService.count(), 2);
@@ -95,11 +102,11 @@ public class ActivationServiceTestCase extends EventTestCase {
         logger.info("processed inactive tenant : "+ ref.toJSon());
         Assert.assertEquals(activationService.countInActiveTenant(), 1);
         
-        Assert.assertEquals(activationService.countSpaceIntoInActiveTenant(), 2);
+        Assert.assertEquals(activationService.countSpace(), 2);
         
-        Assert.assertEquals(activationService.countRoleIntoInActiveTenant(), 2);
+        Assert.assertEquals(activationService.countRole(), 2);
         
-        Assert.assertEquals(activationService.countInActiveUser(), 1);
+        Assert.assertEquals(activationService.countUser(), 1);
         
         Assert.assertEquals(tenantService.count(), 2);
         
@@ -145,6 +152,7 @@ public class ActivationServiceTestCase extends EventTestCase {
     
   }
   
+  @Test
   public void testInactiveFeature() throws InterruptedException {
     Tenant tenant = tenantService.get("Fsoft");
     
@@ -202,8 +210,6 @@ public class ActivationServiceTestCase extends EventTestCase {
           Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
         }
       }
-      
     }
-    
   }
 }

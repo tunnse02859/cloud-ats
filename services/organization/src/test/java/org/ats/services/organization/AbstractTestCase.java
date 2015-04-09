@@ -17,7 +17,7 @@ import com.google.inject.Injector;
  *
  * Mar 10, 2015
  */
-public class AbstractTestCase {
+public abstract class AbstractTestCase {
   
   /** .*/
   protected Injector injector;
@@ -43,6 +43,7 @@ public class AbstractTestCase {
     eventService.start();
     
     //cleanup database
+    System.out.println("Cleanup database");
     this.mongoService.dropDatabase();
   }
 }

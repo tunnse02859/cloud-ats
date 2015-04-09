@@ -90,9 +90,11 @@ public class ActivationTenantActor extends UntypedActor {
   
   private void activationProcessing(TenantReference ref) {
     
-    PageList<DBObject> listSpace = activationService.findSpaceIntoInActiveTenant(ref);
+    BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
     
     // restore spaces
+    PageList<DBObject> listSpace = activationService.findSpaceIntoInActiveTenant(ref);
+    
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     List<DBObject> list = new ArrayList<DBObject>();
     
@@ -102,11 +104,13 @@ public class ActivationTenantActor extends UntypedActor {
         
         Space space = spaceService.transform(source);
         
-        
         // restore role
         SpaceReference refSpace = spaceRefFactory.create(space.getId());
-        PageList<DBObject> listRole = activationService.findRoleIntoInActiveSpace(refSpace);
         
+        BasicDBObject querySpace = new BasicDBObject("space", refSpace.toJSon());
+        
+        PageList<DBObject> listRole = activationService.findRoleIntoInActiveSpace(refSpace);
+        listRole.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
         List<DBObject> listRoleObject = new ArrayList<DBObject>();
         
         while (listRole.hasNext()) {
@@ -117,8 +121,6 @@ public class ActivationTenantActor extends UntypedActor {
             
             listRoleObject.add(role);
             
-            // delete role in activated space
-            activationService.deleteRole(role);
             if (listRoleObject.size() == 1000) {
               roleService.restoreRole(listRoleObject);
               listRoleObject.clear();
@@ -129,11 +131,13 @@ public class ActivationTenantActor extends UntypedActor {
         if (listRoleObject.size() > 0) {
           roleService.restoreRole(listRoleObject);
         }
+        
+        // delete role in activated space
+        activationService.deleteRoleBy(querySpace);
+        
         // continue restore spaces
         list.add(space);
         
-        //delete space if it belong to activated tenant
-        activationService.deleteSpace(space);
         if (list.size() == 1000) {
           spaceService.restoreSpace(list);
           list.clear();
@@ -144,9 +148,12 @@ public class ActivationTenantActor extends UntypedActor {
     if (list.size() > 0) {
       spaceService.restoreSpace(list);
     }
+    //delete space if it belong to activated tenant
+    activationService.deleteSpaceBy(query);
     
     // Restore user
     PageList<DBObject> listUser = activationService.findUserIntoInActiveTenant(ref);
+    listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     
     list = new ArrayList<DBObject>();
     while (listUser.hasNext()) {
@@ -157,8 +164,7 @@ public class ActivationTenantActor extends UntypedActor {
         
         list.add(user);
         
-        // delete user if users belong to activated tenant
-        activationService.deleteUser(user);
+        
         if (list.size() == 1000) {
           userService.restoreUser(list);
           
@@ -170,11 +176,16 @@ public class ActivationTenantActor extends UntypedActor {
     if (list.size() > 0) {
       userService.restoreUser(list);
     }
+    
+    // delete user if users belong to activated tenant
+    activationService.deleteUsersBy(query);
     // delete activated tenant 
     
     activationService.deleteTenant(ref.getId());
     
-    while (activationService.countInActiveTenant() != 0 && activationService.countSpaceIntoInActiveTenant() != 0) {
+    while (activationService.countSpaceIntoInActiveTenant(new BasicDBObject("tenant", ref.toJSon())) != 0
+       && activationService.countInActiveUser(new BasicDBObject("tenant", ref.toJSon())) != 0 
+       && activationService.hasTenant(ref.getId())) {
 
     }
     
@@ -198,6 +209,7 @@ public class ActivationTenantActor extends UntypedActor {
         // moving role in moved space
         SpaceReference spaceRef = spaceRefFactory.create(space.getId());
         PageList<Role> listRole = roleService.query(new BasicDBObject("space", spaceRef.toJSon()));
+        listRole.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
         
         List<DBObject> listRoleObject = new ArrayList<DBObject>(1000);
         
@@ -228,6 +240,8 @@ public class ActivationTenantActor extends UntypedActor {
     
     // moving user
     PageList<User> listUser = userService.findUserInTenant(ref);
+    
+    listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     list = new ArrayList<DBObject>(1000);
     while (listUser.hasNext()) {
       for (User user : listUser.next()) {
@@ -248,8 +262,9 @@ public class ActivationTenantActor extends UntypedActor {
     //
     
     while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0 &&
-        spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0) {
-
+        spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0
+        && (tenantService.get(ref.getId()) != null)) {
+      
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {

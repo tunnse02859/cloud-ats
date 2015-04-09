@@ -333,8 +333,8 @@ public class ActivationService {
     
   }
   
-  public long countInActiveUser() {
-    return this.userCol.count();
+  public long countInActiveUser(DBObject query) {
+    return this.query(query, this.userCol).count();
   }
   
   public long countInActiveTenant() {
@@ -342,18 +342,45 @@ public class ActivationService {
     
   }
   
-  public long countSpaceIntoInActiveTenant() {
+  public long countSpaceIntoInActiveTenant(DBObject query) {
+    return this.query(query, this.spaceCol).count();
+  }
+  
+  public long countRoleIntoInActiveTenant(DBObject query){
+    return this.query(query, this.roleCol).count();
+  }
+  
+  public long countUser() {
+    return this.userCol.count();
+  }
+  
+  public long countTenant() {
+    return this.tenantCol.count();
+  }
+  
+  public long countSpace() {
     return this.spaceCol.count();
   }
   
-  public long countRoleIntoInActiveTenant(){
+  public long countRole() {
     return this.roleCol.count();
   }
   
+  public long countFeature() {
+    return this.featureCol.count();
+  }
   public void activeUser(User obj) {
     
   }
   
+  public boolean hasTenant(String id) {
+    
+    DBObject object = this.tenantCol.findOne(new BasicDBObject("_id", id));
+    
+    if (object != null) {
+      return true;
+    } else return false;
+  }
   public void activeUser(String id) {
     
     logger.info("active user has id : "+ id);
@@ -405,6 +432,19 @@ public class ActivationService {
   
   public void deleteUser(User user) {
     this.userCol.remove(user);
+  }
+  
+  public void deleteUsersBy(DBObject query) {
+    
+    this.userCol.remove(query);
+  }
+  
+  public void deleteSpaceBy(DBObject query) {
+    this.spaceCol.remove(query);
+  }
+  
+  public void deleteRoleBy(DBObject query) {
+    this.roleCol.remove(query);
   }
   
   public PageList<DBObject> findSpaceIntoInActiveTenant(TenantReference ref) {
