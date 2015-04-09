@@ -22,7 +22,6 @@ import org.ats.services.organization.entity.reference.FeatureReference;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 import akka.actor.UntypedActor;
@@ -57,29 +56,22 @@ public class ActivationFeatureActor extends UntypedActor{
 
     if(message instanceof Event) {
       Event event = (Event) message;
-      if("inactive-feature".equals(event.getName())) {
-        Feature feature = (Feature) event.getSource();
-        FeatureReference ref = refFactory.create(feature.getId());
-        processInActive(ref);
-      } else if("inactive-feature-ref".equals(event.getName())) {
-        FeatureReference ref = (FeatureReference) event.getSource();
-        processInActive(ref);
-      } else if("active-feature".equals(event.getName())){
-        Feature feature = (Feature) event.getSource();
-        FeatureReference ref = refFactory.create(feature.getId());
-        processActive(ref);
+      if("inactive-feature-ref".equals(event.getName())) {
+        logger.info("Recieved event "+ event.getName());
+        processInActive(event);
       } else if("active-feature-ref".equals(event.getName())) {
-        FeatureReference ref = (FeatureReference) event.getSource();
-        processActive(ref);
+        logger.info("Recieved event "+ event.getName());
+        processActive(event);
       } else {
         unhandled(message);
       }
     }
   }
 
-  private void processActive(FeatureReference ref) throws InterruptedException {
+  private void processActive(Event event) throws InterruptedException {
     DBCollection tenantCol = mongo.getDatabase().getCollection("inactived-tenant");
     DBCollection featureCol = mongo.getDatabase().getCollection("inactived-feature");
+    FeatureReference ref = (FeatureReference) event.getSource();
     DBObject dbObj = featureCol.findOne(new BasicDBObject("_id",ref.getId()));
     Feature feature = featureService.transform(dbObj);
     
@@ -105,13 +97,15 @@ public class ActivationFeatureActor extends UntypedActor{
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
     
   }
 
-  private void processInActive(FeatureReference ref) throws InterruptedException {
-    logger.info("Process event source: " + ref);
+  private void processInActive(Event event) throws InterruptedException {
+    logger.info("Process event source: " + event);
+    
+    FeatureReference ref = (FeatureReference) event.getSource();
     
     featureService.delete(ref.getId());
     
@@ -119,7 +113,7 @@ public class ActivationFeatureActor extends UntypedActor{
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
   }
 

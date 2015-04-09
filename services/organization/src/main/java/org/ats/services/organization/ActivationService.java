@@ -140,7 +140,7 @@ public class ActivationService {
           this.tenantCol.insert(tenant);
         }
       }
-      Event event = eventFactory.create(obj, "inactive-feature");
+      Event event = eventFactory.create(ref, "inactive-feature-ref");
       event.broadcast();
     } else {
       logger.info("Feature is inactived not available");
@@ -163,7 +163,8 @@ public class ActivationService {
   public void activeFeature(Feature obj) {
     DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",obj.getId()));
     if(dbObj != null) {
-      Event event = eventFactory.create(obj, "active-feature");
+      FeatureReference ref = featureRefFactory.create(obj.getId());
+      Event event = eventFactory.create(ref, "active-feature-ref");
       event.broadcast();
     } else {
       logger.info("Feature is actived not available");
@@ -249,7 +250,7 @@ public class ActivationService {
         moveUser(listUserObj);
       }
       
-      Event event = eventFactory.create(obj, "inactive-space");
+      Event event = eventFactory.create(ref, "inactive-space-ref");
       event.broadcast();
     } else {
       logger.info("Space is inactived not available");
@@ -314,10 +315,10 @@ public class ActivationService {
   }
   
   public void activeSpace(Space obj) {
-    System.out.println("active-------");
     DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",obj.getId()));
     if(dbObj != null) {
-      Event event = eventFactory.create(obj, "active-space");
+      SpaceReference ref = spaceRefFactory.create(obj.getId());
+      Event event = eventFactory.create(ref, "active-space-ref");
       event.broadcast();
     } else {
       logger.info("Space is actived not available");

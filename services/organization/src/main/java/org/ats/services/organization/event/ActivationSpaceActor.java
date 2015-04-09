@@ -61,37 +61,24 @@ public class ActivationSpaceActor extends UntypedActor{
     
     if(message instanceof Event) {
       Event event = (Event) message;
-      if("inactive-space".equals(event.getName())) {
-        Space space = (Space) event.getSource();
-        SpaceReference ref = spaceRefFactory.create(space.getId());
-        
+       if("inactive-space-ref".equals(event.getName())) {
+         
         logger.info("Recieved event "+message);
-        processInactive(ref);
-      } else if("inactive-space-ref".equals(event.getName())) {
-        SpaceReference ref = (SpaceReference) event.getSource();
-        
-        logger.info("Recieved event "+message);
-        processInactive(ref);
-      } else if("active-space".equals(event.getName())) {
-        Space space = (Space) event.getSource();
-        SpaceReference ref = spaceRefFactory.create(space.getId());
-        
-        logger.info("Recieved event "+message);
-        processActive(ref);
+        processInactive(event);
       } else if("active-space-ref".equals(event.getName())) {
-        SpaceReference ref = (SpaceReference) event.getSource();
         
         logger.info("Recieved event "+message);
-        processActive(ref);
+        processActive(event);
       } else {
         unhandled(message);
       }
     }
   }
 
-  private void processActive(SpaceReference ref) {
+  private void processActive(Event event) {
     DBCollection spaceCol = mongo.getDatabase().getCollection("inactived-space");
     DBCollection userCol = mongo.getDatabase().getCollection("inactived-user");
+    SpaceReference ref = (SpaceReference) event.getSource();
     PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
     //insert role into role collection
     PageList<DBObject> listRoleObj = activationService.findRoleIntoInActiveSpace(ref);
@@ -143,18 +130,18 @@ public class ActivationSpaceActor extends UntypedActor{
     activationService.deleteSpace(space);
     
     if(!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
   }
 
-  private void processInactive(SpaceReference ref) throws InterruptedException {
+  private void processInactive(Event event) throws InterruptedException {
+    SpaceReference ref = (SpaceReference) event.getSource();
     spaceService.delete(ref.getId());
     while(userService.findUsersInSpace(ref).count() != 0 && roleService.query(new BasicDBObject("space", ref.toJSon())).count() != 0) {
       Thread.sleep(300);
     }
-    PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
     if(!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref,getSelf());
+      getSender().tell(event,getSelf());
     }
   }
   
