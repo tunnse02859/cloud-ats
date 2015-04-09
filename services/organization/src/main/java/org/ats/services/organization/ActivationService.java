@@ -12,6 +12,7 @@ import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.data.common.MongoPageList;
+import org.ats.services.data.common.Reference;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.organization.entity.Feature;
@@ -20,9 +21,6 @@ import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.UserFactory;
-import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
@@ -55,13 +53,7 @@ public class ActivationService {
   private EventFactory eventFactory;
   
   @Inject
-  private UserFactory userFactory;
-  
-  @Inject
   private ReferenceFactory<FeatureReference> featureRefFactory;
-  
-  @Inject
-  private ReferenceFactory<RoleReference> roleRefFactory;
   
   @Inject
   private ReferenceFactory<UserReference> userRefFactory;
@@ -72,8 +64,6 @@ public class ActivationService {
   @Inject
   private ReferenceFactory<SpaceReference> spaceRefFactory;
   
-  @Inject
-  private TenantFactory tenantFactory;
   
   @Inject 
   private RoleService roleService;
@@ -86,6 +76,8 @@ public class ActivationService {
   
   @Inject
   private TenantService tenantService;
+  
+  private DBCollection col;
   
   @Inject
   public ActivationService(MongoDBService mongo, Logger logger) {
@@ -227,27 +219,36 @@ public class ActivationService {
       
       //Insert role into inactive-role
       PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
-      List<RoleReference> holder = new ArrayList<RoleReference>();
+      //List<RoleReference> holder = new ArrayList<RoleReference>();
+      List<DBObject> listRoleObj = new ArrayList<DBObject>();
       while (listRole.hasNext()) {
-        List<Role> roles = listRole.next();
-        for (Role role : roles) {
-          holder.add(roleRefFactory.create(role.getId()));
+        for (Role role : listRole.next()) {
+          listRoleObj.add(role);
+          if(listRoleObj.size() == 1000) {
+            moveRole(listRoleObj);
+          }
         }
       }
-
-      for(RoleReference reference : holder) {
-        this.roleCol.insert(reference.get());
+      if (listRoleObj.size() > 0) {
+        moveRole(listRoleObj);
       }
       
       //Insert user into inactive-user
       PageList<User> listUser = userService.findUsersInSpace(ref);
       listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+      List<DBObject> listUserObj = new ArrayList<DBObject>();
       while(listUser.hasNext()) {
-        List<User> users = listUser.next();
-        for(User user:users) {
-          this.userCol.insert(user);
+        for(User user:listUser.next()) {
+          listUserObj.add(user);
+          if(listUserObj.size() == 1000) {
+            moveUser(listUserObj);
+          }
         }
       }
+      if(listUserObj.size() > 0) {
+        moveUser(listUserObj);
+      }
+      
       Event event = eventFactory.create(obj, "inactive-space");
       event.broadcast();
     } else {
@@ -264,27 +265,36 @@ public class ActivationService {
       
       //Insert role into inactive-role
       PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
-      List<RoleReference> holder = new ArrayList<RoleReference>();
+      //List<RoleReference> holder = new ArrayList<RoleReference>();
+      List<DBObject> listRoleObj = new ArrayList<DBObject>();
       while (listRole.hasNext()) {
-        List<Role> roles = listRole.next();
-        for (Role role : roles) {
-          holder.add(roleRefFactory.create(role.getId()));
+        for (Role role : listRole.next()) {
+          listRoleObj.add(role);
+          if(listRoleObj.size() == 1000) {
+            moveRole(listRoleObj);
+          }
         }
       }
-
-      for(RoleReference reference : holder) {
-        this.roleCol.insert(reference.get());
+      if (listRoleObj.size() > 0) {
+        moveRole(listRoleObj);
       }
       
       //Insert user into inactive-user
       PageList<User> listUser = userService.findUsersInSpace(ref);
       listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+      List<DBObject> listUserObj = new ArrayList<DBObject>();
       while(listUser.hasNext()) {
-        List<User> users = listUser.next();
-        for(User user:users) {
-          this.userCol.insert(user);
+        for(User user:listUser.next()) {
+          listUserObj.add(user);
+          if(listUserObj.size() == 1000) {
+            moveUser(listUserObj);
+          }
         }
       }
+      if(listUserObj.size() > 0) {
+        moveUser(listUserObj);
+      }
+      
       Event event = eventFactory.create(ref, "inactive-space-ref");
       event.broadcast();
     } else {
@@ -304,6 +314,7 @@ public class ActivationService {
   }
   
   public void activeSpace(Space obj) {
+    System.out.println("active-------");
     DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",obj.getId()));
     if(dbObj != null) {
       Event event = eventFactory.create(obj, "active-space");
@@ -467,11 +478,33 @@ public class ActivationService {
     return query(query, this.roleCol);
   }
   
+  public PageList<DBObject> findUserInActiveSpace(SpaceReference ref) {
+    return findIn("spaces",  ref);
+  }
+  
+  public PageList<DBObject> findIn(String field, Reference<?> ref) {
+    BasicDBObject query = new BasicDBObject(field, new BasicDBObject("$elemMatch", ref.toJSon()));
+    return query(query,this.userCol);
+  }
+  
+  public PageList<DBObject> findTenantIntoInactiveFeature(String field,Reference<?> ref) {
+    BasicDBObject query = new BasicDBObject(field, new BasicDBObject("$elemMatch", ref.toJSon()));
+    return query(query,this.tenantCol);
+  }
+  
+  public PageList<DBObject> query(DBObject query) {
+    return query(query, 10);
+  }
+  
   public PageList<DBObject> query(DBObject query, DBCollection col) {
     return query(query, 10, col);
   }
 
   public PageList<DBObject> query(DBObject query, int pageSize, DBCollection col) {
+    return buildPageList(pageSize, col, query);
+  }
+  
+  public PageList<DBObject> query(DBObject query, int pageSize) {
     return buildPageList(pageSize, col, query);
   }
   

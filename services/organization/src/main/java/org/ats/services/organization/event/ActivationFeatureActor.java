@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.ats.common.MapBuilder;
+import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.Event;
+import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.entity.Feature;
@@ -46,6 +49,8 @@ public class ActivationFeatureActor extends UntypedActor{
   @Inject
   private ReferenceFactory<FeatureReference> refFactory;
   
+  @Inject
+  private ActivationService activationService;
   
   @Override
   public void onReceive(Object message) throws Exception {
@@ -81,28 +86,24 @@ public class ActivationFeatureActor extends UntypedActor{
     featureService.create(feature);
     featureCol.remove(feature);
     
-    DBCursor cursor = tenantCol.find();
+    PageList<DBObject> listTenantObj = activationService.findTenantIntoInactiveFeature("features", ref);
+    listTenantObj.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
     List<Tenant> listTenant = new ArrayList<Tenant>();
-    List<FeatureReference> listFeatures = new ArrayList<FeatureReference>();
-    while(cursor.hasNext()){
-      Tenant tenant = tenantService.transform(cursor.next());
-      listTenant.add(tenant);
-    }
-    
-    for(Tenant t:listTenant){
-      listFeatures = t.getFeatures();
-      for(FeatureReference featureRef:listFeatures) {
-        if(featureRef.getId().equals(ref.getId())) {
-          Tenant tenant = tenantService.get(t.getId());
-          tenantService.get(t.getId());
-          tenant.addFeature(refFactory.create(featureRef.getId()));
-          tenantService.update(tenant);
-          if(tenantService.get(t.getId()).getFeatures().size() == listFeatures.size()) {
-            tenantCol.remove(new BasicDBObject("_id",t.getId()));
-          }
-        }
+    while(listTenantObj.hasNext()) {
+      for(DBObject obj:listTenantObj.next()) {
+        listTenant.add(tenantService.transform(obj));
       }
     }
+
+    for(Tenant t:listTenant) {
+      Tenant tenant = tenantService.get(t.getId());
+      tenant.addFeature(refFactory.create(ref.getId()));
+      tenantService.update(tenant);
+      if(tenantService.get(t.getId()).getFeatures().size() == t.getFeatures().size()) {
+        tenantCol.remove(new BasicDBObject("_id",t.getId()));
+      }
+    }
+    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref, getSelf());
     }
