@@ -5,6 +5,7 @@ package org.ats.services.organization.event;
 
 import java.util.logging.Logger;
 
+import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
@@ -17,7 +18,6 @@ import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,11 +35,6 @@ public class EventTestCase extends AbstractEventTestCase {
   @Override @BeforeMethod
   public void init() throws Exception {
     super.init();
-  }
-  
-  @AfterMethod
-  public void tearDown() throws Exception {
-    
   }
   
   @Test
@@ -95,6 +90,8 @@ public class EventTestCase extends AbstractEventTestCase {
     @Inject UserService userService;
     
     @Inject SpaceService spaceService;
+    
+    @Inject MongoDBService mongoService;
 
     @Override
     public void onReceive(Object message) throws Exception {
@@ -104,6 +101,7 @@ public class EventTestCase extends AbstractEventTestCase {
         
         Assert.assertEquals(spaceService.findIn("roles", ref).count(), 0);
         Assert.assertEquals(userService.findIn("roles", ref).count(), 0);
+        mongoService.dropDatabase();
       }
     }
     
@@ -117,6 +115,8 @@ public class EventTestCase extends AbstractEventTestCase {
     
     @Inject UserService userService;
     
+    @Inject MongoDBService mongoService;
+    
     @Override
     public void onReceive(Object message) throws Exception {
       if (message instanceof SpaceReference) {
@@ -125,6 +125,7 @@ public class EventTestCase extends AbstractEventTestCase {
         
         Assert.assertEquals(roleService.count(), 0);
         Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+        mongoService.dropDatabase();
       }
       
     }
@@ -156,12 +157,16 @@ public class EventTestCase extends AbstractEventTestCase {
     
     @Inject TenantService tenantService;
     
+    @Inject MongoDBService mongoService;
+    
     @Override
     public void onReceive(Object message) throws Exception {
       if (message instanceof FeatureReference) {
         FeatureReference ref = (FeatureReference) message;
         logger.info("processed delete feature reference " + ref.toJSon());
         Assert.assertEquals(tenantService.findIn("features", ref).count(), 0);
+        
+        mongoService.dropDatabase();
       }
     }
     
@@ -185,7 +190,11 @@ public class EventTestCase extends AbstractEventTestCase {
     @Inject Logger logger;
     
     @Inject private UserService userService;
+    
     @Inject private SpaceService spaceService;
+    
+    @Inject MongoDBService mongoService;
+    
     @Override
     public void onReceive(Object message) throws Exception {
       
@@ -196,6 +205,8 @@ public class EventTestCase extends AbstractEventTestCase {
         logger.info("processed delete tenant reference "+ ref.toJSon());
         Assert.assertEquals(userService.findUserInTenant(ref).count(), 0);
         Assert.assertEquals(spaceService.findSpaceInTenant(ref).count(), 0);
+        
+        mongoService.dropDatabase();
       }
       
     }

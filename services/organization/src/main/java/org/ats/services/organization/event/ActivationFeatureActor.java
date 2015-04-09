@@ -49,7 +49,7 @@ public class ActivationFeatureActor extends UntypedActor{
   
   @Override
   public void onReceive(Object message) throws Exception {
-    logger.info("Recieved event "+message);
+
     if(message instanceof Event) {
       Event event = (Event) message;
       if("inactive-feature".equals(event.getName())) {

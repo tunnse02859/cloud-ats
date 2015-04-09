@@ -83,7 +83,6 @@ public class DeleteRoleActor extends UntypedActor {
     }
     
     //send processed event to listener
-    System.out.println("------0"+getSender().path().name());
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(reference, getSelf());
     }

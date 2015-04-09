@@ -29,9 +29,15 @@ public abstract class AbstractTestCase {
   protected EventService eventService;
   
   public void init() throws Exception {
-    System.setProperty(DatabaseModule.DB_CONF, "");
     System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
-    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule());
+    
+    String host = "localhost";
+    
+    int port = 27017;
+    
+    String dbName = "test-db-" + System.currentTimeMillis();
+    
+    Injector injector = Guice.createInjector(new DatabaseModule(host, port, dbName), new EventModule(), new OrganizationServiceModule());
     
     this.mongoService = injector.getInstance(MongoDBService.class);
     
@@ -41,8 +47,9 @@ public abstract class AbstractTestCase {
     eventService = injector.getInstance(EventService.class);
     eventService.setInjector(injector);
     eventService.start();
-    
-    //cleanup database
+  }
+  
+  public void tearDown() throws Exception {
     System.out.println("Cleanup database");
     this.mongoService.dropDatabase();
   }

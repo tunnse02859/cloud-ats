@@ -41,6 +41,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -168,8 +169,10 @@ public class InterceptorTestCase {
   }
 
   @AfterMethod
-  public void tearDown() {
+  public void tearDown() throws InterruptedException {
     this.authService.logOut();
+    
+    Thread.sleep(3000);
   }
 
   @Test
@@ -308,32 +311,29 @@ public class InterceptorTestCase {
   @Test
   public void testDefaultTenant() {
 
-    createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@viettel:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    User user = createUser("viettel", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@viettel:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
 
     Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
 
-    this.user.setTenant(tenantRefFactory.create("mobi"));
-    this.userService.update(this.user);
+    user.setTenant(tenantRefFactory.create("mobi"));
+    this.userService.update(user);
 
     Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
 
     this.authService.logOut();
+
     //
     //this.userService.delete("trinhtv3@viettel");
-   // this.tenantService.delete("viettel");
-   // this.featureService.delete("featureViettel");
-  //  createUser("mobi", "dev", "featureViettel", "actionViettel", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
-   // this.authService.logIn("trinhtv3@viettel", "trinhtran");
-
-    //Assert.assertEquals(this.service.viettelDefaultTenant(), "viettelDefault");
-
-   // this.authService.logOut();
-    //
-    this.userService.delete("trinhtv3@viettel");
     this.tenantService.delete("mobi");
     this.featureService.delete("featureViettel");
+    
+    while (this.tenantService.get("mobi") != null || this.userService.get("trinhtv3@viettel") != null) {
+      //wait for clean up
+    }
+    
     createUser("mobi", "dev", "featureMobi", "actionViettel", "roleViettel", "featureMobi:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
+    
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
 
     try {
@@ -502,7 +502,7 @@ public class InterceptorTestCase {
   }
 
   // create new User
-  public void createUser(String tenantId, String spaceId, String featureName, String actionName, String roleName, String perm, String userName,String firstName, String lastName, String pass) {
+  public User createUser(String tenantId, String spaceId, String featureName, String actionName, String roleName, String perm, String userName,String firstName, String lastName, String pass) {
 
     Feature foo = featureFactory.create(featureName);
     foo.addAction(new Action(actionName),new Action("fooAction"), new Action("barAction"));
@@ -528,5 +528,6 @@ public class InterceptorTestCase {
     user.addRole(roleRefFactory.create(fooRole.getId()));
 
     this.userService.create(user);
+    return user;
   }
 }

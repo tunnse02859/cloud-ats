@@ -16,17 +16,16 @@ import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
-import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
+import akka.actor.UntypedActor;
+
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-
-import akka.actor.UntypedActor;
 
 /**
  * @author TrinhTV3
@@ -59,37 +58,19 @@ public class ActivationTenantActor extends UntypedActor {
     if (message instanceof Event) {
       
       Event event = (Event) message;
-      if ("inactive-tenant".equals(event.getName())) {
-        
-        Tenant tenant = (Tenant) event.getSource();
-        
-        TenantReference ref = tenantRefFactory.create(tenant.getId());
-        inactivationProcessing(ref);
-        
-      } else if ("inactive-ref-tenant".equals(event.getName())) {
-        
-        TenantReference ref = (TenantReference) event.getSource();
-        inactivationProcessing(ref);
-        
-      } else if ("active-tenant".equals(event.getName())) {
-        
-        Tenant tenant = (Tenant) event.getSource();
-        TenantReference ref = tenantRefFactory.create(tenant.getId());
-        
-        activationProcessing(ref);
-        
-      } else if ("active-ref-tenant".equals(event.getName())) {
-        
-        TenantReference ref = (TenantReference) event.getSource();
-        activationProcessing(ref);
-        
+      
+      if ("inactive-tenant-ref".equals(event.getName())) {
+        inactivationProcessing(event);
+      } else if ("active-tenant-ref".equals(event.getName())) {
+        activationProcessing(event);
       } else unhandled(message);
       
     }
   }
   
-  private void activationProcessing(TenantReference ref) {
+  private void activationProcessing(Event event) {
     
+    TenantReference ref = (TenantReference) event.getSource();
     BasicDBObject query = new BasicDBObject("tenant", ref.toJSon());
     
     // restore spaces
@@ -190,11 +171,13 @@ public class ActivationTenantActor extends UntypedActor {
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
   }
   
-  private void inactivationProcessing(TenantReference ref) throws InterruptedException {
+  private void inactivationProcessing(Event event) throws InterruptedException {
+    
+    TenantReference ref = (TenantReference) event.getSource();
     
     PageList<Space> listSpace = spaceService.findSpaceInTenant(ref);
     
@@ -268,7 +251,7 @@ public class ActivationTenantActor extends UntypedActor {
     }
     
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
     
   }

@@ -89,7 +89,6 @@ public class DeleteSpaceActor extends UntypedActor{
     while(userService.findUsersInSpace(reference).count() != 0 && roleService.query(new BasicDBObject("space", reference.toJSon())).count() != 0) {
       Thread.sleep(3000);
     }
-    System.out.println("----1"+getSender().path().name());
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(reference, getSelf());
     }

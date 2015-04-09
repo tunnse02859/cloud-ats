@@ -186,7 +186,7 @@ public class ActivationService {
       this.tenantCol.insert(tenant);
       
       TenantReference ref = tenantRefFactory.create(id);
-      Event event = eventFactory.create(ref, "inactive-ref-tenant");
+      Event event = eventFactory.create(ref, "inactive-tenant-ref");
       event.broadcast();
     } else {
       
@@ -196,8 +196,8 @@ public class ActivationService {
   }
   
   public void inActiveTenant(Tenant obj) {
-    
-    Event event = eventFactory.create(obj, "inactive-tenant");
+    TenantReference ref = tenantRefFactory.create(obj.getId());
+    Event event = eventFactory.create(ref, "inactive-tenant-ref");
     event.broadcast();
   }
   
@@ -210,7 +210,7 @@ public class ActivationService {
       tenantService.create(tenant);
 
       TenantReference ref = tenantRefFactory.create(id);
-      Event event = eventFactory.create(ref, "active-ref-tenant");
+      Event event = eventFactory.create(ref, "active-tenant-ref");
       event.broadcast();
     } else {
       logger.info("Tenant to active is not available");

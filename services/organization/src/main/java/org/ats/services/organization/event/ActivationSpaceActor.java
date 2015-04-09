@@ -11,18 +11,16 @@ import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
-import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
+
+import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-
-import akka.actor.UntypedActor;
 
 /**
  * @author NamBV2
@@ -49,25 +47,32 @@ public class ActivationSpaceActor extends UntypedActor{
   @Inject
   private MongoDBService mongo;
   
-  
   @Override
   public void onReceive(Object message) throws Exception {
-    logger.info("Recieved event "+message);
+    
     if(message instanceof Event) {
       Event event = (Event) message;
       if("inactive-space".equals(event.getName())) {
         Space space = (Space) event.getSource();
         SpaceReference ref = spaceRefFactory.create(space.getId());
+        
+        logger.info("Recieved event "+message);
         processInactive(ref);
       } else if("inactive-space-ref".equals(event.getName())) {
         SpaceReference ref = (SpaceReference) event.getSource();
+        
+        logger.info("Recieved event "+message);
         processInactive(ref);
       } else if("active-space".equals(event.getName())) {
         Space space = (Space) event.getSource();
         SpaceReference ref = spaceRefFactory.create(space.getId());
+        
+        logger.info("Recieved event "+message);
         processActive(ref);
       } else if("active-space-ref".equals(event.getName())) {
         SpaceReference ref = (SpaceReference) event.getSource();
+        
+        logger.info("Recieved event "+message);
         processActive(ref);
       } else {
         unhandled(message);
@@ -80,7 +85,6 @@ public class ActivationSpaceActor extends UntypedActor{
     DBCollection roleCol = mongo.getDatabase().getCollection("inactived-role");
     DBCollection userCol = mongo.getDatabase().getCollection("inactived-user");
     PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
-    System.out.println("------------------+++++++++++++"+listRole.count());
   }
 
   private void processInactive(SpaceReference ref) throws InterruptedException {
@@ -89,8 +93,6 @@ public class ActivationSpaceActor extends UntypedActor{
       Thread.sleep(300);
     }
     PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
-    System.out.println("------------------+++++++++++++"+listRole.count());
-    System.out.println("----2"+getSender().path().name());
     if(!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref,getSelf());
     }

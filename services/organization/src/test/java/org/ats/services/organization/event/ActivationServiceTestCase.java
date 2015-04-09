@@ -5,6 +5,8 @@ package org.ats.services.organization.event;
 
 import java.util.logging.Logger;
 
+import org.ats.services.data.MongoDBService;
+import org.ats.services.event.Event;
 import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
@@ -15,7 +17,6 @@ import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,11 +36,6 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
   @Override @BeforeMethod
   public void init() throws Exception {
     super.init();
-  }
-  
-  @AfterMethod
-  public void tearDown() throws Exception {
-    Thread.sleep(5000);
   }
   
   @Test
@@ -78,6 +74,59 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
   }
   
+  @Test
+  public void testActivationTenant() {
+    
+    eventService.setListener(ActivationTenantListener.class);
+    
+    activationService.inActiveTenant("Fsoft");
+    while (tenantService.count() != 2) {
+    }
+    
+    activationService.activeTenant("Fsoft");
+  }
+  
+  @Test
+  public void testInactiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    
+    eventService.setListener(inactiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    
+  }
+  
+  
+  @Test
+  public void testActiveFeature() throws InterruptedException {
+    Tenant tenant = tenantService.get("Fsoft");
+    eventService.setListener(ActiveFeatureListener.class);
+    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    activationService.activeFeature("performace");
+    
+  }
+  
+  static class ActiveFeatureListener extends UntypedActor {
+
+    @Inject Logger logger;
+    
+    @Inject private TenantService tenantService;
+    
+    @Inject private FeatureService featureService;
+    
+    @Inject private MongoDBService mongoService;
+    
+    public void onReceive(Object message) throws Exception {
+      if (message instanceof FeatureReference) {
+        FeatureReference ref = (FeatureReference) message;
+        if(featureService.get(ref.getId()) != null) {
+          Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+        }
+        
+        mongoService.dropDatabase();
+      }
+    }
+  }
+  
   static class InActivationTenantListener extends UntypedActor {
 
     @Inject
@@ -93,6 +142,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
     @Inject private Logger logger;
     
+    @Inject private MongoDBService mongoService;
+    
     @Override
     public void onReceive(Object message) throws Exception {
       
@@ -100,65 +151,19 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
         TenantReference ref = (TenantReference) message;
         
         logger.info("processed inactive tenant : "+ ref.toJSon());
+        
         Assert.assertEquals(activationService.countInActiveTenant(), 1);
-        
         Assert.assertEquals(activationService.countSpace(), 2);
-        
         Assert.assertEquals(activationService.countRole(), 2);
-        
         Assert.assertEquals(activationService.countUser(), 1);
-        
         Assert.assertEquals(tenantService.count(), 2);
-        
         Assert.assertEquals(userService.count(), 0);
-        
         Assert.assertEquals(roleService.count(), 0);
-        
         Assert.assertEquals(spaceService.count(), 0);
+        
+        mongoService.dropDatabase();
       }
     }
-   
-  }
-  @Test
-  public void testActivationTenant() {
-    
-    activationService.inActiveTenant("Fsoft");
-    eventService.setListener(ActivationTenantListener.class);
-    while (tenantService.count() != 2) {
-      
-    }
-    activationService.activeTenant("Fsoft");
-  }
-  
-  static class ActivationTenantListener extends UntypedActor {
-
-    @Inject Logger logger;
-    
-    @Inject private TenantService tenantService;
-    
-    @Override
-    public void onReceive(Object message) throws Exception {
-      
-      if (message instanceof TenantReference) {
-        TenantReference ref = (TenantReference) message;
-        
-        logger.info("actived tenant "+ ref.toJSon());
-        
-        Assert.assertEquals(tenantService.count(), 3);
-        
-      }
-      
-    }
-    
-  }
-  
-  @Test
-  public void testInactiveFeature() throws InterruptedException {
-    Tenant tenant = tenantService.get("Fsoft");
-    
-    eventService.setListener(inactiveFeatureListener.class);
-    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
-    
   }
   
   static class inactiveFeatureListener extends UntypedActor {
@@ -171,6 +176,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     @Inject
     private FeatureService featureService;
     
+    @Inject private MongoDBService mongoService;
+
     @Override
     public void onReceive(Object message) throws Exception {
       
@@ -180,34 +187,36 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
         
         Assert.assertEquals(featureService.count(), 2);
         Assert.assertEquals(tenantService.findIn("features", ref).count(),0);
+        
+        mongoService.dropDatabase();
       }
       
     }
-    
   }
   
-  @Test
-  public void testActiveFeature() throws InterruptedException {
-    Tenant tenant = tenantService.get("Fsoft");
-    eventService.setListener(ActiveFeatureListener.class);
-    activationService.inActiveFeature(tenant.getFeatures().get(1).get());
-    activationService.activeFeature("performace");
-    
-  }
-  
-  static class ActiveFeatureListener extends UntypedActor {
+  static class ActivationTenantListener extends UntypedActor {
 
     @Inject Logger logger;
     
     @Inject private TenantService tenantService;
     
-    @Inject private FeatureService featureService;
+    @Inject private MongoDBService mongoService;
     
+    @Override
     public void onReceive(Object message) throws Exception {
-      if (message instanceof FeatureReference) {
-        FeatureReference ref = (FeatureReference) message;
-        if(featureService.get(ref.getId()) != null) {
-          Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+      
+      if (message instanceof Event) {
+        
+        Event event = (Event) message;
+        
+        if ("active-tenant-ref".equals(event.getName())) {
+          
+          TenantReference ref = (TenantReference) event.getSource();
+
+          logger.info("processed active tenant "+ ref.toJSon());
+          Assert.assertEquals(tenantService.count(), 3);
+          
+          mongoService.dropDatabase();
         }
       }
     }
