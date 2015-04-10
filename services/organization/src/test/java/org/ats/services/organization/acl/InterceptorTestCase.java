@@ -33,6 +33,7 @@ import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -173,6 +174,11 @@ public class InterceptorTestCase {
     this.authService.logOut();
     
     Thread.sleep(3000);
+  }
+  
+  @AfterClass
+  public void dropDB() {
+    this.mongoService.dropDatabase();
   }
 
   @Test
@@ -391,9 +397,6 @@ public class InterceptorTestCase {
 
     this.authService.logOut();
 
-    //this.userService.delete("tuanhq_vt@viettel");
-    //this.tenantService.delete("viettel");
-    //this.featureService.delete("featureViettel");
     createUser("mobi", "dev", "*", "actionMobi", "roleViettel", "featureViettel:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     this.authService.logIn("trinhtv3@viettel", "trinhtran");
 
