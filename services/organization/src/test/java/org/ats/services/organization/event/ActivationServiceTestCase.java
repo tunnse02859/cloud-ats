@@ -56,6 +56,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
     Assert.assertEquals(activationService.countUser(), 0);
     Assert.assertEquals(userService.count(), 1);
+    
+    mongoService.dropDatabase();
   }
   
   @Test
@@ -71,8 +73,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     Assert.assertEquals(spaceService.findSpaceInTenant(tenantRefFactory.create(tenant.getId())).count(), 2);
     Assert.assertEquals(roleService.count(), 2);
     Assert.assertEquals(userService.count(), 1);
+
     eventService.setListener(InActivationTenantListener.class);
-    
     activationService.inActiveTenant("Fsoft");
     
   }
@@ -80,26 +82,25 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testActivationTenant() {
     
-    eventService.setListener(ActivationTenantListener.class);
-    
     activationService.inActiveTenant("Fsoft");
     while (tenantService.count() != 2) {
     }
     
+    eventService.setListener(ActivationTenantListener.class);
     activationService.activeTenant("Fsoft");
   }
   
   @Test
   public void testInactiveFeature() throws InterruptedException {
     Tenant tenant = tenantService.get("Fsoft");
-    
-    eventService.setListener(inactiveFeatureListener.class);
     Feature faeture = tenant.getFeatures().get(0).get();
+    
+    eventService.setListener(InactiveFeatureListener.class);
     activationService.inActiveFeature(faeture);
     Assert.assertEquals(tenantService.findIn("features", featureRefFactory.create(faeture.getId())).count(),3);
   }
   
-  static class inactiveFeatureListener extends UntypedActor {
+  static class InactiveFeatureListener extends UntypedActor {
 
     @Inject Logger logger;
     
@@ -130,15 +131,17 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testActiveFeature() throws InterruptedException {
     Tenant tenant = tenantService.get("Fsoft");
-    eventService.setListener(ActiveFeatureListener.class);
     Feature feature = tenant.getFeatures().get(0).get();
+    
     activationService.inActiveFeature(feature);
+    
     while(featureService.count() != 2 || 
         tenantService.findIn("features", featureRefFactory.create(feature.getId())).count() != 0) {
     }
     Assert.assertEquals(tenantService.findIn("features", featureRefFactory.create(feature.getId())).count(), 0);
-    activationService.activeFeature("performace");
     
+    eventService.setListener(ActiveFeatureListener.class);
+    activationService.activeFeature("performace");
   }
   
   static class ActiveFeatureListener extends UntypedActor {
@@ -151,11 +154,15 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
     public void onReceive(Object message) throws Exception {
       if (message instanceof Event) {
+        
         Event event = (Event) message;
+        
         if("active-feature-ref".equals(event.getName())) {
+          
           FeatureReference ref = (FeatureReference) event.getSource();
           logger.info("active feature "+ref.toJSon());
           Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+          
           mongoService.dropDatabase();
         }
       }
@@ -182,22 +189,24 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     @Override
     public void onReceive(Object message) throws Exception {
       
-      if (message instanceof Event) {
+      if (message instanceof TenantReference) {
+        TenantReference ref = (TenantReference) message;
         
-        Event event = (Event) message;
+        logger.info("processed inactive tenant : "+ ref.toJSon());
         
-        if ("active-tenant-ref".equals(event.getName())) {
-          
-          TenantReference ref = (TenantReference) event.getSource();
-
-          logger.info("processed active tenant "+ ref.toJSon());
-          Assert.assertEquals(tenantService.count(), 3);
-          
-          mongoService.dropDatabase();
-    }
-  }
+        Assert.assertEquals(activationService.countInActiveTenant(), 1);
+        Assert.assertEquals(activationService.countSpace(), 2);
+        Assert.assertEquals(activationService.countRole(), 2);
+        Assert.assertEquals(activationService.countUser(), 1);
+        Assert.assertEquals(tenantService.count(), 2);
+        Assert.assertEquals(userService.count(), 0);
+        Assert.assertEquals(roleService.count(), 0);
+        Assert.assertEquals(spaceService.count(), 0);
+        
+        mongoService.dropDatabase();
+      }
    
-  }
+    }
   }
   
   static class ActivationTenantListener extends UntypedActor {
@@ -210,15 +219,19 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
     @Override
     public void onReceive(Object message) throws Exception {
-      
-      if (message instanceof TenantReference) {
-        TenantReference ref = (TenantReference) message;
-        
-        logger.info("actived tenant "+ ref.toJSon());
-        
-        Assert.assertEquals(tenantService.count(), 3);
-        
-        mongoService.dropDatabase();
+      if (message instanceof Event) {
+
+        Event event = (Event) message;
+
+        if ("active-tenant-ref".equals(event.getName())) {
+
+          TenantReference ref = (TenantReference) event.getSource();
+
+          logger.info("processed active tenant " + ref.toJSon());
+          Assert.assertEquals(tenantService.count(), 3);
+
+          mongoService.dropDatabase();
+        }
       }
     }
     
@@ -228,10 +241,13 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testInactiveSpace() throws InterruptedException {
     Space space = spaceService.list().next().get(0);
+    
     eventService.setListener(InactiveSpaceListener.class);
     activationService.inActiveSpace(space);
+    
     Assert.assertEquals(roleService.count(), 2);
   }
+  
   static class InactiveSpaceListener extends UntypedActor {
 
     @Inject
@@ -249,11 +265,13 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     @Override
     public void onReceive(Object message) throws Exception {
       if(message instanceof Event) {
+        
         Event event = (Event) message;
         SpaceReference ref = (SpaceReference) event.getSource();
         logger.info("inactive space reference "+ ref.toJSon());
         Assert.assertEquals(roleService.count(), 0);
         Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+        
         mongoService.dropDatabase();
       }
       
@@ -264,12 +282,15 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
   @Test 
   public void testActiveSpace() throws InterruptedException {
     Space space = spaceService.list().next().get(0);
-    eventService.setListener(ActiveSpaceListener.class);
+
     activationService.inActiveSpace(space);
+    
     while(userService.findUsersInSpace(spaceRefFactory.create(space.getId())).count() != 0 || 
         roleService.count() != 0 || spaceService.count() != 1) {
     }
     Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+    
+    eventService.setListener(ActiveSpaceListener.class);
     activationService.activeSpace(space);
   }
   
@@ -293,10 +314,12 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
         
         Event event = (Event) message;
         if("active-space-ref".equals(event.getName())) {
+          
           SpaceReference ref = (SpaceReference) event.getSource();
           logger.info("active space reference "+ ref.toJSon());
           Assert.assertEquals(roleService.count(), 2);
           Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 1);
+          
           mongoService.dropDatabase();
         }
         
