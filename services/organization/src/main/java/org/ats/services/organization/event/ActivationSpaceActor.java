@@ -79,7 +79,7 @@ public class ActivationSpaceActor extends UntypedActor{
     DBCollection spaceCol = mongo.getDatabase().getCollection("inactived-space");
     DBCollection userCol = mongo.getDatabase().getCollection("inactived-user");
     SpaceReference ref = (SpaceReference) event.getSource();
-    PageList<Role> listRole = roleService.query(new BasicDBObject("space", ref.toJSon()));
+    
     //insert role into role collection
     PageList<DBObject> listRoleObj = activationService.findRoleIntoInActiveSpace(ref);
     //List<Role> listRole = new ArrayList<Role>();
@@ -99,10 +99,6 @@ public class ActivationSpaceActor extends UntypedActor{
     if (listObj.size() > 0) {
       roleService.restoreRole(listObj);
     }
-    /*for(Role role:listRole) {
-      roleService.create(role);
-      activationService.deleteRole(role);
-    }*/
     
     //insert space into user
     PageList<DBObject> listUserObj = activationService.findUserInActiveSpace(ref);

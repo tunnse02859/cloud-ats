@@ -122,6 +122,7 @@ public class ActivationService {
     
   }
   
+  //Activation Feature
   public void inActiveFeature(Feature obj) {
     FeatureReference ref = featureRefFactory.create(obj.getId());
     if(ref.get() != null) {
@@ -211,6 +212,7 @@ public class ActivationService {
     
   }
   
+  //Activation Space
   public void inActiveSpace(Space obj) {
     SpaceReference ref = spaceRefFactory.create(obj.getId());
     if(ref.get() != null) {

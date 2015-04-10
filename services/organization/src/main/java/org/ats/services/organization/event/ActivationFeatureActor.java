@@ -72,12 +72,6 @@ public class ActivationFeatureActor extends UntypedActor{
     DBCollection tenantCol = mongo.getDatabase().getCollection("inactived-tenant");
     DBCollection featureCol = mongo.getDatabase().getCollection("inactived-feature");
     FeatureReference ref = (FeatureReference) event.getSource();
-    DBObject dbObj = featureCol.findOne(new BasicDBObject("_id",ref.getId()));
-    Feature feature = featureService.transform(dbObj);
-    
-    featureService.create(feature);
-    featureCol.remove(feature);
-    
     PageList<DBObject> listTenantObj = activationService.findTenantIntoInactiveFeature("features", ref);
     listTenantObj.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
     List<Tenant> listTenant = new ArrayList<Tenant>();
@@ -96,6 +90,11 @@ public class ActivationFeatureActor extends UntypedActor{
       }
     }
     
+    DBObject dbObj = featureCol.findOne(new BasicDBObject("_id",ref.getId()));
+    Feature feature = featureService.transform(dbObj);
+    featureService.create(feature);
+    featureCol.remove(dbObj);
+    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());
     }
@@ -111,7 +110,6 @@ public class ActivationFeatureActor extends UntypedActor{
     
     while (tenantService.findIn("features", ref).count() != 0) {
     }
-    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());
     }

@@ -13,6 +13,7 @@ import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.reference.FeatureReference;
@@ -93,7 +94,9 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     Tenant tenant = tenantService.get("Fsoft");
     
     eventService.setListener(inactiveFeatureListener.class);
-    activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    Feature faeture = tenant.getFeatures().get(0).get();
+    activationService.inActiveFeature(faeture);
+    Assert.assertEquals(tenantService.findIn("features", featureRefFactory.create(faeture.getId())).count(),3);
   }
   
   static class inactiveFeatureListener extends UntypedActor {
@@ -113,7 +116,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
       
       if (message instanceof FeatureReference) {
         FeatureReference ref = (FeatureReference) message;
-        logger.info("processed inactive feature reference "+ ref.toJSon());
+        logger.info("inactive feature reference "+ ref.toJSon());
         
         Assert.assertEquals(featureService.count(), 2);
         Assert.assertEquals(tenantService.findIn("features", ref).count(),0);
@@ -129,6 +132,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     Tenant tenant = tenantService.get("Fsoft");
     eventService.setListener(ActiveFeatureListener.class);
     activationService.inActiveFeature(tenant.getFeatures().get(0).get());
+    while(featureService.count() != 2) {
+    }
     activationService.activeFeature("performace");
     
   }
@@ -144,11 +149,12 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     public void onReceive(Object message) throws Exception {
       if (message instanceof Event) {
         Event event = (Event) message;
-        if("actived-feature".equals(event.getName())) {
+        if("actived-feature-ref".equals(event.getName())) {
           FeatureReference ref = (FeatureReference) event.getSource();
+          logger.info("active feature "+ref.toJSon());
           Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
+          mongoService.dropDatabase();
         }
-        mongoService.dropDatabase();
       }
     }
   }
@@ -253,6 +259,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     Space space = spaceService.list().next().get(0);
     eventService.setListener(ActiveSpaceListener.class);
     activationService.inActiveSpace(space);
+    while(spaceService.count() != 1) {
+    }
     activationService.activeSpace(space);
   }
   
