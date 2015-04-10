@@ -94,7 +94,6 @@ public class ActivationFeatureActor extends UntypedActor{
     Feature feature = featureService.transform(dbObj);
     featureService.create(feature);
     featureCol.remove(dbObj);
-    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());
     }
