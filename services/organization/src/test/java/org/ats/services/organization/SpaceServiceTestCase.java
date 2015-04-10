@@ -13,6 +13,7 @@ import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,10 +42,9 @@ public class SpaceServiceTestCase extends AbstractTestCase {
   /** .*/
   private ReferenceFactory<SpaceReference> spaceRefFactory;
   
-  @Override
   @BeforeMethod
   public void init() throws Exception {
-    super.init();
+    super.init(false);
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
@@ -52,6 +52,11 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     this.roleRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
     this.spaceRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    super.tearDown();
   }
   
   @Test

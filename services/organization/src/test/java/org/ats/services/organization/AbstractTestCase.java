@@ -28,14 +28,18 @@ public abstract class AbstractTestCase {
   /** .*/
   protected EventService eventService;
   
-  public void init() throws Exception {
+  public void init(boolean seprate) throws Exception {
     System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     
     String host = "localhost";
     
     int port = 27017;
     
-    String dbName = "test-db-" + System.currentTimeMillis();
+    String dbName;
+    
+    if (seprate) {
+      dbName = "test-db-" + System.currentTimeMillis();
+    } else dbName = "test-db";
     
     Injector injector = Guice.createInjector(new DatabaseModule(host, port, dbName), new EventModule(), new OrganizationServiceModule());
     

@@ -10,6 +10,7 @@ import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,14 +25,18 @@ public class MixinTestCase extends AbstractTestCase {
   
   private UserFactory userFactory;
   
-  @Override
   @BeforeMethod
   public void init() throws Exception {
-    super.init();
+    super.init(false);
     this.userService  = injector.getInstance(UserService.class);
     this.userFactory = injector.getInstance(UserFactory.class);
   }
 
+  @AfterMethod
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
+  
   @SuppressWarnings("deprecation")
   @Test
   public void test() {

@@ -17,6 +17,7 @@ import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,10 +42,10 @@ public class RoleServiceTestCase extends AbstractTestCase {
   private ReferenceFactory<SpaceReference> spaceFactory;
 
   private ReferenceFactory<RoleReference> roleRef; 
-  @Override
+
   @BeforeMethod
   public void init() throws Exception {
-    super.init();
+    super.init(false);
     this.service = injector.getInstance(RoleService.class);
     this.factory = injector.getInstance(RoleFactory.class);
     this.permFactory = injector.getInstance(PermissionFactory.class);
@@ -55,6 +56,11 @@ public class RoleServiceTestCase extends AbstractTestCase {
     this.eventService = injector.getInstance(EventService.class);
     this.eventService.setInjector(injector);
     this.eventService.start();
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    super.tearDown();
   }
   
   @Test

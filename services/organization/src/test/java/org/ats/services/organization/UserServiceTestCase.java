@@ -15,6 +15,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.entity.reference.UserReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,10 +48,9 @@ public class UserServiceTestCase extends AbstractTestCase {
   /** .*/
   private ReferenceFactory<RoleReference> roleRefFactory;
   
-  @Override
   @BeforeMethod
   public void init() throws Exception {
-    super.init();
+    super.init(false);
     
   //
   this.userService = injector.getInstance(UserService.class);
@@ -60,6 +60,11 @@ public class UserServiceTestCase extends AbstractTestCase {
   this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
   this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
   this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    super.tearDown();
   }
   
   @Test

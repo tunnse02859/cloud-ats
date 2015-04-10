@@ -62,7 +62,7 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
   protected Role tester;
   
   public void init() throws Exception {
-    super.init();
+    super.init(true);
     this.tenantService = injector.getInstance(TenantService.class);
     this.tenantFactory = injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));

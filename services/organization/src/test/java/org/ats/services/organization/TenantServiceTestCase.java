@@ -11,6 +11,7 @@ import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,15 +40,19 @@ public class TenantServiceTestCase extends AbstractTestCase {
   /** .*/ 
   private TenantFactory tenantFactory;
   
-  @Override
   @BeforeMethod
   public void init() throws Exception {
-    super.init();
+    super.init(false);
     this.service = this.injector.getInstance(TenantService.class);
     this.factory = this.injector.getInstance(TenantFactory.class);
     this.featureRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    super.tearDown();
   }
   
   @Test
