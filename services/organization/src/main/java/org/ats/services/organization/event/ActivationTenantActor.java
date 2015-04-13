@@ -165,8 +165,8 @@ public class ActivationTenantActor extends UntypedActor {
     activationService.deleteTenant(ref.getId());
     
     while (activationService.countSpaceIntoInActiveTenant(new BasicDBObject("tenant", ref.toJSon())) != 0
-       && activationService.countInActiveUser(new BasicDBObject("tenant", ref.toJSon())) != 0 
-       && activationService.hasTenant(ref.getId())) {
+       || activationService.countInActiveUser(new BasicDBObject("tenant", ref.toJSon())) != 0 
+       || activationService.hasTenant(ref.getId())) {
 
     }
     
@@ -244,9 +244,9 @@ public class ActivationTenantActor extends UntypedActor {
     tenantService.delete(ref.getId());
     //
     
-    while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0 &&
-        spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0
-        && (tenantService.get(ref.getId()) != null)) {
+    while (userService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0
+        || spaceService.query(new BasicDBObject("tenant", ref.toJSon())).count() != 0
+        || (tenantService.get(ref.getId()) != null)) {
       
     }
     
