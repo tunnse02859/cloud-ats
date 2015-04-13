@@ -153,6 +153,8 @@ public class ActivationService {
     DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",id));
     if(dbObj != null) {
       Feature feature = featureService.transform(dbObj);
+      featureService.create(feature);
+      
       FeatureReference ref = featureRefFactory.create(feature.getId());
       Event event = eventFactory.create(ref, "active-feature-ref");
       event.broadcast();
@@ -164,6 +166,9 @@ public class ActivationService {
   public void activeFeature(Feature obj) {
     DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",obj.getId()));
     if(dbObj != null) {
+      Feature feature = featureService.transform(dbObj);
+      featureService.create(feature);
+      
       FeatureReference ref = featureRefFactory.create(obj.getId());
       Event event = eventFactory.create(ref, "active-feature-ref");
       event.broadcast();
@@ -308,6 +313,9 @@ public class ActivationService {
   public void activeSpace(String id) {
     DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",id));
     if(dbObj != null) {
+      Space space = spaceService.transform(dbObj);
+      spaceService.create(space);
+      
       SpaceReference ref = spaceRefFactory.create(id);
       Event event = eventFactory.create(ref, "active-space-ref");
       event.broadcast();
@@ -319,6 +327,10 @@ public class ActivationService {
   public void activeSpace(Space obj) {
     DBObject dbObj = this.spaceCol.findOne(new BasicDBObject("_id",obj.getId()));
     if(dbObj != null) {
+      
+      Space space = spaceService.transform(dbObj);
+      spaceService.create(space);
+      
       SpaceReference ref = spaceRefFactory.create(obj.getId());
       Event event = eventFactory.create(ref, "active-space-ref");
       event.broadcast();
@@ -395,6 +407,12 @@ public class ActivationService {
       return true;
     } else return false;
   }
+  
+  public DBObject hasFeature(String id) {
+    DBObject dbObj = this.featureCol.findOne(new BasicDBObject("_id",id));
+    return dbObj;
+  }
+  
   public void activeUser(String id) {
     
     logger.info("active user has id : "+ id);
@@ -405,6 +423,14 @@ public class ActivationService {
     
     restoreUser(id);
     
+  }
+  
+  public void restoreTenant(String id) {
+    this.tenantCol.remove(new BasicDBObject("_id",id));
+  }
+  
+  public void restoreFeature(String id) {
+    this.featureCol.remove(new BasicDBObject("_id",id));
   }
   
   public void restoreUser(String id) {

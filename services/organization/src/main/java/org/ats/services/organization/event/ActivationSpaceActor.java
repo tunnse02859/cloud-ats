@@ -75,8 +75,6 @@ public class ActivationSpaceActor extends UntypedActor{
   }
 
   private void processActive(Event event) {
-    DBCollection spaceCol = mongo.getDatabase().getCollection("inactived-space");
-    DBCollection userCol = mongo.getDatabase().getCollection("inactived-user");
     SpaceReference ref = (SpaceReference) event.getSource();
     
     //insert role into role collection
@@ -114,15 +112,12 @@ public class ActivationSpaceActor extends UntypedActor{
       user.joinSpace(ref);
       userService.update(user);
       if(u.getSpaces().size() == user.getSpaces().size()) {
-        userCol.remove(new BasicDBObject("_id",u.getEmail()));
+        activationService.restoreUser(u.getEmail());
       }
     }
     
     //Insert space in space collection
-    DBObject spaceObj = spaceCol.findOne(new BasicDBObject("_id",ref.getId()));
-    Space space = spaceService.transform(spaceObj);
-    spaceService.create(space);
-    activationService.deleteSpace(space);
+    activationService.deleteSpace(ref.get());
     
     if(!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());

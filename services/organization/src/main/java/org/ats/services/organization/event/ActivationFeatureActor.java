@@ -69,8 +69,6 @@ public class ActivationFeatureActor extends UntypedActor{
   }
 
   private void processActive(Event event) throws InterruptedException {
-    DBCollection tenantCol = mongo.getDatabase().getCollection("inactived-tenant");
-    DBCollection featureCol = mongo.getDatabase().getCollection("inactived-feature");
     FeatureReference ref = (FeatureReference) event.getSource();
     PageList<DBObject> listTenantObj = activationService.findTenantIntoInactiveFeature("features", ref);
     listTenantObj.setSortable(new MapBuilder<String,Boolean>("created_date", true).build());
@@ -86,14 +84,12 @@ public class ActivationFeatureActor extends UntypedActor{
       tenant.addFeature(refFactory.create(ref.getId()));
       tenantService.update(tenant);
       if(tenantService.get(t.getId()).getFeatures().size() == t.getFeatures().size()) {
-        tenantCol.remove(new BasicDBObject("_id",t.getId()));
+        activationService.restoreTenant(t.getId());
       }
     }
     
-    DBObject dbObj = featureCol.findOne(new BasicDBObject("_id",ref.getId()));
-    Feature feature = featureService.transform(dbObj);
-    featureService.create(feature);
-    featureCol.remove(dbObj);
+    activationService.restoreFeature(ref.getId());
+    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());
     }
