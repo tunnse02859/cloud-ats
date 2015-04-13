@@ -16,6 +16,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -88,7 +89,7 @@ public class OrganizationContextTestCase extends AbstractTestCase {
   }
   
   @AfterClass
-  public void tearDown() throws Exception {
+  public void dropDB() throws Exception {
     super.tearDown();
   }
   

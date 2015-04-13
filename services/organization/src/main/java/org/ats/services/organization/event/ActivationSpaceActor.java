@@ -18,7 +18,6 @@ import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 
 import akka.actor.UntypedActor;
@@ -124,6 +123,7 @@ public class ActivationSpaceActor extends UntypedActor{
     Space space = spaceService.transform(spaceObj);
     spaceService.create(space);
     activationService.deleteSpace(space);
+    
     if(!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event, getSelf());
     }

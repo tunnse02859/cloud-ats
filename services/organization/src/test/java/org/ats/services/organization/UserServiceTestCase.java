@@ -51,7 +51,7 @@ public class UserServiceTestCase extends AbstractTestCase {
   
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(true);
     
   //
   this.userService = injector.getInstance(UserService.class);
@@ -72,6 +72,7 @@ public class UserServiceTestCase extends AbstractTestCase {
   public void dropDB() throws Exception {
     super.tearDown();
   }
+  
   @Test
   public void testCRUD() throws Exception {
     

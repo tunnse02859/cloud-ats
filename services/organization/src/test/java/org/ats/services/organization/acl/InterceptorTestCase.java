@@ -172,8 +172,6 @@ public class InterceptorTestCase {
   @AfterMethod
   public void tearDown() throws InterruptedException {
     this.authService.logOut();
-    
-    Thread.sleep(3000);
   }
   
   @AfterClass
