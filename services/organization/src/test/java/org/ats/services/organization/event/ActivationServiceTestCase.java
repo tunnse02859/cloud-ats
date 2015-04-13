@@ -278,8 +278,8 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
 
     activationService.inActiveSpace(space);
     
-    while(userService.findUsersInSpace(spaceRefFactory.create(space.getId())).count() != 0 || 
-        roleService.count() != 0 || spaceService.count() != 1) {
+    while(userService.findUsersInSpace(spaceRefFactory.create(space.getId())).count() != 0 
+        || roleService.count() != 0 || spaceService.count() != 1) {
     }
     eventService.setListener(ActiveSpaceListener.class);
     activationService.activeSpace(space);
