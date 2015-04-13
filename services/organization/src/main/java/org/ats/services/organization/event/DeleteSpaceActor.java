@@ -10,6 +10,7 @@ import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
+import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
@@ -38,6 +39,9 @@ public class DeleteSpaceActor extends UntypedActor{
 
   @Inject
   private RoleService roleService;
+  
+  @Inject 
+  private SpaceService spaceService;
 
   @Override
   public void onReceive(Object message) throws Exception {
@@ -87,9 +91,9 @@ public class DeleteSpaceActor extends UntypedActor{
 
     //send processed event to listener
     while(userService.findUsersInSpace(reference).count() != 0 
-        && roleService.query(new BasicDBObject("space", reference.toJSon())).count() != 0) {
+        || roleService.query(new BasicDBObject("space", reference.toJSon())).count() != 0 
+        || spaceService.get(reference.getId()) != null) {
     }
-    
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(reference, getSelf());
     }

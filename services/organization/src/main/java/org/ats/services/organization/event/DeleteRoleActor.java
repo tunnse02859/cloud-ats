@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
+import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Role;
@@ -36,6 +37,9 @@ public class DeleteRoleActor extends UntypedActor {
   
   @Inject
   private ReferenceFactory<RoleReference> roleRefFactory;
+  
+  @Inject
+  private RoleService roleService;
   
   @Inject
   private Logger logger;
@@ -81,7 +85,10 @@ public class DeleteRoleActor extends UntypedActor {
         userService.update(user);
       }
     }
-    
+    while(spaceService.findIn("roles", reference).count() != 0 
+        || userService.findIn("roles", reference).count() != 0 
+        || roleService.get(reference.getId()) != null) {
+    }
     //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(reference, getSelf());

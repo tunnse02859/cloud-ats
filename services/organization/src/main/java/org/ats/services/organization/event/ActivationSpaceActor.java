@@ -127,8 +127,11 @@ public class ActivationSpaceActor extends UntypedActor{
   private void processInactive(Event event) throws InterruptedException {
     SpaceReference ref = (SpaceReference) event.getSource();
     spaceService.delete(ref.getId());
-    while(userService.findUsersInSpace(ref).count() != 0 || roleService.query(new BasicDBObject("space", ref.toJSon())).count() != 0) {
+    while(userService.findUsersInSpace(ref).count() != 0 
+        || roleService.query(new BasicDBObject("space", ref.toJSon())).count() != 0 
+        || spaceService.get(ref.getId()) != null) {
     }
+    
     if(!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(event,getSelf());
     }

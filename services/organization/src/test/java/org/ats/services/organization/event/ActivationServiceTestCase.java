@@ -105,9 +105,6 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     @Inject Logger logger;
     
     @Inject 
-    private TenantService tenantService;
-    
-    @Inject
     private FeatureService featureService;
     
     @Inject private MongoDBService mongoService;
@@ -120,8 +117,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
         logger.info("inactive feature reference "+ ref.toJSon());
         
         Assert.assertEquals(featureService.count(), 2);
-        Assert.assertEquals(tenantService.findIn("features", ref).count(),0);
-        
+
         mongoService.dropDatabase();
       }
       
@@ -138,7 +134,6 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     while(featureService.count() != 2 || 
         tenantService.findIn("features", featureRefFactory.create(feature.getId())).count() != 0) {
     }
-    Assert.assertEquals(tenantService.findIn("features", featureRefFactory.create(feature.getId())).count(), 0);
     
     eventService.setListener(ActiveFeatureListener.class);
     activationService.activeFeature("performace");
@@ -148,9 +143,10 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
 
     @Inject Logger logger;
     
-    @Inject private TenantService tenantService;
-    
     @Inject private MongoDBService mongoService;
+    
+    @Inject
+    private FeatureService featureService;
     
     public void onReceive(Object message) throws Exception {
       if (message instanceof Event) {
@@ -161,8 +157,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
           
           FeatureReference ref = (FeatureReference) event.getSource();
           logger.info("active feature "+ref.toJSon());
-          Assert.assertEquals(tenantService.findIn("features", ref).count(), 3);
-          
+          Assert.assertEquals(featureService.count(), 3);
           mongoService.dropDatabase();
         }
       }
@@ -244,8 +239,6 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     
     eventService.setListener(InactiveSpaceListener.class);
     activationService.inActiveSpace(space);
-    
-    Assert.assertEquals(roleService.count(), 2);
   }
   
   static class InactiveSpaceListener extends UntypedActor {
@@ -254,7 +247,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     private Logger logger;
     
     @Inject
-    private UserService userService;
+    private SpaceService spaceService;
     
     @Inject
     private RoleService roleService;
@@ -270,7 +263,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
         SpaceReference ref = (SpaceReference) event.getSource();
         logger.info("inactive space reference "+ ref.toJSon());
         Assert.assertEquals(roleService.count(), 0);
-        Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
+        Assert.assertEquals(spaceService.count(), 1);
         
         mongoService.dropDatabase();
       }
@@ -288,8 +281,6 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     while(userService.findUsersInSpace(spaceRefFactory.create(space.getId())).count() != 0 || 
         roleService.count() != 0 || spaceService.count() != 1) {
     }
-    Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 0);
-    
     eventService.setListener(ActiveSpaceListener.class);
     activationService.activeSpace(space);
   }
@@ -303,7 +294,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
     private RoleService roleService;
     
     @Inject
-    private UserService userService;
+    private SpaceService spaceService;
     
     @Inject 
     private MongoDBService mongoService;
@@ -318,7 +309,7 @@ public class ActivationServiceTestCase extends AbstractEventTestCase {
           SpaceReference ref = (SpaceReference) event.getSource();
           logger.info("active space reference "+ ref.toJSon());
           Assert.assertEquals(roleService.count(), 2);
-          Assert.assertEquals(userService.get("haint@cloud-ats.net").getSpaces().size(), 1);
+          Assert.assertEquals(spaceService.count(), 2);
           
           mongoService.dropDatabase();
         }
