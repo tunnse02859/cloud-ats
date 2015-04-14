@@ -1,0 +1,44 @@
+@args() {String packageName, String extraImports, String suiteName, String driverVar, String initDriver, String cases} 
+
+package @packageName
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import static org.testng.Assert.*;
+@extraImports
+import java.util.concurrent.TimeUnit;
+import java.util.Date;
+import java.io.File;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.*;
+import static org.openqa.selenium.OutputType.*;
+
+public class @suiteName {
+
+  @driverVar
+
+  @@BeforeMethod
+  public void setUp() throws Exception {
+    @initDriver
+    wd.manage().timeouts().implicitlyWait({timeoutSeconds}, TimeUnit.SECONDS);
+  }
+   
+  @@AfterMethod
+  public void tearDown() {
+    wd.quit();
+  }
+  
+  @cases
+
+  public static boolean isAlertPresent(FirefoxDriver wd) {
+    try {
+      wd.switchTo().alert();
+      return true;
+    } catch (NoAlertPresentException e) {
+      return false;
+    }
+  }
+}
