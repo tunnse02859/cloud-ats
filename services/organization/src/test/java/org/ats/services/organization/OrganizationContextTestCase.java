@@ -16,7 +16,6 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -58,7 +57,7 @@ public class OrganizationContextTestCase extends AbstractTestCase {
   
   @BeforeClass
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.tenantService = this.injector.getInstance(TenantService.class);
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));

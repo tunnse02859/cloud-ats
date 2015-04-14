@@ -37,18 +37,15 @@ public class DeleteFeatureActor extends UntypedActor {
         Feature feature = (Feature) event.getSource();
         FeatureReference ref = featureRefFactory.create(feature.getId());
         process(ref);
-      } else if ("delete-feature-ref".equals(event.getName())) {
-        FeatureReference ref = (FeatureReference) event.getSource();
-        process(ref);
-      } else {
-        unhandled(message);
       }
+    } else {
+      unhandled(message);
     }
   }
   
   private void process(FeatureReference ref) {
     
-    logger.info("Process event source: " + ref);
+    logger.info("Process event delete-feature " + ref.toJSon());
     
     PageList<Tenant> listTenant = tenantService.findIn("features", ref);
     listTenant.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
@@ -65,6 +62,7 @@ public class DeleteFeatureActor extends UntypedActor {
       tenantService.update(tenant);
     }
     
+    //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
       getSender().tell(ref, getSelf());
     }

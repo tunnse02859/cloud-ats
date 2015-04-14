@@ -42,21 +42,16 @@ public class DeleteTenantActor extends UntypedActor{
       Event event = (Event) message;
       if ("delete-tenant".equals(event.getName())) {
         Tenant tenant = (Tenant) event.getSource();
-        TenantReference ref = tenantRefFactory.create(tenant.getId());
-        process(ref);
-      } else if ("delete-tenant-ref".equals(event.getName())) {
-        TenantReference ref = (TenantReference) event.getSource();
-        process(ref);
-      } else {
-        unhandled(message);
+        process(tenant);
       }
+    } else {
+      unhandled(message);
     }
-    
   }
 
-  private void process(TenantReference ref) {
-    
-    logger.info("Process event source: " + ref);
+  private void process(Tenant tenant) {
+    TenantReference ref = tenantRefFactory.create(tenant.getId());
+    logger.info("Process event delete-tenant " + ref.toJSon());
 
     //Delete all user in tenant
     userService.deleteBy(new BasicDBObject("tenant", ref.toJSon()));

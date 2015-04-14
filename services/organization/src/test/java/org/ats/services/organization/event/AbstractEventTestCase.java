@@ -25,9 +25,11 @@ import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
+import org.testng.Assert;
 
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author TrinhTV3
@@ -58,11 +60,17 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
   
   protected ActivationService activationService;
   
+  
   protected Role admin;
   protected Role tester;
   
-  public void init() throws Exception {
-    super.init(true);
+  protected Space space1;
+  protected Space space2;
+  
+  protected void initData() {
+    
+    System.out.println("Start initialize data");
+    
     this.tenantService = injector.getInstance(TenantService.class);
     this.tenantFactory = injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
@@ -83,11 +91,7 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
     this.featureService = injector.getInstance(FeatureService.class);
     this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     this.activationService = injector.getInstance(ActivationService.class);
-    System.out.println("Start initialize data");
-    initData();
-  }
-  
-  private void initData() {
+    
     Tenant tenant = tenantFactory.create("Fsoft");
     
     FeatureReference feature1 = featureRefFactory.create("performace");
@@ -98,37 +102,55 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
     tenant.addFeature(feature1, feature2, feature3);
     tenantService.create(tenant);
     
-    Tenant tenant1 = tenantFactory.create("Fsoft1");
-    tenant1.addFeature(feature1, feature2, feature3);
-    tenantService.create(tenant1);
-    
-    Tenant tenant2 = tenantFactory.create("Fsoft2");
-    tenant2.addFeature(feature1, feature2, feature3);
-    tenantService.create(tenant2);
-    
-    Space space = spaceFactory.create("FSU1.BU11");
-    space.setTenant(tenantRefFactory.create(tenant.getId()));
-    
-    Space space1 = spaceFactory.create("FSU1.Bu12");
+    space1 = spaceFactory.create("FSU1.BU11");
     space1.setTenant(tenantRefFactory.create(tenant.getId()));
     
+    space2 = spaceFactory.create("FSU1.Bu12");
+    space2.setTenant(tenantRefFactory.create(tenant.getId()));
+    
     admin = roleFactory.create("admin");
-    admin.setSpace(spaceRefFactory.create(space.getId()));
+    admin.setSpace(spaceRefFactory.create(space1.getId()));
     admin.addPermission(permFactory.create("*:*@Fsoft:*"));
     
     tester = roleFactory.create("tester");
-    tester.setSpace(spaceRefFactory.create(space.getId()));
-    tester.addPermission(permFactory.create("test:*@Fsoft:" + space.getId()));
+    tester.setSpace(spaceRefFactory.create(space1.getId()));
+    tester.addPermission(permFactory.create("test:*@Fsoft:" + space1.getId()));
     
-    space.addRole(roleRefFactory.create(admin.getId()), roleRefFactory.create(tester.getId()));
-    spaceService.create(space, space1);
+    space1.addRole(roleRefFactory.create(admin.getId()), roleRefFactory.create(tester.getId()));
+    spaceService.create(space1, space2);
     roleService.create(admin, tester);
     
     User user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
     user.setTenant(tenantRefFactory.create(tenant.getId()));
-    user.joinSpace(spaceRefFactory.create(space.getId()));
+    user.joinSpace(spaceRefFactory.create(space1.getId()));
     user.addRole(roleRefFactory.create(admin.getId()), roleRefFactory.create(tester.getId()));
     userService.create(user);
-    
+  }
+
+  protected void waitToFinishDeleteRole(RoleReference ref) {
+    while (spaceService.findIn("roles", ref).count() != 0 || userService.findIn("roles", ref).count() != 0) {
+    }
+  }
+  
+  protected void waitToFinishDeleteFeature(FeatureReference ref) {
+    while(tenantService.findIn("features", ref).count() != 0) {
+    }
+  }
+  
+  protected void waitToFinishDeleteSpace(SpaceReference spaceRef) {
+    while(userService.findUsersInSpace(spaceRef).count() != 0 
+        || roleService.query(new BasicDBObject("space", spaceRef.toJSon())).count() != 0) {
+    }
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  protected void waitToFinishDeleteTenant(TenantReference tenantRef) {
+    while (userService.findUserInTenant(tenantRef).count() != 0
+      || spaceService.findSpaceInTenant(tenantRef).count() != 0) {
+      }
   }
 }

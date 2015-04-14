@@ -14,7 +14,6 @@ import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -47,9 +46,6 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   private EventFactory eventFactory;
   
   @Inject
-  private ReferenceFactory<SpaceReference> refFactory;
-  
-  @Inject
   SpaceService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -70,10 +66,8 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   
   @Override
   public void delete(String id) {
-    super.delete(id);
-    SpaceReference ref = refFactory.create(id);
-    Event event = eventFactory.create(ref, "delete-space-ref");
-    event.broadcast();
+    Space space = get(id);
+    delete(space);
   }
 
   public Space transform(DBObject source) {

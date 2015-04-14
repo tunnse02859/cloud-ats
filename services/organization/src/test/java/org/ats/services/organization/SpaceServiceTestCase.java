@@ -45,7 +45,7 @@ public class SpaceServiceTestCase extends AbstractTestCase {
   
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));

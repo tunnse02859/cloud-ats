@@ -46,7 +46,7 @@ public class RoleServiceTestCase extends AbstractTestCase {
 
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.service = injector.getInstance(RoleService.class);
     this.factory = injector.getInstance(RoleFactory.class);
     this.permFactory = injector.getInstance(PermissionFactory.class);

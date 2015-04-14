@@ -43,7 +43,7 @@ public class TenantServiceTestCase extends AbstractTestCase {
   
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.service = this.injector.getInstance(TenantService.class);
     this.factory = this.injector.getInstance(TenantFactory.class);
     this.featureRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));

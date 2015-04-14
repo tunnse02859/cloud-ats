@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
-import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Role;
@@ -39,9 +38,6 @@ public class DeleteRoleActor extends UntypedActor {
   private ReferenceFactory<RoleReference> roleRefFactory;
   
   @Inject
-  private RoleService roleService;
-  
-  @Inject
   private Logger logger;
 
   @Override
@@ -53,45 +49,39 @@ public class DeleteRoleActor extends UntypedActor {
         Role role = (Role) event.getSource();
         RoleReference ref = roleRefFactory.create(role.getId());
         process(ref);
-      } else if ("delete-role-ref".equals(event.getName())) {
-        RoleReference ref = (RoleReference) event.getSource();
-        process(ref);
       }
     } else {
       unhandled(message);
     }
   }
   
-  private void process(RoleReference reference) {
+  private void process(RoleReference ref) {
     
-    logger.info("Process event source: " + reference);
+    logger.info("Process event delete-role " + ref.toJSon());
     
-    PageList<Space> listSpace = spaceService.findIn("roles", reference);
+    PageList<Space> listSpace = spaceService.findIn("roles", ref);
     listSpace.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listSpace.hasNext()) {
       List<Space> spaces = listSpace.next();
       for (Space space : spaces) {
-        space.removeRole(reference);
+        space.removeRole(ref);
         spaceService.update(space);
       }
     }
     
-    PageList<User> listUser = userService.findIn("roles", reference); 
+    PageList<User> listUser = userService.findIn("roles", ref); 
     listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listUser.hasNext()) {
       List<User> users = listUser.next();
       for (User user : users) {
-        user.removeRole(reference);
+        user.removeRole(ref);
         userService.update(user);
       }
     }
-    while(spaceService.findIn("roles", reference).count() != 0 
-        || userService.findIn("roles", reference).count() != 0 
-        || roleService.get(reference.getId()) != null) {
-    }
+    
     //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(reference, getSelf());
+      getSender().tell(ref, getSelf());
     }
   }
 }

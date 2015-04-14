@@ -27,7 +27,7 @@ public class MixinTestCase extends AbstractTestCase {
   
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.userService  = injector.getInstance(UserService.class);
     this.userFactory = injector.getInstance(UserFactory.class);
   }

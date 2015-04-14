@@ -51,7 +51,7 @@ public class UserServiceTestCase extends AbstractTestCase {
   
   @BeforeMethod
   public void init() throws Exception {
-    super.init(true);
+    super.init(this.getClass().getSimpleName());
     
   //
   this.userService = injector.getInstance(UserService.class);

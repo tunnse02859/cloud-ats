@@ -11,8 +11,6 @@ import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.organization.entity.reference.FeatureReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,10 +31,6 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
   /** .*/
   @Inject
   private FeatureFactory factory;
-  
-  /** .*/
-  @Inject
-  private ReferenceFactory<FeatureReference> refFactory;
   
   /** .*/
   @Inject
@@ -64,16 +58,11 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
     super.delete(obj);
     Event event = eventFactory.create(obj, "delete-feature");
     event.broadcast();
-    
   }
   
   @Override
   public void delete(String id) {
-    super.delete(id);
-    FeatureReference ref = refFactory.create(id);
-    Event event = eventFactory.create(ref, "delete-feature-ref");
-    event.broadcast();
-    
+    Feature feature = get(id);
+    delete(feature);
   }
-
 }

@@ -26,7 +26,7 @@ public class FeatureServiceTestCase extends AbstractTestCase {
 
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
     this.service = this.injector.getInstance(FeatureService.class);
     this.factory = this.injector.getInstance(FeatureFactory.class);
   }

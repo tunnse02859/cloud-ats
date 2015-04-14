@@ -1,6 +1,5 @@
 package org.ats.services.organization.event;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -10,18 +9,16 @@ import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
-import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
-import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 
-import com.mongodb.BasicDBObject;
-
 import akka.actor.UntypedActor;
+
+import com.mongodb.BasicDBObject;
 
 public class DeleteSpaceActor extends UntypedActor{
 
@@ -35,14 +32,8 @@ public class DeleteSpaceActor extends UntypedActor{
   private ReferenceFactory<SpaceReference> spaceRefFactory;
 
   @Inject
-  private ReferenceFactory<RoleReference> roleRefFactory;
-
-  @Inject
   private RoleService roleService;
   
-  @Inject 
-  private SpaceService spaceService;
-
   @Override
   public void onReceive(Object message) throws Exception {
 
@@ -50,52 +41,46 @@ public class DeleteSpaceActor extends UntypedActor{
       Event event = (Event) message;
       if("delete-space".equals(event.getName())) {
         Space space = (Space) event.getSource();
-        SpaceReference ref = spaceRefFactory.create(space.getId());
-        process(ref);
-      } else if("delete-space-ref".equals(event.getName())) {
-        SpaceReference ref = (SpaceReference) event.getSource();
-        process(ref);
-      } else {
-        unhandled(message);
+        process(space);
       }
+    } else {
+      unhandled(message);
     }
-
   }
 
-  private void process(SpaceReference reference) throws InterruptedException {
-    
-    logger.info("Process event source: " + reference);
-    
-    PageList<Role> listRole = roleService.query(new BasicDBObject("space", reference.toJSon()));
-    List<RoleReference> holder = new ArrayList<RoleReference>();
-    while (listRole.hasNext()) {
-      List<Role> roles = listRole.next();
-      for (Role role : roles) {
-        holder.add(roleRefFactory.create(role.getId()));
-      }
-    }
+  private void process(Space space) throws InterruptedException {
 
-    for(RoleReference ref : holder) {
-      roleService.delete(ref.getId());
-    }
+    SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+    logger.info("Process event delete-space " + spaceRef.toJSon());
     
-    PageList<User> listUser = userService.findUsersInSpace(reference);
+    //leave user out to space
+    PageList<User> listUser = userService.findUsersInSpace(spaceRef);
     listUser.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
     while(listUser.hasNext()) {
       List<User> users = listUser.next();
       for(User user:users) {
-        user.leaveSpace(reference);
+        user.leaveSpace(spaceRef);
         userService.update(user);
       }
     }
+    
+    //delete role of space
+    for(RoleReference ref : space.getRoles()) {
+      roleService.delete(ref.getId());
 
-    //send processed event to listener
-    while(userService.findUsersInSpace(reference).count() != 0 
-        || roleService.query(new BasicDBObject("space", reference.toJSon())).count() != 0 
-        || spaceService.get(reference.getId()) != null) {
+      //wait for event bubble processing
+      while (userService.findIn("roles", ref).count() != 0) {
+      }
     }
+
+    //wait for event bubble processing
+    while(userService.findUsersInSpace(spaceRef).count() != 0 
+        || roleService.query(new BasicDBObject("space", spaceRef.toJSon())).count() != 0) {
+    }
+    
+    //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(reference, getSelf());
+      getSender().tell(spaceRef, getSelf());
     }
   }
 }

@@ -42,7 +42,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -327,14 +326,8 @@ public class InterceptorTestCase {
 
     this.authService.logOut();
 
-    //
-    //this.userService.delete("trinhtv3@viettel");
-    this.tenantService.delete("mobi");
-    this.featureService.delete("featureViettel");
-    
-    while (this.tenantService.get("mobi") != null || this.userService.get("trinhtv3@viettel") != null) {
-      //wait for clean up
-    }
+    //cleanup database
+    this.mongoService.dropDatabase();
     
     createUser("mobi", "dev", "featureMobi", "actionViettel", "roleViettel", "featureMobi:actionViettel@mobi:*", "trinhtv3@viettel", "trinh", "tran", "trinhtran");
     

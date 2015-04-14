@@ -11,9 +11,7 @@ import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.Role;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
-import org.ats.services.organization.entity.reference.RoleReference;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,10 +32,6 @@ public class RoleService extends AbstractMongoCRUD<Role> {
   /** .*/
   @Inject
   private RoleFactory factory;
-  
-  /** .*/
-  @Inject
-  private ReferenceFactory<RoleReference> refFactory;
   
   /** .*/
   @Inject
@@ -62,10 +56,8 @@ public class RoleService extends AbstractMongoCRUD<Role> {
   
   @Override
   public void delete(String id) {
-    super.delete(id);
-    RoleReference ref = refFactory.create(id);
-    Event event = eventFactory.create(ref, "delete-role-ref");
-    event.broadcast();
+    Role role = get(id);
+    delete(role);
   }
 
   public Role transform(DBObject source) {

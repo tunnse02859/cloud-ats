@@ -64,7 +64,7 @@ public class EntityTestCase extends AbstractTestCase {
 
   @BeforeMethod
   public void init() throws Exception {
-    super.init(false);
+    super.init(this.getClass().getSimpleName());
 
     //
     this.userFactory = injector.getInstance(UserFactory.class);
