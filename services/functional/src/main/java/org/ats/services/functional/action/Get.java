@@ -5,6 +5,7 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.Value;
 import org.rythmengine.Rythm;
 
 /**
@@ -14,14 +15,14 @@ import org.rythmengine.Rythm;
  */
 public class Get implements IAction {
   
-  private String url;
+  private Value url;
   
-  public Get(String url) {
+  public Get(Value url) {
     this.url = url;
   }
 
   public String transform() throws IOException {
-    return Rythm.render("wd.get(@url);\n", url);
+    return Rythm.render("wd.get(@url);\n", url.transform());
   }
 
   public String getAction() {

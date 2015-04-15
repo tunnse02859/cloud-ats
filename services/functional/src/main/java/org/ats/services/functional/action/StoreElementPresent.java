@@ -26,7 +26,7 @@ public class StoreElementPresent implements IAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder("boolean ").append(name);
-    sb.append(" = wd.findElements(@locator).size() == 0;\n");
+    sb.append(" = (wd.findElements(@locator).size() != 0);\n");
     return Rythm.render(sb.toString(), locator.transform());
   }
 

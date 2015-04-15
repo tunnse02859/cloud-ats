@@ -15,7 +15,7 @@ import org.rythmengine.Rythm;
  */
 public class LinkTextLocator extends AbstractLocator {
 
-  LinkTextLocator(Value locator) {
+  public LinkTextLocator(Value locator) {
     super(locator);
   }
 

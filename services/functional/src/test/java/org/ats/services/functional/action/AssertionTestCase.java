@@ -94,6 +94,5 @@ public class AssertionTestCase {
     
     action = new AssertTextPresent(value, false);
     Assert.assertEquals(action.transform(), "assertTrue(wd.findElement(By.tagName(\"html\")).getText().contains(text_present));\n");
-    
   }
 }

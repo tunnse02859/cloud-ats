@@ -98,5 +98,4 @@ public class VerifyTestCase {
     Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(not body text)) {\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
   
   }
-  
 }

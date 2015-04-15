@@ -23,9 +23,9 @@ public class SetElementNotSelected implements IAction {
   
   public String transform() throws IOException {
     String template =
-        "        if (wd.findElement(@locator).isSelected()) {\n" +
-        "            wd.findElement(@locator).click();\n" +
-        "        }\n";
+        "if (wd.findElement(@locator).isSelected()) {\n" +
+        "wd.findElement(@locator).click();\n" +
+        "}\n";
     return Rythm.render(template, locator.transform());
   }
 
