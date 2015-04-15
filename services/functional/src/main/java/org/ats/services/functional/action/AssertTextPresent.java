@@ -28,7 +28,7 @@ public class AssertTextPresent implements IAction {
     StringBuilder sb = new StringBuilder();
     sb.append(negated ? "assertFalse(" : "assertTrue(");
     sb.append("wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
-    sb.append(")\n");
+    sb.append(");\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

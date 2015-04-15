@@ -26,7 +26,7 @@ public class AssertBodyText implements IAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(neagated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.findElement(By.tagName(\"html\")).getText(), @text)");
+    sb.append("wd.findElement(By.tagName(\"html\")).getText(), @text);\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

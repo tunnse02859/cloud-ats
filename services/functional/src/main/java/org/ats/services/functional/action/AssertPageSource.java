@@ -25,7 +25,7 @@ public class AssertPageSource implements IAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.getPageSource(), ").append(source.transform()).append(")");
+    sb.append("wd.getPageSource(), ").append(source.transform()).append(");\n");
     return sb.toString();
   }
 
