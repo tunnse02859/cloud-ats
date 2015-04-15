@@ -29,9 +29,9 @@ public class VerifyText implements IAction {
   }
 
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("if(").append(negated ? "" : "!");
+    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
     sb.append("wd.findElement(@locator).getText().equals(@text)) {\n");
-    sb.append("System.err.println(\"").append(negated ? "!" : "").append("verifyText failed\");\n");
+    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyText failed\");\n");
     sb.append("}\n");
     return Rythm.render(sb.toString(), locator.transform(), text.transform());
   }

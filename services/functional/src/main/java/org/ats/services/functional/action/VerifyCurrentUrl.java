@@ -25,9 +25,9 @@ public class VerifyCurrentUrl implements IAction {
   }
 
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("if(").append(negated ? "" : "!");
+    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
     sb.append("wd.getCurrentUrl().equals(@url)) {\n");
-    sb.append("System.err.println(\"").append(negated ? "!" : "").append("verifyCurrentUrl failed\");\n");
+    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyCurrentUrl failed\");\n");
     sb.append("}\n");
     return Rythm.render(sb.toString(), url.transform());
   }

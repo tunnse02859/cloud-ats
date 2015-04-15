@@ -3,6 +3,13 @@
  */
 package org.ats.services.functional.action;
 
+import java.io.IOException;
+
+import org.ats.services.functional.Value;
+import org.ats.services.functional.locator.IDLocator;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 /**
  * @author TrinhTV3
  *
@@ -10,4 +17,78 @@ package org.ats.services.functional.action;
  */
 public class VerifyTestCase {
 
+  @Test
+  public void testVerifyTextPresent() throws IOException {
+    
+    Value value = new Value("foo", false);
+    VerifyTextPresent action = new VerifyTextPresent(value, true);
+    
+    Assert.assertEquals(action.transform(),"if (wd.findElement(By.tagName(\"html\")).getText().contains(\"foo\")) {\nSystem.out.println(\"!verifyTextPresent failed\");\n}\n");
+    
+    action = new VerifyTextPresent(value, false);
+    
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().contains(\"foo\")) {\nSystem.out.println(\"verifyTextPresent failed\");\n}\n");
+  }
+  
+  @Test
+  public void testVerityText() throws IOException {
+    
+    IDLocator locator = new IDLocator(new Value("test", false));
+    Value value = new Value("foo", false);
+    VerifyText action = new VerifyText(locator, value, true);
+    
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"test\")).getText().equals(\"foo\")) {\nSystem.out.println(\"!verifyText failed\");\n}\n");
+    
+    action = new VerifyText(locator, value, false);
+    
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"test\")).getText().equals(\"foo\")) {\nSystem.out.println(\"verifyText failed\");\n}\n");
+    
+  }
+  
+  @Test
+  public void testVerifyPageSource() throws IOException {
+    
+    Value value = new Value("https://google.com.vn", false);
+    
+    VerifyPageSource action = new VerifyPageSource(value, true);
+    Assert.assertEquals(action.transform(), "if (wd.getPageSource().equals(\"https://google.com.vn\")) {\nSystem.out.println(\"!verifyPageSource failed\");\n}\n");
+   
+    action = new VerifyPageSource(value, false);
+    
+    Assert.assertEquals(action.transform(), "if (!wd.getPageSource().equals(\"https://google.com.vn\")) {\nSystem.out.println(\"verifyPageSource failed\");\n}\n");
+  }
+  
+  @Test
+  public void testVerifyElementPresent() {
+    
+  }
+  
+  @Test
+  public void testVerifyCurrentUrl() throws IOException {
+    
+    Value value = new Value("https://google.com.vn", false);
+    
+    VerifyCurrentUrl action = new VerifyCurrentUrl(value, true);
+    Assert.assertEquals(action.transform(), "if (wd.getCurrentUrl().equals(\"https://google.com.vn\")) {\nSystem.out.println(\"!verifyCurrentUrl failed\");\n}\n");
+    
+    action = new VerifyCurrentUrl(value, false);
+    
+    Assert.assertEquals(action.transform(), "if (!wd.getCurrentUrl().equals(\"https://google.com.vn\")) {\nSystem.out.println(\"verifyCurrentUrl failed\");\n}\n");
+    
+  }
+  
+  @Test
+  public void testVerifyBodyText() throws IOException {
+    
+    Value value = new Value("not body text", false);
+    
+    VerifyBodyText action = new VerifyBodyText(value, true);
+    
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) {\nSystem.out.println(\"!verifyBodyText failed\");\n}\n");
+    
+    action = new VerifyBodyText(value, false);
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) {\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
+  
+  }
+  
 }

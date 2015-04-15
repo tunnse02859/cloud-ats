@@ -3,6 +3,8 @@
  */
 package org.ats.services.functional.action;
 
+import org.testng.annotations.Test;
+
 /**
  * @author TrinhTV3
  *
@@ -10,4 +12,8 @@ package org.ats.services.functional.action;
  */
 public class NagivationTestCase {
 
+  @Test
+  void testGetAction() {
+    
+  }
 }

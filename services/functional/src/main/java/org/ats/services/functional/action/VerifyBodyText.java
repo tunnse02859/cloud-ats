@@ -27,7 +27,7 @@ public class VerifyBodyText implements IAction {
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
     sb.append("wd.findElement(By.tagName(\"html\")).getText().equals(@text)) {\n");
-    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyBodyText failed\");\n");
+    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyBodyText failed\");\n}\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 
