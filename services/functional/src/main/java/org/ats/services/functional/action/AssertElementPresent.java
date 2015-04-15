@@ -25,8 +25,8 @@ public class AssertElementPresent implements IAction {
   }
 
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.findElements(@locator).size() == 0));\n");
+    StringBuilder sb = new StringBuilder(negated ? "assertFalse((" : "assertTrue((");
+    sb.append("wd.findElements(@locator).size() != 0));\n");
     return Rythm.render(sb.toString(), locator.transform());
   }
 

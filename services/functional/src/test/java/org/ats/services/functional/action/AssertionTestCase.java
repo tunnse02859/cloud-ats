@@ -44,9 +44,16 @@ public class AssertionTestCase {
   }
   
   @Test
-  public void testAssertElementPresent() {
+  public void testAssertElementPresent() throws IOException {
     
+    IDLocator locator = new IDLocator(new Value("i am id", false));
     
+    AssertElementPresent action = new AssertElementPresent(locator, true);
+    
+    Assert.assertEquals(action.transform(), "assertFalse((wd.findElements(By.id(\"i am id\")).size() != 0));\n");
+    
+    action = new AssertElementPresent(locator, false);
+    Assert.assertEquals(action.transform(), "assertTrue((wd.findElements(By.id(\"i am id\")).size() != 0));\n");
   }
   
   @Test

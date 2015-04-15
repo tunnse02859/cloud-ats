@@ -26,7 +26,7 @@ public class VerifyElementPresent implements IAction {
 
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
-    sb.append("(wd.findElements(@locator).size() == 0)) {\n");
+    sb.append("(wd.findElements(@locator).size() != 0)) {\n");
     sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyElementPresent failed\");\n");
     sb.append("}\n");
     return Rythm.render(sb.toString(), locator.transform());

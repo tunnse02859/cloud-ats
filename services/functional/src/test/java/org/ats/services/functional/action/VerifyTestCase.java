@@ -59,7 +59,15 @@ public class VerifyTestCase {
   }
   
   @Test
-  public void testVerifyElementPresent() {
+  public void testVerifyElementPresent() throws IOException {
+    
+    IDLocator locator = new IDLocator(new Value("i am id", false));
+    
+    VerifyElementPresent action = new VerifyElementPresent(locator, true);
+    Assert.assertEquals(action.transform(), "if ((wd.findElements(By.id(\"i am id\")).size() != 0)) {\nSystem.out.println(\"!verifyElementPresent failed\");\n}\n");
+  
+    action = new VerifyElementPresent(locator, false);
+    Assert.assertEquals(action.transform(), "if (!(wd.findElements(By.id(\"i am id\")).size() != 0)) {\nSystem.out.println(\"verifyElementPresent failed\");\n}\n");
     
   }
   
