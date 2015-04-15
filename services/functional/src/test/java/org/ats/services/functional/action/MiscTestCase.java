@@ -3,6 +3,12 @@
  */
 package org.ats.services.functional.action;
 
+import java.io.IOException;
+
+import org.ats.services.functional.Value;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 /**
  * @author TrinhTV3
  *
@@ -10,4 +16,24 @@ package org.ats.services.functional.action;
  */
 public class MiscTestCase {
 
+  @Test
+  public void testAddCookie() throws IOException {
+    
+    Value valueName = new Value("test_cookie", false);
+    Value value = new Value("this-is-a-cookie", false);
+    String option = "path=/,max_age=100000000";
+    AddCookie action = new AddCookie(valueName, value, option);
+    
+    Assert.assertEquals(action.transform(), "wd.manage().addCookie(new Cookie.Builder(\"test_cookie\", \"this-is-a-cookie\").path(\"/\").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());\n");
+  }
+  
+  @Test
+  public void testDeleteCookie() throws IOException {
+    
+    Value valueName = new Value("test_cookie", false);
+    
+    DeleteCookie action = new DeleteCookie(valueName);
+    Assert.assertNull(action.transform());
+  }
+  
 }

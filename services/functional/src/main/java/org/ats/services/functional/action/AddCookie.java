@@ -26,7 +26,8 @@ public class AddCookie implements IAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder("wd.manage().addCookie(");
-    sb.append("new Cookie.Builder(").append("\"").append(name).append("\",\"").append(value).append("\")");
+    sb.append("new Cookie.Builder(").append(name).append(", ").append(value).append(")");
+    //sb.append("new Cookie.Builder(").append("\"").append(name).append("\",\"").append(value).append("\")");
     if (option != null) {
       for (String s : option.split(",")) {
         String[] foo = s.trim().split("=");
@@ -35,13 +36,17 @@ public class AddCookie implements IAction {
           sb.append(".path(").append("\"").append(foo[1]).append("\")");
         }
         else if (foo[0].equals("max_age")) {
+          System.out.println(foo[1]);
           sb.append(".expiresOn(new Date(new Date().getTime() + ");
-          sb.append(Integer.parseInt(foo[1]) * 1000).append("l))");
+          sb.append(foo[1] + "000").append("l").append("))");
+          // sb.append(Integer.parseInt(foo[1]) * 1000).append("l))");
         }
       }
     }
-    sb.append(".build();\n");
+    sb.append(".build()");
     sb.append(");\n");
+    //sb.append(".build();\n");
+    //sb.append(");\n");
     return sb.toString();
   }
 
