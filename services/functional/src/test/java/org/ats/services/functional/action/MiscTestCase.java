@@ -22,9 +22,17 @@ public class MiscTestCase {
     Value valueName = new Value("test_cookie", false);
     Value value = new Value("this-is-a-cookie", false);
     String option = "path=/,max_age=100000000";
+    
     AddCookie action = new AddCookie(valueName, value, option);
     
     Assert.assertEquals(action.transform(), "wd.manage().addCookie(new Cookie.Builder(\"test_cookie\", \"this-is-a-cookie\").path(\"/\").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());\n");
+    
+    valueName = new Value("test_cookie", true);
+    value = new Value("this-is-a-cookie", true);
+    action = new AddCookie(valueName, value, option);
+    
+    Assert.assertEquals(action.transform(), "wd.manage().addCookie(new Cookie.Builder(test_cookie, this-is-a-cookie).path(\"/\").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());\n");
+   
   }
   
   @Test
@@ -33,7 +41,12 @@ public class MiscTestCase {
     Value valueName = new Value("test_cookie", false);
     
     DeleteCookie action = new DeleteCookie(valueName);
-    Assert.assertNull(action.transform());
+    Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(\"test_cookie\") != null) { wd.manage().deleteCookie(wd.manage().getCookieNamed(\"test_cookie\")); }\n");
+    
+    valueName = new Value("test_cookie", true);
+    
+    action = new DeleteCookie(valueName);
+    Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(test_cookie) != null) { wd.manage().deleteCookie(wd.manage().getCookieNamed(test_cookie)); }\n");
   }
   
 }

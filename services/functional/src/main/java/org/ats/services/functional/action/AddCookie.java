@@ -36,9 +36,8 @@ public class AddCookie implements IAction {
           sb.append(".path(").append("\"").append(foo[1]).append("\")");
         }
         else if (foo[0].equals("max_age")) {
-          System.out.println(foo[1]);
           sb.append(".expiresOn(new Date(new Date().getTime() + ");
-          sb.append(foo[1] + "000").append("l").append("))");
+          sb.append(Integer.parseInt(foo[1])).append("000").append("l").append("))");
           // sb.append(Integer.parseInt(foo[1]) * 1000).append("l))");
         }
       }

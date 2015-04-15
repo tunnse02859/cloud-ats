@@ -22,10 +22,10 @@ public class DeleteCookie implements IAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("if (wd.manage().getCookieNamed(\"").append(name.transform()).append("\") != null {\n");
-    sb.append("wd.manage().deleteCookie(wd.manage().getCookieNamed(\"").append(name.transform()).append("\"");
-    sb.append("}\n");
-    return null;
+    sb.append("if (wd.manage().getCookieNamed(").append(name.transform()).append(") != null) {");
+    sb.append(" wd.manage().deleteCookie(wd.manage().getCookieNamed(").append(name.transform()).append("");
+    sb.append(")); }\n");
+    return sb.toString();
   }
 
   public String getAction() {
