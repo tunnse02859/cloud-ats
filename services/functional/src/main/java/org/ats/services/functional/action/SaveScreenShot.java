@@ -21,11 +21,15 @@ public class SaveScreenShot implements IAction{
   }
   
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder();
+    sb.append("wd.getScreenshotAs(FILE).renameTo(new File(");
+    sb.append(file);
+    sb.append("));\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    return null;
+    return "saveScreenShot";
   }
 
 }

@@ -14,21 +14,25 @@ import org.ats.services.functional.Value;
  */
 public class StoreCookiePresent implements IAction{
 
-  private Value variable, name;
+  private Value name;
   
-  public StoreCookiePresent(Value variable, Value name) {
+  private String variable;
+  
+  public StoreCookiePresent(String variable, Value name) {
     this.variable = variable;
     this.name = name;
   }
   
   public String transform() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    StringBuilder sb = new StringBuilder("boolean ").append(variable);
+    sb.append(" = (wd.manage().getCookieNamed(");
+    sb.append(name);
+    sb.append(") != null);\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    // TODO Auto-generated method stub
-    return null;
+    return "storeCookiePresent";
   }
 
 }

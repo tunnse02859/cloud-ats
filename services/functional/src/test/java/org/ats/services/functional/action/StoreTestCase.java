@@ -60,4 +60,28 @@ public class StoreTestCase {
     StoreElementAttribute action = new StoreElementAttribute(var, name, locator);
     Assert.assertEquals(action.transform(), "String link_href = wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\");\n");
   }
+    @Test
+    public void testStore() throws IOException {
+    String variable = "text_present";
+    Value text = new Value("I am another div",false);
+    Store store = new Store(text, variable);
+    Assert.assertEquals(store.transform(), 
+        "String text_present = \"\" + \"I am another div\";\n");
+  }
+  
+  @Test
+  public void testStoreCookiePresent() throws IOException {
+    String variable = "cookie_is_present";
+    Value name = new Value("test_cookie", false);
+    StoreCookiePresent storeCookiePresent = new StoreCookiePresent(variable, name);
+    Assert.assertEquals(storeCookiePresent.transform(), 
+        "boolean cookie_is_present = (wd.manage().getCookieNamed(\"test_cookie\") != null);\n");
+  }
+  
+  @Test
+  public void testStoreCurrentUrl() throws IOException {
+    String variable = "url";
+    StoreCurrentUrl storeCurrentUrl = new StoreCurrentUrl(variable);
+    Assert.assertEquals(storeCurrentUrl.transform(), "String url = wd.getCurrentUrl();\n");
+  }
 }

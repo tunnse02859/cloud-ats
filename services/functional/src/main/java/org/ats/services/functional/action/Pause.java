@@ -5,8 +5,6 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.Value;
-
 /**
  * @author TrinhTV3
  *
@@ -23,7 +21,7 @@ public class Pause implements IAction{
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append("try { Thread.sleep(");
-    sb.append(waitTime).append("l)");
+    sb.append(Integer.parseInt(waitTime)).append("l)");
     sb.append("; } catch (Exception e) { throw new RuntimeException(e); }\n");
     return sb.toString();
   }

@@ -14,20 +14,23 @@ import org.ats.services.functional.Value;
  */
 public class Store implements IAction{
 
-  private Value text, variable;
+  private String variable;
   
-  public Store(Value text, Value variable) {
+  private Value text;
+  
+  public Store(Value text, String variable) {
     this.text = text;
     this.variable = variable;
   }
   public String transform() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = \"\" + ");
+    sb.append(text);
+    sb.append(";\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    // TODO Auto-generated method stub
-    return null;
+    return "store";
   }
 
 }
