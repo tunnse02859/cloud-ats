@@ -16,6 +16,7 @@ import org.ats.services.data.common.MongoPageList;
 import org.ats.services.data.common.Reference;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BulkWriteOperation;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -53,11 +54,23 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
     this.col.insert(obj);
   }
   
+  public void create(List<DBObject> list) {
+    this.col.insert(list);
+  }
+  
   public void update(T obj) {
+    if (obj == null) return;
     this.col.save(obj);
   }
 
+  public void bulkUpdate(DBObject query, DBObject update) {
+    BulkWriteOperation builder = this.col.initializeUnorderedBulkOperation(); 
+    builder.find(query).update(update);
+    builder.execute();
+  }
+
   public void delete(T obj) {
+    if (obj == null) return;
     this.col.remove(obj);
   }
   
@@ -67,6 +80,26 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
   
   public void delete(String id) {
     this.col.remove(new BasicDBObject("_id", id)); 
+  }
+  
+  public void active(String id) {
+    this.active(get(id));
+  }
+  
+  public void active(T obj) {
+    if (obj == null) return;
+    obj.put("active", true);
+    this.update(obj);
+  }
+  
+  public void inActive(String id) {
+    this.inActive(get(id));
+  }
+  
+  public void inActive(T obj) {
+    if (obj == null) return;
+    obj.put("active", false);
+    this.update(obj);
   }
   
   public MapReduceOutput mapreduce(MapReduceCommand cmd) {

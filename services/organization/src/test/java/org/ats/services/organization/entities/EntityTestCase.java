@@ -25,8 +25,9 @@ import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.inject.Key;
@@ -62,37 +63,30 @@ public class EntityTestCase extends AbstractTestCase {
   /** .*/
   private PermissionFactory permFactory;
 
-  @BeforeMethod
-  public void init() throws Exception {
+  @BeforeClass
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
 
-    //
     this.userFactory = injector.getInstance(UserFactory.class);
-//    this.userRefFactory = injector.getInstance(UserReferenceFactory.class);
-
-    //
     this.tenantFactory = injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
-
-    //
     this.spaceFactory = injector.getInstance(SpaceFactory.class);
     this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
-
-    //
     this.roleFactory = injector.getInstance(RoleFactory.class);
     this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
-
-    //
     this.featureFactory = injector.getInstance(FeatureFactory.class);
     this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
-    
-    //
     this.permFactory = injector.getInstance(PermissionFactory.class);
+  }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
   }
 
   @AfterMethod
   public void tearDown() throws Exception {
-    super.tearDown();
+    this.mongoService.dropDatabase();
   }
   
   @Test

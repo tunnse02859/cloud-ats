@@ -35,6 +35,7 @@ import org.ats.services.organization.entity.reference.TenantReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -99,15 +100,16 @@ public class InterceptorTestCase {
   /** .*/
   private MockService service;
   
-  @BeforeMethod
-  public void init() throws Exception {
+  /** .*/
+  private EventService eventService;
+  
+  @BeforeClass
+  public void setup() throws Exception {
     System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     Injector injector = Guice.createInjector(new MockModule(), new DatabaseModule(), new EventModule(), new OrganizationServiceModule());
     this.injector = injector;
 
     this.mongoService = injector.getInstance(MongoDBService.class);
-    this.mongoService.dropDatabase();
-
     this.service = injector.getInstance(MockService.class);
 
     this.featureService = this.injector.getInstance(FeatureService.class);
@@ -135,10 +137,20 @@ public class InterceptorTestCase {
     this.authService = this.injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     
     //start event service
-    EventService eventService = injector.getInstance(EventService.class);
+    this.eventService = injector.getInstance(EventService.class);
     eventService.setInjector(injector);
     eventService.start();
-
+  }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    eventService.stop();
+  }
+  
+  @BeforeMethod
+  public void initData() throws Exception {
+    this.mongoService.dropDatabase();
+    
     Feature foo = featureFactory.create("fooFeature");
     foo.addAction(new Action("fooAction"));
     this.featureService.create(foo);
@@ -171,13 +183,9 @@ public class InterceptorTestCase {
   @AfterMethod
   public void tearDown() throws InterruptedException {
     this.authService.logOut();
-  }
-  
-  @AfterClass
-  public void dropDB() {
     this.mongoService.dropDatabase();
   }
-
+  
   @Test
   public void testFoo() throws Exception {
     try {

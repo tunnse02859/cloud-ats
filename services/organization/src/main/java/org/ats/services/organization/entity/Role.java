@@ -28,7 +28,7 @@ import com.mongodb.BasicDBObject;
  * Mar 9, 2015
  */
 @SuppressWarnings("serial")
-public class Role  extends BasicDBObject {
+public class Role  extends AbstractEntity<Role> {
   
   /** .*/
   private ReferenceFactory<SpaceReference> spaceFactory;
@@ -41,6 +41,8 @@ public class Role  extends BasicDBObject {
     this.put("_id", UUID.randomUUID().toString());
     this.setName(name);
     this.put("created_date", new Date());
+    this.setActive(true);
+    
     this.spaceFactory = spaceFactory;
     this.permFactory = permFactory;
   }

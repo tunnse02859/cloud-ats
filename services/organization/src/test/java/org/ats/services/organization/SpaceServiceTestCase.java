@@ -44,7 +44,7 @@ public class SpaceServiceTestCase extends AbstractTestCase {
   private ReferenceFactory<SpaceReference> spaceRefFactory;
   
   @BeforeMethod
-  public void init() throws Exception {
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
     this.spaceService = this.injector.getInstance(SpaceService.class);
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
@@ -55,14 +55,14 @@ public class SpaceServiceTestCase extends AbstractTestCase {
     this.spaceRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
   }
   
-  @AfterMethod
-  public void tearDown() throws Exception {
-    super.tearDown();
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
   }
   
-  @AfterClass
-  public void dropDB() throws Exception {
-    super.tearDown();
+  @AfterMethod
+  public void tearDown() throws Exception {
+    this.mongoService.dropDatabase();
   }
   
   @Test

@@ -49,6 +49,7 @@ public class RoleService extends AbstractMongoCRUD<Role> {
   
   @Override
   public void delete(Role obj) {
+    if (obj == null) return;
     super.delete(obj);
     Event event = eventFactory.create(obj, "delete-role");
     event.broadcast();
@@ -57,13 +58,42 @@ public class RoleService extends AbstractMongoCRUD<Role> {
   @Override
   public void delete(String id) {
     Role role = get(id);
-    delete(role);
+    this.delete(role);
+  }
+  
+  @Override
+  public void active(Role obj) {
+    if (obj == null) return;
+    super.active(obj);
+    Event event = eventFactory.create(obj, "active-role");
+    event.broadcast();
+  }
+  
+  @Override
+  public void active(String id) {
+    Role role = get(id);
+    this.active(role);
+  }
+  
+  @Override
+  public void inActive(Role obj) {
+    if (obj == null) return;
+    super.inActive(obj);
+    Event event = eventFactory.create(obj, "in-active-role");
+    event.broadcast();
+  }
+  
+  @Override
+  public void inActive(String id) {
+    Role role = get(id);
+    this.inActive(role);
   }
 
   public Role transform(DBObject source) {
     Role role = factory.create((String) source.get("name"));
     role.put("_id", source.get("_id"));
     role.put("created_date", source.get("created_date"));
+    role.put("active", source.get("active"));
     role.put("desc", source.get("desc"));
     role.put("space", source.get("space"));
     role.put("permissions", source.get("permissions"));

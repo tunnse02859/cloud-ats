@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization.event;
 
+import org.ats.services.event.Event;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.Space;
@@ -29,6 +30,7 @@ public class DeleteRoleTestCase extends AbstractEventTestCase {
   @BeforeClass
   public void init() throws Exception {
     super.init(this.getClass().getSimpleName());
+    initService();
   }
   
   @AfterClass
@@ -79,10 +81,13 @@ public class DeleteRoleTestCase extends AbstractEventTestCase {
     
     @Override
     public void onReceive(Object message) throws Exception {
-      if (message instanceof RoleReference) {
+      if (message instanceof Event) {
+        Event event = (Event) message;
+        if ("delete-role".equals(event.getName())) {
           RoleReference ref = (RoleReference) message;
           Assert.assertEquals(spaceService.findIn("roles", ref).count(), 0);
           Assert.assertEquals(userService.findIn("roles", ref).count(), 0);
+        }
       }
     }
   }

@@ -3,7 +3,6 @@
  */
 package org.ats.services.organization;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -34,16 +33,14 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   /** .*/
   private final String COL_NAME = "org-space";
   
-  /** .*/
   @Inject
   private SpaceFactory factory;
   
-  /** .*/
-  @Inject
-  private OrganizationContext context;
-  
   @Inject
   private EventFactory eventFactory;
+  
+  @Inject
+  private OrganizationContext context;
   
   @Inject
   SpaceService(MongoDBService mongo, Logger logger) {
@@ -59,7 +56,13 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   
   @Override
   public void delete(Space obj) {
+    if (obj == null) return;
     super.delete(obj);
+    
+    if (context.getSpace() != null && context.getSpace().getId().equals(obj.getId())) {
+      context.setSpace(null);
+    }
+    
     Event event = eventFactory.create(obj, "delete-space");
     event.broadcast();
   }
@@ -69,11 +72,43 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     Space space = get(id);
     delete(space);
   }
+  
+  @Override
+  public void active(Space obj) {
+    if (obj == null) return;
+    super.active(obj);
+    Event event = eventFactory.create(obj, "active-space");
+    event.broadcast();
+  }
+  
+  @Override
+  public void active(String id) {
+    this.active(this.get(id));
+  }
+  
+  @Override
+  public void inActive(Space obj) {
+    if (obj == null) return;
+    super.inActive(obj);
+    
+    //logout current user if user's space is inactive
+    if (context.getSpace() != null && context.getSpace().getId().equals(obj.getId())) {
+      context.setSpace(null);
+    }
+    Event event = eventFactory.create(obj, "in-active-space");
+    event.broadcast();
+  }
+  
+  @Override
+  public void inActive(String id) {
+    this.inActive(this.get(id));
+  }
 
   public Space transform(DBObject source) {
     Space space = factory.create((String) source.get("name"));
     space.put("_id", source.get("_id"));
     space.put("created_date", source.get("created_date"));
+    space.put("active", source.get("active"));
     space.put("desc", source.get("desc"));
     space.put("tenant", source.get("tenant"));
     space.put("roles", source.get("roles"));
@@ -90,8 +125,8 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
     }
     
     Space space = ref.get();
-    if (space == null) {
-      logger.info("The space " + ref.getId() + " does not exist");
+    if (space == null || !space.isActive()) {
+      logger.info("The space " + ref.getId() + " does not exist or inactive");
       return null;
     }
     
@@ -108,10 +143,5 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   public PageList<Space> findSpaceInTenant(TenantReference tenant) {
     BasicDBObject query = new BasicDBObject("tenant", tenant.toJSon());
     return query(query);
-  }
-
-  public void restoreSpace(List<DBObject> list) {
-    
-    this.col.insert(list);
   }
 }

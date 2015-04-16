@@ -3,8 +3,10 @@
  */
 package org.ats.services.organization.event;
 
+import java.util.List;
+
+import org.ats.common.PageList;
 import org.ats.services.organization.AbstractTestCase;
-import org.ats.services.organization.ActivationService;
 import org.ats.services.organization.FeatureService;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
@@ -25,7 +27,6 @@ import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
-import org.testng.Assert;
 
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -58,19 +59,13 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
   protected ReferenceFactory<FeatureReference> featureRefFactory;
   protected FeatureService featureService;
   
-  protected ActivationService activationService;
-  
-  
   protected Role admin;
   protected Role tester;
   
   protected Space space1;
   protected Space space2;
   
-  protected void initData() {
-    
-    System.out.println("Start initialize data");
-    
+  protected void initService() {
     this.tenantService = injector.getInstance(TenantService.class);
     this.tenantFactory = injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
@@ -90,8 +85,11 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
     this.featureFactory = injector.getInstance(FeatureFactory.class);
     this.featureService = injector.getInstance(FeatureService.class);
     this.featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
-    this.activationService = injector.getInstance(ActivationService.class);
-    
+  }
+  
+  protected void initData() {
+    System.out.println("Start initialize data");
+
     Tenant tenant = tenantFactory.create("Fsoft");
     
     FeatureReference feature1 = featureRefFactory.create("performace");
@@ -152,5 +150,33 @@ public abstract class AbstractEventTestCase extends AbstractTestCase {
     while (userService.findUserInTenant(tenantRef).count() != 0
       || spaceService.findSpaceInTenant(tenantRef).count() != 0) {
       }
+  }
+  
+  protected void waitToFinishActivationSpace(SpaceReference spaceRef, boolean active) {
+    BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", spaceRef.toJSon()));
+    query.append("active", active);
+    while (userService.query(query).count() != 0
+        || roleService.query(new BasicDBObject("space", spaceRef.toJSon()).append("active", active)).count() != 0) {
+    }
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  protected void waitToFinishActivationTenant(TenantReference tenantRef, boolean active) {
+    PageList<Space> list = spaceService.findIn("tenant", tenantRef);
+    while(list.hasNext()) {
+      List<Space> spaces = list.next();
+      for (Space space : spaces) {
+        waitToFinishActivationSpace(spaceRefFactory.create(space.getId()), active);
+      }
+    }
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 }

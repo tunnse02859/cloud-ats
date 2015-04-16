@@ -10,8 +10,9 @@ import org.ats.services.organization.UserService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -25,16 +26,21 @@ public class MixinTestCase extends AbstractTestCase {
   
   private UserFactory userFactory;
   
-  @BeforeMethod
-  public void init() throws Exception {
+  @BeforeClass
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
     this.userService  = injector.getInstance(UserService.class);
     this.userFactory = injector.getInstance(UserFactory.class);
   }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
+  }
 
   @AfterMethod
   public void tearDown() throws Exception {
-    super.tearDown();
+    this.mongoService.dropDatabase();
   }
   
   @SuppressWarnings("deprecation")

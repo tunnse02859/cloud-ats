@@ -26,7 +26,7 @@ import com.google.inject.Inject;
  *
  * Mar 24, 2015
  */
-public class DeleteRoleActor extends UntypedActor {
+public class RoleEventActor extends UntypedActor {
   
   @Inject
   private SpaceService spaceService;
@@ -46,17 +46,21 @@ public class DeleteRoleActor extends UntypedActor {
     if (message instanceof Event) {
       Event event = (Event) message;
       if ("delete-role".equals(event.getName())) {
-        Role role = (Role) event.getSource();
-        RoleReference ref = roleRefFactory.create(role.getId());
-        process(ref);
+        delete(event);
+      } else if ("active-role".equals(event.getName())) {
+        
+      } else if ("in-active-role".equals(event.getName())) {
+        
       }
     } else {
       unhandled(message);
     }
   }
   
-  private void process(RoleReference ref) {
+  private void delete(Event event) {
     
+    Role role = (Role) event.getSource();
+    RoleReference ref = roleRefFactory.create(role.getId());
     logger.info("Process event delete-role " + ref.toJSon());
     
     PageList<Space> listSpace = spaceService.findIn("roles", ref);

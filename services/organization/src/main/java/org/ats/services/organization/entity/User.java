@@ -24,7 +24,7 @@ import com.mongodb.BasicDBObject;
  * Mar 9, 2015
  */
 @SuppressWarnings("serial")
-public class User extends BasicDBObject {
+public class User extends AbstractEntity<User> {
   
   /** .*/
   private ReferenceFactory<RoleReference> roleFactory;
@@ -42,6 +42,7 @@ public class User extends BasicDBObject {
     this.put("first_name", firstName);
     this.put("last_name", lastName);
     this.put("created_date", new Date());
+    this.setActive(true);
     
     this.roleFactory = roleFactory;
     this.spaceFactory = spaceFactory;

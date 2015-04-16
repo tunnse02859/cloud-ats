@@ -45,7 +45,7 @@ public class RoleServiceTestCase extends AbstractTestCase {
   private ReferenceFactory<RoleReference> roleRef; 
 
   @BeforeMethod
-  public void init() throws Exception {
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
     this.service = injector.getInstance(RoleService.class);
     this.factory = injector.getInstance(RoleFactory.class);
@@ -59,14 +59,14 @@ public class RoleServiceTestCase extends AbstractTestCase {
     this.eventService.start();
   }
   
-  @AfterMethod
-  public void tearDown() throws Exception {
-    super.tearDown();
+  @AfterClass
+  public void shutdown() {
+    this.eventService.stop();
   }
   
-  @AfterClass
-  public void dropDB() throws Exception {
-    super.tearDown();
+  @AfterMethod
+  public void tearDown() throws Exception {
+    this.mongoService.dropDatabase();
   }
   
   @Test

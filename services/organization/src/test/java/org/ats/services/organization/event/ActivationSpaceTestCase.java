@@ -3,90 +3,145 @@
  */
 package org.ats.services.organization.event;
 
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.ats.services.data.MongoDBService;
 import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
-import org.ats.services.organization.SpaceService;
+import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Role;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
- * Apr 14, 2015
+ * Apr 15, 2015
  */
 public class ActivationSpaceTestCase extends AbstractEventTestCase {
 
-  @BeforeMethod
+  @BeforeClass
   public void init() throws Exception {
     super.init(this.getClass().getSimpleName());
+    initService();
   }
   
-  static class InactiveSpaceListener extends UntypedActor {
+  @AfterClass
+  public void shutdown() throws Exception {
+    eventService.stop();
+  }
+  
+  private Space space;
+  
+  @BeforeMethod
+  public void setup()  throws Exception {
+    Tenant tenant = tenantFactory.create("Fsoft");
+    tenantService.create(tenant);
+    
+    space = spaceFactory.create("FSU1.BU11");
+    space.setTenant(tenantRefFactory.create(tenant.getId()));
 
-    @Inject
-    private Logger logger;
+    List<DBObject> batch = new ArrayList<DBObject>();
+    for (int i = 0; i < 1000; i++) {
+      Role role = roleFactory.create("role" + i);
+      role.setSpace(spaceRefFactory.create(space.getId()));
+      space.addRole(roleRefFactory.create(role.getId()));
+      batch.add(role);
+    }
     
-    @Inject
-    private SpaceService spaceService;
+    roleService.create(batch);
+    spaceService.create(space);
+
+    batch.clear();
     
-    @Inject
-    private RoleService roleService;
-    
-    @Inject 
-    private MongoDBService mongoService;
-    
-    @Override
-    public void onReceive(Object message) throws Exception {
-      if(message instanceof Event) {
-        
-        Event event = (Event) message;
-        SpaceReference ref = (SpaceReference) event.getSource();
-        logger.info("inactive space reference "+ ref.toJSon());
-        Assert.assertEquals(roleService.count(), 0);
-        Assert.assertEquals(spaceService.count(), 1);
-        
-        mongoService.dropDatabase();
+    for (int i = 0; i < (100 * 1000); i++) {
+      User user = userFactory.create("user" + i + "@fsoft.com.vn", "user" + i, "fsofter");
+      user.setTenant(tenantRefFactory.create(tenant.getId()));
+      user.joinSpace(spaceRefFactory.create(space.getId()));
+      batch.add(user);
+      if (batch.size() == 1000) {
+        userService.create(batch);
+        batch.clear();
       }
     }
   }
   
-  static class ActiveSpaceListener extends UntypedActor {
+  @AfterMethod
+  public void tearDown() throws Exception {
+    this.mongoService.dropDatabase();
+  }
+  
+  @Test
+  public void test() throws Exception {
+    SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+    Assert.assertEquals(userService.query(new BasicDBObject("active", false)).count(), 0);
+    Assert.assertEquals(userService.query(new BasicDBObject("active", true)).count(), 100 * 1000);
+    
+    Assert.assertEquals(roleService.query(new BasicDBObject("active", false)).count(), 0);
+    Assert.assertEquals(roleService.query(new BasicDBObject("active", true)).count(), 1000);
+    
+    eventService.setListener(ActivationListener.class);
+    spaceService.inActive(space);
+    
+    waitToFinishActivationSpace(spaceRef, true);
+    
+    spaceService.active(space);
+    
+    waitToFinishActivationSpace(spaceRef, false);
+  }
+  
+  static class ActivationListener extends UntypedActor {
+    
+    @Inject UserService userService;
+    
+    @Inject RoleService roleService;
+    
+    @Inject ReferenceFactory<SpaceReference> spaceRefFactory;
 
-    @Inject
-    private Logger logger;
-    
-    @Inject
-    private RoleService roleService;
-    
-    @Inject
-    private SpaceService spaceService;
-    
-    @Inject 
-    private MongoDBService mongoService;
-    
     @Override
-    public void onReceive(Object message) throws Exception {
-      if(message instanceof Event) {
-        
-        Event event = (Event) message;
-        if("active-space-ref".equals(event.getName())) {
-          
-          SpaceReference ref = (SpaceReference) event.getSource();
-          logger.info("active space reference "+ ref.toJSon());
-          Assert.assertEquals(roleService.count(), 2);
-          Assert.assertEquals(spaceService.count(), 2);
-          
-          mongoService.dropDatabase();
+    public void onReceive(Object obj) throws Exception {
+      if (obj instanceof Event) {
+        Event event = (Event) obj;
+        if ("in-active-space".equals(event.getName())) {
+          Space space = (Space) event.getSource();
+          SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+          assertActivation(spaceRef, true);
+        } else if ("active-space".equals(event.getName())) {
+          Space space = (Space) event.getSource();
+          SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+          assertActivation(spaceRef, false);
         }
       }
+    }
+    
+    private void assertActivation(SpaceReference spaceRef, boolean active) {
+      BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", spaceRef.toJSon()));
+      query.append("active", active);
+      Assert.assertEquals(userService.query(query).count(), 0);
+      
+      query.append("active", !active);
+      Assert.assertEquals(userService.query(query).count(), 100 * 1000);
+      
+      query = new BasicDBObject("space", spaceRef.toJSon()).append("active", active);
+      Assert.assertEquals(roleService.query(query).count(), 0);
+      
+      query.append("active", !active);
+      Assert.assertEquals(roleService.query(query).count(), 1000);
     }
   }
 }

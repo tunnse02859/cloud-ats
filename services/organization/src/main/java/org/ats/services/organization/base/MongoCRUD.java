@@ -3,6 +3,7 @@
  */
 package org.ats.services.organization.base;
 
+import java.util.List;
 import java.util.Set;
 
 import org.ats.common.PageList;
@@ -16,9 +17,13 @@ import com.mongodb.DBObject;
  */
 public interface MongoCRUD<T extends DBObject> {
 
+  public void create(List<DBObject> list);
+  
   public void create(T... obj);
   
   public void update(T obj);
+  
+  public void bulkUpdate(DBObject query, DBObject update);
   
   public void delete(String id);
   

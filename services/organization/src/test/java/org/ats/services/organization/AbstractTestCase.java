@@ -46,9 +46,4 @@ public abstract class AbstractTestCase {
     eventService.setInjector(injector);
     eventService.start();
   }
-  
-  public void tearDown() throws Exception {
-    System.out.println("Cleanup database");
-    this.mongoService.dropDatabase();
-  }
 }

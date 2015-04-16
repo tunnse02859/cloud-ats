@@ -41,8 +41,8 @@ public class MongoAuthenticationService extends AuthenticationService<User> {
   @Override
   public String logIn(String username, String password) {
     User user = service.get(username);
-    if (user == null) {
-      logger.info("The user " + username + " does not exist");
+    if (user == null || !user.isActive()) {
+      logger.info("The user " + username + " does not exist or inactive");
       return null;
     }
     if (password.equals(user.getPassword())) {
@@ -60,6 +60,8 @@ public class MongoAuthenticationService extends AuthenticationService<User> {
   @Override
   public User logOut() {
     User user = context.getUser();
+    if (user == null) return null;
+    
     context.setUser(null);
     context.setSpace(null);
     context.setTenant(null);

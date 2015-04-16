@@ -22,7 +22,7 @@ import com.mongodb.BasicDBObject;
  * Mar 9, 2015
  */
 @SuppressWarnings("serial")
-public class Tenant extends BasicDBObject {
+public class Tenant extends AbstractEntity<Tenant> {
 
   /** .*/
   private ReferenceFactory<FeatureReference> featureFactory;
@@ -31,6 +31,8 @@ public class Tenant extends BasicDBObject {
   Tenant(ReferenceFactory<FeatureReference> featureFactory, @Assisted String name) {
     this.put("_id", name);
     this.put("created_date", new Date());
+    this.setActive(true);
+    
     this.featureFactory = featureFactory;
   }
 

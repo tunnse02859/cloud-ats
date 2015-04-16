@@ -3,8 +3,11 @@
  */
 package org.ats.services.organization.event;
 
+import org.ats.services.event.Event;
 import org.ats.services.organization.TenantService;
+import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.FeatureReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -27,6 +30,7 @@ public class DeleteFeatureTestCase extends AbstractEventTestCase {
   @BeforeClass
   public void init() throws Exception {
     super.init(this.getClass().getSimpleName());
+    initService();
   }
   
   @AfterClass
@@ -71,11 +75,17 @@ public class DeleteFeatureTestCase extends AbstractEventTestCase {
     
     @Inject TenantService tenantService;
     
+    @Inject ReferenceFactory<FeatureReference> featureRefFactory;
+    
     @Override
     public void onReceive(Object message) throws Exception {
-      if (message instanceof FeatureReference) {
-        FeatureReference ref = (FeatureReference) message;
-        Assert.assertEquals(tenantService.findIn("features", ref).count(), 0);
+      if (message instanceof Event) {
+        Event event = (Event) message;
+        if ("delete-feature".equals(event.getName())) {
+          Feature feature = (Feature) event.getSource();
+          FeatureReference ref = featureRefFactory.create(feature.getId());
+          Assert.assertEquals(tenantService.findIn("features", ref).count(), 0);
+        }
       }
     }
   }

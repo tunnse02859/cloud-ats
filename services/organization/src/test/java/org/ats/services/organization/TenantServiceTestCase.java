@@ -51,14 +51,14 @@ public class TenantServiceTestCase extends AbstractTestCase {
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
   }
   
-  @AfterMethod
-  public void tearDown() throws Exception {
-    super.tearDown();
-  }
-  
   @AfterClass
   public void dropDB() throws Exception {
-    super.tearDown();
+    this.eventService.stop();
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    this.mongoService.dropDatabase();
   }
   
   @Test

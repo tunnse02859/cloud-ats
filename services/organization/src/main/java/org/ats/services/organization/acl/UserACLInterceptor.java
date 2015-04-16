@@ -43,7 +43,7 @@ public class UserACLInterceptor implements MethodInterceptor {
     if (context.get().getUser() == null) throw new UnAuthenticatedException("You need logging to perform this action");
 
     Authorized rule = invocation.getMethod().getAnnotation(Authorized.class);
-    if (rule == null) return invocation.proceed();;
+    if (rule == null) return invocation.proceed();
     
     UnAuthorizationException e = new UnAuthorizationException("The user " + context.get().getUser().getEmail() + " does not have permission to perform " + invocation.getMethod());
     
@@ -68,6 +68,7 @@ public class UserACLInterceptor implements MethodInterceptor {
     for (RoleReference roleRef : user.getRoles()) {
       
       Role role = roleRef.get();
+      if (!role.isActive()) continue;
 
       for (Permission perm : role.getPermissions()) {
         Reference<?> featureRef = perm.getFeature();

@@ -25,20 +25,20 @@ public class FeatureServiceTestCase extends AbstractTestCase {
   private FeatureFactory factory;
 
   @BeforeMethod
-  public void init() throws Exception {
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
     this.service = this.injector.getInstance(FeatureService.class);
     this.factory = this.injector.getInstance(FeatureFactory.class);
   }
   
-  @AfterMethod
-  public void tearDown() throws Exception {
-    super.tearDown();
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
   }
   
-  @AfterClass
-  public void dropDB() throws Exception {
-    super.tearDown();
+  @AfterMethod
+  public void tearDown() throws Exception {
+    this.mongoService.dropDatabase();
   }
   
   @Test

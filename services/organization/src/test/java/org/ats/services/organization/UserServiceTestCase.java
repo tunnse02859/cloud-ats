@@ -50,7 +50,7 @@ public class UserServiceTestCase extends AbstractTestCase {
   private ReferenceFactory<RoleReference> roleRefFactory;
   
   @BeforeMethod
-  public void init() throws Exception {
+  public void setup() throws Exception {
     super.init(this.getClass().getSimpleName());
     
   //
@@ -62,15 +62,15 @@ public class UserServiceTestCase extends AbstractTestCase {
   this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
   this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
   }
+
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
+  }
   
   @AfterMethod
   public void tearDown() throws Exception {
-    super.tearDown();
-  }
-  
-  @AfterClass
-  public void dropDB() throws Exception {
-    super.tearDown();
+    this.mongoService.dropDatabase();
   }
   
   @Test

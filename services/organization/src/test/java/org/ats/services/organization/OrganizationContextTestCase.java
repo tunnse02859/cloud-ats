@@ -14,9 +14,12 @@ import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
+import org.ats.services.organization.event.AbstractEventTestCase;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.inject.Key;
@@ -27,23 +30,7 @@ import com.google.inject.TypeLiteral;
  *
  * Mar 16, 2015
  */
-public class OrganizationContextTestCase extends AbstractTestCase {
-  
-  private TenantService tenantService;
-  
-  private TenantFactory tenantFactory;
-  
-  private ReferenceFactory<TenantReference> tenantRefFactory;
-  
-  private SpaceService spaceService;
-  
-  private SpaceFactory spaceFactory;
-  
-  private ReferenceFactory<SpaceReference> spaceRefFactory;
-  
-  private UserService userService;
-  
-  private UserFactory userFactory;
+public class OrganizationContextTestCase extends AbstractEventTestCase {
   
   private OrganizationContext context;
   
@@ -72,7 +59,16 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     this.context = this.injector.getInstance(OrganizationContext.class);
     
     this.authService = this.injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
-    
+  }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.eventService.stop();
+    this.mongoService.dropDatabase();
+  }
+  
+  @BeforeMethod
+  public void initData() {
     this.tenant = tenantFactory.create("Fsoft");
     this.tenantService.create(this.tenant);
     
@@ -87,12 +83,13 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     this.userService.create(this.user);
   }
   
-  @AfterClass
-  public void dropDB() throws Exception {
-    super.tearDown();
+  @AfterMethod
+  public void tearDown() {
+    this.authService.logOut();
+    this.mongoService.dropDatabase();
   }
   
-  @Test(threadPoolSize = 2, invocationCount = 2, timeOut = 1000)
+  @Test
   public void testLoginAndLogout() {
     
     Assert.assertNull(this.context.getUser());
@@ -128,5 +125,80 @@ public class OrganizationContextTestCase extends AbstractTestCase {
     Assert.assertNull(this.spaceService.goTo(spaceRefFactory.create("foo")));
     OrganizationContext context = this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     Assert.assertEquals(this.context.getSpace().getId(), context.getSpace().getId());
+  }
+  
+  @Test
+  public void testUserActivation() {
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.context.getSpace());
+    Assert.assertNull(this.context.getUser());
+    
+    User user = userService.get("haint@cloud-ats.net");
+    Assert.assertNotNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    Assert.assertNotNull(this.context.getTenant());
+    Assert.assertNotNull(this.context.getUser());
+    
+    userService.inActive(user);
+    Assert.assertNull(this.context.getUser());
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    userService.active(user);
+    
+    Assert.assertNotNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    Assert.assertNotNull(this.context.getTenant());
+    Assert.assertNotNull(this.context.getUser());
+    
+    userService.delete(user);
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.context.getSpace());
+    Assert.assertNull(this.context.getUser());
+  }
+  
+  @Test
+  public void testSpaceActivation() {
+    
+    Assert.assertNull(context.getSpace());
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    Assert.assertNotNull(context.getSpace());
+    
+    spaceService.inActive(this.space);
+    Assert.assertNull(context.getSpace());
+    Assert.assertNull(this.spaceService.goTo(spaceRefFactory.create(this.space.getId())));
+    
+    spaceService.active(this.space);
+    Assert.assertNotNull(this.spaceService.goTo(spaceRefFactory.create(this.space.getId())));
+    Assert.assertNotNull(context.getSpace());
+    
+    spaceService.delete(this.space);
+    Assert.assertNull(context.getSpace());
+  }
+  
+  @Test
+  public void testTenantActivation() {
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.context.getSpace());
+    Assert.assertNull(this.context.getUser());
+    
+    Assert.assertNotNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    Assert.assertNotNull(this.context.getTenant());
+    Assert.assertNotNull(this.context.getUser());
+    
+    tenantService.inActive(tenant);
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.context.getUser());
+    
+    waitToFinishActivationTenant(tenantRefFactory.create(tenant.getId()), true);
+    
+    Assert.assertNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    
+    tenantService.active(tenant);
+    waitToFinishActivationTenant(tenantRefFactory.create(tenant.getId()), false);
+    Assert.assertNotNull(this.authService.logIn("haint@cloud-ats.net", "12345"));
+    
+    tenantService.delete(tenant);
+    Assert.assertNull(this.context.getTenant());
+    Assert.assertNull(this.context.getSpace());
+    Assert.assertNull(this.context.getUser());
   }
 }

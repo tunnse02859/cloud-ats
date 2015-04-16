@@ -21,7 +21,7 @@ import com.mongodb.BasicDBObject;
  * Mar 9, 2015
  */
 @SuppressWarnings("serial")
-public class Feature extends BasicDBObject {
+public class Feature extends AbstractEntity<Feature> {
   
   public static final Reference<Feature> ANY = new Reference<Feature>("*") {
     @Override
@@ -32,6 +32,7 @@ public class Feature extends BasicDBObject {
   Feature(@Assisted String name) {
     this.put("_id", name);
     this.put("created_date", new Date());
+    this.setActive(true);
   }
   
   public String getId() {

@@ -25,7 +25,7 @@ import com.mongodb.BasicDBObject;
  * Mar 9, 2015
  */
 @SuppressWarnings("serial")
-public class Space extends BasicDBObject {
+public class Space extends AbstractEntity<Space> {
 
   /** .*/
   public static final Reference<Space> ANY = new Reference<Space>("*") {
@@ -44,6 +44,7 @@ public class Space extends BasicDBObject {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("created_date", new Date());
+    this.setActive(true);
     
     this.tenantFactory = tenantFactory;
     this.roleFactory = roleFactory;

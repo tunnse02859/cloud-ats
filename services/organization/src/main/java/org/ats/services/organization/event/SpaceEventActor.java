@@ -19,8 +19,9 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import akka.actor.UntypedActor;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
-public class DeleteSpaceActor extends UntypedActor{
+public class SpaceEventActor extends UntypedActor {
 
   @Inject 
   private UserService userService;
@@ -39,17 +40,43 @@ public class DeleteSpaceActor extends UntypedActor{
 
     if(message instanceof Event) {
       Event event = (Event) message;
-      if("delete-space".equals(event.getName())) {
-        Space space = (Space) event.getSource();
-        process(space);
+      if ("delete-space".equals(event.getName())) {
+        delete(event);
+      } else if ("active-space".equals(event.getName())) {
+        activation(event, true);
+      } else if ("in-active-space".equals(event.getName())) {
+        activation(event, false);
       }
     } else {
       unhandled(message);
     }
   }
+  
+  private void activation(Event event, boolean active) {
+    
+    Space space = (Space) event.getSource();
+    SpaceReference spaceRef = spaceRefFactory.create(space.getId());
+    logger.info("Process event" + (active ? " active-space " : " in-active-space ") + spaceRef.toJSon());
+    
+    DBObject update = new BasicDBObject("$set", new BasicDBObject("active", active));
+    
+    //active/inactive user
+    BasicDBObject query = new BasicDBObject("spaces", new BasicDBObject("$elemMatch", spaceRef.toJSon())).append("active", !active);
+    userService.bulkUpdate(query, update);
+    
+    //active/inactive role
+    query = new BasicDBObject("space", spaceRef.toJSon()).append("active", !active);
+    roleService.bulkUpdate(query, update);
+    
+    //notify to listener
+    if (!"deadLetters".equals(getSender().path().name())) {
+      getSender().tell(event, getSelf());
+    }
+  }
 
-  private void process(Space space) throws InterruptedException {
+  private void delete(Event event) {
 
+    Space space = (Space) event.getSource();
     SpaceReference spaceRef = spaceRefFactory.create(space.getId());
     logger.info("Process event delete-space " + spaceRef.toJSon());
     
@@ -80,7 +107,7 @@ public class DeleteSpaceActor extends UntypedActor{
     
     //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(spaceRef, getSelf());
+      getSender().tell(event, getSelf());
     }
   }
 }

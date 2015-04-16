@@ -17,7 +17,7 @@ import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
 
-public class DeleteFeatureActor extends UntypedActor {
+public class FeatureEventActor extends UntypedActor {
 
   @Inject
   private TenantService tenantService;
@@ -34,16 +34,21 @@ public class DeleteFeatureActor extends UntypedActor {
     if (message instanceof Event) {
       Event event = (Event) message;
       if ("delete-feature".equals(event.getName())) {
-        Feature feature = (Feature) event.getSource();
-        FeatureReference ref = featureRefFactory.create(feature.getId());
-        process(ref);
+        delete(event);
+      } else if ("active-feature".equals(event.getName())) {
+        
+      } else if ("in-active-feature".equals(event.getName())) {
+        
       }
     } else {
       unhandled(message);
     }
   }
   
-  private void process(FeatureReference ref) {
+  private void delete(Event event) {
+    
+    Feature feature = (Feature) event.getSource();
+    FeatureReference ref = featureRefFactory.create(feature.getId());
     
     logger.info("Process event delete-feature " + ref.toJSon());
     
@@ -64,7 +69,7 @@ public class DeleteFeatureActor extends UntypedActor {
     
     //send processed event to listener
     if (!"deadLetters".equals(getSender().path().name())) {
-      getSender().tell(ref, getSelf());
+      getSender().tell(event, getSelf());
     }
   }
 

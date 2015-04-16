@@ -49,12 +49,14 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
   public Feature transform(DBObject source) {
     Feature feature = factory.create((String) source.get("_id"));
     feature.put("created_date", source.get("created_date"));
+    feature.put("active", source.get("active"));
     feature.put("actions", source.get("actions"));
     return feature;
   }
   
   @Override
   public void delete(Feature obj) {
+    if (obj == null) return;
     super.delete(obj);
     Event event = eventFactory.create(obj, "delete-feature");
     event.broadcast();
@@ -63,6 +65,35 @@ public class FeatureService extends AbstractMongoCRUD<Feature> {
   @Override
   public void delete(String id) {
     Feature feature = get(id);
-    delete(feature);
+    this.delete(feature);
   }
+  
+  @Override
+  public void active(Feature obj) {
+    if (obj == null) return;
+    super.active(obj);
+    Event event = eventFactory.create(obj, "active-feature");
+    event.broadcast();
+  }
+  
+  @Override
+  public void active(String id) {
+    Feature feature = get(id);
+    this.active(feature);
+  }
+  
+  @Override
+  public void inActive(Feature obj) {
+    if (obj == null) return;
+    super.inActive(obj);
+    Event event = eventFactory.create(obj, "in-active-feature");
+    event.broadcast();
+  }
+  
+  @Override
+  public void inActive(String id) {
+    Feature feature = get(id);
+    this.inActive(feature);
+  }
+
 }

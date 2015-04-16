@@ -3,8 +3,11 @@
  */
 package org.ats.services.organization.event;
 
+import org.ats.services.event.Event;
 import org.ats.services.organization.RoleService;
 import org.ats.services.organization.UserService;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -27,6 +30,7 @@ public class DeleteSpaceTestCase extends AbstractEventTestCase {
   @BeforeClass
   public void init() throws Exception {
     super.init(this.getClass().getSimpleName());
+    initService();
   }
   
   @AfterClass
@@ -64,13 +68,20 @@ public class DeleteSpaceTestCase extends AbstractEventTestCase {
     @Inject RoleService roleService;
     
     @Inject UserService userService;
+    
+    @Inject ReferenceFactory<SpaceReference> spaceRefFactory;
 
     @Override
     public void onReceive(Object message) throws Exception {
-      if (message instanceof SpaceReference) {
-          SpaceReference ref = (SpaceReference) message;
+      if (message instanceof Event) {
+        Event event = (Event) message;
+        if ("delete-space".equals(event.getName())) {
+          Space space = (Space) event.getSource();
+          SpaceReference ref = spaceRefFactory.create(space.getId());
+          
           Assert.assertEquals(roleService.findIn("space", ref).count(), 0);
           Assert.assertEquals(userService.findIn("spaces", ref).count(), 0);
+        }
       }
     }
   }
