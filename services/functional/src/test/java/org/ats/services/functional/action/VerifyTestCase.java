@@ -23,11 +23,13 @@ public class VerifyTestCase {
     Value value = new Value("foo", true);
     VerifyTextPresent action = new VerifyTextPresent(value, true);
     
-    Assert.assertEquals(action.transform(),"if (wd.findElement(By.tagName(\"html\")).getText().contains(foo)) {\nSystem.out.println(\"!verifyTextPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(),"if (wd.findElement(By.tagName(\"html\")).getText().contains(foo)) "+
+    "{\nSystem.out.println(\"!verifyTextPresent failed\");\n}\n");
     
     action = new VerifyTextPresent(value, false);
     
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().contains(foo)) {\nSystem.out.println(\"verifyTextPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().contains(foo)) "+
+    "{\nSystem.out.println(\"verifyTextPresent failed\");\n}\n");
   }
   
   @Test
@@ -37,11 +39,13 @@ public class VerifyTestCase {
     Value value = new Value("foo", true);
     VerifyText action = new VerifyText(locator, value, true);
     
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"test\")).getText().equals(foo)) {\nSystem.out.println(\"!verifyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"test\")).getText().equals(foo)) "
+        + "{\nSystem.out.println(\"!verifyText failed\");\n}\n");
     
     action = new VerifyText(locator, value, false);
     
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"test\")).getText().equals(foo)) {\nSystem.out.println(\"verifyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"test\")).getText().equals(foo)) "
+        + "{\nSystem.out.println(\"verifyText failed\");\n}\n");
     
   }
   
@@ -51,11 +55,13 @@ public class VerifyTestCase {
     Value value = new Value("https://google.com.vn", true);
     
     VerifyPageSource action = new VerifyPageSource(value, true);
-    Assert.assertEquals(action.transform(), "if (wd.getPageSource().equals(https://google.com.vn)) {\nSystem.out.println(\"!verifyPageSource failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.getPageSource().equals(https://google.com.vn)) "
+        + "{\nSystem.out.println(\"!verifyPageSource failed\");\n}\n");
    
     action = new VerifyPageSource(value, false);
     
-    Assert.assertEquals(action.transform(), "if (!wd.getPageSource().equals(https://google.com.vn)) {\nSystem.out.println(\"verifyPageSource failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.getPageSource().equals(https://google.com.vn)) "
+        + "{\nSystem.out.println(\"verifyPageSource failed\");\n}\n");
   }
   
   @Test
@@ -64,10 +70,12 @@ public class VerifyTestCase {
     IDLocator locator = new IDLocator(new Value("i am id", false));
     
     VerifyElementPresent action = new VerifyElementPresent(locator, true);
-    Assert.assertEquals(action.transform(), "if ((wd.findElements(By.id(\"i am id\")).size() != 0)) {\nSystem.out.println(\"!verifyElementPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if ((wd.findElements(By.id(\"i am id\")).size() != 0)) "
+        + "{\nSystem.out.println(\"!verifyElementPresent failed\");\n}\n");
   
     action = new VerifyElementPresent(locator, false);
-    Assert.assertEquals(action.transform(), "if (!(wd.findElements(By.id(\"i am id\")).size() != 0)) {\nSystem.out.println(\"verifyElementPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!(wd.findElements(By.id(\"i am id\")).size() != 0)) "
+        + "{\nSystem.out.println(\"verifyElementPresent failed\");\n}\n");
     
   }
   
@@ -77,11 +85,13 @@ public class VerifyTestCase {
     Value value = new Value("https://google.com.vn", true);
     
     VerifyCurrentUrl action = new VerifyCurrentUrl(value, true);
-    Assert.assertEquals(action.transform(), "if (wd.getCurrentUrl().equals(https://google.com.vn)) {\nSystem.out.println(\"!verifyCurrentUrl failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.getCurrentUrl().equals(https://google.com.vn)) "
+        + "{\nSystem.out.println(\"!verifyCurrentUrl failed\");\n}\n");
     
     action = new VerifyCurrentUrl(value, false);
     
-    Assert.assertEquals(action.transform(), "if (!wd.getCurrentUrl().equals(https://google.com.vn)) {\nSystem.out.println(\"verifyCurrentUrl failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.getCurrentUrl().equals(https://google.com.vn)) "
+        + "{\nSystem.out.println(\"verifyCurrentUrl failed\");\n}\n");
     
   }
   
@@ -92,10 +102,12 @@ public class VerifyTestCase {
     
     VerifyBodyText action = new VerifyBodyText(value, true);
     
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.tagName(\"html\")).getText().equals(not body text)) {\nSystem.out.println(\"!verifyBodyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.tagName(\"html\")).getText().equals(not body text)) "
+        + "{\nSystem.out.println(\"!verifyBodyText failed\");\n}\n");
     
     action = new VerifyBodyText(value, false);
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(not body text)) {\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(not body text)) "
+        + "{\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
   
   }
 }
