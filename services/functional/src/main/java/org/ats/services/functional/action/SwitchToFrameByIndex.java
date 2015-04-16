@@ -5,17 +5,22 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.Value;
+
 /**
  * @author TrinhTV3
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SwitchToDefaultContent implements IAction {
+public class SwitchToFrameByIndex implements IAction {
+
+  private Value index;
 
   /**
    * 
    */
-  public SwitchToDefaultContent() {
+  public SwitchToFrameByIndex(Value index) {
+    this.index = index;
   }
   public String transform() throws IOException {
     return null;
@@ -24,6 +29,5 @@ public class SwitchToDefaultContent implements IAction {
   public String getAction() {
     return null;
   }
-
   
 }
