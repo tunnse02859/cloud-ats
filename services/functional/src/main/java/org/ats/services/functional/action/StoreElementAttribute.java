@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.ats.services.functional.Value;
 import org.ats.services.functional.locator.ILocator;
+import org.rythmengine.Rythm;
 
 /**
  * @author TrinhTV3
@@ -26,13 +27,14 @@ public class StoreElementAttribute implements IAction{
   }
   
   public String transform() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    
+    StringBuilder sb = new StringBuilder("String @variable = ");
+    sb.append(" wd.findElement(@locator).getAttribute(@attributeName);\n");
+    return Rythm.render(sb.toString(), variable.transform(), locator.transform(), attributeName.transform());
   }
 
   public String getAction() {
-    // TODO Auto-generated method stub
-    return null;
+    return "testStoreElementAttribute";
   }
 
 }
