@@ -141,4 +141,27 @@ public class VerifyTestCase {
         + "{\nSystem.out.println(\"verifyElementValue failed\");\n}\n");
     
   }
+  
+  @Test
+  public void testVerifyElementSelected() throws IOException {
+    
+    Value value = new Value("unchecked_checkbox", false);
+    
+    IDLocator locator = new IDLocator(value);
+    
+    VerifyElementSelected action = new VerifyElementSelected(locator, true);
+    Assert.assertEquals(action.transform(), "if ((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) "
+        + "{\nSystem.out.println(\"!verifyElementSelected failed\");\n}\n");
+ 
+    action = new VerifyElementSelected(locator, false);
+    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) "
+        + "{\nSystem.out.println(\"verifyElementSelected failed\");\n}\n");
+    
+    value = new Value("unchecked_checkbox", true);
+    locator = new IDLocator(value);
+    action = new VerifyElementSelected(locator, false);
+    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(unchecked_checkbox)).isSelected())) "
+        + "{\nSystem.out.println(\"verifyElementSelected failed\");\n}\n");
+    
+  }
 }
