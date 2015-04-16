@@ -56,4 +56,26 @@ public class MiscTestCase {
     SwitchToWindow action = new SwitchToWindow(name);
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().window(\"test_witch_to_window\");\n");
   }
+  
+  @Test
+  public void testSwitchToFrameByIndex() throws IOException {
+    Value name = new Value("index", false);
+    SwitchToFrameByIndex action = new SwitchToFrameByIndex(name);
+    
+    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(\"index\");\n");
+  }
+  
+  @Test
+  public void testSwitchToFrame() throws IOException {
+    Value identifier = new Value("indentifier", false);
+    SwitchToFrame action = new SwitchToFrame(identifier);
+    
+    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(\"indentifier\");\n");
+  }
+  
+  @Test
+  public void testSwitchToDefaultContent() throws IOException {
+    SwitchToDefaultContent action = new SwitchToDefaultContent();
+    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().switchToDefaultContent();\n");
+  }
 }

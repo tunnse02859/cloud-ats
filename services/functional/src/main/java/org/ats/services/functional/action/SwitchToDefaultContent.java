@@ -18,11 +18,13 @@ public class SwitchToDefaultContent implements IAction {
   public SwitchToDefaultContent() {
   }
   public String transform() throws IOException {
-    return null;
+    
+    StringBuilder sb = new StringBuilder("wd = (FirefoxDriver) wd.switchTo().switchToDefaultContent();\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    return null;
+    return "testSwitchDefaultContent";
   }
 
   
