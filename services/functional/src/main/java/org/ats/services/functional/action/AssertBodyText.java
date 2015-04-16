@@ -17,15 +17,15 @@ public class AssertBodyText implements IAction {
 
   private Value text;
   
-  private boolean neagated;
+  private boolean negated;
   
   public AssertBodyText(Value text, boolean negated) {
     this.text = text;
-    this.neagated = negated;
+    this.negated = negated;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(neagated ? "assertNotEquals(" : "assertEquals(");
+    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
     sb.append("wd.findElement(By.tagName(\"html\")).getText(), @text);\n");
     return Rythm.render(sb.toString(), text.transform());
   }

@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.ats.services.functional.Value;
 import org.ats.services.functional.locator.IDLocator;
+import org.ats.services.functional.locator.LinkTextLocator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -94,5 +95,84 @@ public class AssertionTestCase {
     
     action = new AssertTextPresent(value, false);
     Assert.assertEquals(action.transform(), "assertTrue(wd.findElement(By.tagName(\"html\")).getText().contains(text_present));\n");
+  }
+  
+  @Test
+  public void testAssertCookieByName() throws IOException {
+    Value name = new Value("test_cookie", false);
+    Value value = new Value("cookie", true);
+    
+    AssertCookieByName assertCookieByName = new AssertCookieByName(name, value, false);
+    Assert.assertEquals(assertCookieByName.transform(), 
+        "assertEquals(wd.manage().getCookieNamed(\"test_cookie\").getValue(), cookie);\n");
+    
+    assertCookieByName = new AssertCookieByName(name, value, true);
+    Assert.assertEquals(assertCookieByName.transform(), 
+        "assertNotEquals(wd.manage().getCookieNamed(\"test_cookie\").getValue(), cookie);\n");
+  }
+  
+  @Test
+  public void testAssertCookiePresent() throws IOException {
+    Value name = new Value("test_cookie",false);
+    
+    AssertCookiePresent assertCookiePresent = new AssertCookiePresent(name, true);
+    Assert.assertEquals(assertCookiePresent.transform(), 
+        "assertFalse((wd.manage().getCookieNamed(\"test_cookie\") != null));\n");
+    
+    assertCookiePresent = new AssertCookiePresent(name, false);
+    Assert.assertEquals(assertCookiePresent.transform(), 
+        "assertTrue((wd.manage().getCookieNamed(\"test_cookie\") != null));\n");
+  }
+  
+  @Test
+  public void testAssertElementAttribute() throws IOException {
+    Value attributeName = new Value("href", false);
+    Value value = new Value("link_href", true);
+    LinkTextLocator locator = new LinkTextLocator(new Value("i am a link", false));
+    
+    AssertElementAttribute assertElementAttribute = new AssertElementAttribute(attributeName, value, locator, true);
+    Assert.assertEquals(assertElementAttribute.transform(), 
+        "assertNotEquals(wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\"), link_href);\n");
+    
+    assertElementAttribute = new AssertElementAttribute(attributeName, value, locator, false);
+    Assert.assertEquals(assertElementAttribute.transform(), 
+        "assertEquals(wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\"), link_href);\n");
+  }
+  
+  @Test
+  public void testAssertElementSelected() throws IOException {
+    IDLocator locator = new IDLocator(new Value("unchecked_checkbox", false));
+    
+    AssertElementSelected assertElementSelected = new AssertElementSelected(locator,true);
+    Assert.assertEquals(assertElementSelected.transform(),
+        "assertFalse((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()));\n");
+    
+    assertElementSelected = new AssertElementSelected(locator,false);
+    Assert.assertEquals(assertElementSelected.transform(),
+        "assertTrue((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()));\n");
+  }
+  
+  @Test
+  public void testAssertElementValue() throws IOException {
+    IDLocator locator = new IDLocator(new Value("comments", false));
+    Value value = new Value("not w00t", false);
+    AssertElementValue assertElementValue = new AssertElementValue(value, locator, true);
+    Assert.assertEquals(assertElementValue.transform(), 
+        "assertNotEquals(wd.findElement(By.id(\"comments\")).getAttribute(\"value\"), \"not w00t\");\n");
+    
+    assertElementValue = new AssertElementValue(value, locator, false);
+    Assert.assertEquals(assertElementValue.transform(), 
+        "assertEquals(wd.findElement(By.id(\"comments\")).getAttribute(\"value\"), \"not w00t\");\n");
+  }
+  
+  @Test
+  public void testAssertTitle() throws IOException {
+    AssertTitle assertTitle = new AssertTitle(new Value("this is title", false), true);
+    Assert.assertEquals(assertTitle.transform(), 
+        "assertNotEquals(wd.getTitle(), \"this is title\");\n");
+    
+    assertTitle = new AssertTitle(new Value("this is title", false), false);
+    Assert.assertEquals(assertTitle.transform(), 
+        "assertEquals(wd.getTitle(), \"this is title\");\n");
   }
 }
