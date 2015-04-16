@@ -123,4 +123,22 @@ public class VerifyTestCase {
     Assert.assertEquals(action.transform(), "if (!wd.getTitle().equals(\"title\")) {\nSystem.out.println(\"verifyTitle failed\");\n}\n");
  
   }
+  
+  @Test
+  public void testVerifyElementValue() throws IOException {
+    
+    Value value = new Value("comments", false);
+    IDLocator locator = new IDLocator(value);
+    
+    VerifyElementValue action = new VerifyElementValue(locator, new Value("w00t", false), true);
+    
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) "
+        + "{\nSystem.out.println(\"!verifyElementValue failed\");\n}\n");
+    
+    action = new VerifyElementValue(locator, new Value("w00t", false), false);
+    
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) "
+        + "{\nSystem.out.println(\"verifyElementValue failed\");\n}\n");
+    
+  }
 }
