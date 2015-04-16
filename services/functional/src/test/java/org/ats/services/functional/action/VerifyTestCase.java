@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.ats.services.functional.Value;
 import org.ats.services.functional.locator.IDLocator;
+import org.ats.services.functional.locator.LinkTextLocator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -162,6 +163,27 @@ public class VerifyTestCase {
     action = new VerifyElementSelected(locator, false);
     Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(unchecked_checkbox)).isSelected())) "
         + "{\nSystem.out.println(\"verifyElementSelected failed\");\n}\n");
+    
+  }
+  
+  @Test
+  public void testVerifyElementAttribute() throws IOException {
+    Value valueLocator = new Value("i am a link", false);
+    
+    Value value = new Value("link_href", true);
+    
+    Value attributeName = new Value("href", false);
+    
+    LinkTextLocator locator = new LinkTextLocator(valueLocator);
+    
+    VerifyElementAttribute action = new VerifyElementAttribute(locator, attributeName, value, true);
+    
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) "
+        + "{\nSystem.out.println(\"!verifyElementAttribute failed\");\n}\n");
+    
+    action = new VerifyElementAttribute(locator, attributeName, value, false);
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) "
+        + "{\nSystem.out.println(\"verifyElementAttribute failed\");\n}\n");
     
   }
 }
