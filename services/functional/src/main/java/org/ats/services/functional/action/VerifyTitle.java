@@ -19,7 +19,7 @@ public class VerifyTitle implements IAction {
   
   private boolean negated;
   
-  VerifyTitle(Value title, boolean negated) {
+  public VerifyTitle(Value title, boolean negated) {
     
     this.title = title;
     this.negated = negated;
