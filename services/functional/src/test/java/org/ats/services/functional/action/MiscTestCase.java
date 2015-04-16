@@ -84,14 +84,13 @@ public class MiscTestCase {
     String waitTime = "10000";
     Pause pause = new Pause(waitTime);
     Assert.assertEquals(pause.transform(), 
-        "try { Thread.sleep(10000l); } catch (Exception e) { throw new RuntimeException(e); }");
+        "try { Thread.sleep(10000l); } catch (Exception e) { throw new RuntimeException(e); }\n");
   }
   
   @Test
   public void testSaveScreenShot() throws IOException {
     Value file = new Value("/tmp/screen.png", false);
     SaveScreenShot saveScreenShot = new SaveScreenShot(file);
-    System.out.println(saveScreenShot.transform());
     Assert.assertEquals(saveScreenShot.transform(), "wd.getScreenshotAs(FILE).renameTo(new File(\"/tmp/screen.png\"));\n");
   }
 }
