@@ -49,4 +49,11 @@ public class MiscTestCase {
     Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(test_cookie) != null) { wd.manage().deleteCookie(wd.manage().getCookieNamed(test_cookie)); }\n");
   }
   
+  @Test
+  public void testSwitchToWindow() throws IOException {
+    
+    Value name = new Value("test_witch_to_window", false);
+    SwitchToWindow action = new SwitchToWindow(name);
+    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().window(\"test_witch_to_window\");\n");
+  }
 }
