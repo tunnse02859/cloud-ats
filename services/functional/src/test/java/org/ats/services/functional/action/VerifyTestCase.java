@@ -186,4 +186,17 @@ public class VerifyTestCase {
         + "{\nSystem.out.println(\"verifyElementAttribute failed\");\n}\n");
     
   }
+  
+  @Test
+  public void testVerifyCookiePresent() throws IOException {
+    Value name = new Value("test_cookie", false);
+    VerifyCookiePresent action = new VerifyCookiePresent(name, true);
+    
+    Assert.assertEquals(action.transform(), "if ((wd.manage().getCookieNamed(\"test_cookie\") != null)) "
+        + "{\nSystem.out.println(\"!verifyCookiePresent failed\");\n}\n");
+    
+    action = new VerifyCookiePresent(name, false);
+    
+    Assert.assertEquals(action.transform(), "if (!(wd.manage().getCookieNamed(\"test_cookie\") != null)) {\nSystem.out.println(\"verifyCookiePresent failed\");\n}\n");
+  }
 }
