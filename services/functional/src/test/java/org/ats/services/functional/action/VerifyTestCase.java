@@ -110,4 +110,17 @@ public class VerifyTestCase {
         + "{\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
   
   }
+  
+  @Test
+  public void testVerifyTitle() throws IOException {
+    
+    Value value = new Value("title", false);
+    
+    VerifyTitle action = new VerifyTitle(value, true);
+    Assert.assertEquals(action.transform(), "if (wd.getTitle().equals(\"title\")) {\nSystem.out.println(\"!verifyTitle failed\");\n}\n");
+    
+    action = new VerifyTitle(value, false);
+    Assert.assertEquals(action.transform(), "if (!wd.getTitle().equals(\"title\")) {\nSystem.out.println(\"verifyTitle failed\");\n}\n");
+ 
+  }
 }
