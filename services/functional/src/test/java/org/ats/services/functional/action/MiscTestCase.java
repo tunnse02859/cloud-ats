@@ -78,4 +78,20 @@ public class MiscTestCase {
     SwitchToDefaultContent action = new SwitchToDefaultContent();
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().switchToDefaultContent();\n");
   }
+  
+  @Test
+  public void testPause() throws IOException {
+    String waitTime = "10000";
+    Pause pause = new Pause(waitTime);
+    Assert.assertEquals(pause.transform(), 
+        "try { Thread.sleep(10000l); } catch (Exception e) { throw new RuntimeException(e); }");
+  }
+  
+  @Test
+  public void testSaveScreenShot() throws IOException {
+    Value file = new Value("/tmp/screen.png", false);
+    SaveScreenShot saveScreenShot = new SaveScreenShot(file);
+    System.out.println(saveScreenShot.transform());
+    Assert.assertEquals(saveScreenShot.transform(), "wd.getScreenshotAs(FILE).renameTo(new File(\"/tmp/screen.png\"));\n");
+  }
 }
