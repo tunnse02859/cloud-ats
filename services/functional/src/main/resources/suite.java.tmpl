@@ -1,4 +1,4 @@
-@args() {String packageName, String extraImports, String suiteName, String driverVar, String initDriver, String cases} 
+@args() {String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, String cases} 
 
 package @packageName
 
@@ -23,7 +23,7 @@ public class @suiteName {
   @@BeforeMethod
   public void setUp() throws Exception {
     @initDriver
-    wd.manage().timeouts().implicitlyWait({timeoutSeconds}, TimeUnit.SECONDS);
+    wd.manage().timeouts().implicitlyWait(@timeoutSeconds, TimeUnit.SECONDS);
   }
    
   @@AfterMethod

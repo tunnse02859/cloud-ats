@@ -17,6 +17,7 @@
 		<module>database</module>
 		<module>organization</module>
 		<module>event</module>
+		<module>functional</module>
 	</modules>
 
 </project>

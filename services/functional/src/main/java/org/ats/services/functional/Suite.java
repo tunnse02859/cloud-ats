@@ -27,14 +27,17 @@ public class Suite implements ITemplate {
   
   private String initDriver;
   
+  private int timeoutSeconds;
+  
   private List<Case> cases = new ArrayList<Case>();
 
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, List<Case> cases) {
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, List<Case> cases) {
     this.packageName = packageName;
     this.extraImports = extraImports;
     this.suiteName = suiteName;
     this.driverVar = driverVar;
     this.initDriver = initDriver;
+    this.timeoutSeconds = timeoutSeconds;
     this.cases = cases;
   }
   
@@ -44,14 +47,16 @@ public class Suite implements ITemplate {
     for (Case caze : cases) {
       sb.append(caze.transform());
     }
-    return Rythm.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, sb.toString());
+    return Rythm.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sb.toString());
   }
   
   public static class SuiteBuilder {
     
     public static final String DEFAULT_DRIVER_VAR = "FirefoxDriver wd;";
     
-    public static final String DEFAULT_INIT_DRIVER = "wd = new FirefoxDriver();";  
+    public static final String DEFAULT_INIT_DRIVER = "wd = new FirefoxDriver();";
+    
+    public static final int DEFAULT_TIMEOUT_SECONDS = 60;
     
     private String suiteName;
     
@@ -62,6 +67,8 @@ public class Suite implements ITemplate {
     private String driverVar;
     
     private String initDriver;
+    
+    private int timeoutSeconds;
     
     private List<Case> cases = new ArrayList<Case>();
     
@@ -85,6 +92,11 @@ public class Suite implements ITemplate {
       return this;
     }
     
+    public SuiteBuilder timeoutSeconds(int timeoutSeconds) {
+      this.timeoutSeconds = timeoutSeconds;
+      return this;
+    }
+    
     public SuiteBuilder suiteName(String name) {
       this.suiteName = name;
       return this;
@@ -98,7 +110,7 @@ public class Suite implements ITemplate {
     }
     
     public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, cases);
+      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases);
     }
   }
 }

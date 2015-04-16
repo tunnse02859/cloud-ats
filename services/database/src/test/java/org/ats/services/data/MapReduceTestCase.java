@@ -10,7 +10,6 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -20,7 +19,6 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MapReduceCommand;
 import com.mongodb.MapReduceCommand.OutputType;
-import com.mongodb.MapReduceOutput;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
