@@ -199,4 +199,16 @@ public class VerifyTestCase {
     
     Assert.assertEquals(action.transform(), "if (!(wd.manage().getCookieNamed(\"test_cookie\") != null)) {\nSystem.out.println(\"verifyCookiePresent failed\");\n}\n");
   }
+  
+  @Test
+  public void testVerifyCookieByName() throws IOException {
+    
+    Value name = new Value("test_cookie", false);
+    
+    Value value = new Value("cookie", true);
+    
+    VerifyCookieByName action = new VerifyCookieByName(name, value, true);
+    Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(\"test_cookie\").getValue().equals(cookie)) {\nSystem.out.println(\"!verifyCookieByName failed\");\n}\n");
+ 
+  }
 }
