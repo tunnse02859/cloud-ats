@@ -84,4 +84,11 @@ public class StoreTestCase {
     StoreCurrentUrl storeCurrentUrl = new StoreCurrentUrl(variable);
     Assert.assertEquals(storeCurrentUrl.transform(), "String url = wd.getCurrentUrl();\n");
   }
+  
+  @Test
+  public void testStoreAlertPresent() throws IOException {
+    
+    StoreAlertPresent action = new StoreAlertPresent("var test");
+    Assert.assertEquals(action.transform(), "boolean var test = isAlertPresent(wd);\n");
+  }
 }
