@@ -226,8 +226,12 @@ public class VerifyTestCase {
   @Test
   public void testVerifyAlertPresent() throws IOException {
     
-    VerifyAlertPresent action = new VerifyAlertPresent(false);
+    VerifyAlertPresent action = new VerifyAlertPresent(true);
+    Assert.assertEquals(action.transform(), "if (isAlertPresent(wd)) {\nSystem.out.println(\"!verifyAlertPresent failed\");\n}\n");
+    
+    action = new VerifyAlertPresent(false);
     Assert.assertEquals(action.transform(), "if (!isAlertPresent(wd)) {\nSystem.out.println(\"verifyAlertPresent failed\");\n}\n");
+    
   }
   
   @Test
@@ -238,6 +242,11 @@ public class VerifyTestCase {
     
     VerifyEval action = new VerifyEval(script, value, false);
     Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"verifyEval failed\");\n}\n");
+    
+    action = new VerifyEval(script, value, true);
+    Assert.assertEquals(action.transform(), "if (wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"!verifyEval failed\");\n}\n");
+    
+    
   }
   
   @Test
@@ -247,6 +256,12 @@ public class VerifyTestCase {
     VerifyAlertText verifyAlertText = new VerifyAlertText(text, true);
     Assert.assertEquals(verifyAlertText.transform(), 
         "if (wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
-            "System.out.println(\"!verifyAlertText failed\");}");
+            "System.out.println(\"!verifyAlertText failed\");\n}\n");
+    
+    verifyAlertText = new VerifyAlertText(text, false);
+    Assert.assertEquals(verifyAlertText.transform(), 
+        "if (!wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
+            "System.out.println(\"verifyAlertText failed\");\n}\n");
+    
   }
 }

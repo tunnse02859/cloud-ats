@@ -19,6 +19,8 @@ public class VerifyEval implements IAction {
   
   private Value value;
   
+  private boolean negated;
+  
   /**
    * 
    */
@@ -26,13 +28,14 @@ public class VerifyEval implements IAction {
     
     this.script = script;
     this.value = value;
+    this.negated = negated;
   }
   
   @Override
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("if (!wd.executeScript(@script).equals(@value)) {\n");
-    sb.append("System.out.println(\"verifyEval failed\");\n");
+    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("wd.executeScript(@script).equals(@value)) {\n");
+    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyEval failed\");\n");
     sb.append("}\n");
     
     return Rythm.render(sb.toString(), script.transform(), value.transform());

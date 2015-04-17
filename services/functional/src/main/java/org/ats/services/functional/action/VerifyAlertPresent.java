@@ -21,8 +21,8 @@ public class VerifyAlertPresent implements IAction {
   @Override
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("if (!isAlertPresent(wd)) {\n");
-    sb.append("System.out.println(\"verifyAlertPresent failed\");\n}\n");
+    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("isAlertPresent(wd)) {\n");
+    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyAlertPresent failed\");\n}\n");
     return sb.toString();
   }
 
