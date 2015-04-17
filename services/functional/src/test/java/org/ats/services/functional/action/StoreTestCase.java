@@ -115,4 +115,27 @@ public class StoreTestCase {
     Assert.assertEquals(storeElementStyle.transform(), 
         "String element_style = wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\");\n");
   }
+  
+  @Test
+  public void testStoreTitle() throws IOException {
+    StoreTitle action = new StoreTitle("var");
+    Assert.assertEquals(action.transform(), "String var = wd.getTitle();\n");
+  }
+  
+  @Test
+  public void testStoreElementValue() throws IOException {
+    IDLocator locator = new IDLocator(new Value("i am id", false));
+    StoreElementValue action = new StoreElementValue(locator, "var1");
+    
+    Assert.assertEquals(action.transform(), "String var1 = wd.findElement(By.id(\"i am id\")).getAttribute(\"value\");\n");
+  }
+  
+  @Test
+  public void testStoreElementSelected() throws IOException {
+    
+    IDLocator locator = new IDLocator(new Value("i am id", false));
+    StoreElementSelected action = new StoreElementSelected("var2", locator);
+    
+    Assert.assertEquals(action.transform(), "boolean var2 = (wd.findElement(By.id(\"i am id\")).isSelected());\n");
+  }
 }

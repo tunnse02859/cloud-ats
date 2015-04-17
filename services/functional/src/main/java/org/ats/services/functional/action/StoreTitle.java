@@ -20,12 +20,12 @@ public class StoreTitle implements IAction {
   
   @Override
   public String transform() throws IOException {
-    return null;
+    return "String " + variable + " = wd.getTitle();\n";
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testStoreTitle";
   }
 
 }
