@@ -182,7 +182,11 @@ public class AssertionTestCase {
     Value value = new Value("value is bar", false);
     Value propertyName = new Value("bar", false);
     
-    AssertElementStyle assertElementStyle = new AssertElementStyle(propertyName, value, locator, false);
+    AssertElementStyle assertElementStyle = new AssertElementStyle(propertyName, value, locator,true);
+    Assert.assertEquals(assertElementStyle.transform(), 
+        "assertNotEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
+    
+    assertElementStyle = new AssertElementStyle(propertyName, value, locator,false);
     Assert.assertEquals(assertElementStyle.transform(), 
         "assertEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
   }

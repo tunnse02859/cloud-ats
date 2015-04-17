@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author NamBV2
@@ -28,7 +29,7 @@ public class AssertAlertText implements IAction{
     sb.append("wd.switchTo().alert().getText(), ");
     sb.append(text);
     sb.append(");\n");
-    return sb.toString();
+    return Rythm.render(sb.toString(), text.transform());
   }
 
   public String getAction() {

@@ -30,13 +30,13 @@ public class AssertElementStyle implements IAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder();
-    sb.append("assertEquals(wd.findElement(@locator).getCssValue(");
+    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
+    sb.append("wd.findElement(@locator).getCssValue(");
     sb.append(propertyName);
     sb.append("), ");
     sb.append(value);
     sb.append(");\n");
-    return Rythm.render(sb.toString(), locator.transform());
+    return Rythm.render(sb.toString(), locator.transform(),value.transform(),propertyName.transform());
   }
 
   public String getAction() {

@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.ats.services.functional.Value;
 import org.ats.services.functional.locator.ILocator;
+import org.rythmengine.Rythm;
 
 /**
  * @author NamBV2
@@ -28,11 +29,16 @@ public class StoreElementStyle implements IAction{
   }
   
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder("String ");
+    sb.append(variable);
+    sb.append(" = wd.findElement(@locator).getCssValue(");
+    sb.append(propertyName);
+    sb.append(");\n");
+    return Rythm.render(sb.toString(), locator.transform(),propertyName.transform());
   }
 
   public String getAction() {
-    return null;
+    return "storeElementStyle";
   }
 
 }

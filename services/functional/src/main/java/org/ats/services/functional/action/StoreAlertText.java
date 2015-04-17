@@ -5,8 +5,6 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.Value;
-
 /**
  * @author NamBV2
  *
@@ -21,12 +19,15 @@ public class StoreAlertText implements IAction{
   }
   
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder("String ");
+    sb.append(variable);
+    sb.append(" = wd.switchTo().alert().getText();\n");
+    return sb.toString();
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "storeAlertText";
   }
 
 }

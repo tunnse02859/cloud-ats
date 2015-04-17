@@ -30,13 +30,13 @@ public class VerifyElementStyle implements IAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder();
-    sb.append("if (!wd.findElement(@locator).getCssValue(");
+    StringBuilder sb = new StringBuilder(negated ? "if (wd." : "if (!wd.");
+    sb.append("findElement(@locator).getCssValue(");
     sb.append(propertyName);
     sb.append(").equals(");
     sb.append(value);
     sb.append(")) {\nSystem.out.println(\"verifyElementStyle failed\");\n}\n");
-    return Rythm.render(sb.toString(), locator.transform());
+    return Rythm.render(sb.toString(), locator.transform(), propertyName.transform(), value.transform());
   }
 
   @Override

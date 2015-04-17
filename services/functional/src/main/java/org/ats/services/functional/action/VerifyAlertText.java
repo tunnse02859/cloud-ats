@@ -26,7 +26,7 @@ public class VerifyAlertText implements IAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("if (").append(negated ? "wd." : "!wd.");
+    StringBuilder sb = new StringBuilder(negated ? "if (wd." : "if (!wd.");
     sb.append("switchTo().alert().getText().equals(");
     sb.append(text);
     sb.append(")) {\nSystem.out.println(\"").append(negated ? "!" : "").append("verifyAlertText failed\");\n}\n");

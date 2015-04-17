@@ -217,7 +217,16 @@ public class VerifyTestCase {
     Value value = new Value("value is bar", false);
     Value propertyName = new Value("bar", false);
     
+<<<<<<< HEAD
     VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator, false);
+=======
+    VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator,true);
+    Assert.assertEquals(verifyElementStyle.transform(), 
+        "if (wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
+            "System.out.println(\"verifyElementStyle failed\");\n}\n");
+    
+    verifyElementStyle = new VerifyElementStyle(propertyName, value, locator,false);
+>>>>>>> Continue create keywords
     Assert.assertEquals(verifyElementStyle.transform(), 
         "if (!wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
             "System.out.println(\"verifyElementStyle failed\");\n}\n");
@@ -257,11 +266,14 @@ public class VerifyTestCase {
     Assert.assertEquals(verifyAlertText.transform(), 
         "if (wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
             "System.out.println(\"!verifyAlertText failed\");\n}\n");
+<<<<<<< HEAD
     
     verifyAlertText = new VerifyAlertText(text, false);
     Assert.assertEquals(verifyAlertText.transform(), 
         "if (!wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
             "System.out.println(\"verifyAlertText failed\");\n}\n");
     
+=======
+>>>>>>> Continue create keywords
   }
 }

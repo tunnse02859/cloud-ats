@@ -100,4 +100,19 @@ public class StoreTestCase {
     StoreEval action = new StoreEval(script, "value");
     Assert.assertEquals(action.transform(), "String value = wd.executeScript(\"test\");\n");
   }
+  
+  @Test
+  public void testStoreAlertText() throws IOException {
+    StoreAlertText storeAlertText = new StoreAlertText("alert_text");
+    Assert.assertEquals(storeAlertText.transform(), "String alert_text = wd.switchTo().alert().getText();\n");
+  }
+  
+  @Test
+  public void testStoreElementStyle() throws IOException {
+    Value propertyName = new Value("bar", false);
+    IDLocator locator = new IDLocator(new Value("i am a id", false));
+    StoreElementStyle storeElementStyle = new StoreElementStyle(propertyName, "element_style", locator);
+    Assert.assertEquals(storeElementStyle.transform(), 
+        "String element_style = wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\");\n");
+  }
 }
