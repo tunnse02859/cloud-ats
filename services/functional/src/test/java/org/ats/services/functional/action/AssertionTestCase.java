@@ -182,7 +182,7 @@ public class AssertionTestCase {
     Value value = new Value("value is bar", false);
     Value propertyName = new Value("bar", false);
     
-    AssertElementStyle assertElementStyle = new AssertElementStyle(propertyName, value, locator);
+    AssertElementStyle assertElementStyle = new AssertElementStyle(propertyName, value, locator, false);
     Assert.assertEquals(assertElementStyle.transform(), 
         "assertEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
   }
@@ -207,5 +207,14 @@ public class AssertionTestCase {
     alertText = new AssertAlertText(text, false);
     Assert.assertEquals(alertText.transform(), 
         "assertEquals(wd.switchTo().alert().getText(), \"this is alert text\");\n");
+  }
+  
+  @Test
+  public void testAssertEval() throws IOException {
+    Value script = new Value("test", false);
+    Value value = new Value("value", false);
+    
+    AssertEval action = new AssertEval(script, value, false);
+    Assert.assertEquals(action.transform(), "assertEquals(wd.executeScript(\"test\"), \"value\");\n");
   }
 }

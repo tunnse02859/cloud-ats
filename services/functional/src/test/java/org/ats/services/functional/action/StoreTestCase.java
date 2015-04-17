@@ -91,4 +91,13 @@ public class StoreTestCase {
     StoreAlertPresent action = new StoreAlertPresent("var test");
     Assert.assertEquals(action.transform(), "boolean var test = isAlertPresent(wd);\n");
   }
+  
+  @Test
+  public void testStoreEval() throws IOException {
+    
+    Value script = new Value("test", false);
+    
+    StoreEval action = new StoreEval(script, "value");
+    Assert.assertEquals(action.transform(), "String value = wd.executeScript(\"test\");\n");
+  }
 }

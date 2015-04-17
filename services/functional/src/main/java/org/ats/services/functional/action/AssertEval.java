@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author TrinhTV3
@@ -25,12 +26,16 @@ public class AssertEval implements IAction {
   }
   @Override
   public String transform() throws IOException {
-    return null;
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append("assertEquals(wd.executeScript(@script), @value);\n");
+    
+    return Rythm.render(sb.toString(), script.transform(), value.transform());
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testAssertEval";
   }
 
 }

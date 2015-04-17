@@ -20,12 +20,12 @@ public class DismissAlert implements IAction {
   }
   @Override
   public String transform() throws IOException {
-    return null;
+    return "wd.switchTo().alert().dismiss();\n";
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testDismissAlert";
   }
 
 }

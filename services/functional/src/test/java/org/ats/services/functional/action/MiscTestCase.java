@@ -92,4 +92,24 @@ public class MiscTestCase {
     SaveScreenShot saveScreenShot = new SaveScreenShot(file);
     Assert.assertEquals(saveScreenShot.transform(), "wd.getScreenshotAs(FILE).renameTo(new File(\"/tmp/screen.png\"));\n");
   }
+  
+  @Test
+  public void testAnswerAlert() throws IOException {
+    Value value = new Value("test", false);
+    
+    AnswerAlert action = new AnswerAlert(value);
+    Assert.assertEquals(action.transform(), "wd.switchTo().alert().sendKeys(\"test\");\n");
+  }
+  
+  @Test
+  public void testAcceptAlert() throws IOException {
+    AcceptAlert action = new AcceptAlert();
+    Assert.assertEquals(action.transform(), "wd.switchTo().alert().accept();\n");
+  }
+  
+  @Test
+  public void testDismissAlert() throws IOException {
+    DismissAlert action = new DismissAlert();
+    Assert.assertEquals(action.transform(), "wd.switchTo().alert().dismiss();\n");
+  }
 }

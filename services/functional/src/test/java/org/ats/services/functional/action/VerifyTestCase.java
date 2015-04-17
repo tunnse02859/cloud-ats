@@ -217,7 +217,7 @@ public class VerifyTestCase {
     Value value = new Value("value is bar", false);
     Value propertyName = new Value("bar", false);
     
-    VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator);
+    VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator, false);
     Assert.assertEquals(verifyElementStyle.transform(), 
         "if (!wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
             "System.out.println(\"verifyElementStyle failed\");\n}\n");
@@ -226,7 +226,7 @@ public class VerifyTestCase {
   @Test
   public void testVerifyAlertPresent() throws IOException {
     
-    VerifyAlertPresent action = new VerifyAlertPresent();
+    VerifyAlertPresent action = new VerifyAlertPresent(false);
     Assert.assertEquals(action.transform(), "if (!isAlertPresent(wd)) {\nSystem.out.println(\"verifyAlertPresent failed\");\n}\n");
   }
   
@@ -236,7 +236,7 @@ public class VerifyTestCase {
     
     Value value = new Value("value", false);
     
-    VerifyEval action = new VerifyEval(script, value);
+    VerifyEval action = new VerifyEval(script, value, false);
     Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"verifyEval failed\");\n}\n");
   }
   

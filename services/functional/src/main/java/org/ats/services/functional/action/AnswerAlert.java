@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author TrinhTV3
@@ -25,12 +26,14 @@ public class AnswerAlert implements IAction {
   }
   @Override
   public String transform() throws IOException {
-    return null;
+    
+    StringBuilder sb = new StringBuilder("wd.switchTo().alert().sendKeys(@text);\n");
+    return Rythm.render(sb.toString(), text.transform());
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testAnswerAlert";
   }
 
 }

@@ -20,12 +20,12 @@ public class AcceptAlert implements IAction {
   }
   @Override
   public String transform() throws IOException {
-    return null;
+    return "wd.switchTo().alert().accept();\n";
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testAcceptAlert";
   }
 
 }

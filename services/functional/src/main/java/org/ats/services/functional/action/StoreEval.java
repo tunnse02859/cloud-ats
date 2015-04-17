@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author TrinhTV3
@@ -29,12 +30,16 @@ public class StoreEval implements IAction {
   
   @Override
   public String transform() throws IOException {
-    return null;
+    
+    StringBuilder sb = new StringBuilder("String "+var);
+    sb.append(" = ").append("wd.executeScript(@script);\n");
+    
+    return Rythm.render(sb.toString(), script.transform());
   }
 
   @Override
   public String getAction() {
-    return null;
+    return "testStoreEval";
   }
 
 }
