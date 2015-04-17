@@ -209,7 +209,18 @@ public class VerifyTestCase {
     
     VerifyCookieByName action = new VerifyCookieByName(name, value, true);
     Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(\"test_cookie\").getValue().equals(cookie)) {\nSystem.out.println(\"!verifyCookieByName failed\");\n}\n");
- 
+  }
+  
+  @Test
+  public void testVerifyElementStyle() throws IOException {
+    IDLocator locator = new IDLocator(new Value("i am a id", false));
+    Value value = new Value("value is bar", false);
+    Value propertyName = new Value("bar", false);
+    
+    VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator);
+    Assert.assertEquals(verifyElementStyle.transform(), 
+        "if (!wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
+            "System.out.println(\"verifyElementStyle failed\");\n}\n");
   }
   
   @Test
