@@ -138,4 +138,12 @@ public class StoreTestCase {
     
     Assert.assertEquals(action.transform(), "boolean var2 = (wd.findElement(By.id(\"i am id\")).isSelected());\n");
   }
+  
+  @Test
+  public void testStoreCookieByName() throws IOException {
+    Value name = new Value("this is cookie name", false);
+    StoreCookieByName storeCookieByName = new StoreCookieByName(name, "cookie_name");
+    Assert.assertEquals(storeCookieByName.transform(), 
+        "String cookie_name = wd.manage().getCookieNamed(\"this is cookie name\").getValue();\n");
+  }
 }

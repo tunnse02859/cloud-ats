@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -20,12 +21,13 @@ public class Print implements IAction {
     this.text = text;
   }
 
-  @Override
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder("System.out.println(");
+    sb.append(text);
+    sb.append(");\n");
+    return Rythm.render(sb.toString(), text.transform());
   }
 
-  @Override
   public String getAction() {
     return "print";
   }

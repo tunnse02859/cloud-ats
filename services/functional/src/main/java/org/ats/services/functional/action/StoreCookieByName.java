@@ -6,6 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.rythmengine.Rythm;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -23,12 +24,15 @@ public class StoreCookieByName implements IAction {
     this.variable = variable;
   }
   
-  @Override
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder("String ");
+    sb.append(variable);
+    sb.append(" = wd.manage().getCookieNamed(");
+    sb.append(name);
+    sb.append(").getValue();\n");
+    return Rythm.render(sb.toString(), name.transform());
   }
 
-  @Override
   public String getAction() {
     return "storeCookieByName";
   }

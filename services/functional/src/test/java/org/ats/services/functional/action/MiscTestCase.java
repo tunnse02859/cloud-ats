@@ -112,4 +112,11 @@ public class MiscTestCase {
     DismissAlert action = new DismissAlert();
     Assert.assertEquals(action.transform(), "wd.switchTo().alert().dismiss();\n");
   }
+  
+  @Test
+  public void testPrint() throws IOException {
+    Value text = new Value("this is printing", false);
+    Print print = new Print(text);
+    Assert.assertEquals(print.transform(), "System.out.println(\"this is printing\");\n");
+  }
 }
