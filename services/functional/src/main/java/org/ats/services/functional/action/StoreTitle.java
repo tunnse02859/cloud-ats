@@ -8,23 +8,24 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
- * Apr 13, 2015
+ * Apr 16, 2015
  */
-public class StorePageSource implements IAction {
-
-  private String variable;
+public class StoreTitle implements IAction {
   
-  public StorePageSource(String variable) {
+  private String variable;
+
+  public StoreTitle(String variable) {
     this.variable = variable;
   }
   
+  @Override
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = wd.getPageSource();\n");
-    return sb.toString();
+    return null;
   }
 
+  @Override
   public String getAction() {
-    return "storePageSource";
+    return null;
   }
 
 }

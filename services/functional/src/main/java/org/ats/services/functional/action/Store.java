@@ -12,11 +12,10 @@ import org.ats.services.functional.Value;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class Store implements IAction{
+public class Store implements IAction {
 
-  private String variable;
-  
   private Value text;
+  private String variable;
   
   public Store(Value text, String variable) {
     this.text = text;

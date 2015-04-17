@@ -59,10 +59,9 @@ public class MiscTestCase {
   
   @Test
   public void testSwitchToFrameByIndex() throws IOException {
-    Value name = new Value("index", false);
-    SwitchToFrameByIndex action = new SwitchToFrameByIndex(name);
+    SwitchToFrameByIndex action = new SwitchToFrameByIndex(1);
     
-    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(\"index\");\n");
+    Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(1);\n");
   }
   
   @Test
@@ -81,7 +80,7 @@ public class MiscTestCase {
   
   @Test
   public void testPause() throws IOException {
-    String waitTime = "10000";
+    long waitTime = 10000;
     Pause pause = new Pause(waitTime);
     Assert.assertEquals(pause.transform(), 
         "try { Thread.sleep(10000l); } catch (Exception e) { throw new RuntimeException(e); }\n");

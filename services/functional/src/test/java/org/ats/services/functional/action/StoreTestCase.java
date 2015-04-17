@@ -55,7 +55,7 @@ public class StoreTestCase {
     LinkTextLocator locator = new LinkTextLocator(new Value("i am a link", false));
     
     Value name = new Value("href", false);
-    Value var = new Value("link_href", true);
+    String var = "link_href";
     
     StoreElementAttribute action = new StoreElementAttribute(var, name, locator);
     Assert.assertEquals(action.transform(), "String link_href = wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\");\n");

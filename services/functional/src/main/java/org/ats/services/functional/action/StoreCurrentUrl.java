@@ -12,14 +12,14 @@ import java.io.IOException;
  */
 public class StoreCurrentUrl implements IAction {
 
-  private String name;
+  private String variable;
   
-  public StoreCurrentUrl(String name) {
-    this.name = name;
+  public StoreCurrentUrl(String variable) {
+    this.variable = variable;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(name).append(" = wd.getCurrentUrl();\n");
+    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = wd.getCurrentUrl();\n");
     return sb.toString();
   }
 

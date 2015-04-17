@@ -15,7 +15,7 @@ import org.rythmengine.Rythm;
  */
 public class CssSelectorLocator extends AbstractLocator {
 
-  CssSelectorLocator(Value locator) {
+  public CssSelectorLocator(Value locator) {
     super(locator);
   }
 

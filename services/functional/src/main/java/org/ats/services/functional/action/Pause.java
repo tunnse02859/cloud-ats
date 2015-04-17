@@ -12,16 +12,16 @@ import java.io.IOException;
  */
 public class Pause implements IAction{
 
-  private String waitTime;
+  private long waitTime;
   
-  public Pause(String waitTime) {
+  public Pause(long waitTime) {
     this.waitTime = waitTime;
   }
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append("try { Thread.sleep(");
-    sb.append(Integer.parseInt(waitTime)).append("l)");
+    sb.append(waitTime).append("l)");
     sb.append("; } catch (Exception e) { throw new RuntimeException(e); }\n");
     return sb.toString();
   }

@@ -15,7 +15,7 @@ import org.rythmengine.Rythm;
  */
 public class TagNameLocator extends AbstractLocator {
 
-  TagNameLocator(Value locator) {
+  public TagNameLocator(Value locator) {
     super(locator);
   }
 

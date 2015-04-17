@@ -15,7 +15,7 @@ import org.rythmengine.Rythm;
  */
 public class XPathLocator extends AbstractLocator {
 
-  XPathLocator(Value locator) {
+  public XPathLocator(Value locator) {
     super(locator);
   }
 

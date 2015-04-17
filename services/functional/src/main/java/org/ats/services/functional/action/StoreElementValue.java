@@ -6,32 +6,31 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.locator.ILocator;
-import org.rythmengine.Rythm;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
- * Apr 13, 2015
+ * Apr 16, 2015
  */
-public class StoreElementPresent implements IAction {
-
+public class StoreElementValue implements IAction {
+  
   private ILocator locator;
   
   private String variable;
-  
-  public StoreElementPresent(ILocator locator, String variable) {
+
+  public StoreElementValue(ILocator locator, String variable) {
     this.locator = locator;
     this.variable = variable;
   }
   
+  @Override
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("boolean ").append(variable);
-    sb.append(" = (wd.findElements(@locator).size() != 0);\n");
-    return Rythm.render(sb.toString(), locator.transform());
+    return null;
   }
 
+  @Override
   public String getAction() {
-    return "storeElementPresent";
+    return "storeElementValue";
   }
+
 }
-  

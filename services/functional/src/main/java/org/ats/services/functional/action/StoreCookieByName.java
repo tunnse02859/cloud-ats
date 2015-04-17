@@ -5,26 +5,32 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.Value;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
- * Apr 13, 2015
+ * Apr 16, 2015
  */
-public class StoreBodyText implements IAction {
+public class StoreCookieByName implements IAction {
 
+  private Value name;
+  
   private String variable;
   
-  public StoreBodyText(String variable) {
+  public StoreCookieByName(Value name, String variable) {
+    this.name = name;
     this.variable = variable;
   }
   
+  @Override
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = wd.findElement(By.tagName(\"html\")).getText();\n");
-    return sb.toString();
+    return null;
   }
 
+  @Override
   public String getAction() {
-    return "storeBodyText";
+    return "storeCookieByName";
   }
 
 }

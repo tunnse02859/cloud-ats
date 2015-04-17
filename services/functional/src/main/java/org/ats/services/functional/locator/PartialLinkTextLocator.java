@@ -15,7 +15,7 @@ import org.rythmengine.Rythm;
  */
 public class PartialLinkTextLocator extends AbstractLocator {
 
-  PartialLinkTextLocator(Value locator) {
+  public PartialLinkTextLocator(Value locator) {
     super(locator);
   }
 

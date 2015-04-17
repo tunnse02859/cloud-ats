@@ -5,7 +5,6 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.Value;
 import org.rythmengine.Rythm;
 
 /**
@@ -15,18 +14,15 @@ import org.rythmengine.Rythm;
  */
 public class SwitchToFrameByIndex implements IAction {
 
-  private Value index;
+  private int index;
 
-  /**
-   * 
-   */
-  SwitchToFrameByIndex(Value index) {
+  public SwitchToFrameByIndex(int index) {
     this.index = index;
   }
+  
   public String transform() throws IOException {
-    
     StringBuilder sb = new StringBuilder("wd = (FirefoxDriver) wd.switchTo().frame(@index);\n");
-    return Rythm.render(sb.toString(), index.toString());
+    return Rythm.render(sb.toString(), index);
   }
 
   public String getAction() {

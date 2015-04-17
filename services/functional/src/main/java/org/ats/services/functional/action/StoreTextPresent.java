@@ -15,17 +15,17 @@ import org.rythmengine.Rythm;
  */
 public class StoreTextPresent implements IAction {
 
-  private String name;
+  private String variable;
   
   private Value text;
   
-  public StoreTextPresent(String name, Value text) {
-    this.name = name;
+  public StoreTextPresent(String variable, Value text) {
+    this.variable = variable;
     this.text = text;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("boolean ").append(name);
+    StringBuilder sb = new StringBuilder("boolean ").append(variable);
     sb.append(" = wd.findElement(By.tagName(\"html\")).getText().contains(@text);\n");
     return Rythm.render(sb.toString(), text.transform());
   }

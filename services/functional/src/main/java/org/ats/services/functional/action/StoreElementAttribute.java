@@ -16,11 +16,13 @@ import org.rythmengine.Rythm;
  */
 public class StoreElementAttribute implements IAction{
 
-  private Value variable, attributeName;
+  private Value attributeName;
+  
+  private String variable;
   
   private ILocator locator;
   
-  public StoreElementAttribute(Value variable, Value attributeName, ILocator locator) {
+  public StoreElementAttribute(String variable, Value attributeName, ILocator locator) {
     this.variable = variable;
     this.attributeName = attributeName;
     this.locator = locator;
@@ -30,7 +32,7 @@ public class StoreElementAttribute implements IAction{
     
     StringBuilder sb = new StringBuilder("String @variable = ");
     sb.append(" wd.findElement(@locator).getAttribute(@attributeName);\n");
-    return Rythm.render(sb.toString(), variable.transform(), locator.transform(), attributeName.transform());
+    return Rythm.render(sb.toString(), variable, locator.transform(), attributeName.transform());
   }
 
   public String getAction() {
