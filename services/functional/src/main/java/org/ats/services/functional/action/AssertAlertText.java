@@ -16,16 +16,23 @@ public class AssertAlertText implements IAction{
 
   private Value text;
   
-  public AssertAlertText(Value text) {
+  private boolean negated;
+  
+  public AssertAlertText(Value text, boolean negated) {
     this.text = text;
+    this.negated = negated;
   }
   
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
+    sb.append("wd.switchTo().alert().getText(), ");
+    sb.append(text);
+    sb.append(");\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    return null;
+    return "assertAlertText";
   }
 
 }

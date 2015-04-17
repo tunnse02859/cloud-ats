@@ -20,10 +20,13 @@ public class AssertElementStyle implements IAction{
   
   private ILocator locator;
   
-  public AssertElementStyle(Value propertyName,Value value, ILocator locator) {
+  private boolean negated;
+  
+  public AssertElementStyle(Value propertyName,Value value, ILocator locator, boolean negated) {
     this.propertyName = propertyName;
     this.value = value;
     this.locator = locator;
+    this.negated = negated;
   }
   
   public String transform() throws IOException {

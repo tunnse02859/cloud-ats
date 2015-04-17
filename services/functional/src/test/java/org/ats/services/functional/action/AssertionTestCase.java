@@ -186,4 +186,26 @@ public class AssertionTestCase {
     Assert.assertEquals(assertElementStyle.transform(), 
         "assertEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
   }
+  
+  @Test
+  public void testAssertAlertPresent() throws IOException {
+    AssertAlertPresent alertPresent = new AssertAlertPresent(true);
+    Assert.assertEquals(alertPresent.transform(), "assertFalse(isAlertPresent(wd));\n");
+
+    alertPresent = new AssertAlertPresent(false);
+    Assert.assertEquals(alertPresent.transform(), "assertTrue(isAlertPresent(wd));\n");
+  }
+  
+  @Test
+  public void testAssertAlertText() throws IOException {
+    Value text = new Value("this is alert text", false);
+    
+    AssertAlertText alertText = new AssertAlertText(text, true);
+    Assert.assertEquals(alertText.transform(), 
+        "assertNotEquals(wd.switchTo().alert().getText(), \"this is alert text\");\n");
+    
+    alertText = new AssertAlertText(text, false);
+    Assert.assertEquals(alertText.transform(), 
+        "assertEquals(wd.switchTo().alert().getText(), \"this is alert text\");\n");
+  }
 }

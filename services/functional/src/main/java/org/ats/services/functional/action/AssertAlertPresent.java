@@ -12,18 +12,20 @@ import java.io.IOException;
  */
 public class AssertAlertPresent implements IAction{
 
-  private boolean nageted;
+  private boolean negated;
   
   public AssertAlertPresent(boolean negated) {
-    this.nageted = negated;
+    this.negated = negated;
   }
   
   public String transform() throws IOException {
-    return null;
+    StringBuilder sb = new StringBuilder(negated ? "assertFalse(" : "assertTrue(");
+    sb.append("isAlertPresent(wd));\n");
+    return sb.toString();
   }
 
   public String getAction() {
-    return null;
+    return "assertAlertPresent";
   }
 
 }

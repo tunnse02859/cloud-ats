@@ -239,4 +239,14 @@ public class VerifyTestCase {
     VerifyEval action = new VerifyEval(script, value);
     Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"verifyEval failed\");\n}\n");
   }
+  
+  @Test
+  public void testVerifyAlertText() throws IOException {
+    Value text = new Value("this is alert text", false);
+    
+    VerifyAlertText verifyAlertText = new VerifyAlertText(text, true);
+    Assert.assertEquals(verifyAlertText.transform(), 
+        "if (wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
+            "System.out.println(\"!verifyAlertText failed\");}");
+  }
 }
