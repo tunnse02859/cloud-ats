@@ -28,7 +28,7 @@
     {
       "type": "verifyTitle",
       "negated": true,
-      "title": "title"
+      "title": "asdf"
     },
     {
       "type": "assertTitle",
@@ -103,7 +103,15 @@
       },
       "negated": true
     },
-    ,
+    {
+      "type": "verifyText",
+      "text": "not ${text}",
+      "locator": {
+        "type": "id",
+        "value": "i_am_an_id"
+      },
+      "negated": true
+    },
     {
       "type": "assertText",
       "text": "${text}",
@@ -443,16 +451,6 @@
     },
     {
         "type": "verifyElementAttribute",
-        "locator": {
-            "type": "link text",
-            "value": "i am a link"
-        },
-        "attributeName": "href",
-        "value": "not ${link_href}",
-        "negated": true
-    },
-	{
-        "type": "verifyElementPresent",
         "locator": {
             "type": "link text",
             "value": "i am a link"
