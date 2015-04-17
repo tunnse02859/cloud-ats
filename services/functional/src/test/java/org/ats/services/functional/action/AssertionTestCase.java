@@ -175,4 +175,15 @@ public class AssertionTestCase {
     Assert.assertEquals(assertTitle.transform(), 
         "assertEquals(wd.getTitle(), \"this is title\");\n");
   }
+  
+  @Test
+  public void testAssertElementStyle() throws IOException {
+    IDLocator locator = new IDLocator(new Value("i am a id", false));
+    Value value = new Value("value is bar", false);
+    Value propertyName = new Value("bar", false);
+    AssertElementStyle assertElementStyle = new AssertElementStyle(propertyName, value, locator);
+    System.out.println(assertElementStyle.transform());
+    Assert.assertEquals(assertElementStyle.transform(), 
+        "assertEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
+  }
 }
