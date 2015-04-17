@@ -18,10 +18,7 @@ public class AssertEval implements IAction {
   
   private Value value;
   
-  /**
-   * 
-   */
-  public AssertEval(Value script, Value value) {
+  public AssertEval(Value script, Value value, boolean negated) {
 
     this.script = script;
     this.value = value;

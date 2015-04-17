@@ -11,8 +11,11 @@ import java.io.IOException;
  * Email: TrinhTV3@fsoft.com.vn
  */
 public class VerifyAlertPresent implements IAction {
+  
+  private boolean negated;
 
-  public VerifyAlertPresent() {
+  public VerifyAlertPresent(boolean negated) {
+    this.negated = negated;
   }
   
   @Override

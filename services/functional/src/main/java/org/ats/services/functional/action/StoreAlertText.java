@@ -14,9 +14,9 @@ import org.ats.services.functional.Value;
  */
 public class StoreAlertText implements IAction{
 
-  private Value variable;
+  private String variable;
   
-  public StoreAlertText(Value variable) {
+  public StoreAlertText(String variable) {
     this.variable = variable;
   }
   

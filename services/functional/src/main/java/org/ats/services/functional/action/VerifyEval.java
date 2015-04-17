@@ -22,7 +22,7 @@ public class VerifyEval implements IAction {
   /**
    * 
    */
-  public VerifyEval(Value script, Value value) {
+  public VerifyEval(Value script, Value value, boolean negated) {
     
     this.script = script;
     this.value = value;
