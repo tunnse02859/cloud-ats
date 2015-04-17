@@ -211,4 +211,21 @@ public class VerifyTestCase {
     Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(\"test_cookie\").getValue().equals(cookie)) {\nSystem.out.println(\"!verifyCookieByName failed\");\n}\n");
  
   }
+  
+  @Test
+  public void testVerifyAlertPresent() throws IOException {
+    
+    VerifyAlertPresent action = new VerifyAlertPresent();
+    Assert.assertEquals(action.transform(), "if (!isAlertPresent(wd)) {\nSystem.out.println(\"verifyAlertPresent failed\");\n}\n");
+  }
+  
+  @Test
+  public void testVerifyEval() throws IOException {
+    Value script = new Value("test", false);
+    
+    Value value = new Value("value", false);
+    
+    VerifyEval action = new VerifyEval(script, value);
+    Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"verifyEval failed\");\n}\n");
+  }
 }
