@@ -46,6 +46,7 @@ public class InputTestCase {
     Assert.assertEquals(action.transform(), "new Actions(wd).dragAndDrop(wd.findElement(By.id(i am source)), wd.findElement(By.{locator2By}({locator2}))).build().perform();\n");
   
   }
+  
   @Test
   public void testClearSelections() throws IOException {
     IDLocator locator = new IDLocator(new Value("foo", false));
