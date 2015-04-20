@@ -6,6 +6,8 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 
 /**
  * @author TrinhTV3
@@ -14,16 +16,23 @@ import org.ats.services.functional.Value;
  */
 public class Store implements IAction {
 
+  /** .*/
   private Value text;
+  
+  /** .*/
   private String variable;
   
-  public Store(Value text, String variable) {
+  /** .*/
+  private VariableFactory factory;
+  
+  public Store(Value text, String variable, VariableFactory factory) {
     this.text = text;
     this.variable = variable;
+    this.factory = factory;
   }
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = \"\" + ");
-    sb.append(text);
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = ");
+    sb.append(text.transform());
     sb.append(";\n");
     return sb.toString();
   }

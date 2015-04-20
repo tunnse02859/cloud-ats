@@ -5,6 +5,8 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.ats.services.functional.locator.ILocator;
 import org.rythmengine.Rythm;
 
@@ -19,13 +21,16 @@ public class StoreElementPresent implements IAction {
   
   private String variable;
   
-  public StoreElementPresent(ILocator locator, String variable) {
+  private VariableFactory factory;
+  
+  public StoreElementPresent(ILocator locator, String variable, VariableFactory factory) {
     this.locator = locator;
     this.variable = variable;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("boolean ").append(variable);
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
     sb.append(" = (wd.findElements(@locator).size() != 0);\n");
     return Rythm.render(sb.toString(), locator.transform());
   }

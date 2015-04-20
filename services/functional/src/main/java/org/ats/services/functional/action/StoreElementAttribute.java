@@ -6,6 +6,8 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.ats.services.functional.locator.ILocator;
 import org.rythmengine.Rythm;
 
@@ -22,21 +24,24 @@ public class StoreElementAttribute implements IAction{
   
   private ILocator locator;
   
-  public StoreElementAttribute(String variable, Value attributeName, ILocator locator) {
+  private VariableFactory factory;
+  
+  public StoreElementAttribute(String variable, Value attributeName, ILocator locator, VariableFactory factory) {
     this.variable = variable;
     this.attributeName = attributeName;
     this.locator = locator;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("String @variable = ");
-    sb.append(" wd.findElement(@locator).getAttribute(@attributeName);\n");
-    return Rythm.render(sb.toString(), variable, locator.transform(), attributeName.transform());
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = ");
+    sb.append("wd.findElement(@locator).getAttribute(@attributeName);\n");
+    return Rythm.render(sb.toString(), locator.transform(), attributeName.transform());
   }
 
   public String getAction() {
-    return "testStoreElementAttribute";
+    return "storeElementAttribute";
   }
 
 }

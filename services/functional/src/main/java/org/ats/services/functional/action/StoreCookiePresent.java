@@ -6,6 +6,8 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 
 /**
  * @author TrinhTV3
@@ -18,16 +20,17 @@ public class StoreCookiePresent implements IAction{
   
   private String variable;
   
-  public StoreCookiePresent(String variable, Value name) {
+  private VariableFactory factory;
+  
+  public StoreCookiePresent(String variable, Value name, VariableFactory factory) {
     this.variable = variable;
     this.name = name;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("boolean ").append(variable);
-    sb.append(" = (wd.manage().getCookieNamed(");
-    sb.append(name);
-    sb.append(") != null);\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
+    sb.append(" = (wd.manage().getCookieNamed(").append(name).append(") != null);\n");
     return sb.toString();
   }
 

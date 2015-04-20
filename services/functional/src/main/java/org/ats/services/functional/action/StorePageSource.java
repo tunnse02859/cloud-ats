@@ -5,6 +5,9 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -14,12 +17,15 @@ public class StorePageSource implements IAction {
 
   private String variable;
   
-  public StorePageSource(String variable) {
+  private VariableFactory factory;
+  
+  public StorePageSource(String variable, VariableFactory factory) {
     this.variable = variable;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(variable).append(" = wd.getPageSource();\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = wd.getPageSource();\n");
     return sb.toString();
   }
 

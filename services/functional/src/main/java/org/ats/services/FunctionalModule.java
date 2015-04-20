@@ -4,6 +4,7 @@
 package org.ats.services;
 
 import org.ats.services.functional.ActionFactory;
+import org.ats.services.functional.VariableFactory;
 
 import com.google.inject.AbstractModule;
 
@@ -17,6 +18,7 @@ public class FunctionalModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(ActionFactory.class);
+    bind(VariableFactory.class);
   }
 
 }

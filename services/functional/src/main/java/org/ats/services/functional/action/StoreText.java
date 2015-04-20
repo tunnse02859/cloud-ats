@@ -5,6 +5,8 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.ats.services.functional.locator.ILocator;
 import org.rythmengine.Rythm;
 
@@ -19,13 +21,16 @@ public class StoreText implements IAction {
   
   private ILocator locator;
   
-  public StoreText(String variable, ILocator locator) {
+  private VariableFactory factory;
+  
+  public StoreText(String variable, ILocator locator, VariableFactory factory) {
     this.variable = variable;
     this.locator = locator;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ").append(variable);
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable));
     sb.append(" = wd.findElement(@locator).getText();\n");
     return Rythm.render(sb.toString(), locator.transform());
   }

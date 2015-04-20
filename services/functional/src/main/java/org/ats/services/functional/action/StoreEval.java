@@ -6,6 +6,8 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.rythmengine.Rythm;
 
 /**
@@ -17,29 +19,26 @@ public class StoreEval implements IAction {
 
   private Value script;
   
-  private String var;
+  private String variable;
   
-  /**
-   * 
-   */
-  public StoreEval(Value script, String var) {
+  private VariableFactory factory;
   
+  public StoreEval(Value script, String variable, VariableFactory factory) {
     this.script = script;
-    this.var = var;
+    this.variable = variable;
+    this.factory = factory;
   }
   
   @Override
   public String transform() throws IOException {
-    
-    StringBuilder sb = new StringBuilder("String "+var);
-    sb.append(" = ").append("wd.executeScript(@script);\n");
-    
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable));
+    sb.append(" = wd.executeScript(@script);\n");
     return Rythm.render(sb.toString(), script.transform());
   }
 
   @Override
   public String getAction() {
-    return "testStoreEval";
+    return "storeEval";
   }
 
 }

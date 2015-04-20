@@ -44,6 +44,7 @@ import org.ats.services.functional.action.SendKeysToElement;
 import org.ats.services.functional.action.SetElementNotSelected;
 import org.ats.services.functional.action.SetElementSelected;
 import org.ats.services.functional.action.SetElementText;
+import org.ats.services.functional.action.Store;
 import org.ats.services.functional.action.StoreAlertPresent;
 import org.ats.services.functional.action.StoreAlertText;
 import org.ats.services.functional.action.StoreBodyText;
@@ -92,15 +93,21 @@ import org.ats.services.functional.locator.TagNameLocator;
 import org.ats.services.functional.locator.XPathLocator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Singleton;
+import com.google.inject.Inject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Apr 16, 2015
  */
-@Singleton
 public class ActionFactory {
+  
+  private VariableFactory factory;
+  
+  @Inject
+  public ActionFactory(VariableFactory factory) {
+    this.factory = factory;
+  }
 
   public IAction createAction(JsonNode json) {
     if (json == null) return null;
@@ -189,7 +196,7 @@ public class ActionFactory {
     case "storeTextPresent":
       String variable = json.get("variable").asText();
       text = toValue(json.get("text").asText());
-      return new StoreTextPresent(variable, text);
+      return new StoreTextPresent(variable, text, factory);
     
     case "assertBodyText":
       text = toValue(json.get("text").asText());
@@ -203,7 +210,7 @@ public class ActionFactory {
       
     case "storeBodyText":
       variable = json.get("variable").asText();
-      return new StoreBodyText(variable);
+      return new StoreBodyText(variable, factory);
     
     case "assertElementPresent":
       locator = parseLocator(json.get("locator"));
@@ -218,7 +225,7 @@ public class ActionFactory {
     case "storeElementPresent":
       locator = parseLocator(json.get("locator"));
       variable = json.get("variable").asText();
-      return new StoreElementPresent(locator, variable);
+      return new StoreElementPresent(locator, variable, factory);
       
     case "assertPageSource":
       Value source = toValue(json.get("source").asText());
@@ -232,7 +239,7 @@ public class ActionFactory {
       
     case "storePageSource":
       variable = json.get("variable").asText();
-      return new StorePageSource(variable);
+      return new StorePageSource(variable, factory);
       
     case "assertText":
       locator = parseLocator(json.get("locator"));
@@ -249,7 +256,7 @@ public class ActionFactory {
     case "storeText":
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreText(variable, locator);
+      return new StoreText(variable, locator, factory);
       
     case "assertCurrentUrl":
       url = toValue(json.get("url").asText());
@@ -263,7 +270,7 @@ public class ActionFactory {
       
     case "storeCurrentUrl":
       variable = json.get("variable").asText();
-      return new StoreCurrentUrl(variable);
+      return new StoreCurrentUrl(variable, factory);
       
     case "assertTitle":
       Value title = toValue(json.get("title").asText());
@@ -277,7 +284,7 @@ public class ActionFactory {
     
     case "storeTitle":
       variable = json.get("variable").asText();
-      return new StoreTitle(variable);
+      return new StoreTitle(variable, factory);
       
     case "assertElementAttribute":
       Value value = toValue(json.get("value").asText());
@@ -297,7 +304,7 @@ public class ActionFactory {
       variable = json.get("variable").asText();
       attributeName = toValue(json.get("attributeName").asText());
       locator = parseLocator(json.get("locator"));
-      return new StoreElementAttribute(variable, attributeName, locator);
+      return new StoreElementAttribute(variable, attributeName, locator, factory);
       
     case "assertElementStyle":
       Value propertyName = toValue(json.get("propertyName").asText());
@@ -317,7 +324,7 @@ public class ActionFactory {
       propertyName = toValue(json.get("propertyName").asText());
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreElementStyle(propertyName, variable, locator);
+      return new StoreElementStyle(propertyName, variable, locator, factory);
       
     case "assertElementSelected":
       locator = parseLocator(json.get("locator"));
@@ -332,7 +339,7 @@ public class ActionFactory {
     case "storeElementSelected":
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreElementSelected(variable, locator);
+      return new StoreElementSelected(variable, locator, factory);
       
     case "assertElementValue": 
       value = toValue(json.get("value").asText());
@@ -349,7 +356,7 @@ public class ActionFactory {
     case "storeElementValue":
       locator = parseLocator(json.get("locator"));
       variable = json.get("variable").asText();
-      return new StoreElementValue(locator, variable);
+      return new StoreElementValue(locator, variable, factory);
       
     case "addCookie":
       Value name = toValue(json.get("name").asText());
@@ -376,7 +383,7 @@ public class ActionFactory {
     case "storeCookieByName":
       name = toValue(json.get("name").asText());
       variable = json.get("variable").asText();
-      return new StoreCookieByName(name, variable);
+      return new StoreCookieByName(name, variable, factory);
       
     case "assertCookiePresent":
       name = toValue(json.get("name").asText());
@@ -391,7 +398,7 @@ public class ActionFactory {
     case "storeCookiePresent":
       variable = json.get("variable").asText();
       name = toValue(json.get("name").asText());
-      return new StoreCookiePresent(variable, name);
+      return new StoreCookiePresent(variable, name, factory);
       
     case "saveScreenshot":
       Value file = toValue(json.get("file").asText());
@@ -400,6 +407,11 @@ public class ActionFactory {
     case "print":
       text = toValue(json.get("text").asText());
       return new Print(text);
+      
+    case "store":
+      text = toValue(json.get("text").asText());
+      variable = json.get("variable").asText();
+      return new Store(text, variable, factory);
       
     case "pause":
       long waitTime = json.get("waitTime").asLong();
@@ -432,7 +444,7 @@ public class ActionFactory {
       
     case "storeAlertText":
       variable = json.get("variable").asText();
-      return new StoreAlertText(variable);
+      return new StoreAlertText(variable, factory);
       
     case "assertAlertPresent":
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
@@ -444,7 +456,7 @@ public class ActionFactory {
     
     case "storeAlertPresent":
       variable = json.get("variable").asText();
-      return new StoreAlertPresent(variable);
+      return new StoreAlertPresent(variable, factory);
       
     case "answerAlert":
       text = toValue(json.get("text").asText());
@@ -471,7 +483,7 @@ public class ActionFactory {
     case "storeEval":
       script = toValue(json.get("script").asText());
       variable = json.get("variable").asText();
-      return new StoreEval(script, variable);
+      return new StoreEval(script, variable, factory);
       
     default:
       return null;

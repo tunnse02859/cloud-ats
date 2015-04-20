@@ -5,6 +5,8 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.ats.services.functional.locator.ILocator;
 import org.rythmengine.Rythm;
 
@@ -19,15 +21,18 @@ public class StoreElementSelected implements IAction {
   
   private ILocator locator;
   
-  public StoreElementSelected(String variable, ILocator locator) {
+  private VariableFactory factory;
+  
+  public StoreElementSelected(String variable, ILocator locator, VariableFactory factory) {
     this.variable = variable;
     this.locator = locator;
+    this.factory = factory;
   }
 
   @Override
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("boolean "+variable);
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
     sb.append(" = (wd.findElement(@locator).isSelected());\n");
     
     return Rythm.render(sb.toString(), locator.transform());

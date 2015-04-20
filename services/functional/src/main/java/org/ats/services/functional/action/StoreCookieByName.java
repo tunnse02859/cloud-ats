@@ -6,6 +6,8 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
+import org.ats.services.functional.VariableFactory;
+import org.ats.services.functional.VariableFactory.DataType;
 import org.rythmengine.Rythm;
 
 /**
@@ -19,17 +21,17 @@ public class StoreCookieByName implements IAction {
   
   private String variable;
   
-  public StoreCookieByName(Value name, String variable) {
+  private VariableFactory factory;
+  
+  public StoreCookieByName(Value name, String variable, VariableFactory factory) {
     this.name = name;
     this.variable = variable;
+    this.factory = factory;
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("String ");
-    sb.append(variable);
-    sb.append(" = wd.manage().getCookieNamed(");
-    sb.append(name);
-    sb.append(").getValue();\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable));
+    sb.append(" = wd.manage().getCookieNamed(").append(name).append(").getValue();\n");
     return Rythm.render(sb.toString(), name.transform());
   }
 
