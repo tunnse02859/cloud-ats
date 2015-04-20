@@ -19,23 +19,24 @@ public class AssertEval implements IAction {
   
   private Value value;
   
+  private boolean negated;
+  
   public AssertEval(Value script, Value value, boolean negated) {
-
     this.script = script;
     this.value = value;
+    this.negated = negated;
   }
   @Override
   public String transform() throws IOException {
-    
-    StringBuilder sb = new StringBuilder();
-    sb.append("assertEquals(wd.executeScript(@script), @value);\n");
+    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
+    sb.append("wd.executeScript(@script), @value);\n");
     
     return Rythm.render(sb.toString(), script.transform(), value.transform());
   }
 
   @Override
   public String getAction() {
-    return "testAssertEval";
+    return "assertEval";
   }
 
 }
