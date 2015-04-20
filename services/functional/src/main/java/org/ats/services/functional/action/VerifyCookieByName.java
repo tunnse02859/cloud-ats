@@ -40,7 +40,7 @@ public class VerifyCookieByName implements IAction {
   }
 
   public String getAction() {
-    return "testVerifyCookieByName";
+    return "verifyCookieByName";
   }
 
   

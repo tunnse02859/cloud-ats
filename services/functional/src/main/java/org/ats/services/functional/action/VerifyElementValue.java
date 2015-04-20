@@ -42,7 +42,7 @@ public class VerifyElementValue implements IAction {
   }
 
   public String getAction() {
-    return "testVerifyElementValue";
+    return "verifyElementValue";
   }
   
 }

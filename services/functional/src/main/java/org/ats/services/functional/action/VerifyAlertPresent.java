@@ -28,7 +28,7 @@ public class VerifyAlertPresent implements IAction {
 
   @Override
   public String getAction() {
-    return "testVerifyAlertPresent";
+    return "verifyAlertPresent";
   }
 
 }

@@ -38,7 +38,7 @@ public class VerifyElementSelected implements IAction {
   }
 
   public String getAction() {
-    return "testVerifyElementSelected";
+    return "verifyElementSelected";
   }
 
 }

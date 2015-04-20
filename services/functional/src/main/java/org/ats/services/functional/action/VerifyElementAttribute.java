@@ -43,6 +43,6 @@ public class VerifyElementAttribute implements IAction {
   }
 
   public String getAction() {
-    return "testVerifyElementAttribute";
+    return "verifyElementAttribute";
   }
 }

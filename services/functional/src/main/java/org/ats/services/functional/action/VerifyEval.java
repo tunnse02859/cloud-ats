@@ -43,7 +43,7 @@ public class VerifyEval implements IAction {
 
   @Override
   public String getAction() {
-    return "testVerifyEval";
+    return "verifyEval";
   }
 
 }

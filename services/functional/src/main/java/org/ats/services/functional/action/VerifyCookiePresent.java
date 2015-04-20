@@ -39,6 +39,6 @@ public class VerifyCookiePresent implements IAction {
   }
 
   public String getAction() {
-    return "testVerifyCookiePresent";
+    return "verifyCookiePresent";
   }
 }
