@@ -59,12 +59,18 @@ public class MiscTestCase {
     json.put("name", "test_cookie");
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(\"test_cookie\") != null) { wd.manage().deleteCookie(wd.manage().getCookieNamed(\"test_cookie\")); }\n");
+    Assert.assertEquals(action.transform(), 
+        "if (wd.manage().getCookieNamed(\"test_cookie\") != null) {\n"
+      + "      wd.manage().deleteCookie(wd.manage().getCookieNamed(\"test_cookie\"));\n"
+      + "    }\n");
     
     json.put("name", "${test_cookie}");
     
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.manage().getCookieNamed(test_cookie) != null) { wd.manage().deleteCookie(wd.manage().getCookieNamed(test_cookie)); }\n");
+    Assert.assertEquals(action.transform(), 
+        "if (wd.manage().getCookieNamed(test_cookie) != null) {\n"
+        + "      wd.manage().deleteCookie(wd.manage().getCookieNamed(test_cookie));\n"
+        + "    }\n");
   }
   
   @Test

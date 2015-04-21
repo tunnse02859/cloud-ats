@@ -4,11 +4,12 @@
 package org.ats.services.functional;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
-import org.rythmengine.Rythm;
+import org.rythmengine.RythmEngine;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -29,9 +30,9 @@ public class Suite implements ITemplate {
   
   private int timeoutSeconds;
   
-  private List<Case> cases = new ArrayList<Case>();
+  private Map<String, Case> cases = new HashMap<String, Case>();
 
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, List<Case> cases) {
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases) {
     this.packageName = packageName;
     this.extraImports = extraImports;
     this.suiteName = suiteName;
@@ -44,10 +45,12 @@ public class Suite implements ITemplate {
   public String transform() throws IOException {
     String suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
     StringBuilder sb = new StringBuilder();
-    for (Case caze : cases) {
+    for (Case caze : cases.values()) {
       sb.append(caze.transform());
     }
-    return Rythm.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sb.toString());
+    
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    return engine.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sb.toString());
   }
   
   public static class SuiteBuilder {
@@ -70,7 +73,7 @@ public class Suite implements ITemplate {
     
     private int timeoutSeconds;
     
-    private List<Case> cases = new ArrayList<Case>();
+    private Map<String, Case> cases = new HashMap<String, Case>();
     
     public SuiteBuilder packageName(String name) {
       this.packageName = name;
@@ -104,7 +107,7 @@ public class Suite implements ITemplate {
     
     public SuiteBuilder addCases(Case...cases) {
       for (Case caze : cases) {
-        this.cases.add(caze);
+        this.cases.put(caze.getName(), caze);
       }
       return this;
     }

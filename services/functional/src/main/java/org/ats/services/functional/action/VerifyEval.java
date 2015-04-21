@@ -5,8 +5,9 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.rythmengine.Rythm;
+import org.rythmengine.RythmEngine;
 
 /**
  * @author TrinhTV3
@@ -35,10 +36,11 @@ public class VerifyEval implements IAction {
   public String transform() throws IOException {
     
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("wd.executeScript(@script).equals(@value)) {\n");
-    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyEval failed\");\n");
-    sb.append("}\n");
+    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyEval failed\");\n");
+    sb.append("    }\n");
     
-    return Rythm.render(sb.toString(), script.transform(), value.transform());
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    return engine.render(sb.toString(), script.transform(), value.transform());
   }
 
   @Override

@@ -22,7 +22,7 @@ public class VerifyAlertPresent implements IAction {
   public String transform() throws IOException {
     
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("isAlertPresent(wd)) {\n");
-    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyAlertPresent failed\");\n}\n");
+    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyAlertPresent failed\");\n    }\n");
     return sb.toString();
   }
 

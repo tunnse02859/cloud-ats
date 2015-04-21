@@ -5,8 +5,9 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.rythmengine.Rythm;
+import org.rythmengine.RythmEngine;
 
 /**
  * @author TrinhTV3
@@ -29,10 +30,11 @@ public class VerifyTitle implements IAction {
     
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
     sb.append("wd.getTitle().equals(@title)) {\n");
-    sb.append("System.out.println(\"").append(negated ? "!" : "").append("verifyTitle failed\");\n");
-    sb.append("}\n");
+    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyTitle failed\");\n");
+    sb.append("    }\n");
     
-    return Rythm.render(sb.toString(), title.transform());
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    return engine.render(sb.toString(), title.transform());
   }
 
   public String getAction() {

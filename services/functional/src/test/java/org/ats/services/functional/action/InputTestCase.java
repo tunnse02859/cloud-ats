@@ -150,7 +150,7 @@ public class InputTestCase {
     IAction sendKeysToElement = actionFactory.createAction(json); 
     Assert.assertEquals(sendKeysToElement.transform(), 
     "wd.findElement(By.id(\"comments\")).click();\n" +
-    "wd.findElement(By.id(\"comments\")).sendKeys(\"w00t\");\n");
+    "    wd.findElement(By.id(\"comments\")).sendKeys(\"w00t\");\n");
   }
   
   @Test
@@ -163,8 +163,8 @@ public class InputTestCase {
     IAction setElementNotSelected = actionFactory.createAction(json);
     Assert.assertEquals(setElementNotSelected.transform(),
             "if (wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()) {\n" +
-            "wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
-            "}\n");
+            "      wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
+            "    }\n");
   }
   
   @Test
@@ -177,8 +177,8 @@ public class InputTestCase {
     IAction selected = actionFactory.createAction(json);
     Assert.assertEquals(selected.transform(),
     "if (!wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()) {\n" +
-      "wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
-      "}\n");
+      "      wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
+      "    }\n");
   }
   
   @Test

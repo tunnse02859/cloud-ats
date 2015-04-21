@@ -3,6 +3,8 @@
  */
 package org.ats.services.functional;
 
+import java.util.logging.Logger;
+
 import org.ats.services.functional.action.AcceptAlert;
 import org.ats.services.functional.action.AddCookie;
 import org.ats.services.functional.action.AnswerAlert;
@@ -102,13 +104,12 @@ import com.google.inject.Inject;
  */
 public class ActionFactory {
   
-  private VariableFactory factory;
-  
   @Inject
-  public ActionFactory(VariableFactory factory) {
-    this.factory = factory;
-  }
+  private VariableFactory factory;
 
+  @Inject
+  private Logger logger;
+  
   public IAction createAction(JsonNode json) {
     if (json == null) return null;
     
@@ -486,6 +487,7 @@ public class ActionFactory {
       return new StoreEval(script, variable, factory);
       
     default:
+      logger.warning("Unsupported keyword: " + type);
       return null;
     }
   }
@@ -494,8 +496,16 @@ public class ActionFactory {
     boolean isVariable = str.startsWith("${") && str.endsWith("}");
     if (isVariable) {
       str = str.substring(2, str.length() - 1);
+      return new Value(str, isVariable);
+    } else if (str.indexOf("${") != -1 && str.lastIndexOf("}") != -1 ) {
+      int start = str.indexOf("${");
+      int end = str.lastIndexOf("}");
+      String variable = str.substring(start + 2, end);
+      StringBuilder sb = new StringBuilder(str.substring(0, start)).append("\" + ");
+      sb.append(variable).append(" + \"").append(str.substring(end + 1));
+      return new Value(sb.toString(), false);
     }
-    return new Value(str, isVariable);
+    return new Value(str, false);
   }
   
   public ILocator parseLocator(JsonNode json) {
@@ -521,6 +531,7 @@ public class ActionFactory {
     case "partial link text":
       return new PartialLinkTextLocator(locator);
     default:
+      logger.warning("Unsupported locator type: " + type);
       return null;
     }
   }

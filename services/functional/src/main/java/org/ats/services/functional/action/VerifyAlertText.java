@@ -5,8 +5,9 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
+import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.rythmengine.Rythm;
+import org.rythmengine.RythmEngine;
 
 /**
  * @author NamBV2
@@ -29,8 +30,10 @@ public class VerifyAlertText implements IAction{
     StringBuilder sb = new StringBuilder(negated ? "if (wd." : "if (!wd.");
     sb.append("switchTo().alert().getText().equals(");
     sb.append(text);
-    sb.append(")) {\nSystem.out.println(\"").append(negated ? "!" : "").append("verifyAlertText failed\");\n}\n");
-    return Rythm.render(sb.toString(), text.transform());
+    sb.append(")) {\n      System.out.println(\"").append(negated ? "!" : "").append("verifyAlertText failed\");\n    }\n");
+    
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    return engine.render(sb.toString(), text.transform());
   }
 
   public String getAction() {

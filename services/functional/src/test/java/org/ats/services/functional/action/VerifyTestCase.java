@@ -48,14 +48,16 @@ public class VerifyTestCase {
     
     IAction action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(),"if (wd.findElement(By.tagName(\"html\")).getText().contains(foo)) "+
-    "{\nSystem.out.println(\"!verifyTextPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(),"if (wd.findElement(By.tagName(\"html\")).getText().contains(foo)) {\n"
+        + "      System.out.println(\"!verifyTextPresent failed\");\n"
+        + "    }\n");
 
     json.put("negated", false);
     action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().contains(foo)) "+
-    "{\nSystem.out.println(\"verifyTextPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().contains(foo)) {\n"
+        + "      System.out.println(\"verifyTextPresent failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -69,14 +71,16 @@ public class VerifyTestCase {
     
     IAction action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"test\")).getText().equals(foo)) "
-        + "{\nSystem.out.println(\"!verifyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"test\")).getText().equals(foo)) {\n"
+        + "      System.out.println(\"!verifyText failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"test\")).getText().equals(foo)) "
-        + "{\nSystem.out.println(\"verifyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"test\")).getText().equals(foo)) {\n"
+        + "      System.out.println(\"verifyText failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -86,13 +90,15 @@ public class VerifyTestCase {
     json.put("negated", true);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.getPageSource().equals(\"https://google.com.vn\")) "
-        + "{\nSystem.out.println(\"!verifyPageSource failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.getPageSource().equals(\"https://google.com.vn\")) {\n"
+        + "      System.out.println(\"!verifyPageSource failed\");\n"
+        + "    }\n");
    
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!wd.getPageSource().equals(\"https://google.com.vn\")) "
-        + "{\nSystem.out.println(\"verifyPageSource failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.getPageSource().equals(\"https://google.com.vn\")) {\n"
+        + "      System.out.println(\"verifyPageSource failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -104,13 +110,15 @@ public class VerifyTestCase {
     json.put("locator", locator);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if ((wd.findElements(By.id(\"i am id\")).size() != 0)) "
-        + "{\nSystem.out.println(\"!verifyElementPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if ((wd.findElements(By.id(\"i am id\")).size() != 0)) {\n"
+        + "      System.out.println(\"!verifyElementPresent failed\");\n"
+        + "    }\n");
   
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!(wd.findElements(By.id(\"i am id\")).size() != 0)) "
-        + "{\nSystem.out.println(\"verifyElementPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!(wd.findElements(By.id(\"i am id\")).size() != 0)) {\n"
+        + "      System.out.println(\"verifyElementPresent failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -120,14 +128,16 @@ public class VerifyTestCase {
     json.put("negated", true);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.getCurrentUrl().equals(\"https://google.com.vn\")) "
-        + "{\nSystem.out.println(\"!verifyCurrentUrl failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.getCurrentUrl().equals(\"https://google.com.vn\")) {\n"
+        + "      System.out.println(\"!verifyCurrentUrl failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (!wd.getCurrentUrl().equals(\"https://google.com.vn\")) "
-        + "{\nSystem.out.println(\"verifyCurrentUrl failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.getCurrentUrl().equals(\"https://google.com.vn\")) {\n"
+        + "      System.out.println(\"verifyCurrentUrl failed\");\n"
+        + "    }\n");
     
   }
   
@@ -138,13 +148,15 @@ public class VerifyTestCase {
     json.put("negated", true);
 
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) "
-        + "{\nSystem.out.println(\"!verifyBodyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) {\n"
+        + "      System.out.println(\"!verifyBodyText failed\");\n"
+        + "    }\n");
 
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) "
-        + "{\nSystem.out.println(\"verifyBodyText failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.tagName(\"html\")).getText().equals(\"not body text\")) {\n"
+        + "      System.out.println(\"verifyBodyText failed\");\n"
+        + "    }\n");
   
   }
   
@@ -155,11 +167,15 @@ public class VerifyTestCase {
     json.put("negated", true);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.getTitle().equals(\"title\")) {\nSystem.out.println(\"!verifyTitle failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.getTitle().equals(\"title\")) {\n"
+        + "      System.out.println(\"!verifyTitle failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!wd.getTitle().equals(\"title\")) {\nSystem.out.println(\"verifyTitle failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.getTitle().equals(\"title\")) {\n"
+        + "      System.out.println(\"verifyTitle failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -174,14 +190,16 @@ public class VerifyTestCase {
     
     IAction action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) "
-        + "{\nSystem.out.println(\"!verifyElementValue failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) {\n"
+        + "      System.out.println(\"!verifyElementValue failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) "
-        + "{\nSystem.out.println(\"verifyElementValue failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.id(\"comments\")).getAttribute(\"value\").equals(\"w00t\")) {\n"
+        + "      System.out.println(\"verifyElementValue failed\");\n"
+        + "    }\n");
     
   }
   
@@ -195,20 +213,23 @@ public class VerifyTestCase {
     json.put("locator", locator);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if ((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) "
-        + "{\nSystem.out.println(\"!verifyElementSelected failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if ((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) {\n"
+        + "      System.out.println(\"!verifyElementSelected failed\");\n"
+        + "    }\n");
  
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) "
-        + "{\nSystem.out.println(\"verifyElementSelected failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(\"unchecked_checkbox\")).isSelected())) {\n"
+        + "      System.out.println(\"verifyElementSelected failed\");\n"
+        + "    }\n");
     
     locator.put("value", "${unchecked_checkbox}");
     json.put("locator", locator);
     
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(unchecked_checkbox)).isSelected())) "
-        + "{\nSystem.out.println(\"verifyElementSelected failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!(wd.findElement(By.id(unchecked_checkbox)).isSelected())) {\n"
+        + "      System.out.println(\"verifyElementSelected failed\");\n"
+        + "    }\n");
     
   }
   
@@ -226,13 +247,15 @@ public class VerifyTestCase {
     
     IAction action = actionFactory.createAction(json);
     
-    Assert.assertEquals(action.transform(), "if (wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) "
-        + "{\nSystem.out.println(\"!verifyElementAttribute failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) {\n"
+        + "      System.out.println(\"!verifyElementAttribute failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) "
-        + "{\nSystem.out.println(\"verifyElementAttribute failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\").equals(link_href)) {\n"
+        + "      System.out.println(\"verifyElementAttribute failed\");\n"
+        + "    }\n");
     
   }
   
@@ -243,12 +266,15 @@ public class VerifyTestCase {
     json.put("negated", true);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if ((wd.manage().getCookieNamed(\"test_cookie\") != null)) "
-        + "{\nSystem.out.println(\"!verifyCookiePresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if ((wd.manage().getCookieNamed(\"test_cookie\") != null)) {\n"
+        + "      System.out.println(\"!verifyCookiePresent failed\");\n"
+        + "    }\n");
 
     json.put("negated", false);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!(wd.manage().getCookieNamed(\"test_cookie\") != null)) {\nSystem.out.println(\"verifyCookiePresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!(wd.manage().getCookieNamed(\"test_cookie\") != null)) {\n"
+        + "      System.out.println(\"verifyCookiePresent failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -260,7 +286,9 @@ public class VerifyTestCase {
     
     IAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), 
-        "if (wd.manage().getCookieNamed(\"test_cookie\").getValue().equals(cookie)) {\nSystem.out.println(\"!verifyCookieByName failed\");\n}\n");
+        "if (wd.manage().getCookieNamed(\"test_cookie\").getValue().equals(cookie)) {\n"
+        + "      System.out.println(\"!verifyCookieByName failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -272,12 +300,14 @@ public class VerifyTestCase {
     VerifyElementStyle verifyElementStyle = new VerifyElementStyle(propertyName, value, locator,true);
     Assert.assertEquals(verifyElementStyle.transform(), 
         "if (wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
-            "System.out.println(\"verifyElementStyle failed\");\n}\n");
+            "      System.out.println(\"!verifyElementStyle failed\");\n"
+            + "    }\n");
     
     verifyElementStyle = new VerifyElementStyle(propertyName, value, locator,false);
     Assert.assertEquals(verifyElementStyle.transform(), 
         "if (!wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\").equals(\"value is bar\")) {\n"+
-            "System.out.println(\"verifyElementStyle failed\");\n}\n");
+            "      System.out.println(\"verifyElementStyle failed\");\n"
+            + "    }\n");
   }
   
   @Test
@@ -285,11 +315,15 @@ public class VerifyTestCase {
     json.put("type", "verifyAlertPresent");
     json.put("negated", true);
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (isAlertPresent(wd)) {\nSystem.out.println(\"!verifyAlertPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (isAlertPresent(wd)) {\n"
+        + "      System.out.println(\"!verifyAlertPresent failed\");\n"
+        + "    }\n");
     
     json.put("negated", false);
     action = new VerifyAlertPresent(false);
-    Assert.assertEquals(action.transform(), "if (!isAlertPresent(wd)) {\nSystem.out.println(\"verifyAlertPresent failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!isAlertPresent(wd)) {\n"
+        + "      System.out.println(\"verifyAlertPresent failed\");\n"
+        + "    }\n");
     
   }
   
@@ -301,11 +335,15 @@ public class VerifyTestCase {
     json.put("negated", false);
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"verifyEval failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (!wd.executeScript(\"test\").equals(\"value\")) {\n"
+        + "      System.out.println(\"verifyEval failed\");\n"
+        + "    }\n");
     
     json.put("negated", true);
     action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "if (wd.executeScript(\"test\").equals(\"value\")) {\nSystem.out.println(\"!verifyEval failed\");\n}\n");
+    Assert.assertEquals(action.transform(), "if (wd.executeScript(\"test\").equals(\"value\")) {\n"
+        + "      System.out.println(\"!verifyEval failed\");\n"
+        + "    }\n");
   }
   
   @Test
@@ -316,13 +354,15 @@ public class VerifyTestCase {
     
     IAction verifyAlertText = actionFactory.createAction(json);
     Assert.assertEquals(verifyAlertText.transform(), 
-        "if (wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
-            "System.out.println(\"!verifyAlertText failed\");\n}\n");
+        "if (wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"
+          + "      System.out.println(\"!verifyAlertText failed\");\n"
+          + "    }\n");
 
     json.put("negated", false);
     verifyAlertText = actionFactory.createAction(json);
     Assert.assertEquals(verifyAlertText.transform(), 
-        "if (!wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"+
-            "System.out.println(\"verifyAlertText failed\");\n}\n");
+        "if (!wd.switchTo().alert().getText().equals(\"this is alert text\")) {\n"
+     + "      System.out.println(\"verifyAlertText failed\");\n"
+     + "    }\n");
   }
 }
