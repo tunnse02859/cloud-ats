@@ -25,7 +25,7 @@ public class DismissAlert implements IAction {
 
   @Override
   public String getAction() {
-    return "testDismissAlert";
+    return "dismissAlert";
   }
 
 }

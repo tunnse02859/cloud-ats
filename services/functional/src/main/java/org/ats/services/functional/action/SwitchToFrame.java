@@ -29,7 +29,7 @@ public class SwitchToFrame implements IAction {
   }
 
   public String getAction() {
-    return null;
+    return "switchToFrame";
   }
 
 }

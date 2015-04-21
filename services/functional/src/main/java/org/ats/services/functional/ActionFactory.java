@@ -361,8 +361,8 @@ public class ActionFactory {
     case "addCookie":
       Value name = toValue(json.get("name").asText());
       value = toValue(json.get("value").asText());
-      String option = json.get("option").asText();
-      return new AddCookie(name, value, option);
+      String options = json.get("options").asText();
+      return new AddCookie(name, value, options);
     
     case "deleteCookie":
       name = toValue(json.get("name").asText());

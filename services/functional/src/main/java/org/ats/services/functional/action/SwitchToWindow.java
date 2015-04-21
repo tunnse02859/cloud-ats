@@ -29,7 +29,7 @@ public class SwitchToWindow implements IAction {
   }
 
   public String getAction() {
-    return "testSwitchToWindow";
+    return "switchToWindow";
   }
   
 }

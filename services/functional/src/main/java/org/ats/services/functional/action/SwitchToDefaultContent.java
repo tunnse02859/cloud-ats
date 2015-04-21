@@ -24,7 +24,7 @@ public class SwitchToDefaultContent implements IAction {
   }
 
   public String getAction() {
-    return "testSwitchDefaultContent";
+    return "switchToDefaultContent";
   }
 
   

@@ -33,7 +33,7 @@ public class AnswerAlert implements IAction {
 
   @Override
   public String getAction() {
-    return "testAnswerAlert";
+    return "answerAlert";
   }
 
 }

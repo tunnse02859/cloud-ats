@@ -29,7 +29,7 @@ public class SaveScreenShot implements IAction{
   }
 
   public String getAction() {
-    return "saveScreenShot";
+    return "saveScreenshot";
   }
 
 }

@@ -25,7 +25,7 @@ public class AcceptAlert implements IAction {
 
   @Override
   public String getAction() {
-    return "testAcceptAlert";
+    return "acceptAlert";
   }
 
 }

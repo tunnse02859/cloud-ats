@@ -26,7 +26,7 @@ public class SwitchToFrameByIndex implements IAction {
   }
 
   public String getAction() {
-    return "testSwitchToFrameByIndex";
+    return "switchToFrameByIndex";
   }
   
 }
