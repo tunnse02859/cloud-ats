@@ -32,7 +32,7 @@ public class VariableFactory {
   }
   
   public static enum DataType {
-    STRING("String"), BOOLEAN("boolean");
+    STRING("String"), BOOLEAN("boolean"), OBJECT("Object");
     
     private String normalize;
     

@@ -40,7 +40,7 @@ public class Case implements ITemplate {
     StringBuilder sb = new StringBuilder();
     sb.append("\n");
     sb.append("  @Test\n");
-    sb.append("  public void ").append(name).append("() {\n");
+    sb.append("  public void ").append(name).append("() throws Exception {\n");
     for (IAction action : actions) {
       sb.append("    ");
       sb.append(action.transform());

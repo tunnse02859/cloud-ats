@@ -16,7 +16,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.*;
 import static org.openqa.selenium.OutputType.*;
 
-public class TestGenerated {
+public class FullExample {
 
   FirefoxDriver wd;
 
@@ -34,7 +34,7 @@ public class TestGenerated {
   
   
   @Test
-  public void test() {
+  public void test() throws Exception {
     wd.get("http://saucelabs.com/test/guinea-pig/");
 
     wd.findElement(By.linkText("i am a link")).click();

@@ -185,7 +185,7 @@ public class StoreTestCase {
     json.put("script", "alert('test_script');");
     
     IAction action = actionFactory.createAction(json);
-    Assert.assertEquals(action.transform(), "String test = wd.executeScript(\"alert('test_script');\");\n");
+    Assert.assertEquals(action.transform(), "Object test = wd.executeScript(\"alert('test_script');\");\n");
   }
 
   @Test

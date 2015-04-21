@@ -31,7 +31,7 @@ public class StoreEval implements IAction {
   
   @Override
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable));
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.OBJECT, variable));
     sb.append(" = wd.executeScript(@script);\n");
     return Rythm.render(sb.toString(), script.transform());
   }
