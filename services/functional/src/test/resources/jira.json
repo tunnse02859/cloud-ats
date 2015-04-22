@@ -1,0 +1,63 @@
+{
+  "type": "script",
+  "seleniumVersion": "2",
+  "formatVersion": 2,
+  "steps": [
+    {
+      "type": "get",
+      "url": "https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa"
+    },
+    {
+      "type": "switchToFrame",
+      "identifier": "gadget-0"
+    },
+    {
+      "type": "sendKeysToElement",
+      "locator": {
+        "type": "xpath",
+        "value": ".//*[@id='login-form-username']"
+      },
+      "text": "trinhtv3"
+    },
+    {
+      "type": "sendKeysToElement",
+      "locator": {
+        "type": "xpath",
+        "value": ".//*[@id='login-form-password']"
+      },
+      "text": "DamMai@65"
+    },
+    {
+      "type": "setElementSelected",
+      "locator": {
+        "type": "xpath",
+        "value": ".//*[@id='login-form-remember-me']"
+      }
+    },
+    {
+      "type": "submitElement",
+      "locator": {
+        "type": "xpath",
+        "value": ".//*[@id='login']"
+      }
+    },
+    {
+      "type": "pause",
+      "waitTime": "2000"
+    },
+    {
+      "type": "get",
+      "url": "https://insight.fsoft.com.vn/jira"
+    },
+    {
+      "type": "assertTextPresent",
+      "text": "Assigned to Me"
+    }
+  ],
+  "data": {
+    "configs": {},
+    "source": "none"
+  },
+  "inputs": [],
+  "timeoutSeconds": 60
+}

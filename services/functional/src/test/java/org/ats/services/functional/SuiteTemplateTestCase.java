@@ -89,6 +89,11 @@ public class SuiteTemplateTestCase {
     testBase("SwitchToWindow", "switchToWindow.json");
   }
   
+  @Test
+  public void testJira() throws Exception {
+    testBase("Jira", "jira.json");
+  }
+  
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
     SuiteBuilder builder = new SuiteBuilder();
     builder.packageName("org.ats.generated")
