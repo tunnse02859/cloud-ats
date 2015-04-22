@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Apr 8, 2015
  */
-public class GoForward implements IAction {
+@SuppressWarnings("serial")
+public class GoForward extends AbstractAction {
 
   public String transform() throws IOException {
     return "wd.navigate().forward();\n";

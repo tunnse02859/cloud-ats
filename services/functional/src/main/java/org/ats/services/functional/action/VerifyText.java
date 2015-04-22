@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
@@ -15,15 +15,16 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 13, 2015
  */
-public class VerifyText implements IAction {
+@SuppressWarnings("serial")
+public class VerifyText extends AbstractAction {
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private Value text;
   
   private boolean negated;
   
-  public VerifyText(ILocator locator, Value text, boolean negated) {
+  public VerifyText(AbstractLocator locator, Value text, boolean negated) {
     this.locator = locator;
     this.text = text;
     this.negated = negated;

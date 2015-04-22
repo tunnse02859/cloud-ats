@@ -13,7 +13,8 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AssertCookieByName implements IAction{
+@SuppressWarnings("serial")
+public class AssertCookieByName extends AbstractAction{
 
   private Value name, value;
   

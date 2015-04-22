@@ -15,7 +15,8 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class StoreEval implements IAction {
+@SuppressWarnings("serial")
+public class StoreEval extends AbstractAction {
 
   private Value script;
   

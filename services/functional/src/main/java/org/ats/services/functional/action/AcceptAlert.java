@@ -10,14 +10,10 @@ import java.io.IOException;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AcceptAlert implements IAction {
 
-  /**
-   * 
-   */
-  public AcceptAlert() {
+@SuppressWarnings("serial")
+public class AcceptAlert extends AbstractAction {
 
-  }
   @Override
   public String transform() throws IOException {
     return "wd.switchTo().alert().accept();\n";

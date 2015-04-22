@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Apr 17, 2015
  */
-public class AssertAlertPresent implements IAction{
+@SuppressWarnings("serial")
+public class AssertAlertPresent extends AbstractAction {
 
   private boolean negated;
   

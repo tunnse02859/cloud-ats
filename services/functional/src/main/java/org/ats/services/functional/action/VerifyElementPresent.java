@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.common.MapBuilder;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
@@ -14,13 +14,14 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 13, 2015
  */
-public class VerifyElementPresent implements IAction {
+@SuppressWarnings("serial")
+public class VerifyElementPresent extends AbstractAction {
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private boolean negated;
   
-  public VerifyElementPresent(ILocator locator, boolean negated) {
+  public VerifyElementPresent(AbstractLocator locator, boolean negated) {
     this.locator = locator;
     this.negated = negated;
   }

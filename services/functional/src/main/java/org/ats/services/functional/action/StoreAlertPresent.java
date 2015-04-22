@@ -13,7 +13,8 @@ import org.ats.services.functional.VariableFactory.DataType;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class StoreAlertPresent implements IAction {
+@SuppressWarnings("serial")
+public class StoreAlertPresent extends AbstractAction {
 
   /** .*/
   private String variable;

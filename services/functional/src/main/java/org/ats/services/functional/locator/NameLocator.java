@@ -13,6 +13,7 @@ import org.rythmengine.Rythm;
  *
  * Apr 9, 2015
  */
+@SuppressWarnings("serial")
 public class NameLocator extends AbstractLocator {
 
   public NameLocator(Value locator) {

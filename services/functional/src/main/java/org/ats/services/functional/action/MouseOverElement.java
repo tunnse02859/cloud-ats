@@ -5,7 +5,7 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -13,11 +13,12 @@ import org.rythmengine.Rythm;
  *
  * Apr 10, 2015
  */
-public class MouseOverElement implements IAction {
+@SuppressWarnings("serial")
+public class MouseOverElement extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
-  public MouseOverElement(ILocator locator) {
+  public MouseOverElement(AbstractLocator locator) {
     this.locator = locator;
   }
   

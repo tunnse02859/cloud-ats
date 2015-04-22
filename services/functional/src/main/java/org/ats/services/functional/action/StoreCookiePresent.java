@@ -14,7 +14,8 @@ import org.ats.services.functional.VariableFactory.DataType;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class StoreCookiePresent implements IAction{
+@SuppressWarnings("serial")
+public class StoreCookiePresent extends AbstractAction{
 
   private Value name;
   

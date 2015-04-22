@@ -11,12 +11,17 @@ import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
 import org.rythmengine.RythmEngine;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Apr 8, 2015
  */
-public class Suite implements ITemplate {
+@SuppressWarnings("serial")
+public class Suite extends AbstractTemplate {
   
   private String suiteName;
   
@@ -51,6 +56,23 @@ public class Suite implements ITemplate {
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sb.toString());
+  }
+  
+  @Override
+  public DBObject toJson() {
+    BasicDBObject obj = new BasicDBObject();
+    obj.put("package_name", packageName);
+    obj.put("extra_imports", extraImports);
+    obj.put("suite_name", suiteName);
+    obj.put("driver_var", driverVar);
+    obj.put("init_driver", initDriver);
+    obj.put("timeout_seconds", timeoutSeconds);
+    BasicDBList list = new BasicDBList();
+    for (Case caze : cases.values()) {
+      list.add(caze.toJson());
+    }
+    obj.put("cases", list);
+    return obj;
   }
   
   public static class SuiteBuilder {

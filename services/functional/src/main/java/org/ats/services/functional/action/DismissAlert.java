@@ -10,14 +10,9 @@ import java.io.IOException;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class DismissAlert implements IAction {
+@SuppressWarnings("serial")
+public class DismissAlert extends AbstractAction {
 
-  /**
-   * 
-   */
-  public DismissAlert() {
-
-  }
   @Override
   public String transform() throws IOException {
     return "wd.switchTo().alert().dismiss();\n";

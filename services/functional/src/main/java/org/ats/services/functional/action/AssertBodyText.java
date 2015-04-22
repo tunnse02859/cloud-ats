@@ -13,7 +13,8 @@ import org.rythmengine.Rythm;
  *
  * Apr 13, 2015
  */
-public class AssertBodyText implements IAction {
+@SuppressWarnings("serial")
+public class AssertBodyText extends AbstractAction {
 
   private Value text;
   

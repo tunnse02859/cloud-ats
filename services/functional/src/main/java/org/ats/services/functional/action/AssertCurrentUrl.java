@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Apr 14, 2015
  */
-public class AssertCurrentUrl implements IAction {
+@SuppressWarnings("serial")
+public class AssertCurrentUrl extends AbstractAction {
   
   private Value url;
   

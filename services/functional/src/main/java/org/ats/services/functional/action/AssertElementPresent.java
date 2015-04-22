@@ -5,7 +5,7 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -13,13 +13,14 @@ import org.rythmengine.Rythm;
  *
  * Apr 13, 2015
  */
-public class AssertElementPresent implements IAction {
+@SuppressWarnings("serial")
+public class AssertElementPresent extends AbstractAction {
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private boolean negated;
   
-  public AssertElementPresent(ILocator locator, boolean negated) {
+  public AssertElementPresent(AbstractLocator locator, boolean negated) {
     this.locator = locator;
     this.negated = negated;
   }

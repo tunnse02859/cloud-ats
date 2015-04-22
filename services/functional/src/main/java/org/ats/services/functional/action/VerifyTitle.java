@@ -14,14 +14,14 @@ import org.rythmengine.RythmEngine;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyTitle implements IAction {
+@SuppressWarnings("serial")
+public class VerifyTitle extends AbstractAction {
 
   private Value title;
   
   private boolean negated;
   
   public VerifyTitle(Value title, boolean negated) {
-    
     this.title = title;
     this.negated = negated;
   }

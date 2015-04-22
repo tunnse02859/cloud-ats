@@ -14,19 +14,16 @@ import org.rythmengine.RythmEngine;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyCookiePresent implements IAction {
+@SuppressWarnings("serial")
+public class VerifyCookiePresent extends AbstractAction {
 
   private Value name;
+
   private boolean negated;
   
-  /**
-   * 
-   */
   public VerifyCookiePresent(Value name, boolean negated) {
-  
     this.name = name;
     this.negated = negated;
-    
   }
 
   public String transform() throws IOException {

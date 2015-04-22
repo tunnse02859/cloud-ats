@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 13, 2015
  */
-public class VerifyBodyText implements IAction {
+@SuppressWarnings("serial")
+public class VerifyBodyText extends AbstractAction {
 
   private Value text;
   

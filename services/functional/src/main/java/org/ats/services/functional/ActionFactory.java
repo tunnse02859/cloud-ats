@@ -5,6 +5,7 @@ package org.ats.services.functional;
 
 import java.util.logging.Logger;
 
+import org.ats.services.functional.action.AbstractAction;
 import org.ats.services.functional.action.AcceptAlert;
 import org.ats.services.functional.action.AddCookie;
 import org.ats.services.functional.action.AnswerAlert;
@@ -35,7 +36,6 @@ import org.ats.services.functional.action.DragToAndDropElement;
 import org.ats.services.functional.action.Get;
 import org.ats.services.functional.action.GoBack;
 import org.ats.services.functional.action.GoForward;
-import org.ats.services.functional.action.IAction;
 import org.ats.services.functional.action.MouseOverElement;
 import org.ats.services.functional.action.Pause;
 import org.ats.services.functional.action.Print;
@@ -84,10 +84,10 @@ import org.ats.services.functional.action.VerifyPageSource;
 import org.ats.services.functional.action.VerifyText;
 import org.ats.services.functional.action.VerifyTextPresent;
 import org.ats.services.functional.action.VerifyTitle;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.ats.services.functional.locator.ClassNameLocator;
 import org.ats.services.functional.locator.CssSelectorLocator;
 import org.ats.services.functional.locator.IDLocator;
-import org.ats.services.functional.locator.ILocator;
 import org.ats.services.functional.locator.LinkTextLocator;
 import org.ats.services.functional.locator.NameLocator;
 import org.ats.services.functional.locator.PartialLinkTextLocator;
@@ -96,6 +96,8 @@ import org.ats.services.functional.locator.XPathLocator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -110,7 +112,8 @@ public class ActionFactory {
   @Inject
   private Logger logger;
   
-  public IAction createAction(JsonNode json) {
+  @SuppressWarnings("serial")
+  public AbstractAction createAction(final JsonNode json) {
     if (json == null) return null;
     
     String type = json.get("type").asText();
@@ -119,372 +122,840 @@ public class ActionFactory {
     
     case "get":
       Value url = toValue(json.get("url").asText());
-      return new Get(url);
+      return new Get(url) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "goBack":
-      return new GoBack();
+      return new GoBack() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "goForward":
-      return new GoForward();
+      return new GoForward() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "clickElement":
-      ILocator locator = parseLocator(json.get("locator"));
-      return new ClickElement(locator);
+      AbstractLocator locator = parseLocator(json.get("locator"));
+      return new ClickElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "setElementText":
       locator = parseLocator(json.get("locator"));
       Value text = toValue(json.get("text").asText());
-      return new SetElementText(locator, text);
+      return new SetElementText(locator, text) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "sendKeysToElement":
       locator = parseLocator(json.get("locator"));
       text = toValue(json.get("text").asText());
-      return new SendKeysToElement(locator, text);
+      return new SendKeysToElement(locator, text) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "doubleClickElement":
       locator = parseLocator(json.get("locator"));
-      return new DoubleClickElement(locator);
+      return new DoubleClickElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "mouseOverElement":
       locator = parseLocator(json.get("locator"));
-      return new MouseOverElement(locator);
+      return new MouseOverElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "dragToAndDropElement":
       locator = parseLocator(json.get("locator"));
-      ILocator targetLocator = parseLocator(json.get("targetLocator"));
-      return new DragToAndDropElement(locator, targetLocator);
+      AbstractLocator targetLocator = parseLocator(json.get("targetLocator"));
+      return new DragToAndDropElement(locator, targetLocator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "clickAndHoldElement":
       locator = parseLocator(json.get("locator"));
-      return new ClickAndHoldElement(locator);
+      return new ClickAndHoldElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "releaseElement":
       locator = parseLocator(json.get("locator"));
-      return new ReleaseElement(locator);
+      return new ReleaseElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "setElementSelected":
       locator = parseLocator(json.get("locator"));
-      return new SetElementSelected(locator);
+      return new SetElementSelected(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "clearSelections":
       locator = parseLocator(json.get("locator"));
-      return new ClearSelections(locator);
+      return new ClearSelections(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "setElementNotSelected":
       locator = parseLocator(json.get("locator"));
-      return new SetElementNotSelected(locator);
+      return new SetElementNotSelected(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "submitElement":
       locator = parseLocator(json.get("locator"));
-      return new SubmitElement(locator);
+      return new SubmitElement(locator) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "close":
-      return new Close();
+      return new Close() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "refresh":
-      return new Refresh();
+      return new Refresh() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "assertTextPresent":
       text = toValue(json.get("text").asText());
       boolean negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertTextPresent(text, negated);
+      return new AssertTextPresent(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "verifyTextPresent":
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyTextPresent(text, negated);
+      return new VerifyTextPresent(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "storeTextPresent":
       String variable = json.get("variable").asText();
       text = toValue(json.get("text").asText());
-      return new StoreTextPresent(variable, text, factory);
+      return new StoreTextPresent(variable, text, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "assertBodyText":
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertBodyText(text, negated);
+      return new AssertBodyText(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyBodyText":
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyBodyText(text, negated);
+      return new VerifyBodyText(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeBodyText":
       variable = json.get("variable").asText();
-      return new StoreBodyText(variable, factory);
+      return new StoreBodyText(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "assertElementPresent":
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertElementPresent(locator, negated);
+      return new AssertElementPresent(locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyElementPresent":
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyElementPresent(locator, negated);
+      return new VerifyElementPresent(locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeElementPresent":
       locator = parseLocator(json.get("locator"));
       variable = json.get("variable").asText();
-      return new StoreElementPresent(locator, variable, factory);
+      return new StoreElementPresent(locator, variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertPageSource":
       Value source = toValue(json.get("source").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertPageSource(source, negated);
+      return new AssertPageSource(source, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
      
     case "verifyPageSource":
       source = toValue(json.get("source").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyPageSource(source, negated);
+      return new VerifyPageSource(source, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storePageSource":
       variable = json.get("variable").asText();
-      return new StorePageSource(variable, factory);
+      return new StorePageSource(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertText":
       locator = parseLocator(json.get("locator"));
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertText(locator, text, negated);
+      return new AssertText(locator, text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyText":
       locator = parseLocator(json.get("locator"));
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyText(locator, text, negated);
+      return new VerifyText(locator, text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeText":
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreText(variable, locator, factory);
+      return new StoreText(variable, locator, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertCurrentUrl":
       url = toValue(json.get("url").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertCurrentUrl(url, negated);
+      return new AssertCurrentUrl(url, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyCurrentUrl":
       url = toValue(json.get("url").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyCurrentUrl(url, negated);
+      return new VerifyCurrentUrl(url, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeCurrentUrl":
       variable = json.get("variable").asText();
-      return new StoreCurrentUrl(variable, factory);
+      return new StoreCurrentUrl(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertTitle":
       Value title = toValue(json.get("title").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertTitle(title, negated);
+      return new AssertTitle(title, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyTitle":
       title = toValue(json.get("title").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyTitle(title, negated);
+      return new VerifyTitle(title, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "storeTitle":
       variable = json.get("variable").asText();
-      return new StoreTitle(variable, factory);
+      return new StoreTitle(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertElementAttribute":
       Value value = toValue(json.get("value").asText());
       Value attributeName = toValue(json.get("attributeName").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertElementAttribute(attributeName, value, locator, negated);
+      return new AssertElementAttribute(attributeName, value, locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyElementAttribute":
       value = toValue(json.get("value").asText());
       attributeName = toValue(json.get("attributeName").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyElementAttribute(locator, attributeName, value, negated);
+      return new VerifyElementAttribute(locator, attributeName, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeElementAttribute":
       variable = json.get("variable").asText();
       attributeName = toValue(json.get("attributeName").asText());
       locator = parseLocator(json.get("locator"));
-      return new StoreElementAttribute(variable, attributeName, locator, factory);
+      return new StoreElementAttribute(variable, attributeName, locator, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertElementStyle":
       Value propertyName = toValue(json.get("propertyName").asText());
       value = toValue(json.get("value").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertElementStyle(propertyName, value, locator, negated);
+      return new AssertElementStyle(propertyName, value, locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyElementStyle":
       propertyName = toValue(json.get("propertyName").asText());
       value = toValue(json.get("value").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyElementStyle(propertyName, value, locator, negated);
+      return new VerifyElementStyle(propertyName, value, locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeElementStyle":
       propertyName = toValue(json.get("propertyName").asText());
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreElementStyle(propertyName, variable, locator, factory);
+      return new StoreElementStyle(propertyName, variable, locator, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertElementSelected":
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertElementSelected(locator, negated);
+      return new AssertElementSelected(locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyElementSelected":
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyElementSelected(locator, negated);
+      return new VerifyElementSelected(locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeElementSelected":
       variable = json.get("variable").asText();
       locator = parseLocator(json.get("locator"));
-      return new StoreElementSelected(variable, locator, factory);
+      return new StoreElementSelected(variable, locator, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertElementValue": 
       value = toValue(json.get("value").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertElementValue(value, locator, negated);
+      return new AssertElementValue(value, locator, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyElementValue":
       value = toValue(json.get("value").asText());
       locator = parseLocator(json.get("locator"));
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyElementValue(locator, value, negated);
+      return new VerifyElementValue(locator, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeElementValue":
       locator = parseLocator(json.get("locator"));
       variable = json.get("variable").asText();
-      return new StoreElementValue(locator, variable, factory);
+      return new StoreElementValue(locator, variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "addCookie":
       Value name = toValue(json.get("name").asText());
       value = toValue(json.get("value").asText());
       String options = json.get("options").asText();
-      return new AddCookie(name, value, options);
+      return new AddCookie(name, value, options) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "deleteCookie":
       name = toValue(json.get("name").asText());
-      return new DeleteCookie(name);
+      return new DeleteCookie(name) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertCookieByName":
       name = toValue(json.get("name").asText());
       value = toValue(json.get("value").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertCookieByName(name, value, negated);
+      return new AssertCookieByName(name, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyCookieByName":
       name = toValue(json.get("name").asText());
       value = toValue(json.get("value").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyCookieByName(name, value, negated);
+      return new VerifyCookieByName(name, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeCookieByName":
       name = toValue(json.get("name").asText());
       variable = json.get("variable").asText();
-      return new StoreCookieByName(name, variable, factory);
+      return new StoreCookieByName(name, variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertCookiePresent":
       name = toValue(json.get("name").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertCookiePresent(name, negated);
+      return new AssertCookiePresent(name, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyCookiePresent":
       name = toValue(json.get("name").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyCookiePresent(name, negated);
+      return new VerifyCookiePresent(name, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeCookiePresent":
       variable = json.get("variable").asText();
       name = toValue(json.get("name").asText());
-      return new StoreCookiePresent(variable, name, factory);
+      return new StoreCookiePresent(variable, name, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "saveScreenshot":
       Value file = toValue(json.get("file").asText());
-      return new SaveScreenShot(file);
+      return new SaveScreenShot(file) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "print":
       text = toValue(json.get("text").asText());
-      return new Print(text);
+      return new Print(text) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "store":
       text = toValue(json.get("text").asText());
       variable = json.get("variable").asText();
-      return new Store(text, variable, factory);
+      return new Store(text, variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "pause":
       long waitTime = json.get("waitTime").asLong();
-      return new Pause(waitTime);
+      return new Pause(waitTime) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "switchToFrame":
       Value identifier = toValue(json.get("identifier").asText());
-      return new SwitchToFrame(identifier);
+      return new SwitchToFrame(identifier) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "switchToFrameByIndex":
       int index = json.get("index").asInt();
-      return new SwitchToFrameByIndex(index);
+      return new SwitchToFrameByIndex(index) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "switchToWindow":
       name = toValue(json.get("name").asText());
-      return new SwitchToWindow(name);
+      return new SwitchToWindow(name) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "switchToDefaultContent":
-      return new SwitchToDefaultContent();
+      return new SwitchToDefaultContent() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertAlertText":
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertAlertText(text, negated);
+      return new AssertAlertText(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyAlertText":
       text = toValue(json.get("text").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyAlertText(text, negated);
+      return new VerifyAlertText(text, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "storeAlertText":
       variable = json.get("variable").asText();
-      return new StoreAlertText(variable, factory);
+      return new StoreAlertText(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertAlertPresent":
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertAlertPresent(negated);
+      return new AssertAlertPresent(negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyAlertPresent":
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyAlertPresent(negated);
+      return new VerifyAlertPresent(negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
     
     case "storeAlertPresent":
       variable = json.get("variable").asText();
-      return new StoreAlertPresent(variable, factory);
+      return new StoreAlertPresent(variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "answerAlert":
       text = toValue(json.get("text").asText());
-      return new AnswerAlert(text);
+      return new AnswerAlert(text) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "acceptAlert":
-      return new AcceptAlert();
+      return new AcceptAlert() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "dismissAlert":
-      return new DismissAlert();
+      return new DismissAlert() {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "assertEval":
       Value script = toValue(json.get("script").asText());
       value = toValue(json.get("value").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new AssertEval(script, value, negated);
+      return new AssertEval(script, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     case "verifyEval":
       script = toValue(json.get("script").asText());
       value = toValue(json.get("value").asText());
       negated = json.get("negated") == null ? false : json.get("negated").asBoolean();
-      return new VerifyEval(script, value, negated);
+      return new VerifyEval(script, value, negated) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
    
     case "storeEval":
       script = toValue(json.get("script").asText());
       variable = json.get("variable").asText();
-      return new StoreEval(script, variable, factory);
+      return new StoreEval(script, variable, factory) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
       
     default:
       logger.warning("Unsupported keyword: " + type);
@@ -508,7 +979,7 @@ public class ActionFactory {
     return new Value(str, false);
   }
   
-  public ILocator parseLocator(JsonNode json) {
+  public AbstractLocator parseLocator(JsonNode json) {
     String type = json.get("type").asText();
     Value locator = toValue(json.get("value").asText());
     

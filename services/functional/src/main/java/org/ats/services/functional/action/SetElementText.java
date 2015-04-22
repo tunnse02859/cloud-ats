@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -14,13 +14,14 @@ import org.rythmengine.Rythm;
  *
  * Apr 9, 2015
  */
-public class SetElementText implements IAction {
+@SuppressWarnings("serial")
+public class SetElementText extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private Value text;
   
-  public SetElementText(ILocator locator, Value text) {
+  public SetElementText(AbstractLocator locator, Value text) {
     this.locator = locator;
     this.text = text;
   }

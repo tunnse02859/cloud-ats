@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
@@ -15,13 +15,14 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 9, 2015
  */
-public class SendKeysToElement implements IAction {
+@SuppressWarnings("serial")
+public class SendKeysToElement extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private Value text;
   
-  public SendKeysToElement(ILocator locator, Value text) {
+  public SendKeysToElement(AbstractLocator locator, Value text) {
     this.locator = locator;
     this.text = text;
   }

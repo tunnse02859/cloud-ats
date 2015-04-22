@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AssertCookiePresent implements IAction{
+@SuppressWarnings("serial")
+public class AssertCookiePresent extends AbstractAction{
 
   private Value name;
   

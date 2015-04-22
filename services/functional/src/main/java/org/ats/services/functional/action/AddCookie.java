@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Apr 10, 2015
  */
-public class AddCookie implements IAction {
+@SuppressWarnings("serial")
+public class AddCookie extends AbstractAction {
 
   private Value name, value;
   

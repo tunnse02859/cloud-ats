@@ -13,7 +13,8 @@ import org.rythmengine.Rythm;
  *
  * Apr 8, 2015
  */
-public class Get implements IAction {
+@SuppressWarnings("serial")
+public class Get extends AbstractAction {
   
   private Value url;
   

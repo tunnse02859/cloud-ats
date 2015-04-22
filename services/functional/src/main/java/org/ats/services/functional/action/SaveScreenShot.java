@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SaveScreenShot implements IAction{
+@SuppressWarnings("serial")
+public class SaveScreenShot extends AbstractAction {
 
   private Value file;
   

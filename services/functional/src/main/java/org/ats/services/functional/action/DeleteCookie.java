@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Apr 10, 2015
  */
-public class DeleteCookie implements IAction {
+@SuppressWarnings("serial")
+public class DeleteCookie extends AbstractAction {
 
   private Value name;
   

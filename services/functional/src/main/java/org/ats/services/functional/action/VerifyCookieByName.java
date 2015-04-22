@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyCookieByName implements IAction {
+@SuppressWarnings("serial")
+public class VerifyCookieByName extends AbstractAction {
 
   private boolean negated;
   

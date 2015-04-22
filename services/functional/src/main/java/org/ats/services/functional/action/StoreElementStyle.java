@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.ats.services.functional.Value;
 import org.ats.services.functional.VariableFactory;
 import org.ats.services.functional.VariableFactory.DataType;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -16,17 +16,18 @@ import org.rythmengine.Rythm;
  *
  * Apr 17, 2015
  */
-public class StoreElementStyle implements IAction{
+@SuppressWarnings("serial")
+public class StoreElementStyle extends AbstractAction{
 
   private Value propertyName;
   
   private String variable;
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private VariableFactory factory;
   
-  public StoreElementStyle(Value propertyName,String variable, ILocator locator, VariableFactory factory) {
+  public StoreElementStyle(Value propertyName,String variable, AbstractLocator locator, VariableFactory factory) {
     this.propertyName = propertyName;
     this.variable = variable;
     this.locator = locator;

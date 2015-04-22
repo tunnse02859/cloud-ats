@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 14, 2015
  */
-public class VerifyCurrentUrl implements IAction {
+@SuppressWarnings("serial")
+public class VerifyCurrentUrl extends AbstractAction {
   
   private Value url;
   

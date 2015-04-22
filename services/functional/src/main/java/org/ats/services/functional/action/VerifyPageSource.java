@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 13, 2015
  */
-public class VerifyPageSource implements IAction {
+@SuppressWarnings("serial")
+public class VerifyPageSource extends AbstractAction {
   
   private Value source;
   

@@ -13,7 +13,8 @@ import org.ats.services.functional.VariableFactory.DataType;
  *
  * Apr 16, 2015
  */
-public class StoreTitle implements IAction {
+@SuppressWarnings("serial")
+public class StoreTitle extends AbstractAction {
   
   private String variable;
   

@@ -48,7 +48,7 @@ public class InputTestCase {
     locator.put("value", "i am id");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "new Actions(wd).doubleClick(wd.findElement(By.id(\"i am id\"))).build().perform();\n");
 
     locator.put("value", "${value}");
@@ -69,7 +69,7 @@ public class InputTestCase {
     targetLocator.put("value", "i am dest");
     json.put("targetLocator", targetLocator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "new Actions(wd).dragAndDrop(wd.findElement(By.id(\"i am source\")), wd.findElement(By.id(\"i am dest\")).build().perform();\n");
     
     locator.put("type", "id");
@@ -91,7 +91,7 @@ public class InputTestCase {
     locator.put("value", "foo");
     json.put("locator", locator);
     
-    IAction clearSelections = actionFactory.createAction(json);
+    AbstractAction clearSelections = actionFactory.createAction(json);
     Assert.assertEquals(clearSelections.transform(), "new Select(wd.findElement(By.id(\"foo\"))).deselectAll();\n");
   }
   
@@ -102,7 +102,7 @@ public class InputTestCase {
     locator.put("value", "foo");
     json.put("locator", locator);
     
-    IAction clickAndHoldElement = actionFactory.createAction(json);
+    AbstractAction clickAndHoldElement = actionFactory.createAction(json);
     Assert.assertEquals(clickAndHoldElement.transform(), "new Actions(wd).clickAndHold(wd.findElement(By.id(\"foo\"))).build.perform();\n");
   }
   
@@ -113,7 +113,7 @@ public class InputTestCase {
     locator.put("value", "i am a link");
     json.put("locator", locator);
     
-    IAction clickElement = actionFactory.createAction(json);
+    AbstractAction clickElement = actionFactory.createAction(json);
     Assert.assertEquals(clickElement.transform(), "wd.findElement(By.linkText(\"i am a link\")).click();\n");
   }
   
@@ -124,7 +124,7 @@ public class InputTestCase {
     locator.put("value", "foo");
     json.put("locator", locator);
     
-    IAction mouseOverElement = actionFactory.createAction(json);
+    AbstractAction mouseOverElement = actionFactory.createAction(json);
     Assert.assertEquals(mouseOverElement.transform(), "new Actions(wd).moveToElement(wd.findElement(By.id(\"foo\"))).build().perform();\n");
   }
   
@@ -135,7 +135,7 @@ public class InputTestCase {
     locator.put("value", "foo");
     json.put("locator", locator);
     
-    IAction releaseElement = actionFactory.createAction(json);
+    AbstractAction releaseElement = actionFactory.createAction(json);
     Assert.assertEquals(releaseElement.transform(), "new Actions(wd).release(wd.findElement(By.id(\"foo\"))).build.perform();\n");
   }
   
@@ -147,7 +147,7 @@ public class InputTestCase {
     locator.put("value", "comments");
     json.put("locator", locator);
     
-    IAction sendKeysToElement = actionFactory.createAction(json); 
+    AbstractAction sendKeysToElement = actionFactory.createAction(json); 
     Assert.assertEquals(sendKeysToElement.transform(), 
     "wd.findElement(By.id(\"comments\")).click();\n" +
     "    wd.findElement(By.id(\"comments\")).sendKeys(\"w00t\");\n");
@@ -160,7 +160,7 @@ public class InputTestCase {
     locator.put("value", "unchecked_checkbox");
     json.put("locator", locator);
     
-    IAction setElementNotSelected = actionFactory.createAction(json);
+    AbstractAction setElementNotSelected = actionFactory.createAction(json);
     Assert.assertEquals(setElementNotSelected.transform(),
             "if (wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()) {\n" +
             "      wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
@@ -174,7 +174,7 @@ public class InputTestCase {
     locator.put("value", "unchecked_checkbox");
     json.put("locator", locator);
 
-    IAction selected = actionFactory.createAction(json);
+    AbstractAction selected = actionFactory.createAction(json);
     Assert.assertEquals(selected.transform(),
     "if (!wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()) {\n" +
       "      wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
@@ -189,7 +189,7 @@ public class InputTestCase {
     locator.put("value", "unchecked_checkbox");
     json.put("locator", locator);
     
-    IAction setElementText = actionFactory.createAction(json);
+    AbstractAction setElementText = actionFactory.createAction(json);
     Assert.assertEquals(setElementText.transform(), 
     "wd.findElement(By.id(\"unchecked_checkbox\")).click();\n" +
     "wd.findElement(By.id(\"unchecked_checkbox\")).clear();\n" +
@@ -204,7 +204,7 @@ public class InputTestCase {
     locator.put("value", "comments");
     json.put("locator", locator);
     
-    IAction submitElement = actionFactory.createAction(json);
+    AbstractAction submitElement = actionFactory.createAction(json);
     Assert.assertEquals(submitElement.transform(), "wd.findElement(By.id(\"comments\")).submit();\n");
   }
   

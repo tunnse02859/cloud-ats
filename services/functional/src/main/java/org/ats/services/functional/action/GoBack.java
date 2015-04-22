@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Apr 8, 2015
  */
-public class GoBack implements IAction {
+@SuppressWarnings("serial")
+public class GoBack extends AbstractAction {
 
   public String transform() throws IOException {
     return  "wd.navigate().back();\n";

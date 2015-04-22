@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.ats.services.functional.VariableFactory;
 import org.ats.services.functional.VariableFactory.DataType;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -15,15 +15,16 @@ import org.rythmengine.Rythm;
  *
  * Apr 13, 2015
  */
-public class StoreElementPresent implements IAction {
+@SuppressWarnings("serial")
+public class StoreElementPresent extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private String variable;
   
   private VariableFactory factory;
   
-  public StoreElementPresent(ILocator locator, String variable, VariableFactory factory) {
+  public StoreElementPresent(AbstractLocator locator, String variable, VariableFactory factory) {
     this.locator = locator;
     this.variable = variable;
     this.factory = factory;

@@ -12,7 +12,8 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SwitchToFrameByIndex implements IAction {
+@SuppressWarnings("serial")
+public class SwitchToFrameByIndex extends AbstractAction {
 
   private int index;
 

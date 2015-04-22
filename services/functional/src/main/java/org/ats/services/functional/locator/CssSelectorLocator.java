@@ -13,6 +13,7 @@ import org.rythmengine.Rythm;
  *
  * Apr 8, 2015
  */
+@SuppressWarnings("serial")
 public class CssSelectorLocator extends AbstractLocator {
 
   public CssSelectorLocator(Value locator) {

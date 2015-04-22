@@ -5,7 +5,7 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -13,15 +13,16 @@ import org.rythmengine.Rythm;
  *
  * Apr 10, 2015
  */
-public class DragToAndDropElement implements IAction {
+@SuppressWarnings("serial")
+public class DragToAndDropElement extends AbstractAction {
 
   /** .*/
-  private ILocator source;
+  private AbstractLocator source;
   
   /** .*/
-  private ILocator destination;
+  private AbstractLocator destination;
   
-  public DragToAndDropElement(ILocator source, ILocator destination) {
+  public DragToAndDropElement(AbstractLocator source, AbstractLocator destination) {
     this.source = source;
     this.destination = destination;
   }

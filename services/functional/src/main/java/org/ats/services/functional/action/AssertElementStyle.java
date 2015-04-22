@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -14,15 +14,16 @@ import org.rythmengine.Rythm;
  *
  * Apr 17, 2015
  */
-public class AssertElementStyle implements IAction{
+@SuppressWarnings("serial")
+public class AssertElementStyle extends AbstractAction{
 
   private Value propertyName, value;
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private boolean negated;
   
-  public AssertElementStyle(Value propertyName,Value value, ILocator locator, boolean negated) {
+  public AssertElementStyle(Value propertyName,Value value, AbstractLocator locator, boolean negated) {
     this.propertyName = propertyName;
     this.value = value;
     this.locator = locator;

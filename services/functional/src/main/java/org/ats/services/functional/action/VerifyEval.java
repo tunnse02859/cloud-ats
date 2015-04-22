@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyEval implements IAction {
+@SuppressWarnings("serial")
+public class VerifyEval extends AbstractAction {
 
   private Value script;
   
@@ -22,11 +23,7 @@ public class VerifyEval implements IAction {
   
   private boolean negated;
   
-  /**
-   * 
-   */
   public VerifyEval(Value script, Value value, boolean negated) {
-    
     this.script = script;
     this.value = value;
     this.negated = negated;

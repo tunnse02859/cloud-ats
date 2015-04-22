@@ -42,7 +42,7 @@ public class StoreTestCase {
   public void testStoreBodyText() throws IOException {
     json.put("type", "storeBodyText");
     json.put("variable", "body_text");
-    IAction storeBodyText = actionFactory.createAction(json);
+    AbstractAction storeBodyText = actionFactory.createAction(json);
     Assert.assertEquals(storeBodyText.transform(), "String body_text = wd.findElement(By.tagName(\"html\")).getText();\n");
   }
   
@@ -50,7 +50,7 @@ public class StoreTestCase {
   public void testStorePageSource() throws IOException {
     json.put("type", "storePageSource");
     json.put("variable", "page_source");
-    IAction storePageSource = actionFactory.createAction(json);
+    AbstractAction storePageSource = actionFactory.createAction(json);
     Assert.assertEquals(storePageSource.transform(), "String page_source = wd.getPageSource();\n");
   }
   
@@ -64,7 +64,7 @@ public class StoreTestCase {
     
     json.put("locator", locator);
     
-    IAction storeText = actionFactory.createAction(json);
+    AbstractAction storeText = actionFactory.createAction(json);
     Assert.assertEquals(storeText.transform(), "String text = wd.findElement(By.id(\"i_am_an_id\")).getText();\n");
   }
   
@@ -74,7 +74,7 @@ public class StoreTestCase {
    json.put("variable", "text_is_present");
    json.put("text", "I am another div");
    
-   IAction storeTextPresent = actionFactory.createAction(json);
+   AbstractAction storeTextPresent = actionFactory.createAction(json);
    Assert.assertEquals(storeTextPresent.transform(), 
         "boolean text_is_present = wd.findElement(By.tagName(\"html\")).getText().contains(\"I am another div\");\n");
     
@@ -93,7 +93,7 @@ public class StoreTestCase {
     locator.put("value", "unchecked_checkbox");
     json.put("locator", locator);
     
-    IAction storeElementPresent = actionFactory.createAction(json);
+    AbstractAction storeElementPresent = actionFactory.createAction(json);
     Assert.assertEquals(storeElementPresent.transform(), 
         "boolean element_present = (wd.findElements(By.id(\"unchecked_checkbox\")).size() != 0);\n");
     
@@ -115,7 +115,7 @@ public class StoreTestCase {
     locator.put("value", "i am a link");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), 
         "String link_href = wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\");\n");
     
@@ -134,7 +134,7 @@ public class StoreTestCase {
     json.put("variable", "text_present");
     json.put("text", "I am another div");
     
-    IAction store = actionFactory.createAction(json);
+    AbstractAction store = actionFactory.createAction(json);
     Assert.assertEquals(store.transform(), 
         "String text_present = \"I am another div\";\n");
     
@@ -150,7 +150,7 @@ public class StoreTestCase {
     json.put("variable", "cookie_is_present");
     json.put("name", "test_cookie");
     
-    IAction storeCookiePresent = actionFactory.createAction(json);
+    AbstractAction storeCookiePresent = actionFactory.createAction(json);
     Assert.assertEquals(storeCookiePresent.transform(), 
         "boolean cookie_is_present = (wd.manage().getCookieNamed(\"test_cookie\") != null);\n");
     
@@ -165,7 +165,7 @@ public class StoreTestCase {
     json.put("type", "storeCurrentUrl");
     json.put("variable", "url");
 
-    IAction storeCurrentUrl = actionFactory.createAction(json);
+    AbstractAction storeCurrentUrl = actionFactory.createAction(json);
     Assert.assertEquals(storeCurrentUrl.transform(), "String url = wd.getCurrentUrl();\n");
   }
 
@@ -174,7 +174,7 @@ public class StoreTestCase {
     json.put("type", "storeAlertPresent");
     json.put("variable", "isPresent");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "boolean isPresent = isAlertPresent(wd);\n");
   }
 
@@ -184,7 +184,7 @@ public class StoreTestCase {
     json.put("variable", "test");
     json.put("script", "alert('test_script');");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "Object test = wd.executeScript(\"alert('test_script');\");\n");
   }
 
@@ -193,7 +193,7 @@ public class StoreTestCase {
     json.put("type", "storeAlertText");
     json.put("variable", "alert_text");
     
-    IAction storeAlertText = actionFactory.createAction(json);
+    AbstractAction storeAlertText = actionFactory.createAction(json);
     Assert.assertEquals(storeAlertText.transform(), "String alert_text = wd.switchTo().alert().getText();\n");
   }
 
@@ -207,7 +207,7 @@ public class StoreTestCase {
     locator.put("value", "i am a id");
     json.put("locator", locator);
     
-    IAction storeElementStyle = actionFactory.createAction(json);
+    AbstractAction storeElementStyle = actionFactory.createAction(json);
     Assert.assertEquals(storeElementStyle.transform(), 
         "String element_style = wd.findElement(By.id(\"i am a id\")).getCssValue(\"height\");\n");
   }
@@ -217,7 +217,7 @@ public class StoreTestCase {
     json.put("type", "storeTitle");
     json.put("variable", "var");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "String var = wd.getTitle();\n");
   }
 
@@ -230,7 +230,7 @@ public class StoreTestCase {
     locator.put("value", "i am id");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "String var = wd.findElement(By.id(\"i am id\")).getAttribute(\"value\");\n");
   }
 
@@ -243,7 +243,7 @@ public class StoreTestCase {
     locator.put("value", "i am id");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "boolean var = (wd.findElement(By.id(\"i am id\")).isSelected());\n");
   }
 
@@ -253,7 +253,7 @@ public class StoreTestCase {
     json.put("variable", "storeCookie");
     json.put("name", "cookie_name");
     
-    IAction storeCookieByName = actionFactory.createAction(json);
+    AbstractAction storeCookieByName = actionFactory.createAction(json);
     Assert.assertEquals(storeCookieByName.transform(), 
         "String storeCookie = wd.manage().getCookieNamed(\"cookie_name\").getValue();\n");
   }

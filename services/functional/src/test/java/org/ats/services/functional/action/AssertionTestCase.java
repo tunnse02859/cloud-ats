@@ -44,7 +44,7 @@ public class AssertionTestCase {
     json.put("text", "not body text");
     json.put("negated", true);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertNotEquals(wd.findElement(By.tagName(\"html\")).getText(), \"not body text\");\n");
   
     json.put("text", "${text_variable}");
@@ -60,7 +60,7 @@ public class AssertionTestCase {
     json.put("url", "http://google.com");
     json.put("negated", true);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertNotEquals(wd.getCurrentUrl(), \"http://google.com\");\n");
     
     json.put("url", "${url_variable}");
@@ -79,7 +79,7 @@ public class AssertionTestCase {
     locator.put("value", "i am id");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertFalse((wd.findElements(By.id(\"i am id\")).size() != 0));\n");
 
     json.put("negated", false);
@@ -94,7 +94,7 @@ public class AssertionTestCase {
     json.put("source", "${page_source}");
     json.put("negated", true);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertNotEquals(wd.getPageSource(), page_source);\n");
 
     json.put("negated", false);
@@ -112,7 +112,7 @@ public class AssertionTestCase {
     locator.put("value", "i_am_an_id");
     json.put("locator", locator);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     
     Assert.assertEquals(action.transform(), "assertNotEquals(wd.findElement(By.id(\"i_am_an_id\")).getText(), text);\n");
     
@@ -127,7 +127,7 @@ public class AssertionTestCase {
     json.put("text", "${text_present}");
     json.put("negated", true);
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertFalse(wd.findElement(By.tagName(\"html\")).getText().contains(text_present));\n");
     
     json.put("negated", false);
@@ -141,7 +141,7 @@ public class AssertionTestCase {
     json.put("name", "test_cookie");
     json.put("value", "${cookie}");
     
-    IAction assertCookieByName = actionFactory.createAction(json);
+    AbstractAction assertCookieByName = actionFactory.createAction(json);
     Assert.assertEquals(assertCookieByName.transform(), 
         "assertEquals(wd.manage().getCookieNamed(\"test_cookie\").getValue(), cookie);\n");
     
@@ -157,7 +157,7 @@ public class AssertionTestCase {
     json.put("name", "test_cookie");
     json.put("negated", true);
     
-    IAction assertCookiePresent = actionFactory.createAction(json);
+    AbstractAction assertCookiePresent = actionFactory.createAction(json);
     Assert.assertEquals(assertCookiePresent.transform(), 
         "assertFalse((wd.manage().getCookieNamed(\"test_cookie\") != null));\n");
     
@@ -178,7 +178,7 @@ public class AssertionTestCase {
     locator.put("value", "i am a link");
     json.put("locator", locator);
     
-    IAction assertElementAttribute = actionFactory.createAction(json);
+    AbstractAction assertElementAttribute = actionFactory.createAction(json);
     Assert.assertEquals(assertElementAttribute.transform(), 
         "assertNotEquals(wd.findElement(By.linkText(\"i am a link\")).getAttribute(\"href\"), link_href);\n");
     
@@ -196,7 +196,7 @@ public class AssertionTestCase {
     json.put("locator", locator);
     json.put("negated", true);
     
-    IAction assertElementSelected = actionFactory.createAction(json);
+    AbstractAction assertElementSelected = actionFactory.createAction(json);
     Assert.assertEquals(assertElementSelected.transform(),
         "assertFalse((wd.findElement(By.id(\"unchecked_checkbox\")).isSelected()));\n");
     
@@ -215,7 +215,7 @@ public class AssertionTestCase {
     locator.put("value", "comments");
     json.put("locator", locator);
     
-    IAction assertElementValue = actionFactory.createAction(json);
+    AbstractAction assertElementValue = actionFactory.createAction(json);
     Assert.assertEquals(assertElementValue.transform(), 
         "assertNotEquals(wd.findElement(By.id(\"comments\")).getAttribute(\"value\"), \"not w00t\");\n");
     
@@ -231,7 +231,7 @@ public class AssertionTestCase {
     json.put("title", "this is title");
     json.put("negated", true);
     
-    IAction assertTitle = actionFactory.createAction(json);
+    AbstractAction assertTitle = actionFactory.createAction(json);
     Assert.assertEquals(assertTitle.transform(), 
         "assertNotEquals(wd.getTitle(), \"this is title\");\n");
     
@@ -251,7 +251,7 @@ public class AssertionTestCase {
     json.put("locator", locator);
     json.put("negated", true);
     
-    IAction assertElementStyle = actionFactory.createAction(json);
+    AbstractAction assertElementStyle = actionFactory.createAction(json);
     Assert.assertEquals(assertElementStyle.transform(), 
         "assertNotEquals(wd.findElement(By.id(\"i am a id\")).getCssValue(\"bar\"), \"value is bar\");\n");
     
@@ -266,7 +266,7 @@ public class AssertionTestCase {
     json.put("type", "assertAlertPresent");
     json.put("negated", true);
     
-    IAction alertPresent = actionFactory.createAction(json);
+    AbstractAction alertPresent = actionFactory.createAction(json);
     Assert.assertEquals(alertPresent.transform(), "assertFalse(isAlertPresent(wd));\n");
 
     json.put("negated", false);
@@ -280,7 +280,7 @@ public class AssertionTestCase {
     json.put("text", "this is alert text");
     json.put("negated", true);
     
-    IAction alertText = actionFactory.createAction(json);
+    AbstractAction alertText = actionFactory.createAction(json);
     Assert.assertEquals(alertText.transform(), 
         "assertNotEquals(wd.switchTo().alert().getText(), \"this is alert text\");\n");
     
@@ -296,7 +296,7 @@ public class AssertionTestCase {
     json.put("script", "test");
     json.put("value", "value");
 
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "assertEquals(wd.executeScript(\"test\"), \"value\");\n");
     
     json.put("negated", true);

@@ -13,7 +13,8 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AssertEval implements IAction {
+@SuppressWarnings("serial")
+public class AssertEval extends  AbstractAction {
 
   private Value script;
   

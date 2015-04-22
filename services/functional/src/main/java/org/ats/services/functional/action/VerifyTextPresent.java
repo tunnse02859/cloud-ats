@@ -14,7 +14,8 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 13, 2015
  */
-public class VerifyTextPresent implements IAction {
+@SuppressWarnings("serial")
+public class VerifyTextPresent extends AbstractAction {
 
   private Value text;
   

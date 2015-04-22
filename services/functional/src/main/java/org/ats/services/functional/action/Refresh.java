@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Apr 10, 2015
  */
-public class Refresh implements IAction {
+@SuppressWarnings("serial")
+public class Refresh extends AbstractAction {
 
   public String transform() throws IOException {
     return "wd.navigate().refresh();\n";

@@ -7,27 +7,25 @@ import java.io.IOException;
 
 import org.ats.common.MapBuilder;
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
  * @author TrinhTV3
  *
- * Email: TrinhTV3@fsoft.com.vn
- */
-public class VerifyElementValue implements IAction {
+ * Email: TrinhTV3@fsoft.com.vn@SuppressWarnings("serial")
 
-  private ILocator locator;
+ */
+@SuppressWarnings("serial")
+public class VerifyElementValue extends AbstractAction {
+
+  private AbstractLocator locator;
   
   private Value value;
   
   private boolean negated;
 
-  /**
-   * 
-   */
-  public VerifyElementValue(ILocator locator, Value value, boolean negated) {
-    
+  public VerifyElementValue(AbstractLocator locator, Value value, boolean negated) {
     this.locator = locator;
     this.value = value;
     this.negated = negated;

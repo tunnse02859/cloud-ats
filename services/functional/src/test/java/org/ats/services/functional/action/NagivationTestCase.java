@@ -38,7 +38,7 @@ public class NagivationTestCase {
   @Test
   public void testClose() throws IOException {
     json.put("type", "close");
-    IAction close = actionFactory.createAction(json);
+    AbstractAction close = actionFactory.createAction(json);
     Assert.assertEquals(close.transform(), "wd.close();\n");
   }
   
@@ -46,28 +46,28 @@ public class NagivationTestCase {
   public void testGet() throws IOException {
     json.put("type", "get");
     json.put("url", "http://saucelabs.com/test/guinea-pig/");
-    IAction get = actionFactory.createAction(json);
+    AbstractAction get = actionFactory.createAction(json);
     Assert.assertEquals(get.transform(), "wd.get(\"http://saucelabs.com/test/guinea-pig/\");\n");
   }
   
   @Test
   public void testRefresh() throws IOException {
     json.put("type", "refresh");
-    IAction refresh = actionFactory.createAction(json);
+    AbstractAction refresh = actionFactory.createAction(json);
     Assert.assertEquals(refresh.transform(), "wd.navigate().refresh();\n");
   }
  
   @Test
   public void testGoback() throws IOException {
     json.put("type", "goBack");
-    IAction goBack = actionFactory.createAction(json);
+    AbstractAction goBack = actionFactory.createAction(json);
     Assert.assertEquals(goBack.transform(), "wd.navigate().back();\n");
   }
   
   @Test
   public void testGoForward() throws IOException {
     json.put("type", "goForward");
-    IAction goForward = actionFactory.createAction(json);
+    AbstractAction goForward = actionFactory.createAction(json);
     Assert.assertEquals(goForward.transform(), "wd.navigate().forward();\n");
   }
 }

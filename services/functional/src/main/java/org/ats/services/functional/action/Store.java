@@ -14,7 +14,8 @@ import org.ats.services.functional.VariableFactory.DataType;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class Store implements IAction {
+@SuppressWarnings("serial")
+public class Store extends AbstractAction {
 
   /** .*/
   private Value text;

@@ -13,17 +13,15 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AnswerAlert implements IAction {
+@SuppressWarnings("serial")
+public class AnswerAlert extends AbstractAction {
 
   private Value text;
   
-  /**
-   * 
-   */
   public AnswerAlert(Value text) {
     this.text = text;
-    
   }
+  
   @Override
   public String transform() throws IOException {
     

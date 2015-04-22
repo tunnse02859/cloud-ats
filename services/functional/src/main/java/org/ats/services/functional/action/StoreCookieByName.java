@@ -15,7 +15,8 @@ import org.rythmengine.Rythm;
  *
  * Apr 16, 2015
  */
-public class StoreCookieByName implements IAction {
+@SuppressWarnings("serial")
+public class StoreCookieByName extends AbstractAction {
 
   private Value name;
   

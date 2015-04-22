@@ -10,15 +10,10 @@ import java.io.IOException;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SwitchToDefaultContent implements IAction {
+@SuppressWarnings("serial")
+public class SwitchToDefaultContent extends AbstractAction {
 
-  /**
-   * 
-   */
-  public SwitchToDefaultContent() {
-  }
   public String transform() throws IOException {
-    
     StringBuilder sb = new StringBuilder("wd = (FirefoxDriver) wd.switchTo().switchToDefaultContent();\n");
     return sb.toString();
   }

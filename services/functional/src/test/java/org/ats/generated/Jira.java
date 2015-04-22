@@ -51,7 +51,7 @@ public class Jira {
 
     wd.findElement(By.xpath(".//*[@id='login']")).submit();
 
-    try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
+    try { Thread.sleep(2000l); } catch (Exception e) { throw new RuntimeException(e); }
 
     wd.get("https://insight.fsoft.com.vn/jira");
 

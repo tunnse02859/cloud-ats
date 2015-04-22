@@ -15,7 +15,8 @@ import org.rythmengine.Rythm;
  *
  * Apr 13, 2015
  */
-public class StoreTextPresent implements IAction {
+@SuppressWarnings("serial")
+public class StoreTextPresent extends AbstractAction {
 
   private String variable;
   

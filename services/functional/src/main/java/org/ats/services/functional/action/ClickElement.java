@@ -5,7 +5,7 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -13,11 +13,12 @@ import org.rythmengine.Rythm;
  *
  * Apr 8, 2015
  */
-public class ClickElement implements IAction {
+@SuppressWarnings("serial")
+public class ClickElement extends AbstractAction {
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
-  public ClickElement(ILocator locator) {
+  public ClickElement(AbstractLocator locator) {
     this.locator = locator;
   }
 

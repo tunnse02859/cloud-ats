@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.common.MapBuilder;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
@@ -14,11 +14,12 @@ import org.rythmengine.RythmEngine;
  *
  * Apr 9, 2015
  */
-public class SetElementNotSelected implements IAction {
+@SuppressWarnings("serial")
+public class SetElementNotSelected extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
-  public SetElementNotSelected(ILocator locator) {
+  public SetElementNotSelected(AbstractLocator locator) {
     this.locator = locator;
   }
   

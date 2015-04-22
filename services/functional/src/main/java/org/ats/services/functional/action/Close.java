@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Apr 10, 2015
  */
-public class Close implements IAction {
+@SuppressWarnings("serial")
+public class Close extends AbstractAction {
 
   public String transform() throws IOException {
     return "wd.close();\n";

@@ -43,7 +43,7 @@ public class MiscTestCase {
     json.put("value", "this-is-a-cookie");
     json.put("options", "path=/,max_age=100000000");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd.manage().addCookie(new Cookie.Builder(\"test_cookie\", \"this-is-a-cookie\").path(\"/\").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());\n");
     
     json.put("name", "${test_cookie}");
@@ -58,7 +58,7 @@ public class MiscTestCase {
     json.put("type", "deleteCookie");
     json.put("name", "test_cookie");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), 
         "if (wd.manage().getCookieNamed(\"test_cookie\") != null) {\n"
       + "      wd.manage().deleteCookie(wd.manage().getCookieNamed(\"test_cookie\"));\n"
@@ -77,7 +77,7 @@ public class MiscTestCase {
   public void testSwitchToWindow() throws IOException {
     json.put("type", "switchToWindow");
     json.put("name", "test_switch_to_window");
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().window(\"test_switch_to_window\");\n");
   }
   
@@ -86,7 +86,7 @@ public class MiscTestCase {
     json.put("type", "switchToFrameByIndex");
     json.put("index", 1);
     
-    IAction action = actionFactory.createAction(json); 
+    AbstractAction action = actionFactory.createAction(json); 
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(1);\n");
   }
   
@@ -95,14 +95,14 @@ public class MiscTestCase {
     json.put("type", "switchToFrame");
     json.put("identifier", "identifier");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().frame(\"identifier\");\n");
   }
   
   @Test
   public void testSwitchToDefaultContent() throws IOException {
     json.put("type", "switchToDefaultContent");
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd = (FirefoxDriver) wd.switchTo().switchToDefaultContent();\n");
   }
   
@@ -110,7 +110,7 @@ public class MiscTestCase {
   public void testPause() throws IOException {
     json.put("type", "pause");
     json.put("waitTime", 10000);
-    IAction pause = actionFactory.createAction(json);
+    AbstractAction pause = actionFactory.createAction(json);
     Assert.assertEquals(pause.transform(), 
         "try { Thread.sleep(10000l); } catch (Exception e) { throw new RuntimeException(e); }\n");
   }
@@ -120,7 +120,7 @@ public class MiscTestCase {
     json.put("type", "saveScreenshot");
     json.put("file", "/tmp/screen.png");
 
-    IAction saveScreenShot = actionFactory.createAction(json); 
+    AbstractAction saveScreenShot = actionFactory.createAction(json); 
     Assert.assertEquals(saveScreenShot.transform(), "wd.getScreenshotAs(FILE).renameTo(new File(\"/tmp/screen.png\"));\n");
   }
   
@@ -129,21 +129,21 @@ public class MiscTestCase {
     json.put("type", "answerAlert");
     json.put("text", "test");
     
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd.switchTo().alert().sendKeys(\"test\");\n");
   }
   
   @Test
   public void testAcceptAlert() throws IOException {
     json.put("type", "acceptAlert");
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd.switchTo().alert().accept();\n");
   }
   
   @Test
   public void testDismissAlert() throws IOException {
     json.put("type", "dismissAlert");
-    IAction action = actionFactory.createAction(json);
+    AbstractAction action = actionFactory.createAction(json);
     Assert.assertEquals(action.transform(), "wd.switchTo().alert().dismiss();\n");
   }
   
@@ -152,7 +152,7 @@ public class MiscTestCase {
     json.put("type", "print");
     json.put("text", "this is printing");
     
-    IAction print = actionFactory.createAction(json);
+    AbstractAction print = actionFactory.createAction(json);
     Assert.assertEquals(print.transform(), "System.out.println(\"this is printing\");\n");
   }
 }

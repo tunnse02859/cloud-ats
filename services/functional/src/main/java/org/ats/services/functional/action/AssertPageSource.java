@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Apr 13, 2015
  */
-public class AssertPageSource implements IAction {
+@SuppressWarnings("serial")
+public class AssertPageSource extends AbstractAction {
 
   private Value source;
   

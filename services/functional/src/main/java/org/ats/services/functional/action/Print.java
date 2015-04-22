@@ -13,7 +13,8 @@ import org.rythmengine.Rythm;
  *
  * Apr 16, 2015
  */
-public class Print implements IAction {
+@SuppressWarnings("serial")
+public class Print extends AbstractAction {
   
   private Value text;
   

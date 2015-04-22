@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyAlertPresent implements IAction {
+@SuppressWarnings("serial")
+public class VerifyAlertPresent extends AbstractAction {
   
   private boolean negated;
 

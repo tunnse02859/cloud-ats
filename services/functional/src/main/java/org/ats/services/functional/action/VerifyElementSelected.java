@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.common.MapBuilder;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.RythmEngine;
 
 /**
@@ -14,17 +14,14 @@ import org.rythmengine.RythmEngine;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class VerifyElementSelected implements IAction {
+@SuppressWarnings("serial")
+public class VerifyElementSelected extends AbstractAction {
 
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private boolean negated;
   
-  /**
-   * 
-   */
-  public VerifyElementSelected(ILocator locator, boolean negated) {
-
+  public VerifyElementSelected(AbstractLocator locator, boolean negated) {
     this.locator = locator;
     this.negated = negated;
   }

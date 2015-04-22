@@ -6,7 +6,7 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.functional.Value;
-import org.ats.services.functional.locator.ILocator;
+import org.ats.services.functional.locator.AbstractLocator;
 import org.rythmengine.Rythm;
 
 /**
@@ -14,15 +14,16 @@ import org.rythmengine.Rythm;
  *
  * Apr 13, 2015
  */
-public class AssertText implements IAction {
+@SuppressWarnings("serial")
+public class AssertText extends AbstractAction {
   
-  private ILocator locator;
+  private AbstractLocator locator;
   
   private Value text;
   
   private boolean negated;
   
-  public AssertText(ILocator locator, Value text, boolean negated) {
+  public AssertText(AbstractLocator locator, Value text, boolean negated) {
     this.locator = locator;
     this.text = text;
     this.negated = negated;

@@ -12,7 +12,8 @@ import org.ats.services.functional.Value;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class AssertTitle implements IAction{
+@SuppressWarnings("serial")
+public class AssertTitle extends AbstractAction{
 
   private boolean negated;
   

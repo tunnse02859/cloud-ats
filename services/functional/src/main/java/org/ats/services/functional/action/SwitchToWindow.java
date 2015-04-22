@@ -13,13 +13,11 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SwitchToWindow implements IAction {
+@SuppressWarnings("serial")
+public class SwitchToWindow extends AbstractAction {
 
   private Value name;
 
-  /**
-   * 
-   */
   public SwitchToWindow(Value name) {
     this.name = name;
   }

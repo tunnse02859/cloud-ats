@@ -13,13 +13,11 @@ import org.rythmengine.Rythm;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class SwitchToFrame implements IAction {
+@SuppressWarnings("serial")
+public class SwitchToFrame extends AbstractAction {
 
   private Value identifier;
   
-  /**
-   * 
-   */
   public SwitchToFrame(Value identifier) {
     this.identifier = identifier;
   }

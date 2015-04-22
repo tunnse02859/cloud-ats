@@ -10,7 +10,8 @@ import java.io.IOException;
  *
  * Email: TrinhTV3@fsoft.com.vn
  */
-public class Pause implements IAction{
+@SuppressWarnings("serial")
+public class Pause extends AbstractAction {
 
   private long waitTime;
   
