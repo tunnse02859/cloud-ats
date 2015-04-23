@@ -5,13 +5,20 @@ package org.ats.services.organization;
 
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Feature;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.Feature.Action;
+import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.event.AbstractEventTestCase;
@@ -48,10 +55,16 @@ public class OrganizationContextTestCase extends AbstractEventTestCase {
     this.tenantService = this.injector.getInstance(TenantService.class);
     this.tenantFactory = this.injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    this.featureFactory = this.injector.getInstance(FeatureFactory.class);
+    this.roleFactory = this.injector.getInstance(RoleFactory.class);
     
     this.spaceService = this.injector.getInstance(SpaceService.class);
+    this.featureService = this.injector.getInstance(FeatureService.class);
+    
     this.spaceFactory = this.injector.getInstance(SpaceFactory.class);
     this.spaceRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
+    this.featureRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
+    this.roleRefFactory = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
     
     this.userService = this.injector.getInstance(UserService.class);
     this.userFactory = this .injector.getInstance(UserFactory.class);
@@ -200,5 +213,54 @@ public class OrganizationContextTestCase extends AbstractEventTestCase {
     Assert.assertNull(this.context.getTenant());
     Assert.assertNull(this.context.getSpace());
     Assert.assertNull(this.context.getUser());
+  }
+  
+  @Test
+  public void testUpdateUser() {
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    User user = userService.get("haint@cloud-ats.net");
+    user.setPassword("trinhtran");
+    Assert.assertEquals(context.getUser().getPassword(), "12345");
+    userService.update(user);
+    
+    Assert.assertEquals(context.getUser().getPassword(), "trinhtran");
+    Assert.assertEquals(context.getUser().getPassword(), userService.get("haint@cloud-ats.net").getPassword());
+  }
+  
+  @Test
+  public void testUpdateTenant() {
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    Tenant tenant = tenantService.get("Fsoft");
+    Assert.assertEquals(context.getTenant().getFeatures().size(), 0);
+    
+    Feature feature1 = featureFactory.create("Dev");
+    feature1.addAction(new Action("fooAction"), new Action("barAction"));
+    featureService.create(feature1);
+    tenant.addFeature(featureRefFactory.create(feature1.getId()));
+    
+    tenantService.update(tenant);
+    Assert.assertEquals(context.getTenant().getFeatures().size(), 1);
+  }
+  
+  @Test
+  public void testUpdateSpace() {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    Space space = spaceService.get(this.space.getId());
+    Role role1 = roleFactory.create("role1");
+    
+    Assert.assertEquals(context.getSpace().getRoles().size(), 0);
+    space.addRole(roleRefFactory.create(role1.getId()));
+    
+    spaceService.update(space);
+    Assert.assertEquals(context.getSpace().getRoles().size(), 1);
+    
   }
 }

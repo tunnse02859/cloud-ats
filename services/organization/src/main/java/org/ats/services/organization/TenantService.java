@@ -83,6 +83,17 @@ public class TenantService extends AbstractMongoCRUD<Tenant> {
   }
   
   @Override
+  public void update(Tenant tenant) {
+    
+    if (tenant == null) return;
+    super.update(tenant);
+    
+    if (context.getTenant() != null && context.getTenant().getId().equals(tenant.getId())) {
+      context.setTenant(tenant);
+    }
+  }
+  
+  @Override
   public void active(Tenant obj) {
     if (obj == null) return;
     super.active(obj);

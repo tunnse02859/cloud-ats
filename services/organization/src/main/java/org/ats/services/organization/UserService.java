@@ -101,6 +101,17 @@ public class UserService extends AbstractMongoCRUD<User> {
   }
   
   @Override
+  public void update(User user) {
+    
+    if (user == null) return;
+    super.update(user);
+    
+    if (context.getUser() != null && context.getUser().getEmail().equals(user.getEmail())) {
+      context.setUser(user);
+    }
+  }
+  
+  @Override
   public void active(User obj) {
     if (obj == null) return;
     super.active(obj);

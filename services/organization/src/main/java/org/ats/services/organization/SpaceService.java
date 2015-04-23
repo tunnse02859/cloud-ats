@@ -74,6 +74,17 @@ public class SpaceService extends AbstractMongoCRUD<Space> {
   }
   
   @Override
+  public void update(Space space) {
+    if (space == null) return;
+    super.update(space);
+    
+    if (context.getSpace() != null && context.getSpace().getId().equals(space.getId())) {
+      
+      context.setSpace(space);
+    }
+  }
+  
+  @Override
   public void active(Space obj) {
     if (obj == null) return;
     super.active(obj);
