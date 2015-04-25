@@ -1,0 +1,36 @@
+{
+  "type": "script",
+  "seleniumVersion": "2",
+  "formatVersion": 2,
+  "steps": [
+    {
+      "type": "get",
+      "url": "https://www.google.com/?gws_rd=ssl"
+    },
+    {
+      "type": "sendKeysToElement",
+      "locator": {
+        "type": "xpath",
+        "value": ".//input[@id='lst-ib']"
+      },
+      "text": "${username}"
+    },
+    {
+      "type": "submitElement",
+      "locator": {
+        "type": "xpath",
+        "value": ".//input[@id='lst-ib']"
+      }
+    }
+  ],
+  "data": {
+    "configs": {
+      "json": {
+        "path": "C:/Users/nambv2/Desktop/data.json"
+        }
+      },
+    "source": "json"
+  },
+  "inputs": [],
+  "timeoutSeconds": 60
+}
