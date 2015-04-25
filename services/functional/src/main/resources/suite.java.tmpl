@@ -1,4 +1,4 @@
-@args() {String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, String cases} 
+@args() {String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, String cases, String dataDriven} 
 
 package @packageName;
 
@@ -7,6 +7,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 @extraImports
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.testng.annotations.DataProvider;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import java.util.Date;
 import java.io.File;
@@ -42,4 +49,7 @@ public class @suiteName {
       return false;
     }
   }
+  
+  @dataDriven
+  
 }
