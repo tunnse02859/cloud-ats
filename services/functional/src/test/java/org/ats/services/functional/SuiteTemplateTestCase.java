@@ -28,6 +28,10 @@ public class SuiteTemplateTestCase {
   
   private ActionFactory actionFactory;
   
+  private final static String DATATYPE = "json";
+  
+  private static boolean checkDataDriven = false;
+  
   @BeforeMethod
   public void init() {
     Injector injector = Guice.createInjector(new FunctionalModule());
@@ -94,18 +98,41 @@ public class SuiteTemplateTestCase {
     testBase("Jira", "jira.json");
   }
   
+  @Test
+  public void testGoogle() throws Exception {
+    testBase("Google","google.json");
+  }
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
     SuiteBuilder builder = new SuiteBuilder();
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
+    JsonNode nodeCheckData = rootNode.get("data");
+    DataDriven dataDrivens = null;
+    if(nodeCheckData != null) {
+      JsonNode sourceNode = nodeCheckData.get("source");
+      String temp = sourceNode.toString().split("\"")[1];
+      
+      JsonNode node1 = rootNode.get("data");
+      JsonNode node2 = node1.get("configs");
+      JsonNode node3 = node2.get("json");
+      JsonNode node4 = node3.get("path");
+      String pathData = node4.toString();
+      
+      if(DATATYPE.equals(temp.trim())) {
+        checkDataDriven = true;
+        dataDrivens = new DataDriven("LoadData",pathData);
+        builder.addDataDrivens(dataDrivens);
+      }
+    }
+    
     builder.packageName("org.ats.generated")
       .suiteName(testClass)
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS);
     
-    ObjectMapper m = new ObjectMapper();
-    JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = new Case("test");
+    Case caze = new Case("test",checkDataDriven);
     for (JsonNode json : stepsNode) {
       caze.addAction(actionFactory.createAction(json));
     }
