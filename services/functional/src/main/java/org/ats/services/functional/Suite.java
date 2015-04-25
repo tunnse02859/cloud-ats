@@ -36,8 +36,10 @@ public class Suite extends AbstractTemplate {
   private int timeoutSeconds;
   
   private Map<String, Case> cases = new HashMap<String, Case>();
+  
+  private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
 
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases) {
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases, Map<String, DataDriven> dataDrivens) {
     this.packageName = packageName;
     this.extraImports = extraImports;
     this.suiteName = suiteName;
@@ -45,17 +47,22 @@ public class Suite extends AbstractTemplate {
     this.initDriver = initDriver;
     this.timeoutSeconds = timeoutSeconds;
     this.cases = cases;
+    this.dataDrivens = dataDrivens;
   }
   
   public String transform() throws IOException {
     String suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
-    StringBuilder sb = new StringBuilder();
-    for (Case caze : cases.values()) {
-      sb.append(caze.transform());
-    }
+    StringBuilder sbCase = new StringBuilder();
+    StringBuilder sbDataDriven = new StringBuilder();
     
+    for (Case caze : cases.values()) {
+      sbCase.append(caze.transform());
+    }
+    for(DataDriven data : dataDrivens.values()) {
+      sbDataDriven.append(data.transform());
+    }
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
-    return engine.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sb.toString());
+    return engine.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sbCase.toString(), sbDataDriven.toString());
   }
   
   @Override
@@ -97,6 +104,8 @@ public class Suite extends AbstractTemplate {
     
     private Map<String, Case> cases = new HashMap<String, Case>();
     
+    private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
+    
     public SuiteBuilder packageName(String name) {
       this.packageName = name;
       return this;
@@ -134,8 +143,16 @@ public class Suite extends AbstractTemplate {
       return this;
     }
     
+    public SuiteBuilder addDataDrivens(DataDriven...dataDrivens) {
+      for(DataDriven data : dataDrivens) {
+        this.dataDrivens.put(data.getName(), data);
+      }
+      return this;
+      
+    }
+    
     public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases);
+      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens);
     }
   }
 }
