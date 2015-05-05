@@ -4,22 +4,20 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
-import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
-import org.ats.services.organization.entity.fatory.TenantReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import play.mvc.Controller;
+import play.mvc.Result;
+
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
-import play.libs.Json;
-import play.mvc.*;
 
 public class Application extends Controller {
   
@@ -30,7 +28,7 @@ public class Application extends Controller {
   private TenantFactory tenantFactory;
   
   @Inject
-  private TenantReferenceFactory tenantRefFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
   
   @Inject
   private SpaceService spaceService;
@@ -39,7 +37,7 @@ public class Application extends Controller {
   private SpaceFactory spaceFactory;
   
   @Inject
-  private SpaceReferenceFactory spaceRefFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
   
   @Inject
   private UserService userService;

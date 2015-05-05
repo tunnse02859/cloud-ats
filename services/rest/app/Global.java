@@ -4,10 +4,13 @@ import java.lang.reflect.Method;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.SpaceReferenceFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 
 import play.Application;
 import play.GlobalSettings;
@@ -37,11 +40,25 @@ public class Global extends GlobalSettings {
   @Override
   public void onStart(Application app) {
     String dbConf = Play.application().configuration().getString(DatabaseModule.DB_CONF);
+    String eventConf = Play.application().configuration().getString(EventModule.EVENT_CONF);
     try {
-      injector = Guice.createInjector(new DatabaseModule(dbConf), new OrganizationServiceModule());
+      injector = Guice.createInjector(new DatabaseModule(dbConf), new EventModule(eventConf), new OrganizationServiceModule());
+
+      //start event service
+      EventService eventService = injector.getInstance(EventService.class);
+      eventService.setInjector(injector);
+      eventService.start();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    super.onStart(app);
+  }
+  
+  @Override
+  public void onStop(Application app) {
+    EventService eventService = injector.getInstance(EventService.class);
+    eventService.stop();
+    super.onStop(app);
   }
   
   @Override
@@ -49,7 +66,6 @@ public class Global extends GlobalSettings {
     
     OrganizationContext context = injector.getInstance(OrganizationContext.class);
     String token = request.getHeader(AuthenticationService.AUTH_TOKEN_HEADER);
-    
     if (token == null) {
       context.setUser(null);
       context.setSpace(null);
@@ -62,17 +78,22 @@ public class Global extends GlobalSettings {
     AuthenticationService<User> service = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
 
     User user = service.findByAuthToken(token);
-    if (user != null) {
-      context.setUser(user);
-      context.setTenant(user.getTanent().get());
+    if (user == null) {
+      context.setUser(null);
+      context.setSpace(null);
+      context.setTenant(null);
+      return super.onRequest(request, actionMethod);
     }
-    
-    if (user != null && space != null) {
+
+    context.setUser(user);
+    context.setTenant(user.getTanent().get());
+
+    if (space != null) {
       SpaceService spaceService = injector.getInstance(SpaceService.class);
-      SpaceReferenceFactory spaceRefFactory = injector.getInstance(SpaceReferenceFactory.class);
+      ReferenceFactory<SpaceReference> spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
       spaceService.goTo(spaceRefFactory.create(space));
     }
-    
+
     return super.onRequest(request, actionMethod);
   }
   

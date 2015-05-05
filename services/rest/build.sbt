@@ -10,7 +10,8 @@ libraryDependencies ++= Seq(
   cache,
 	"org.ats" % "cloud-common" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "database" % "1.0.0-Alpha-1-SNAPSHOT",
-	"org.ats.services" % "organization" % "1.0.0-Alpha-1-SNAPSHOT"
+	"org.ats.services" % "organization" % "1.0.0-Alpha-1-SNAPSHOT",
+	"org.ats.services" % "event" % "1.0.0-Alpha-1-SNAPSHOT"
 )
 
 
