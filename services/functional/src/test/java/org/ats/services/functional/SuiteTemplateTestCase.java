@@ -7,10 +7,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.ats.services.FunctionalModule;
+import org.ats.services.FunctionalServiceModule;
+import org.ats.services.OrganizationServiceModule;
+import org.ats.services.data.DatabaseModule;
+import org.ats.services.data.MongoDBService;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
 import org.ats.services.functional.Suite.SuiteBuilder;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -26,16 +33,32 @@ import com.google.inject.Injector;
  */
 public class SuiteTemplateTestCase {
   
-  private ActionFactory actionFactory;
+  /** .*/
+  private MongoDBService mongoService;
   
   private final static String DATATYPE = "json";
   
   private static boolean checkDataDriven = false;
   
-  @BeforeMethod
-  public void init() {
-    Injector injector = Guice.createInjector(new FunctionalModule());
-    this.actionFactory = injector.getInstance(ActionFactory.class);
+  /** .*/
+  private EventService eventService;
+  
+  /** .*/
+  private CaseFactory caseFactory;
+
+  
+  @BeforeClass
+  public void init() throws Exception {
+    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new FunctionalServiceModule());
+    this.caseFactory = injector.getInstance(CaseFactory.class);
+    
+    this.mongoService = injector.getInstance(MongoDBService.class);
+    this.mongoService.dropDatabase();
+    
+    //start event service
+    eventService = injector.getInstance(EventService.class);
+    eventService.setInjector(injector);
+    eventService.start();
   }
 
   @Test
@@ -104,9 +127,12 @@ public class SuiteTemplateTestCase {
   }
   
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
+
     SuiteBuilder builder = new SuiteBuilder();
+    
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
+    
     JsonNode nodeCheckData = rootNode.get("data");
     DataDriven dataDrivens = null;
     String pathData = "";
@@ -133,13 +159,15 @@ public class SuiteTemplateTestCase {
       .suiteName(testClass)
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS);
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
+      .raw((DBObject)JSON.parse(rootNode.toString()));
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = new Case("test",checkDataDriven,pathData);
+
+    Case caze = caseFactory.create("test", null, null);
     
     for (JsonNode json : stepsNode) {
-      caze.addAction(actionFactory.createAction(json));
+      caze.addAction(json);
     }
     builder.addCases(caze);
     

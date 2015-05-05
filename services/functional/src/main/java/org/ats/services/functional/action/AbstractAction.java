@@ -16,7 +16,7 @@ import com.mongodb.DBObject;
 public abstract class AbstractAction extends AbstractTemplate {
 
   private static final long serialVersionUID = 1L;
-
+  
   public abstract String getAction();
   
   public DBObject toJson() {

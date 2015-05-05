@@ -31,6 +31,18 @@
 
 		<dependency>
 			<groupId>org.ats.services</groupId>
+			<artifactId>organization</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>organization</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
 			<artifactId>event</artifactId>
 		</dependency>
 

@@ -4,14 +4,6 @@
 package org.ats.services.functional;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.ats.services.functional.action.AbstractAction;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 
 /**
  * @author NamBV2
@@ -20,31 +12,29 @@ import com.mongodb.DBObject;
  */
 
 @SuppressWarnings("serial")
-public class DataDriven extends AbstractTemplate{
+public class DataDriven extends AbstractTemplate {
 
-  private String name;
-  
-  private String pathData;
-  
-  private List<AbstractAction> actions = new ArrayList<AbstractAction>();
-  
   public DataDriven(String name,String pathData) {
-    this.name = name;
-    this.pathData = pathData;
+    this.put("name", name);
+    this.put("data_path", pathData);
   }
   
   public String getName() {
-    return name;
+    return this.getString("name");
+  }
+  
+  public String getDataPath() {
+    return this.getString("data_path");
   }
   
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    String path = pathData.replace("/", "\\\\").trim();
+    String path = getDataPath();
     sb.append("@DataProvider(name = \"");
-    sb.append(name);
+    sb.append(getName());
     sb.append("\")\n");
-    sb.append("  public static Object[][] loadData() throws JsonProcessingException, IOException {\n");
+    sb.append("  public static Object[][] ").append(getName()).append("() throws Exception {\n");
     sb.append("    String DATA_PATH = \"");
     sb.append(path);
     sb.append("\";\n");
@@ -63,15 +53,4 @@ public class DataDriven extends AbstractTemplate{
     
     return sb.toString();
   }
-
-  public DBObject toJson() {
-    BasicDBObject obj = new BasicDBObject("name", name);
-    BasicDBList list = new BasicDBList();
-    for (AbstractAction action : actions) {
-      list.add(action.toJson());
-    }
-    obj.put("actions",  list);
-    return obj;
-  }
-
 }

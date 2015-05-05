@@ -5,10 +5,13 @@ package org.ats.services.functional.action;
 
 import java.io.IOException;
 
-import org.ats.services.FunctionalModule;
+import org.ats.services.FunctionalServiceModule;
+import org.ats.services.OrganizationServiceModule;
+import org.ats.services.data.DatabaseModule;
+import org.ats.services.event.EventModule;
 import org.ats.services.functional.ActionFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,9 +30,9 @@ public class MiscTestCase {
   
   private ObjectNode json;
   
-  @BeforeMethod
-  public void init() {
-    Injector injector = Guice.createInjector(new FunctionalModule());
+  @BeforeClass
+  public void init() throws Exception {
+    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new FunctionalServiceModule());
     this.actionFactory = injector.getInstance(ActionFactory.class);
     ObjectMapper mapper = new ObjectMapper();
     json = mapper.createObjectNode();

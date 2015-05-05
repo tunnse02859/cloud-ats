@@ -4,15 +4,17 @@
 package org.ats.services.functional;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
 import org.rythmengine.RythmEngine;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 /**
@@ -23,31 +25,37 @@ import com.mongodb.DBObject;
 @SuppressWarnings("serial")
 public class Suite extends AbstractTemplate {
   
-  private String suiteName;
-  
-  private String packageName;
-  
-  private String extraImports;
-  
-  private String driverVar;
-  
-  private String initDriver;
-  
-  private int timeoutSeconds;
-  
   private Map<String, Case> cases = new HashMap<String, Case>();
   
   private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
-
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases, Map<String, DataDriven> dataDrivens) {
-    this.packageName = packageName;
-    this.extraImports = extraImports;
-    this.suiteName = suiteName;
-    this.driverVar = driverVar;
-    this.initDriver = initDriver;
-    this.timeoutSeconds = timeoutSeconds;
+  
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases , Map<String, DataDriven> dataDrivens, DBObject raw) { 
+    this.put("_id", UUID.randomUUID().toString());
+    this.put("package_name", packageName);
+    this.put("extra_imports", extraImports);
+    this.put("suite_name", suiteName);
+    this.put("driver_var", driverVar);
+    this.put("init_driver", initDriver);
+    this.put("timeout_seconds", timeoutSeconds);
+    
     this.cases = cases;
+    BasicDBList list = new BasicDBList();
+    for (Case caze : cases.values()) {
+      list.add(caze);
+    }
+    this.put("cases", list);
+    
     this.dataDrivens = dataDrivens;
+    
+    this.put("raw", raw);
+  }
+  
+  public String getId() {
+    return this.getString("_id");
+  }
+
+  public Collection<Case> getCases() {
+    return Collections.unmodifiableCollection(cases.values());
   }
   
   public String transform() throws IOException {
@@ -62,24 +70,15 @@ public class Suite extends AbstractTemplate {
       sbDataDriven.append(data.transform());
     }
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
-    return engine.render(suite, packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, sbCase.toString(), sbDataDriven.toString());
-  }
-  
-  @Override
-  public DBObject toJson() {
-    BasicDBObject obj = new BasicDBObject();
-    obj.put("package_name", packageName);
-    obj.put("extra_imports", extraImports);
-    obj.put("suite_name", suiteName);
-    obj.put("driver_var", driverVar);
-    obj.put("init_driver", initDriver);
-    obj.put("timeout_seconds", timeoutSeconds);
-    BasicDBList list = new BasicDBList();
-    for (Case caze : cases.values()) {
-      list.add(caze.toJson());
-    }
-    obj.put("cases", list);
-    return obj;
+
+    return engine.render(suite, this.get("package_name"), 
+        this.get("extra_imports"), 
+        this.get("suite_name"), 
+        this.get("driver_var"), 
+        this.get("init_driver"), 
+        this.get("timeout_seconds"), 
+        sbCase.toString(),
+        sbDataDriven.toString());
   }
   
   public static class SuiteBuilder {
@@ -105,6 +104,8 @@ public class Suite extends AbstractTemplate {
     private Map<String, Case> cases = new HashMap<String, Case>();
     
     private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
+
+    private DBObject raw;
     
     public SuiteBuilder packageName(String name) {
       this.packageName = name;
@@ -148,11 +149,16 @@ public class Suite extends AbstractTemplate {
         this.dataDrivens.put(data.getName(), data);
       }
       return this;
-      
+    }
+
+    public SuiteBuilder raw(DBObject raw) {
+      this.raw = raw;
+      return this;
     }
     
     public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens);
+      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens, raw);
     }
+    
   }
 }
