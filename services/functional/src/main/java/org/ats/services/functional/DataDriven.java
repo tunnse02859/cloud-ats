@@ -40,26 +40,26 @@ public class DataDriven extends AbstractTemplate{
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    String path = pathData.replace("/", "\\\\");
+    String path = pathData.replace("/", "\\\\").trim();
     sb.append("@DataProvider(name = \"");
     sb.append(name);
     sb.append("\")\n");
-    sb.append("public static Object[][] loadData() throws JsonProcessingException, IOException {\n");
-    sb.append("String DATA_PATH = ");
+    sb.append("  public static Object[][] loadData() throws JsonProcessingException, IOException {\n");
+    sb.append("    String DATA_PATH = \"");
     sb.append(path);
-    sb.append(";\n");
-    sb.append("ObjectMapper obj = new ObjectMapper();\n");
-    sb.append("JsonNode rootNode;\n");
-    sb.append("List<JsonNode> listData = new ArrayList<JsonNode>();\n");
+    sb.append("\";\n");
+    sb.append("    ObjectMapper obj = new ObjectMapper();\n");
+    sb.append("    JsonNode rootNode;\n");
+    sb.append("    List<JsonNode> listData = new ArrayList<JsonNode>();\n");
     sb.append("\n");
-    sb.append("rootNode = obj.readTree(new File(DATA_PATH));\n");
-    sb.append("for(JsonNode json:rootNode) {\n");
-    sb.append("   listData.add(json);\n}\n");
+    sb.append("    rootNode = obj.readTree(new File(DATA_PATH));\n");
+    sb.append("    for(JsonNode json:rootNode) {\n");
+    sb.append("      listData.add(json);\n}\n");
     sb.append("\n");
-    sb.append("JsonNode[][] objData = new JsonNode[listData.size()][];\n");
-    sb.append("for(int i=0; i<listData.size(); i++) {\n");
-    sb.append("   objData[i] = new JsonNode[]{listData.get(i)};\n}\n");
-    sb.append("return objData;\n}");
+    sb.append("    JsonNode[][] objData = new JsonNode[listData.size()][];\n");
+    sb.append("    for(int i=0; i<listData.size(); i++) {\n");
+    sb.append("      objData[i] = new JsonNode[]{listData.get(i)};\n}\n");
+    sb.append("    return objData;\n}");
     
     return sb.toString();
   }

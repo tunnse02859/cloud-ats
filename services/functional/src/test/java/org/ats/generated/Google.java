@@ -42,8 +42,8 @@ public class Google {
   
   @Test (dataProvider = "LoadData")
   public void test(JsonNode data) throws Exception {
-String username = data.get("username").toString().split("\"")[1];
-String password = data.get("password").toString().split("\"")[1];
+    String username = data.get("username").toString().split("\"")[1];
+    String password = data.get("password").toString().split("\"")[1];
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).click();
@@ -52,7 +52,6 @@ String password = data.get("password").toString().split("\"")[1];
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).submit();
 
   }
-
 
   public static boolean isAlertPresent(FirefoxDriver wd) {
     try {
@@ -64,22 +63,22 @@ String password = data.get("password").toString().split("\"")[1];
   }
   
   @DataProvider(name = "LoadData")
-public static Object[][] loadData() throws JsonProcessingException, IOException {
-String DATA_PATH = "C:\\Users\\nambv2\\Desktop\\data.json";
-ObjectMapper obj = new ObjectMapper();
-JsonNode rootNode;
-List<JsonNode> listData = new ArrayList<JsonNode>();
+  public static Object[][] loadData() throws JsonProcessingException, IOException {
+    String DATA_PATH = "src\\test\\resources\\data.json";
+    ObjectMapper obj = new ObjectMapper();
+    JsonNode rootNode;
+    List<JsonNode> listData = new ArrayList<JsonNode>();
 
-rootNode = obj.readTree(new File(DATA_PATH));
-for(JsonNode json:rootNode) {
-   listData.add(json);
+    rootNode = obj.readTree(new File(DATA_PATH));
+    for(JsonNode json:rootNode) {
+      listData.add(json);
 }
 
-JsonNode[][] objData = new JsonNode[listData.size()][];
-for(int i=0; i<listData.size(); i++) {
-   objData[i] = new JsonNode[]{listData.get(i)};
+    JsonNode[][] objData = new JsonNode[listData.size()][];
+    for(int i=0; i<listData.size(); i++) {
+      objData[i] = new JsonNode[]{listData.get(i)};
 }
-return objData;
+    return objData;
 }
   
 }

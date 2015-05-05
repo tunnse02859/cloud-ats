@@ -26,7 +26,7 @@
   "data": {
     "configs": {
       "json": {
-        "path": "C:/Users/nambv2/Desktop/data.json"
+        "path": "src/test/resources/data.json"
         }
       },
     "source": "json"

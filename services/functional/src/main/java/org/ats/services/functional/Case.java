@@ -27,15 +27,16 @@ import com.mongodb.DBObject;
 @SuppressWarnings("serial")
 public class Case extends AbstractTemplate {
   
-  private String name;
+  private String name, pathData;
   
   private boolean checkDataDriven;
   
   private List<AbstractAction> actions = new ArrayList<AbstractAction>();
   
-  public Case(String name, boolean checkDataDriven) {
+  public Case(String name, boolean checkDataDriven, String pathData) {
     this.name = name;
     this.checkDataDriven = checkDataDriven;
+    this.pathData = pathData;
   }
   
   public String getName() {
@@ -54,12 +55,9 @@ public class Case extends AbstractTemplate {
     StringBuilder sb = new StringBuilder();
     
     if(checkDataDriven) {
-      
-      String DATA_PATH = "C:\\Users\\nambv2\\Desktop\\data.json";
       ObjectMapper obj = new ObjectMapper();
       JsonNode rootNode;
-      
-      rootNode = obj.readTree(new File(DATA_PATH));
+      rootNode = obj.readTree(new File(pathData));
       JsonNode json = rootNode.get(0);
       Iterator<Entry<String, JsonNode>> nodeIterator = json.fields();
       
@@ -69,7 +67,7 @@ public class Case extends AbstractTemplate {
       
       while (nodeIterator.hasNext()) {
         Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodeIterator.next();
-        String a = "String "+entry.getKey()+" = data.get(\""+entry.getKey().toString()+"\").toString().split(\"\\\"\")[1];\n";
+        String a = "    String "+entry.getKey()+" = data.get(\""+entry.getKey().toString()+"\").toString().split(\"\\\"\")[1];\n";
         sb.append(a);
 
      }
@@ -85,7 +83,7 @@ public class Case extends AbstractTemplate {
        sb.append(action.transform());
        sb.append("\n");
      }
-     sb.append("  }\n");
+     sb.append("  }");
      return sb.toString();
   }
 

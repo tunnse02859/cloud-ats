@@ -102,26 +102,30 @@ public class SuiteTemplateTestCase {
   public void testGoogle() throws Exception {
     testBase("Google","google.json");
   }
+  
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
     SuiteBuilder builder = new SuiteBuilder();
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
     JsonNode nodeCheckData = rootNode.get("data");
     DataDriven dataDrivens = null;
+    String pathData = "";
+    
     if(nodeCheckData != null) {
       JsonNode sourceNode = nodeCheckData.get("source");
-      String temp = sourceNode.toString().split("\"")[1];
+      String temp = sourceNode.toString().split("\"")[1].trim();
       
-      JsonNode node1 = rootNode.get("data");
-      JsonNode node2 = node1.get("configs");
-      JsonNode node3 = node2.get("json");
-      JsonNode node4 = node3.get("path");
-      String pathData = node4.toString();
-      
-      if(DATATYPE.equals(temp.trim())) {
+      if(DATATYPE.equals(temp)) {
+        JsonNode node1 = rootNode.get("data");
+        JsonNode node2 = node1.get("configs");
+        JsonNode node3 = node2.get("json");
+        JsonNode node4 = node3.get("path");
+        pathData = node4.toString().split("\"")[1].trim();
         checkDataDriven = true;
         dataDrivens = new DataDriven("LoadData",pathData);
         builder.addDataDrivens(dataDrivens);
+      } else {
+        checkDataDriven = false;
       }
     }
     
@@ -132,7 +136,8 @@ public class SuiteTemplateTestCase {
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS);
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = new Case("test",checkDataDriven);
+    Case caze = new Case("test",checkDataDriven,pathData);
+    
     for (JsonNode json : stepsNode) {
       caze.addAction(actionFactory.createAction(json));
     }
