@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.testng.annotations.DataProvider;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
@@ -40,16 +39,18 @@ public class Google {
   }
   
   
-  @Test (dataProvider = "LoadData")
+  @Test (dataProvider = "userSource")
   public void test(JsonNode data) throws Exception {
     String username = data.get("username").toString().split("\"")[1];
     String password = data.get("password").toString().split("\"")[1];
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).click();
-    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys(username);
+    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys("username: " + username + " / password : " + password + "");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).submit();
+
+    try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e); }
 
   }
 
@@ -62,22 +63,15 @@ public class Google {
     }
   }
   
-  @DataProvider(name = "LoadData")
-  public static Object[][] loadData() throws JsonProcessingException, IOException {
-    String DATA_PATH = "src\\test\\resources\\data.json";
+  @DataProvider(name = "userSource")
+  public static Object[][] userSource() throws Exception {
     ObjectMapper obj = new ObjectMapper();
-    JsonNode rootNode;
-    List<JsonNode> listData = new ArrayList<JsonNode>();
+    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\",\"password\":\"a\"},	{\"username\":\"foo1\",\"password\":\"a1\"}]");
 
-    rootNode = obj.readTree(new File(DATA_PATH));
-    for(JsonNode json:rootNode) {
-      listData.add(json);
-}
-
-    JsonNode[][] objData = new JsonNode[listData.size()][];
-    for(int i=0; i<listData.size(); i++) {
-      objData[i] = new JsonNode[]{listData.get(i)};
-}
+    JsonNode[][] objData = new JsonNode[rootNode.size()][];
+    for(int i=0; i<rootNode.size(); i++) {
+      objData[i] = new JsonNode[]{ rootNode.get(i) };
+    }
     return objData;
 }
   

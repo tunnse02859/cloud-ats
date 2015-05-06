@@ -6,6 +6,7 @@ package org.ats.services.functional;
 import java.io.File;
 import java.io.IOException;
 
+import org.ats.services.DataDrivenModule;
 import org.ats.services.FunctionalServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -34,7 +35,13 @@ public class ParserTestCase {
   
   @BeforeClass
   public void init() throws Exception {
-    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new FunctionalServiceModule());
+    Injector injector = Guice.createInjector(
+        new DatabaseModule(), 
+        new EventModule(),
+        new OrganizationServiceModule(),
+        new DataDrivenModule(),
+        new FunctionalServiceModule());
+    
     this.actionFactory = injector.getInstance(ActionFactory.class);
   }
   

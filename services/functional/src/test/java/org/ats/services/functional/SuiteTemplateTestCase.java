@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.ats.services.DataDrivenModule;
 import org.ats.services.FunctionalServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -36,10 +37,6 @@ public class SuiteTemplateTestCase {
   /** .*/
   private MongoDBService mongoService;
   
-  private final static String DATATYPE = "json";
-  
-  private static boolean checkDataDriven = false;
-  
   /** .*/
   private EventService eventService;
   
@@ -49,7 +46,13 @@ public class SuiteTemplateTestCase {
   
   @BeforeClass
   public void init() throws Exception {
-    Injector injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new FunctionalServiceModule());
+    Injector injector = Guice.createInjector(
+        new DatabaseModule(), 
+        new EventModule(),
+        new OrganizationServiceModule(),
+        new DataDrivenModule(),
+        new FunctionalServiceModule());
+    
     this.caseFactory = injector.getInstance(CaseFactory.class);
     
     this.mongoService = injector.getInstance(MongoDBService.class);
@@ -121,39 +124,12 @@ public class SuiteTemplateTestCase {
     testBase("Jira", "jira.json");
   }
   
-  @Test
-  public void testGoogle() throws Exception {
-    testBase("Google","google.json");
-  }
-  
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
 
     SuiteBuilder builder = new SuiteBuilder();
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
-    
-    JsonNode nodeCheckData = rootNode.get("data");
-    DataDriven dataDrivens = null;
-    String pathData = "";
-    
-    if(nodeCheckData != null) {
-      JsonNode sourceNode = nodeCheckData.get("source");
-      String temp = sourceNode.toString().split("\"")[1].trim();
-      
-      if(DATATYPE.equals(temp)) {
-        JsonNode node1 = rootNode.get("data");
-        JsonNode node2 = node1.get("configs");
-        JsonNode node3 = node2.get("json");
-        JsonNode node4 = node3.get("path");
-        pathData = node4.toString().split("\"")[1].trim();
-        checkDataDriven = true;
-        dataDrivens = new DataDriven("LoadData",pathData);
-        builder.addDataDrivens(dataDrivens);
-      } else {
-        checkDataDriven = false;
-      }
-    }
     
     builder.packageName("org.ats.generated")
       .suiteName(testClass)
@@ -164,7 +140,7 @@ public class SuiteTemplateTestCase {
     
     JsonNode stepsNode = rootNode.get("steps");
 
-    Case caze = caseFactory.create("test", null, null);
+    Case caze = caseFactory.create("test", null);
     
     for (JsonNode json : stepsNode) {
       caze.addAction(json);

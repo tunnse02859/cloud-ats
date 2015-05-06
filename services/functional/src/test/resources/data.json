@@ -1,9 +1,4 @@
 [
 	{"username":"foo","password":"a"},
-	{"username":"foo1","password":"a1"},
-	{"username":"foo2","password":"a2"},
-	{"username":"foo3","password":"a3"},
-	{"username":"foo4","password":"a4"},
-	{"username":"foo5","password":"a5"},
-	{"username":"foo6","password":"a6"}
+	{"username":"foo1","password":"a1"}
 ]

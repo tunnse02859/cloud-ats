@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.functional.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -38,6 +39,9 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   
   @Inject
   private ReferenceFactory<SuiteReference> suiteRefFactory;
+  
+  @Inject
+  private ReferenceFactory<DataDrivenReference> drivenRefFactory;
   
   @Inject
   SuiteService(MongoDBService mongo, Logger logger) {
@@ -71,7 +75,12 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     BasicDBList cases = (BasicDBList) obj.get("cases");
     for (Object foo : cases) {
       BasicDBObject sel1 = (BasicDBObject) foo;
-      Case caze = caseFactory.create(sel1.getString("name"), sel1.getString("data_provider"), sel1.getString("data_provider_name"));
+      
+      DataDrivenReference driven = null;
+      if (sel1.get("data_driven") != null) {
+        driven = drivenRefFactory.create(((BasicDBObject)sel1.get("data_driven")).getString("_id"));
+      }
+      Case caze = caseFactory.create(sel1.getString("name"), driven);
       
       if (sel1.get("actions") == null) {
         builder.addCases(caze);

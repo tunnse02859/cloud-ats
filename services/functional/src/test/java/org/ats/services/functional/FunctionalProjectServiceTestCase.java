@@ -5,6 +5,7 @@ package org.ats.services.functional;
 
 import java.io.File;
 
+import org.ats.services.DataDrivenModule;
 import org.ats.services.FunctionalServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
@@ -65,7 +66,13 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
 
   @BeforeClass
   public void init() throws Exception {
-    this.injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new FunctionalServiceModule());
+    this.injector = Guice.createInjector(
+        new DatabaseModule(), 
+        new EventModule(),
+        new OrganizationServiceModule(),
+        new DataDrivenModule(),
+        new FunctionalServiceModule());
+    
     this.funcService = injector.getInstance(FunctionalProjectService.class);
     this.funcFactory = injector.getInstance(FunctionalProjectFactory.class);
     this.suiteService = injector.getInstance(SuiteService.class);
@@ -119,7 +126,7 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
       .raw((DBObject)JSON.parse(rootNode.toString()));
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create("test", null, null);
+    Case caze = caseFactory.create("test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }

@@ -4,14 +4,18 @@
 package org.ats.services.functional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
+import org.ats.services.datadriven.DataDriven;
+import org.ats.services.datadriven.DataDrivenReference;
 import org.rythmengine.RythmEngine;
 
 import com.mongodb.BasicDBList;
@@ -27,9 +31,9 @@ public class Suite extends AbstractTemplate {
   
   private Map<String, Case> cases = new HashMap<String, Case>();
   
-  private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
+  private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
   
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases , Map<String, DataDriven> dataDrivens, DBObject raw) { 
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases , List<DataDrivenReference> dataDrivens, DBObject raw) { 
     this.put("_id", UUID.randomUUID().toString());
     this.put("package_name", packageName);
     this.put("extra_imports", extraImports);
@@ -66,7 +70,8 @@ public class Suite extends AbstractTemplate {
     for (Case caze : cases.values()) {
       sbCase.append(caze.transform());
     }
-    for(DataDriven data : dataDrivens.values()) {
+    for(DataDrivenReference ref : dataDrivens) {
+      DataDriven data = ref.get();
       sbDataDriven.append(data.transform());
     }
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
@@ -103,7 +108,7 @@ public class Suite extends AbstractTemplate {
     
     private Map<String, Case> cases = new HashMap<String, Case>();
     
-    private Map<String, DataDriven> dataDrivens = new HashMap<String, DataDriven>();
+    private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
 
     private DBObject raw;
     
@@ -144,9 +149,9 @@ public class Suite extends AbstractTemplate {
       return this;
     }
     
-    public SuiteBuilder addDataDrivens(DataDriven...dataDrivens) {
-      for(DataDriven data : dataDrivens) {
-        this.dataDrivens.put(data.getName(), data);
+    public SuiteBuilder addDataDrivens(DataDrivenReference... refs) {
+      for(DataDrivenReference ref : refs) {
+        this.dataDrivens.add(ref);
       }
       return this;
     }

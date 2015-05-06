@@ -9,7 +9,7 @@
 		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>functional</artifactId>
+	<artifactId>datadriven</artifactId>
   <packaging>jar</packaging>
 
 	<dependencies>
@@ -27,11 +27,6 @@
 		<dependency>
 			<groupId>org.ats.services</groupId>
 			<artifactId>database</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ats.services</groupId>
-			<artifactId>datadriven</artifactId>
 		</dependency>
 
 		<dependency>
@@ -59,11 +54,6 @@
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-assistedinject</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
 		</dependency>
 
 		<dependency>

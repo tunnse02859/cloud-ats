@@ -970,11 +970,11 @@ public class ActionFactory {
       return new Value(str, isVariable);
     } else if (str.indexOf("${") != -1 && str.lastIndexOf("}") != -1 ) {
       int start = str.indexOf("${");
-      int end = str.lastIndexOf("}");
+      int end = str.indexOf("}");
       String variable = str.substring(start + 2, end);
       StringBuilder sb = new StringBuilder(str.substring(0, start)).append("\" + ");
       sb.append(variable).append(" + \"").append(str.substring(end + 1));
-      return new Value(sb.toString(), false);
+      return toValue(sb.toString());
     }
     return new Value(str, false);
   }

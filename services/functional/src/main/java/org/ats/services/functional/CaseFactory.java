@@ -3,6 +3,8 @@
  */
 package org.ats.services.functional;
 
+import org.ats.services.datadriven.DataDrivenReference;
+
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -12,5 +14,5 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface CaseFactory {
 
-  public Case create(@Assisted("name") String name, @Assisted("dataProvider") String dataProvider, @Assisted("dataProviderName") String dataProviderName);
+  public Case create(@Assisted("name") String name, @Assisted("dataDriven") DataDrivenReference ref);
 }

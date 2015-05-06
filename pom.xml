@@ -48,6 +48,12 @@
 				<artifactId>functional</artifactId>
 				<version>1.0.0-Alpha-1-SNAPSHOT</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.ats.services</groupId>
+				<artifactId>datadriven</artifactId>
+				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+			</dependency>
 			<!--
 
 			<dependency>
@@ -211,6 +217,12 @@
 				<groupId>com.google.inject.extensions</groupId>
 				<artifactId>guice-assistedinject</artifactId>
 				<version>3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>3.0.0</version>
 			</dependency>
 
 			<dependency>

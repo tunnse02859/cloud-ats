@@ -13,7 +13,7 @@
         "type": "xpath",
         "value": ".//input[@id='lst-ib']"
       },
-      "text": "${username}"
+      "text": "username: ${username} / password : ${password}"
     },
     {
       "type": "submitElement",
@@ -21,6 +21,10 @@
         "type": "xpath",
         "value": ".//input[@id='lst-ib']"
       }
+    },
+    {
+      "type": "pause",
+      "waitTime": "3000"
     }
   ],
   "data": {
