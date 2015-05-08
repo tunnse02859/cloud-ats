@@ -3924,30 +3924,30 @@
 .ui-icon {
   width: 16px;
   height: 16px;
-  background-image: url("../img/jqueryui/ui-icons_222222_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_222222_256x240.png");
 }
 .ui-widget-content .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_222222_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_222222_256x240.png");
 }
 .ui-widget-header .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_222222_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_222222_256x240.png");
 }
 .ui-state-default .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_888888_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_888888_256x240.png");
 }
 .ui-state-hover .ui-icon,
 .ui-state-focus .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_454545_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_454545_256x240.png");
 }
 .ui-state-active .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_454545_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_454545_256x240.png");
 }
 .ui-state-highlight .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_2e83ff_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_2e83ff_256x240.png");
 }
 .ui-state-error .ui-icon,
 .ui-state-error-text .ui-icon {
-  background-image: url("../img/jqueryui/ui-icons_f6cf3b_256x240.html");
+  background-image: url("../img/jqueryui/ui-icons_f6cf3b_256x240.png");
 }
 /* positioning */
 .ui-icon-carat-1-n {
@@ -9242,7 +9242,7 @@ textarea.clone {
   margin: 0;
 }
 #extr-page .hero {
-  background-image: url("../img/gradient/login.html");
+  background-image: url("../img/gradient/login.png");
   background-repeat: no-repeat;
   background-position: 0 137px;
   height: 360px;
@@ -15479,19 +15479,19 @@ label:hover input[type="checkbox"][disabled].checkbox:checked + span:before {
 }
 .colorblind-friendly .alert-danger,
 .colorblind-friendly .btn-danger {
-  background-image: url('../img/colorblind-friendly/pt1.html');
+  background-image: url('../img/colorblind-friendly/pt1.png');
   border-color: #272727;
   background-color: #303030;
 }
 .colorblind-friendly .alert-success,
 .colorblind-friendly .btn-success {
-  background-image: url('../img/colorblind-friendly/pt2.html');
+  background-image: url('../img/colorblind-friendly/pt2.png');
   border-color: #FF00EB;
   background-color: #1E5E00;
 }
 .colorblind-friendly .alert-warning,
 .colorblind-friendly .btn-warning {
-  background-image: url('../img/colorblind-friendly/pt3.html');
+  background-image: url('../img/colorblind-friendly/pt3.png');
   border-color: #5F4415;
   background-color: #A07A00;
 }

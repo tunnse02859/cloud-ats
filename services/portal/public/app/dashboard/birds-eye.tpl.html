@@ -1,0 +1,27 @@
+<div jarvis-widget id="bird-eye-widget" data-widget-colorbutton="false" data-widget-editbutton="false">
+  <header>
+    <span class="widget-icon"><i class="fa fa-map-marker"></i></span>
+    <h2>Birds Eye</h2>
+
+    <div class="widget-toolbar hidden-mobile">
+      <span class="onoffswitch-title"><i class="fa fa-location-arrow"></i> Realtime</span>
+      <span class="onoffswitch">
+        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" checked="checked" id="myonoffswitch">
+        <label class="onoffswitch-label" for="myonoffswitch">
+          <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span>
+          <span class="onoffswitch-switch"></span>
+        </label>
+      </span>
+    </div>
+  </header>
+
+  <div>
+    <div class="widget-body no-padding">
+      <div id="vector-map" class="vector-map" data-vector-map data-map-data="countriesVisitsData"></div>
+      <div id="heat-fill">
+        <span class="fill-a">0</span>
+        <span class="fill-b">5,000</span>
+      </div>
+    </div>
+  </div>
+</div>

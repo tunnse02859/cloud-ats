@@ -1,0 +1,100 @@
+<header id="header">
+  
+  <div id="logo-group">
+    <!-- LOGO -->
+    <span id="logo"><img src="styles/img/logo-blue.png" alt="CloudATS Admin"></span>
+    <!-- END LOGO -->
+
+    <!-- Notification -->
+    <span id="activity" class="activity-dropdown" activities-dropdown-toggle>
+      <i class="fa fa-user"></i>
+      <b class="badge bg-color-red">21</b>      
+    </span>
+    <div data-smart-include="app/components/activities/activities.html"></div>
+  </div>
+
+  <recent-projects></recent-projects>
+
+  <!-- pull right nav area-->
+  <div class="pull-right">
+    
+  <!-- collape menu button -->
+  <div id="hide-menu" class="btn-header pull-right">
+    <span>
+      <a data-toggle-menu title="Collapse Menu"><i class="fa fa-reorder"></i></a>
+    </span>    
+  </div>
+  <!-- end collape menu -->
+
+  <!-- Top menu profile: this shows only when top menu is active-->
+  <ul id="mobile-profile-img" class="header-dropdown-list hidden-xs padding-5">
+    <li>
+      <a href="#" class="dropdown-toggle no-margin userdropdown" data-toggle="dropdown">
+        <img src="styles/img/avatars/sunny.png" alt="John Doe" class="online">
+      </a>
+      <ul class="dropdown-menu pull-right">
+        <li>
+          <a class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-cog"></i> Setting</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-user"></i> <u>P</u>rofile</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-arrow-down"></i> <u>S</u>etting</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-arrows-alt"></i> Full <u>S</u>creen</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a class="padding-10 padding-top-5 padding-bottom-5"><i class="fa fa-sign-out fa-lg"></i>
+          <strong><u>L</u>ogout</strong>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- Logout button -->
+  <div id="logout" class="btn-header transparent pull-right">
+    <span>
+      <a href="#" title="Sign Out" data-action="userLogout"><i class="fa fa-sign-out"></i></a>
+    </span>
+  </div>
+  <!-- End logout -->
+
+  <!-- search mobile button (this is hidden till mobile view port-->
+  <div id="search-mobile" class="btn-header transparent pull-right">
+    <span>
+      <a href="#" title="Search"><i class="fa fa-serach"></i></a>
+    </span>
+  </div>
+  <!-- end search mobile button-->
+
+  <!-- Input search field -->
+  <form class="header-search pull-right" search-autocomplete>
+    <input id="search-fld" type="text" name="param" placeholder="Find reports and more">
+    <button type="submit">
+      <i class="fa fa-search"></i>
+    </button>
+    <a href="$" id="cancel-search-js" title="Cancel Search"><i class="fa fa-times"></i></a>
+  </form>
+  <!-- End input search field -->
+
+  <!-- fullscreen button -->
+  <div id="fullscreen" class="btn-header transparent pull-right">
+    <span>
+      <a full-screen title="Full Screen"><i class="fa fa-arrows-alt"></i></a>
+    </span>    
+  </div>
+  <!-- end fullscreen btn -->
+
+  <!-- Multiple lang dropdown -->
+  <language-selector></language-selector>
+  <!-- end multiple flag -->
+
+  </div>
+</header>

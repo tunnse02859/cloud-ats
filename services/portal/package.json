@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "private": true,
-  "name": "cloudats-portal",
+  "name": "cloud-ats-portal",
   "devDependencies": {
     "karma": "^0.12.16",
     "karma-chrome-launcher": "^0.1.4",

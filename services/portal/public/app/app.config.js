@@ -2,7 +2,7 @@
 
 var appConfig = {};
 
-appConfig.smartSkin = "smart-style-0";
+appConfig.smartSkin = "smart-style-2";
 
 appConfig.skins = [
   {

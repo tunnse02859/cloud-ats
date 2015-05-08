@@ -1,0 +1,32 @@
+<div id="content" ng-controller="DashboardCtrl">
+
+  <div class="row">
+    <big-breadcrumbs items="['Dashboard', 'My Dashboard']" class="col-xs-12 col-sm-7 col-md-7 col-lg-4"></big-breadcrumbs>
+    <div smart-include="app/layout/partials/sub-header.tpl.html"></div>
+  </div>
+
+  <section id="widget-grid" widget-grid>
+    
+    <div class="row">
+      <article class="col-sm-12">
+        <div smart-include="app/dashboard/live-feeds.tpl.html" class="placeholder-live-feeds"></div>
+      </article>
+    </div>
+
+    
+    <div class="row">
+      <article class="col-sm-12 col-md-12 col-lg-6">
+        <chat-widget></chat-widget>
+
+        <full-calendar id="dashboard-calendar-widget" data-events="events"></full-calendar>
+      </article>
+
+      <article class="col-sm-12 col-md-12 col-lg-6">
+        <div smart-include="app/dashboard/birds-eye.tpl.html"></div>
+        <div smart-include="app/components/todo/todo-widget.tpl.html"></div>
+      </article>
+    </div>
+
+  </section>
+
+</div>

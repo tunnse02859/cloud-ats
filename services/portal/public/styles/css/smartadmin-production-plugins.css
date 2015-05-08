@@ -1030,10 +1030,10 @@ span.css-emoticon.nintendo-controller {
   margin-top: -1px;
 }
 .colorpicker-hue {
-  background-image: url("../img/hue.html");
+  background-image: url("../img/hue.png");
 }
 .colorpicker-alpha {
-  background-image: url("../img/alpha.html");
+  background-image: url("../img/alpha.png");
   display: none;
 }
 .colorpicker {
@@ -1091,7 +1091,7 @@ span.css-emoticon.nintendo-controller {
   height: 10px;
   margin-top: 5px;
   clear: both;
-  background-image: url("../img/alpha.html");
+  background-image: url("../img/alpha.png");
   background-position: 0 100%;
 }
 .colorpicker-color div {
@@ -1150,19 +1150,19 @@ table.dataTable thead .sorting_desc_disabled {
   cursor: pointer;
 }
 table.dataTable thead .sorting {
-  background: url('../images/sort_both.html') no-repeat center right;
+  background: url('../img/sort_both.png') no-repeat center right;
 }
 table.dataTable thead .sorting_asc {
-  background: url('../images/sort_asc.html') no-repeat center right;
+  background: url('../img/sort_asc.png') no-repeat center right;
 }
 table.dataTable thead .sorting_desc {
-  background: url('../images/sort_desc.html') no-repeat center right;
+  background: url('../img/sort_desc.png') no-repeat center right;
 }
 table.dataTable thead .sorting_asc_disabled {
-  background: url('../images/sort_asc_disabled.html') no-repeat center right;
+  background: url('../img/sort_asc_disabled.png') no-repeat center right;
 }
 table.dataTable thead .sorting_desc_disabled {
-  background: url('../images/sort_desc_disabled.html') no-repeat center right;
+  background: url('../img/sort_desc_disabled.png') no-repeat center right;
 }
 table.dataTable thead > tr > th {
   padding-left: 18px;
@@ -1838,12 +1838,12 @@ div.DTTT_collection a.DTTT_button {
   line-height: 20px;
 }
 table.has-columns-hidden > tbody > tr > td > span.responsiveExpander {
-  background: url('../img/plus.html') no-repeat 5px center;
+  background: url('../img/plus.png') no-repeat 5px center;
   padding-left: 32px;
   cursor: pointer;
 }
 table.has-columns-hidden > tbody > tr.detail-show > td span.responsiveExpander {
-  background: url('../img/minus.html') no-repeat 5px center;
+  background: url('../img/minus.png') no-repeat 5px center;
 }
 table.has-columns-hidden > tbody > tr.row-detail > td {
   background: #eee;

@@ -1,5 +1,5 @@
 {
-  "name": "cloudats-portal",
+  "name": "cloud-ats-portal",
   "version": "0.0.0",
   "dependencies": {
     "requirejs-domready": "~2.0.1",
