@@ -101,4 +101,5 @@ public class Global extends GlobalSettings {
   public <T> T getControllerInstance(Class<T> aClass) throws Exception {
     return injector.getInstance(aClass);
   }
+  
 }

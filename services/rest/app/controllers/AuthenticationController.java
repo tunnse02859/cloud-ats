@@ -7,20 +7,22 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 
-import play.data.DynamicForm;
-import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+
+import actions.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
  * Mar 20, 2015
  */
+@CorsComposition.Cors
 public class AuthenticationController extends Controller {
   
   @Inject
@@ -29,20 +31,17 @@ public class AuthenticationController extends Controller {
   @Inject
   private OrganizationContext context;
   
-  public Result register() {
-    return ok();
-  }
-
   public Result login() {
-    DynamicForm form = Form.form().bindFromRequest();
-    String email = form.get("email");
-    String password = form.get("password");
+    JsonNode json = request().body().asJson();
+
+    String email = json.get("email").asText();
+    String password = json.get("password").asText();
+    
     String token = authenService.logIn(email, password);
     if (token == null) return unauthorized();
     
     ObjectNode authTokenJson = Json.newObject();
     authTokenJson.put(AuthenticationService.AUTH_TOKEN, token);
-    response().setCookie(AuthenticationService.AUTH_TOKEN, token);
     return ok(authTokenJson);
   }
   
