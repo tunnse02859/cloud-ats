@@ -3,8 +3,7 @@
 # ~~~~
 
 # for testing only
-GET     /test                           @controllers.Application.index()
-GET     /test/create                    @controllers.Application.createUser()
+OPTIONS /*path                          controllers.Application.preflight(path: String)
 
 ################################## RESTful API ######################################
 
@@ -14,8 +13,6 @@ GET     /api/v1/context                 @controllers.AuthenticationController.cu
 # Authenticate users
 POST    /api/v1/user/login              @controllers.AuthenticationController.login()
 GET     /api/v1/user/logout             @controllers.AuthenticationController.logout()
-GET     /api/v1/user/register           @controllers.AuthenticationController.register()
-
 #
 
 # Map static resources from the /public folder to the /assets URL path

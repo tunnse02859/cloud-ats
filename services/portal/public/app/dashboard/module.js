@@ -30,9 +30,10 @@ define([
           }
         },
         data: {
-          title: 'Dashboard'
+          title: 'Dashboard',
+          requireLogin: true
         }
-      })
+      });
   });
 
   couchPotato.configureApp(module);

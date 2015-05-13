@@ -45,49 +45,51 @@ define([
     cfpLoadingBarProvider.includeSpinner = false;
 
     //Intercept http calls.
-    $provide.factory('ErrorHttpInterceptor', function($q) {
-      var errorCounter = 0;
-      function notifyError(rejection) {
-        $.bigBox({
-          title: rejection.status + ' ' + rejection.statusText,
-          content: rejection.data,
-          color: "#C46A69",
-          icon: "fa fa-warning shake animated",
-          number: ++errorCounter,
-          timeout: 6000
-        });
-      }
+    // $provide.factory('ErrorHttpInterceptor', function($q) {
+    //   var errorCounter = 0;
+    //   function notifyError(rejection) {
+    //     $.bigBox({
+    //       title: rejection.status + ' ' + rejection.statusText,
+    //       content: rejection.data,
+    //       color: "#C46A69",
+    //       icon: "fa fa-warning shake animated",
+    //       number: ++errorCounter,
+    //       timeout: 6000
+    //     });
+    //   }
 
-      return {
-        //On request failure
-        requestError: function(rejection) {
-          //show notification
-          notifyError(rejection);
+    //   return {
+    //     //On request failure
+    //     requestError: function(rejection) {
+    //       //show notification
+    //       notifyError(rejection);
 
-          //return the promise rejection.
-          return $q.reject(rejection);
-        },
+    //       //return the promise rejection.
+    //       return $q.reject(rejection);
+    //     },
 
-        //On response failure
-        responseError: function(rejection) {
-          //show notification
-          notifyError(rejection);
-          //return the promise rejection.
-          return $q.reject(rejection);
-        }
-      };
-    });
+    //     //On response failure
+    //     responseError: function(rejection) {
+    //       //show notification
+    //       notifyError(rejection);
+    //       //return the promise rejection.
+    //       return $q.reject(rejection);
+    //     }
+    //   };
+    // });
 
     //Add the interceptor to $httpProvider.
-    $httpProvider.interceptors.push('ErrorHttpInterceptor');
+    //$httpProvider.interceptors.push('ErrorHttpInterceptor');
 
+    $httpProvider.defaults.useXDomain = true;
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
   }]);
 
-  app.run(['$couchPotato', '$rootScope', '$state', '$stateParams', 
-    function($couchPotato, $rootScope, $state, $stateParams){
+  app.run(['$couchPotato', '$rootScope', '$state', '$stateParams', 'AuthenticationService',
+    function($couchPotato, $rootScope, $state, $stateParams, AuthenticationService){
       app.lazy = $couchPotato;
       $rootScope.$state = $state;
-      $rootScope.$stateParams = $stateParams;    
+      $rootScope.$stateParams = $stateParams;
   }]);
 
   return app;

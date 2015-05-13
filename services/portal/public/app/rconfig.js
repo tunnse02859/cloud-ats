@@ -1,7 +1,7 @@
 var require = {
 	waitSeconds: 0,
 	paths: {
-    	'jquery': '../plugin/jquery/dist/jquery',
+    	'jquery': '../plugin/jquery/jquery',
         'jquery-ui': '../plugin/jquery-ui/jquery-ui',
         
         'bootstrap': '../plugin/bootstrap/dist/js/bootstrap',

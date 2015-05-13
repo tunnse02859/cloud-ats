@@ -1,11 +1,12 @@
 define([
   'angular',
   'angular-couch-potato',
-  'angular-ui-router'
+  'angular-ui-router',
+  'angular-cookies'
 ], function(ng, couchPotato) {
   "use strict";
 
-  var module = ng.module('app.auth', ['ui.router']);
+  var module = ng.module('app.auth', ['ui.router', 'ngCookies']);
 
   couchPotato.configureApp(module);
 
@@ -20,6 +21,11 @@ define([
       data: {
         title: 'Login',
         htmlId: 'extr-page'
+      },
+      resolve: {
+        deps: $couchPotatoProvider.resolveDependencies([
+          'auth/controllers/login-controller'
+        ])
       }
     })
   }]);

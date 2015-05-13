@@ -6,6 +6,7 @@ define([
   'layout/actions/full-screen',
   'layout/actions/reset-widgets',
 
+  'layout/directives/smart-context',
   'layout/directives/smart-include',
   'layout/directives/smart-menu',
   'layout/directives/search-autocomplete',
@@ -39,6 +40,8 @@ define([
 
   //account
   'auth/module',
+  'auth/controllers/login-controller',
+  'auth/services/authentication-service',
   'auth/models/User',
 
   //components
