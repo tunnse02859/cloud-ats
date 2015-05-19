@@ -13,7 +13,9 @@ GET     /api/v1/context                 @controllers.AuthenticationController.cu
 # Authenticate users
 POST    /api/v1/user/login              @controllers.AuthenticationController.login()
 GET     /api/v1/user/logout             @controllers.AuthenticationController.logout()
+POST	/api/v1/user/register			@controllers.AuthenticationController.register()
 
+GET		/api/v1/user/tenants			@controllers.AuthenticationController.tenants()
 # User controller
 GET     /api/v1/user/spaces             @controllers.UserController.spaces()
 GET     /api/v1/user/go/:spaceId        @controllers.UserController.goTo(spaceId)
