@@ -106,6 +106,7 @@ public class AuthenticationController extends Controller {
       space.setTenant(tenantRef.create(tenantId));
       
       spaceService.create(space);
+      user.joinSpace(spaceRef.create(space.getId()));
     }
     
     user.setTenant(tenantRef.create(tenantId));
