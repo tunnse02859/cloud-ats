@@ -65,6 +65,16 @@ public class AuthenticationController extends Controller {
   
   @Inject private SpaceFactory spaceFactory;
   
+  public Result checkAccount() {
+    
+    String email = request().getQueryString("email");
+    
+    System.out.println("check account in controller");
+    if (userService.get(email) != null) {
+      return ok("false");
+    }
+    return ok();
+  }
   public Result login() {
     JsonNode json = request().body().asJson();
 
@@ -90,14 +100,10 @@ public class AuthenticationController extends Controller {
     
     String email = json.get("email").asText();
     
-    if (userService.get(email) != null) {
-      return ok("false");
-    }
     String password = json.get("password").asText();
     JsonNode tenant = json.get("tenant");
     String tenantId = tenant.get("_id").asText();
     String spaceName = null;
-    
     
     String firstName = json.get("firstname").asText();
     String lastName = json.get("lastname").asText();
