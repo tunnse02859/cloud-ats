@@ -7,6 +7,8 @@ import org.ats.services.data.DatabaseModule;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
 import org.ats.services.organization.SpaceService;
+import org.ats.services.organization.acl.UnAuthenticatedException;
+import org.ats.services.organization.acl.UnAuthorizationException;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -15,8 +17,15 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import play.Application;
 import play.GlobalSettings;
 import play.Play;
+import play.libs.F;
+import play.libs.F.Promise;
 import play.mvc.Action;
+import play.mvc.Http;
+import play.mvc.Http.Response;
+import play.mvc.Result;
 import play.mvc.Http.Request;
+import play.mvc.Http.RequestHeader;
+import play.mvc.Results.Status;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -95,6 +104,19 @@ public class Global extends GlobalSettings {
     }
 
     return super.onRequest(request, actionMethod);
+  }
+  
+  @Override
+  public F.Promise<Result> onError(RequestHeader request, Throwable t) {
+    Response response = Http.Context.current().response();
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    
+    if (t.getCause() instanceof UnAuthenticatedException) {
+      return Promise.<Result>pure(new Status(play.core.j.JavaResults.Status(403)));
+    } else if (t.getCause() instanceof UnAuthorizationException) {
+      return Promise.<Result>pure(new Status(play.core.j.JavaResults.Status(401)));
+    }
+    return super.onError(request, t);
   }
   
   @Override
