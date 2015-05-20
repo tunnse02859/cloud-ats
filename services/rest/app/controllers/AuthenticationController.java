@@ -89,6 +89,10 @@ public class AuthenticationController extends Controller {
     JsonNode json = request().body().asJson();
     
     String email = json.get("email").asText();
+    
+    if (userService.get(email) != null) {
+      return ok("false");
+    }
     String password = json.get("password").asText();
     JsonNode tenant = json.get("tenant");
     String tenantId = tenant.get("_id").asText();
