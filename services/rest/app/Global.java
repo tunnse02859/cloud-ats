@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import org.ats.services.DataDrivenModule;
+import org.ats.services.FunctionalServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -51,7 +53,12 @@ public class Global extends GlobalSettings {
     String dbConf = Play.application().configuration().getString(DatabaseModule.DB_CONF);
     String eventConf = Play.application().configuration().getString(EventModule.EVENT_CONF);
     try {
-      injector = Guice.createInjector(new DatabaseModule(dbConf), new EventModule(eventConf), new OrganizationServiceModule());
+      injector = Guice.createInjector(
+          new DatabaseModule(dbConf), 
+          new EventModule(eventConf), 
+          new OrganizationServiceModule(),
+          new DataDrivenModule(),
+          new FunctionalServiceModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);

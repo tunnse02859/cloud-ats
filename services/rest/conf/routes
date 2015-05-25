@@ -17,9 +17,13 @@ POST	/api/v1/user/register			@controllers.AuthenticationController.register()
 GET		/api/v1/user/checkAccount		@controllers.AuthenticationController.checkAccount()
 
 GET		/api/v1/user/tenants			@controllers.AuthenticationController.tenants()
+
 # User controller
 GET     /api/v1/user/spaces             @controllers.UserController.spaces()
 GET     /api/v1/user/go/:spaceId        @controllers.UserController.goTo(spaceId)
+
+# DataDriven controller
+GET     /api/v1/data/list/:tenant/:space @controllers.DataDrivenController.list(tenant, space)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
