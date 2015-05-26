@@ -6,10 +6,16 @@ package controllers;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.datadriven.DataDriven;
+import org.ats.services.datadriven.DataDrivenFactory;
 import org.ats.services.datadriven.DataDrivenService;
+import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
@@ -31,9 +37,25 @@ public class DataDrivenController extends Controller {
   @Inject
   DataDrivenService service;
   
+  @Inject
+  OrganizationContext context;
+  
+  @Inject
+  SpaceService spaceService;
+  
+  @Inject
+  ReferenceFactory<SpaceReference> spaceRefFactory;
+  
+  @Inject
+  DataDrivenService dataDrivenService;
+  
+  @Inject
+  DataDrivenFactory dataDrivenFactory;
+  
   public Result list(String tenant, String space) {
     BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
-    query.append("space", new BasicDBObject("space", new BasicDBObject("_id", space)));
+    query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
+    
     PageList<DataDriven> list = service.query(query);
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
@@ -43,5 +65,19 @@ public class DataDrivenController extends Controller {
       }
     }
     return ok(array);
+  }
+  
+  public Result newData() {
+    JsonNode json = request().body().asJson();
+    String spaceId = json.get("space").asText();
+    if (spaceId == null) context.setSpace(null);
+    else {
+      spaceService.goTo(spaceRefFactory.create(spaceId));
+    }
+    String name = json.get("name").asText();
+    JsonNode dataset = json.get("dataset");
+    DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
+    dataDrivenService.create(driven);
+    return ok(driven.getId());
   }
 }
