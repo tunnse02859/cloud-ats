@@ -94,8 +94,7 @@ public class DataDrivenController extends Controller {
   
   public Result delete(String id) {
     
-    System.out.println("delete");
-    //service.delete(id);
-    return ok(id);
+    service.delete(id);
+    return ok();
   }
 }
