@@ -17,6 +17,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 
@@ -79,5 +80,22 @@ public class DataDrivenController extends Controller {
     DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
     dataDrivenService.create(driven);
     return ok(driven.getId());
+  }
+  
+  public Result getDataSet(String id) {
+    
+    DataDriven driven = service.get(id);
+    ObjectNode json = Json.newObject();
+    
+    json.put("data", Json.parse(driven.toString()));
+    
+    return ok(json);
+  }
+  
+  public Result delete(String id) {
+    
+    System.out.println("delete");
+    //service.delete(id);
+    return ok(id);
   }
 }
