@@ -23,10 +23,10 @@ GET     /api/v1/user/spaces             @controllers.UserController.spaces()
 GET     /api/v1/user/go/:spaceId        @controllers.UserController.goTo(spaceId)
 
 # DataDriven controller
-GET     /api/v1/data/list/:tenant/:space @controllers.DataDrivenController.list(tenant, space)
-POST    /api/v1/data                    @controllers.DataDrivenController.newData()
-GET		/api/v1/data/dataSet/:dataSetId	@controllers.DataDrivenController.getDataSet(dataSetId)
-DELETE	/api/v1/data/delete/:dataId	@controllers.DataDrivenController.delete(dataId)
-
+GET     /api/v1/data/list/:tenant/:space 	@controllers.DataDrivenController.list(tenant, space)
+POST    /api/v1/data                     	@controllers.DataDrivenController.newData()
+GET		/api/v1/data/dataSet/:dataSetId		@controllers.DataDrivenController.getDataSet(dataSetId)
+DELETE	/api/v1/data/delete/:dataId			@controllers.DataDrivenController.delete(dataId)
+PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

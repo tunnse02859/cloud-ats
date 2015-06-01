@@ -76,6 +76,10 @@ public class DataDriven extends AbstractEntity<DataDriven> {
     return this.getString("data_source");
   }
   
+  public void setDataSource(String dataset) {
+    this.put("data_source", dataset);
+  }
+  
   public UserReference getCreator() {
     return userRefFactory.create(((BasicDBObject)this.get("creator")).getString("_id"));
   }

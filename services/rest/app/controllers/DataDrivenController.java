@@ -97,4 +97,17 @@ public class DataDrivenController extends Controller {
     service.delete(id);
     return ok();
   }
+  
+  public Result update() {
+    
+    JsonNode json = request().body().asJson();
+    String id = json.get("id").asText();
+    JsonNode dataset = json.get("dataset");
+    DataDriven driven = dataDrivenService.get(id);
+    
+    driven.setDataSource(dataset.toString());
+    dataDrivenService.update(driven);
+    
+    return ok();
+  }
 }
