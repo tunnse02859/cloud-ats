@@ -5,6 +5,7 @@ package controllers;
 
 import java.util.List;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.datadriven.DataDriven;
@@ -58,6 +59,8 @@ public class DataDrivenController extends Controller {
     query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
     
     PageList<DataDriven> list = service.query(query);
+    list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
       List<DataDriven> page = list.next();
@@ -70,16 +73,12 @@ public class DataDrivenController extends Controller {
   
   public Result newData() {
     JsonNode json = request().body().asJson();
-    String spaceId = json.get("space").asText();
-    if (spaceId == null) context.setSpace(null);
-    else {
-      spaceService.goTo(spaceRefFactory.create(spaceId));
-    }
     String name = json.get("name").asText();
     JsonNode dataset = json.get("dataset");
     DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
+    
     dataDrivenService.create(driven);
-    return ok(driven.getId());
+    return ok(Json.parse(driven.toString()));
   }
   
   public Result getDataSet(String id) {
@@ -112,6 +111,6 @@ public class DataDrivenController extends Controller {
     driven.setDataSource(dataset.toString());
     dataDrivenService.update(driven);
     
-    return ok();
+    return ok(Json.parse(driven.toString()));
   }
 }

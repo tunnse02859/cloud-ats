@@ -39,7 +39,7 @@ public class CorsComposition {
       if (ctx.request().method().equals("OPTIONS")) {
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, X-Space");
         response.setHeader("Access-Control-Allow-Credentials", "true");
  
         return delegate.call(ctx);
