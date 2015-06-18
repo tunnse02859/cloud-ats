@@ -32,7 +32,6 @@ public class PerformanceProjectService extends AbstractMongoCRUD<PerformanceProj
     //create text index
     this.createTextIndex("name");
     
-    //
     this.col.createIndex(new BasicDBObject("created_date", 1));
     this.col.createIndex(new BasicDBObject("creator._id", 1));
     this.col.createIndex(new BasicDBObject("tenant._id", 1));

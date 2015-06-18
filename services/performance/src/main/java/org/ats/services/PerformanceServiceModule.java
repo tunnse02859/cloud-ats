@@ -6,7 +6,6 @@ package org.ats.services;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
-import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
 
@@ -25,10 +24,8 @@ public class PerformanceServiceModule extends AbstractModule {
   protected void configure() {
     bind(PerformanceProjectService.class);
     bind(JMeterScriptService.class);
-    bind(PerformanceProject.class);
 
     install(new FactoryModuleBuilder().build(PerformanceProjectFactory.class));
-    
     install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<JMeterScriptReference>>(){}));
     
   }
