@@ -42,15 +42,19 @@ import com.mongodb.util.JSON;
  */
 public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
 
-  private FunctionalProjectService funcService;
+  private KeywordProjectService funcService;
 
-  private FunctionalProjectFactory funcFactory;
+  private KeywordProjectFactory funcFactory;
 
   private SuiteService suiteService;
   
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   
   private CaseFactory caseFactory;
+  
+  private CaseService caseService;
+  
+  private ReferenceFactory<CaseReference> caseRefFactory;
 
   private AuthenticationService<User> authService;
   
@@ -73,11 +77,15 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
         new DataDrivenModule(),
         new FunctionalServiceModule());
     
-    this.funcService = injector.getInstance(FunctionalProjectService.class);
-    this.funcFactory = injector.getInstance(FunctionalProjectFactory.class);
+    this.funcService = injector.getInstance(KeywordProjectService.class);
+    this.funcFactory = injector.getInstance(KeywordProjectFactory.class);
+    
     this.suiteService = injector.getInstance(SuiteService.class);
-    this.caseFactory = injector.getInstance(CaseFactory.class);
     this.suiteRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
+    
+    this.caseService = injector.getInstance(CaseService.class);
+    this.caseFactory = injector.getInstance(CaseFactory.class);
+    this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
 
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     this.context = this.injector.getInstance(OrganizationContext.class);
@@ -130,7 +138,8 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
-    builder.addCases(caze);
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
 
     this.suite = builder.build();
     suiteService.create(suite);
@@ -144,7 +153,7 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
 
   @Test
   public void testCRUD() throws Exception {
-    FunctionalProject project = null;
+    KeywordProject project = null;
 
     try {
       project = funcFactory.create("Jira Automation");
@@ -182,7 +191,7 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    FunctionalProject project = funcFactory.create("Jira Automation");
+    KeywordProject project = funcFactory.create("Jira Automation");
     funcService.create(project);
     
     SuiteReference suiteRef = suiteRefFactory.create(suite.getId());

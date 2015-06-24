@@ -56,7 +56,11 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
   
   private ReferenceFactory<DataDrivenReference> drivenRefFactory;
   
+  private CaseService caseService;
+  
   private CaseFactory caseFactory;
+  
+  private ReferenceFactory<CaseReference> caseRefFactory;
   
   private Tenant tenant;
 
@@ -75,8 +79,11 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     this.drivenService = injector.getInstance(DataDrivenService.class);
     this.drivenFactory = injector.getInstance(DataDrivenFactory.class);
-    this.caseFactory = injector.getInstance(CaseFactory.class);
     this.drivenRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<DataDrivenReference>>(){}));
+    
+    this.caseService = injector.getInstance(CaseService.class);
+    this.caseFactory = injector.getInstance(CaseFactory.class);
+    this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     
@@ -150,7 +157,9 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
-    builder.addCases(caze);
+    caseService.create(caze);
+    
+    builder.addCases(caseRefFactory.create(caze.getId()));
     builder.addDataDrivens(dataRef);
 
     Suite suite = builder.build();

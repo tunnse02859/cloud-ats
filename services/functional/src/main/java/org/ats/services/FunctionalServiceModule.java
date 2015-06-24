@@ -5,8 +5,10 @@ package org.ats.services;
 
 import org.ats.services.functional.ActionFactory;
 import org.ats.services.functional.CaseFactory;
-import org.ats.services.functional.FunctionalProjectFactory;
-import org.ats.services.functional.FunctionalProjectService;
+import org.ats.services.functional.CaseReference;
+import org.ats.services.functional.CaseService;
+import org.ats.services.functional.KeywordProjectFactory;
+import org.ats.services.functional.KeywordProjectService;
 import org.ats.services.functional.SuiteReference;
 import org.ats.services.functional.SuiteService;
 import org.ats.services.functional.VariableFactory;
@@ -25,14 +27,15 @@ public class FunctionalServiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(FunctionalProjectService.class);
+    bind(KeywordProjectService.class);
+    bind(CaseService.class);
     bind(SuiteService.class);
     bind(ActionFactory.class);
     bind(VariableFactory.class);
 
-    install(new FactoryModuleBuilder().build(FunctionalProjectFactory.class));
+    install(new FactoryModuleBuilder().build(KeywordProjectFactory.class));
     install(new FactoryModuleBuilder().build(CaseFactory.class));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
   }
-
 }

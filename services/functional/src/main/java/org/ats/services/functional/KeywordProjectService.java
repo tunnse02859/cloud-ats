@@ -19,16 +19,16 @@ import com.mongodb.DBObject;
  * May 4, 2015
  */
 @Singleton
-public class FunctionalProjectService extends AbstractMongoCRUD<FunctionalProject>{
+public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
 
   /** .*/
   private final String COL_NAME = "func-project";
   
   @Inject
-  private FunctionalProjectFactory factory;
+  private KeywordProjectFactory factory;
   
   @Inject
-  FunctionalProjectService(MongoDBService mongo, Logger logger) {
+  KeywordProjectService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     
@@ -43,8 +43,8 @@ public class FunctionalProjectService extends AbstractMongoCRUD<FunctionalProjec
   }
   
   @Override
-  public FunctionalProject transform(DBObject source) {
-    FunctionalProject project = factory.create((String) source.get("name"));
+  public KeywordProject transform(DBObject source) {
+    KeywordProject project = factory.create((String) source.get("name"));
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

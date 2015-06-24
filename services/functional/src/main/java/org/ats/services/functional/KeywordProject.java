@@ -29,21 +29,21 @@ import com.mongodb.BasicDBObject;
  * Apr 22, 2015
  */
 @SuppressWarnings("serial")
-public class FunctionalProject extends AbstractEntity<FunctionalProject> {
+public class KeywordProject extends AbstractEntity<KeywordProject> {
   
   private ReferenceFactory<TenantReference> tenantRefFactory;
   private ReferenceFactory<UserReference> userRefFactory;
   private ReferenceFactory<SpaceReference> spaceRefFactory;
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   
-  private FunctionalProjectService projectService;
+  private KeywordProjectService projectService;
   
   @Inject
-  FunctionalProject(ReferenceFactory<TenantReference> tenantRefFactory, 
+  KeywordProject(ReferenceFactory<TenantReference> tenantRefFactory, 
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       ReferenceFactory<SuiteReference> suiteRefFactory,
-      FunctionalProjectService projectService,
+      KeywordProjectService projectService,
       OrganizationContext context,
       @Assisted("name") String name) {
     
@@ -101,7 +101,7 @@ public class FunctionalProject extends AbstractEntity<FunctionalProject> {
   
   private boolean verifySuite(SuiteReference ref) {
     if (ref.get() == null) return false;
-    PageList<FunctionalProject> list = projectService.findIn("suites", ref);
+    PageList<KeywordProject> list = projectService.findIn("suites", ref);
     return list.count() == 0;
   }
   

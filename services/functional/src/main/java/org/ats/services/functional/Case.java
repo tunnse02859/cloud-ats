@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
@@ -44,13 +45,26 @@ public class Case extends AbstractTemplate {
   
   @Inject
   private Case(@Assisted("name") String name, @Nullable @Assisted("dataDriven") DataDrivenReference ref) {
+    this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("data_driven", ref != null ? ref.toJSon() : null);
     this.put("actions",  null);
   }
   
+  public String getId() {
+    return this.getString("_id");
+  }
+  
+  public void setName(String name) {
+    this.put("name", name);
+  }
+  
   public String getName() {
     return this.getString("name");
+  }
+  
+  public void setDataDriven(DataDrivenReference driven) {
+    this.put("data_driven", driven.toJSon());
   }
   
   public DataDrivenReference getDataDriven() {

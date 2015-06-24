@@ -3,17 +3,14 @@
  */
 package org.ats.services.functional;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.functional.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
@@ -32,16 +29,13 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   private final String COL_NAME = "func-suite";
   
   @Inject
-  private CaseFactory caseFactory;
-  
-  @Inject
-  private FunctionalProjectService projectService;
+  private KeywordProjectService projectService;
   
   @Inject
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   
   @Inject
-  private ReferenceFactory<DataDrivenReference> drivenRefFactory;
+  private ReferenceFactory<CaseReference> caseRefFactory;
   
   @Inject
   SuiteService(MongoDBService mongo, Logger logger) {
@@ -55,7 +49,6 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   @Override
   public Suite transform(DBObject source) {
     
-    ObjectMapper mapper = new ObjectMapper();
     BasicDBObject obj = (BasicDBObject) source;
     SuiteBuilder builder = new SuiteBuilder();
     
@@ -75,28 +68,9 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     BasicDBList cases = (BasicDBList) obj.get("cases");
     for (Object foo : cases) {
       BasicDBObject sel1 = (BasicDBObject) foo;
-      
-      DataDrivenReference driven = null;
-      if (sel1.get("data_driven") != null) {
-        driven = drivenRefFactory.create(((BasicDBObject)sel1.get("data_driven")).getString("_id"));
-      }
-      Case caze = caseFactory.create(sel1.getString("name"), driven);
-      
-      if (sel1.get("actions") == null) {
-        builder.addCases(caze);
-        continue;
-      }
-      
-      BasicDBList actions = (BasicDBList) sel1.get("actions");
-      for (Object bar : actions) {
-        try {
-          caze.addAction(mapper.readTree(bar.toString()));
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      
-      builder.addCases(caze);
+
+      CaseReference caseRef = caseRefFactory.create(sel1.getString("_id"));
+      builder.addCases(caseRef);
     }
     
     Suite suite = builder.build();
@@ -110,8 +84,8 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     super.delete(obj);
     
     SuiteReference suiteRef = suiteRefFactory.create(obj.getId());
-    PageList<FunctionalProject> list = projectService.findIn("suites", suiteRef);
-    FunctionalProject project = list.next().get(0);
+    PageList<KeywordProject> list = projectService.findIn("suites", suiteRef);
+    KeywordProject project = list.next().get(0);
     project.removeSuite(suiteRef);
     projectService.update(project);
   }

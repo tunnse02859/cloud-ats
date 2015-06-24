@@ -15,6 +15,8 @@ import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
 import org.ats.services.functional.Suite.SuiteBuilder;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.event.AbstractEventTestCase;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -24,6 +26,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
@@ -32,7 +36,7 @@ import com.mongodb.util.JSON;
  *
  * Apr 8, 2015
  */
-public class SuiteTemplateTestCase {
+public class SuiteTemplateTestCase extends AbstractEventTestCase {
   
   /** .*/
   private MongoDBService mongoService;
@@ -42,7 +46,10 @@ public class SuiteTemplateTestCase {
   
   /** .*/
   private CaseFactory caseFactory;
-
+  
+  private CaseService caseService;
+  
+  private ReferenceFactory<CaseReference> caseRefFactory;
   
   @BeforeClass
   public void init() throws Exception {
@@ -53,7 +60,10 @@ public class SuiteTemplateTestCase {
         new DataDrivenModule(),
         new FunctionalServiceModule());
     
+    
+    this.caseService = injector.getInstance(CaseService.class);
     this.caseFactory = injector.getInstance(CaseFactory.class);
+    this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -141,11 +151,12 @@ public class SuiteTemplateTestCase {
     JsonNode stepsNode = rootNode.get("steps");
 
     Case caze = caseFactory.create("test", null);
-    
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
-    builder.addCases(caze);
+    caseService.create(caze);
+    
+    builder.addCases(caseRefFactory.create(caze.getId()));
     
     try {
       String output = builder.build().transform();

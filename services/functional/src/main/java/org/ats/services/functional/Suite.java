@@ -29,11 +29,11 @@ import com.mongodb.DBObject;
 @SuppressWarnings("serial")
 public class Suite extends AbstractTemplate {
   
-  private Map<String, Case> cases = new HashMap<String, Case>();
+  private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
   
   private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
   
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, Case> cases , List<DataDrivenReference> dataDrivens, DBObject raw) { 
+  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, CaseReference> cases , List<DataDrivenReference> dataDrivens, DBObject raw) { 
     this.put("_id", UUID.randomUUID().toString());
     this.put("package_name", packageName);
     this.put("extra_imports", extraImports);
@@ -44,8 +44,8 @@ public class Suite extends AbstractTemplate {
     
     this.cases = cases;
     BasicDBList list = new BasicDBList();
-    for (Case caze : cases.values()) {
-      list.add(caze);
+    for (CaseReference caze : cases.values()) {
+      list.add(caze.toJSon());
     }
     this.put("cases", list);
     
@@ -57,8 +57,17 @@ public class Suite extends AbstractTemplate {
   public String getId() {
     return this.getString("_id");
   }
+  
+  public void removeCase(CaseReference caseRef) {
+    this.cases.remove(caseRef.getId());
+    BasicDBList list = new BasicDBList();
+    for (CaseReference caze : cases.values()) {
+      list.add(caze);
+    }
+    this.put("cases", list);
+  }
 
-  public Collection<Case> getCases() {
+  public Collection<CaseReference> getCases() {
     return Collections.unmodifiableCollection(cases.values());
   }
   
@@ -67,8 +76,8 @@ public class Suite extends AbstractTemplate {
     StringBuilder sbCase = new StringBuilder();
     StringBuilder sbDataDriven = new StringBuilder();
     
-    for (Case caze : cases.values()) {
-      sbCase.append(caze.transform());
+    for (CaseReference caze : cases.values()) {
+      sbCase.append(caze.get().transform());
     }
     for(DataDrivenReference ref : dataDrivens) {
       DataDriven data = ref.get();
@@ -106,7 +115,7 @@ public class Suite extends AbstractTemplate {
     
     private int timeoutSeconds;
     
-    private Map<String, Case> cases = new HashMap<String, Case>();
+    private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
     
     private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
 
@@ -142,9 +151,9 @@ public class Suite extends AbstractTemplate {
       return this;
     }
     
-    public SuiteBuilder addCases(Case...cases) {
-      for (Case caze : cases) {
-        this.cases.put(caze.getName(), caze);
+    public SuiteBuilder addCases(CaseReference...cases) {
+      for (CaseReference caze : cases) {
+        this.cases.put(caze.getId(), caze);
       }
       return this;
     }

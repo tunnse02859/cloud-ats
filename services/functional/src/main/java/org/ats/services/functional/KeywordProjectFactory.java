@@ -10,8 +10,8 @@ import com.google.inject.assistedinject.Assisted;
  *
  * May 5, 2015
  */
-public interface FunctionalProjectFactory {
+public interface KeywordProjectFactory {
 
-  public FunctionalProject create(@Assisted("name") String name);
+  public KeywordProject create(@Assisted("name") String name);
   
 }
