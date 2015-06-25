@@ -230,4 +230,51 @@ public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
     } catch (IllegalArgumentException e) {
     }
   }
+  
+  @Test
+  public void testCustomKeyword() throws Exception {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    KeywordProject project = funcFactory.create("Jira Automation");
+    
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
+    JsonNode stepsNode = rootNode.get("steps");
+    
+    CustomKeyword keyword = new CustomKeyword("custom_keyword");
+    for (JsonNode json : stepsNode) {
+      keyword.addAction(json);
+    }
+    project.addCustomKeyword(keyword);
+    funcService.create(project);
+    
+    project = funcService.get(project.getId());
+    Assert.assertEquals(project.getCustomKeywords().size(), 1);
+    
+    CustomKeyword persitedKeyword = project.getCustomKeywords().iterator().next();
+    Assert.assertEquals(persitedKeyword.getName(), keyword.getName());
+    Assert.assertEquals(persitedKeyword.getActions(), keyword.getActions());
+    
+    String actions = "[{\"type\":\"get\",\"url\":\"http://saucelabs.com/test/guinea-pig/\"}, {\"type\":\"clickElement\",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"}}]";
+    stepsNode = m.readTree(actions);
+    keyword = new CustomKeyword("custom_keyword");
+    for (JsonNode json : stepsNode) {
+      keyword.addAction(json);
+    }
+    project.addCustomKeyword(keyword);
+    funcService.update(project);
+    
+    project = funcService.get(project.getId());
+    Assert.assertEquals(project.getCustomKeywords().size(), 1);
+    
+    persitedKeyword = project.getCustomKeywords().iterator().next();
+    Assert.assertEquals(persitedKeyword.getName(), "custom_keyword");
+    Assert.assertEquals(persitedKeyword.getActions().size(), 2);
+    
+    project.removeCustomKeyword("custom_keyword");
+    funcService.update(project);
+    project = funcService.get(project.getId());
+    Assert.assertEquals(project.getCustomKeywords().size(), 0);
+  }
 }

@@ -4,9 +4,12 @@
 package org.ats.services.functional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.ats.common.PageList;
@@ -37,6 +40,8 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   
   private KeywordProjectService projectService;
+  
+  private Map<String, CustomKeyword> customKeywords = new HashMap<String, CustomKeyword>();
   
   @Inject
   KeywordProject(ReferenceFactory<TenantReference> tenantRefFactory, 
@@ -125,5 +130,37 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
     }
     
     return Collections.unmodifiableList(suites);
+  }
+  
+  /**
+   * To add custom keywords into project. The keyword has same name that will be overridden.
+   * @param keywords
+   */
+  public void addCustomKeyword(CustomKeyword... keywords) {
+    BasicDBList list = new BasicDBList();
+    for (CustomKeyword keyword : keywords) {
+      this.customKeywords.put(keyword.getName(), keyword);
+    }
+    for (CustomKeyword keyword : customKeywords.values()) {
+      list.add(keyword);
+    }
+    this.put("custom_keywords", list);
+  }
+  
+  public void removeCustomKeyword(String keywordName) {
+    this.customKeywords.remove(keywordName);
+    BasicDBList list = new BasicDBList();
+    for (CustomKeyword keyword : customKeywords.values()) {
+      list.add(keyword);
+    }
+    this.put("custom_keywords", list);
+  }
+  
+  public void removeCustomKeyword(CustomKeyword keyword) {
+    this.customKeywords.remove(keyword.getName());
+  }
+  
+  public Collection<CustomKeyword> getCustomKeywords() {
+    return Collections.unmodifiableCollection(customKeywords.values());
   }
 }
