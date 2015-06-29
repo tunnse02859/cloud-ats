@@ -33,3 +33,7 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# Performance controller
+POST 	/api/v1/performance/createWizard	@controllers.PerformanceController.createPerformanceTestWizard()
+POST	/api/v1/performance/uploadFile		@controllers.PerformanceController.createPerformanceTestByFile()

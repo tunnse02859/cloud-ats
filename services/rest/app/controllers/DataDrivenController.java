@@ -101,14 +101,12 @@ public class DataDrivenController extends Controller {
     
     JsonNode json = request().body().asJson();
     String id = json.get("id").asText();
-    String name = json.get("name").asText();
     JsonNode dataset = json.get("dataset");
     DataDriven driven = dataDrivenService.get(id);
     
-    if (dataset.toString().equals(driven.getDataSource()) && driven.getName().equals(name)) {
+    if (dataset.toString().equals(driven.getDataSource())) {
       return status(304);
     }
-    driven.put("name", name);
     driven.setDataSource(dataset.toString());
     dataDrivenService.update(driven);
     
