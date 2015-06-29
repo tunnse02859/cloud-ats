@@ -17,6 +17,7 @@ public class Value extends AbstractTemplate {
   private boolean isVariable;
   
   public Value(String value, boolean isVariable) {
+    if (value.indexOf("\"") != -1) value = value.replace("\"", "\\\"");
     this.value = value;
     this.isVariable = isVariable;
   }
