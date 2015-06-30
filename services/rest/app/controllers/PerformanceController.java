@@ -7,16 +7,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import org.ats.common.StringUtil;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterFactory;
 import org.ats.services.performance.JMeterParser;
 import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
+import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
+import org.ats.services.performance.PerformanceProject;
+import org.ats.services.performance.PerformanceProjectFactory;
+import org.ats.services.performance.PerformanceProjectService;
 
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
@@ -41,6 +47,15 @@ public class PerformanceController extends Controller {
   @Inject
   private JMeterScriptService jmeterService;
   
+  @Inject
+  private PerformanceProjectFactory projectFactory;
+  
+  @Inject
+  private PerformanceProjectService projectService;
+  
+  @Inject
+  private ReferenceFactory<JMeterScriptReference> jmeterReferenceFactory;
+  
   /**
    * Create test performance project by using wizard
    * @return
@@ -59,18 +74,26 @@ public class PerformanceController extends Controller {
     JsonNode nodeSamplers = data.get("samplers");
     JMeterSampler[] arraySamplers = new JMeterSampler[nodeSamplers.size()];
     
+    // declare variables
+    String sampler_url;
+    String sampler_assertionTime;
+    long sampler_constantTime;
+    String sampler_method;
+    String sampler_name;
+    JsonNode nodeParams;
+    JMeterArgument[] arrayParams;
     // loops through all samplers
     int i = 0;
     for (JsonNode jsonSampler : nodeSamplers) {
       
-      String sampler_url = jsonSampler.get("sampler_url").toString();
-      String sampler_assertionTime = jsonSampler.get("sampler_assertionTime").toString();
-      long sampler_constantTime = jsonSampler.get("sampler_constantTime").asLong();
-      String sampler_method = jsonSampler.get("sampler_method").asText();
-      String sampler_name = jsonSampler.get("sampler_name").toString();
+      sampler_url = jsonSampler.get("sampler_url").toString();
+      sampler_assertionTime = jsonSampler.get("sampler_assertionTime").toString();
+      sampler_constantTime = jsonSampler.get("sampler_constantTime").asLong();
+      sampler_method = jsonSampler.get("sampler_method").asText();
+      sampler_name = jsonSampler.get("sampler_name").toString();
       
-      JsonNode nodeParams = jsonSampler.get("params");
-      JMeterArgument[] arrayParams = new JMeterArgument[nodeParams.size()];
+      nodeParams = jsonSampler.get("params");
+      arrayParams = new JMeterArgument[nodeParams.size()];
       
       // loops through all parameters in each sampler
       int j = 0;
@@ -105,32 +128,56 @@ public class PerformanceController extends Controller {
   public Result createPerformanceTestByFile() throws FileNotFoundException, IOException {
     
     MultipartFormData body = request().body().asMultipartFormData();
-    FilePart uploadedFile = body.getFile("uploadedFile");
+    List<FilePart> listFiles = body.getFiles();
     
-    String testName = request().getQueryString("project_name");
+    String projectName = request().getQueryString("project_name");
     
-    if(uploadedFile != null) {
-      
-      try {
-        // read file
-        FileInputStream fis = new FileInputStream(uploadedFile.getFile());
-       
-        // get file content
-        String content = StringUtil.readStream(fis);
-        
-        // create jmeter script
-        JMeterParser parse = jmeterFactory.createJMeterParser(content);
-        JMeterScript script = parse.parse();
-        
-        script.put("name", testName);
-        // save into database
-        jmeterService.create(script);
-      } catch (Exception e) {
-        throw new RuntimeException();
-      }
-     
-     return ok();
+    // return badRequest if file amount is lower 1
+    if (listFiles.size() <= 0) {
+      return badRequest();
     }
-    return badRequest();
+    
+    int i = 0;
+    
+    // create performance project model 
+    PerformanceProject project = projectFactory.create(projectName);
+    
+    // declare variables
+    FileInputStream fis;
+    String content;
+    JMeterParser parse;
+    JMeterScript script;
+    JMeterScriptReference jmeterReference;
+    
+    // loop though files
+    for (FilePart file : listFiles) {
+      i ++;
+      try {
+        // read each file and get file content
+        fis = new FileInputStream(file.getFile());
+        content = StringUtil.readStream(fis);
+        
+        // create jmeter parser by file content and build jmeter script 
+        parse = jmeterFactory.createJMeterParser(content);
+        script = parse.parse();
+        
+        script.put("name", "step "+ i);
+        
+        // create jmeter reference script and add jmeter reference to performance project model
+        jmeterReference = jmeterReferenceFactory.create(script.getId());
+        project.addScript(jmeterReference);
+        
+        // save jmeter script into database
+        jmeterService.create(script);
+        
+      } catch(Exception e) {
+         throw new RuntimeException();
+      }
+    }
+    
+    // save performance project into database
+    projectService.create(project);
+    
+    return ok();
   }
 }

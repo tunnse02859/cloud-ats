@@ -68,7 +68,9 @@ public class Global extends GlobalSettings {
           new PerformanceServiceModule(),
           new GeneratorModule(),
           new VMachineServiceModule(vmConf),
-          new ExecutorModule());
+          new ExecutorModule())
+          new FunctionalServiceModule(),
+          new PerformanceServiceModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);
