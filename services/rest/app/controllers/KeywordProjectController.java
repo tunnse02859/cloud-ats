@@ -1,29 +1,10 @@
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ats.common.PageList;
-import org.ats.services.keyword.CaseReference;
-import org.ats.services.keyword.KeywordProject;
-import org.ats.services.keyword.KeywordProjectFactory;
-import org.ats.services.keyword.KeywordProjectService;
-import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.Suite.SuiteBuilder;
-import org.ats.services.keyword.SuiteReference;
-import org.ats.services.keyword.SuiteService;
-import org.ats.services.organization.acl.Authenticated;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
-
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import actions.CorsComposition;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.inject.Inject;
-
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.datadriven.DataDrivenService;
 import org.ats.services.keyword.Case;
@@ -40,14 +21,15 @@ import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Inject;
-import com.mongodb.BasicDBObject;
-
-import actions.CorsComposition.Cors;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import actions.CorsComposition.Cors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.Inject;
 /**
  * @author NamBV2
  *
@@ -82,6 +64,7 @@ public class KeywordProjectController extends Controller{
     JsonNode casesNode = json.get("cases");
     String nameKeywordProject = json.get("wizardData").get("project_name").asText();
     KeywordProject keywordProject = keywordProjectFactory.create(nameKeywordProject);
+    Map<String, Case> listCase = new HashMap<String, Case>();
  
     for(int i = 0; i < casesNode.size(); i++) {
       Case caze;
@@ -92,12 +75,15 @@ public class KeywordProjectController extends Controller{
       } else {
         caze = caseFactory.create(caseName, null);
       }
+      
+      //Add action for test cases
       for(JsonNode action:casesNode.get(i).get("steps")) {
         caze.addAction(action); 
       }
+      listCase.put(caze.get("name").toString(),caze);
       caseService.create(caze);
     }
-
+    
     for(int j = 0; j < json.get("suites").size(); j++) {
       
       //define variable for suites
@@ -111,25 +97,18 @@ public class KeywordProjectController extends Controller{
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS);
-
-      for(JsonNode node:caseInSuiteNode) {
-        PageList<Case> list = caseService.query(new BasicDBObject("name", node.get("name").asText()));
-        /*while(list.hasNext()) {
-          List<Case> listCase = list.next();
-          suiteBuilder.addCases(caseRef.create(listCase.get(0).getId()));
-          break;
-        }*/
-        List<Case> listCase = list.next();
-        suiteBuilder.addCases(caseRef.create(listCase.get(0).getId()));
-      }
       
+      for(JsonNode node:caseInSuiteNode) {
+        Case caseInSuite = listCase.get(node.get("name").asText());
+        suiteBuilder.addCases(caseRef.create(caseInSuite.getId()));
+      }
       suite = suiteBuilder.build();
       suiteService.create(suite);
       keywordProject.addSuite(suiteRef.create(suite.getId()));
     }
     keywordProjectService.create(keywordProject);
       
-    return ok();
+    return ok(Json.parse(keywordProject.toString()));
   }
   
   //
