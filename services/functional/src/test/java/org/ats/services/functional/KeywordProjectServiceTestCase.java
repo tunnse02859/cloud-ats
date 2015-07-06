@@ -40,7 +40,7 @@ import com.mongodb.util.JSON;
  *
  * May 5, 2015
  */
-public class FunctionalProjectServiceTestCase extends AbstractEventTestCase {
+public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
 
   private KeywordProjectService funcService;
 
