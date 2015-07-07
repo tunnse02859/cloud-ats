@@ -31,6 +31,7 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
 # Keyword project controller
 POST	/api/v1/keyword					@controllers.KeywordProjectController.newData()
+GET		/api/v1/getList/:tenant/:space		@controllers.KeywordProjectController.getListKeywordProject(tenant,space)
 
 # Upload script
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()

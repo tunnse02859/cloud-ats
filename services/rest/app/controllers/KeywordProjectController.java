@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.datadriven.DataDrivenService;
@@ -24,19 +25,20 @@ import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import actions.CorsComposition.Cors;
+import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 /**
  * @author NamBV2
  *
  * Jun 29, 2015
  */
 
-@Cors
+@CorsComposition.Cors
 @Authenticated
 public class KeywordProjectController extends Controller{
   
@@ -53,6 +55,21 @@ public class KeywordProjectController extends Controller{
   @Inject ReferenceFactory<CaseReference> caseRef;
   
   @Inject ReferenceFactory<SuiteReference> suiteRef;
+  
+  @Inject
+  private SuiteService suiteService;
+  
+  @Inject
+  private KeywordProjectService keywordProjectService;
+  
+  @Inject
+  private KeywordProjectFactory projectFactory;
+  
+  @Inject
+  private ReferenceFactory<SuiteReference> suiteRefFactory;
+  
+  @Inject
+  private ReferenceFactory<CaseReference> caseRefFactory;
   
   private Suite suite;
   
@@ -111,22 +128,7 @@ public class KeywordProjectController extends Controller{
     return ok(Json.parse(keywordProject.toString()));
   }
   
-  //
-  @Inject
-  private SuiteService suiteService;
-  
-  @Inject
-  private KeywordProjectService keywordProjectService;
-  
-  @Inject
-  private KeywordProjectFactory projectFactory;
-  
-  @Inject
-  private ReferenceFactory<SuiteReference> suiteRefFactory;
-  
-  @Inject
-  private ReferenceFactory<CaseReference> caseRefFactory;
-  
+ 
   public Result getTestsuites(String projectId) {
     
     KeywordProject project = keywordProjectService.get(projectId);
@@ -257,5 +259,24 @@ public class KeywordProjectController extends Controller{
     
     suiteService.delete(id);
     return ok();
+  }
+  public Result getListKeywordProject(String tenant, String space) {
+    
+    BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
+    query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
+    
+    PageList<KeywordProject> list = keywordProjectService.query(query);
+    list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    while(list.hasNext()) {
+      List<KeywordProject> listProject = list.next();
+      for(KeywordProject item : listProject) {
+        array.add(Json.parse(item.toString()));
+      }
+    }
+    System.out.println(array);
+    return ok(array);
+    
   }
 }
