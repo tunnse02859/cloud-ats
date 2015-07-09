@@ -49,7 +49,7 @@
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
-				<artifactId>functional</artifactId>
+				<artifactId>keyword</artifactId>
 				<version>1.0.0-Alpha-1-SNAPSHOT</version>
 			</dependency>
 
@@ -325,6 +325,7 @@
 
 	<modules>
 		<module>common</module>
+		<module>jenkins</module>
 		<module>services</module>
 	</modules>
 

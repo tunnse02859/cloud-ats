@@ -17,7 +17,7 @@
 		<module>database</module>
 		<module>organization</module>
 		<module>event</module>
-		<module>functional</module>
+		<module>keyword</module>
 		<module>datadriven</module>
 		<module>performance</module>
 		<module>cloud</module>

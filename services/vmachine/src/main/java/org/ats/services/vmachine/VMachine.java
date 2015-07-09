@@ -61,6 +61,10 @@ public class VMachine extends AbstractEntity<VMachine> {
     return this.getBoolean("ui");
   }
   
+  public void setPublicIp(String publicIp) {
+    this.put("public_ip", publicIp);
+  }
+  
   public String getPublicIp() {
     return this.getString("public_ip");
   }

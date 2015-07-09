@@ -9,7 +9,7 @@
 		<version>1.0.0-Alpha-1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>functional</artifactId>
+	<artifactId>keyword</artifactId>
   <packaging>jar</packaging>
 
 	<dependencies>

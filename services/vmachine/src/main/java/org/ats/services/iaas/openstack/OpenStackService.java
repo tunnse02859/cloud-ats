@@ -3,9 +3,11 @@
  */
 package org.ats.services.iaas.openstack;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.common.ssh.SSHClient;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.iaas.CreateVMException;
 import org.ats.services.iaas.DestroyTenantException;
@@ -35,13 +37,23 @@ import org.jclouds.openstack.keystone.v2_0.options.CreateTenantOptions;
 import org.jclouds.openstack.keystone.v2_0.options.CreateUserOptions;
 import org.jclouds.openstack.neutron.v2.NeutronApi;
 import org.jclouds.openstack.neutron.v2.domain.ExternalGatewayInfo;
+import org.jclouds.openstack.neutron.v2.domain.FloatingIP;
+import org.jclouds.openstack.neutron.v2.domain.FloatingIP.CreateFloatingIP;
 import org.jclouds.openstack.neutron.v2.domain.Network;
 import org.jclouds.openstack.neutron.v2.domain.Network.CreateNetwork;
 import org.jclouds.openstack.neutron.v2.domain.Router;
 import org.jclouds.openstack.neutron.v2.domain.Router.CreateRouter;
+import org.jclouds.openstack.neutron.v2.domain.Rule.CreateBuilder;
+import org.jclouds.openstack.neutron.v2.domain.Rule.CreateRule;
+import org.jclouds.openstack.neutron.v2.domain.RuleDirection;
+import org.jclouds.openstack.neutron.v2.domain.RuleEthertype;
+import org.jclouds.openstack.neutron.v2.domain.RuleProtocol;
+import org.jclouds.openstack.neutron.v2.domain.SecurityGroup;
 import org.jclouds.openstack.neutron.v2.domain.Subnet;
 import org.jclouds.openstack.neutron.v2.domain.Subnet.CreateSubnet;
+import org.jclouds.openstack.neutron.v2.extensions.FloatingIPApi;
 import org.jclouds.openstack.neutron.v2.extensions.RouterApi;
+import org.jclouds.openstack.neutron.v2.extensions.SecurityGroupApi;
 import org.jclouds.openstack.neutron.v2.features.NetworkApi;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.Address;
@@ -59,6 +71,8 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
@@ -113,7 +127,7 @@ public class OpenStackService implements IaaSServiceInterface {
     this.col = mongo.getDatabase().getCollection("openstack-identity");
   }
   
-  private KeystoneApi createKeystoneAPI(String tenant) {
+  KeystoneApi createKeystoneAPI(String tenant) {
     Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
     
     BasicDBObject credential = getCredential(tenant);
@@ -126,7 +140,7 @@ public class OpenStackService implements IaaSServiceInterface {
         .endpoint(adminKeystoneEndpoint).modules(modules).buildApi(KeystoneApi.class);
   }
   
-  private NeutronApi createNeutronAPI(String tenant) {
+  NeutronApi createNeutronAPI(String tenant) {
     Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
     
     BasicDBObject credential = getCredential(tenant);
@@ -141,7 +155,7 @@ public class OpenStackService implements IaaSServiceInterface {
         .buildApi(NeutronApi.class);
   }
   
-  private NovaApi createNovaApi(String tenant) {
+  NovaApi createNovaApi(String tenant) {
     Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
     
     BasicDBObject credential = getCredential(tenant);
@@ -242,6 +256,9 @@ public class OpenStackService implements IaaSServiceInterface {
           if (externalNetworkId == null) {
             throw new InitializeTenantException("Can not create a tenant without external network. Contact system administrator");
           }
+          
+          //Add security group
+          updateDefaultSecurityGroup(tenantRef);
           
           //Create tenant's router
           Optional<? extends RouterApi> routerApiExtension = neutronAPI.getRouterApi(region);
@@ -382,7 +399,67 @@ public class OpenStackService implements IaaSServiceInterface {
   public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
     String flavorId = getFlavorIdByName(tenant, "m1.small");
     String imageId = getImageIdByName(tenant, systemImage);
-    return createVM(imageId, flavorId, true, false, tenant, space);
+    VMachine vm = createVM(imageId, flavorId, true, false, tenant, space);
+
+    //create floating ip for system vm
+    FloatingIP floatingIp = getFloatingIPAvailable(tenant);
+    NovaApi novaApi = createNovaApi(tenant.getId());
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    org.jclouds.openstack.nova.v2_0.extensions.FloatingIPApi floatingIpApi = novaApi.getFloatingIPApi(region).get();
+    floatingIpApi.addToServer(floatingIp.getFloatingIpAddress(), vm.getId());
+    vm.setPublicIp(floatingIp.getFloatingIpAddress());
+    vmachineService.update(vm);
+    
+    //restart jenkins
+    try {
+      if (SSHClient.checkEstablished(floatingIp.getFloatingIpAddress(), 22, 300)) {
+        Session session = SSHClient.getSession(floatingIp.getFloatingIpAddress(), 22, "cloudats", "#CloudATS");
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        String command = "nohup java -jar jenkins.war --prefix=/jenkins > log.txt 2 > /dev/null &";                
+        channel.setCommand(command);
+        OutputStream out = channel.getOutputStream();
+        channel.connect();
+
+        out.write(("#CloudATS\n").getBytes());
+        out.flush();
+        SSHClient.printOut(System.out, channel);
+        channel.disconnect();
+        session.disconnect();
+      }
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("Cannot connect to vm");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    
+    return vm;
+  }
+  
+  private FloatingIP getFloatingIPAvailable(TenantReference tenant) {
+    NeutronApi neutronApi = createNeutronAPI(tenant.getId());
+    NovaApi novaApi = createNovaApi(tenant.getId());
+    
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    
+    FloatingIPApi floatingIpApi = neutronApi.getFloatingIPApi(region).get();
+    
+    for (FloatingIP sel : floatingIpApi.list().concat()) {
+      if (sel.getFixedIpAddress() == null) {
+        return sel;
+      }
+    }
+    
+    NetworkApi networkApi = neutronApi.getNetworkApi(region);
+
+    String externalNetworkId = null;
+    for (Network sel : networkApi.list().concat()) {
+      if (externalNetwork.equals(sel.getName())) {
+        externalNetworkId = sel.getId();
+        break;
+      }
+    }
+    
+    return floatingIpApi.create(CreateFloatingIP.createBuilder(externalNetworkId).build());
   }
 
   @Override
@@ -417,15 +494,20 @@ public class OpenStackService implements IaaSServiceInterface {
     sb.append(space == null ? "public" : space.getId());
     String serverName = sb.toString();
     sb.setLength(0);
-    
-    CreateServerOptions options = new CreateServerOptions();
+
     sb.append("#cloud-config").append("\n");
-    sb.append("hostname:").append(serverName).append("\n");
-    sb.append("fqdn:").append(serverName).append(".cloud-ats.org").append("\n");
-    sb.append("manage_etc_hosts:true");
-    options.userData(sb.toString().getBytes());
+    if (hasUI) {
+      sb.append("hostname: ").append(serverName).append("\n");
+      sb.append("fqdn: ").append(serverName).append(".cloud-ats.org").append("\n");
+      sb.append("manage_etc_hosts: true").append("\n");
+    }
     
-    ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, options);
+//    if (system) {
+//      sb.append("runcmd:").append("\n");
+//      sb.append("- [ service, jenkins, restart ]");
+//    }
+    
+    ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
     Server server = null;
     do {
       server = serverApi.get(serverCreated.getId());
@@ -436,5 +518,79 @@ public class OpenStackService implements IaaSServiceInterface {
     VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, null, address.getAddr(), Status.Started);
     vmachineService.create(vm);
     return vm;
+  }
+  
+  private void updateDefaultSecurityGroup(TenantReference tenantRef) {
+    NovaApi novaApi = createNovaApi(tenantRef.getId());
+    NeutronApi neutronApi = createNeutronAPI(tenantRef.getId());
+    Optional<SecurityGroupApi> optional = neutronApi.getSecurityGroupApi(novaApi.getConfiguredRegions().iterator().next());
+    if (optional.isPresent()) {
+      SecurityGroupApi securityGroupApi = optional.get();
+      SecurityGroup defaultGroup = securityGroupApi.listSecurityGroups().concat().get(0);
+
+      //create icmp 
+      CreateBuilder createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.ICMP);
+      createBuilder.portRangeMin(0);
+      createBuilder.portRangeMax(255);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 22
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(22);
+      createBuilder.portRangeMax(22);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 80
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(80);
+      createBuilder.portRangeMax(80);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 443
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(443);
+      createBuilder.portRangeMax(443);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 1099
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(1099);
+      createBuilder.portRangeMax(1099);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 5900
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(5900);
+      createBuilder.portRangeMax(5900);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 8080
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(8080);
+      createBuilder.portRangeMax(8080);
+      securityGroupApi.create(createBuilder.build());
+
+      //create port 8081
+      createBuilder = CreateRule.createBuilder(RuleDirection.INGRESS, defaultGroup.getId());
+      createBuilder.ethertype(RuleEthertype.IPV4);
+      createBuilder.protocol(RuleProtocol.TCP);
+      createBuilder.portRangeMin(8081);
+      createBuilder.portRangeMax(8081);
+      securityGroupApi.create(createBuilder.build());
+    }
   }
 }
