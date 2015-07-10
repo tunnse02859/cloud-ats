@@ -3,10 +3,22 @@
   "description": "", 
   "logrotate": false, 
   "": ["0", "0", "0", "0"], 
-  "buildDiscarder": {"stapler-class": "hudson.tasks.LogRotator", "daysToKeepStr": "", "numToKeepStr": "", "artifactDaysToKeepStr": "", "artifactNumToKeepStr": ""}, 
-  "properties": {"stapler-class-bag": "true", "hudson-model-ParametersDefinitionProperty": {}}, 
-  "disable": false, "concurrentBuild": false, 
-  "hasSlaveAffinity": true, "label": "@signed", 
+  "buildDiscarder": {
+    "daysToKeepStr": "", 
+    "numToKeepStr": "", 
+    "artifactDaysToKeepStr": "", 
+    "artifactNumToKeepStr": "",
+    "stapler-class": "hudson.tasks.LogRotator", 
+    "$class": "hudson.tasks.LogRotator"
+  }, 
+  "properties": {
+    "stapler-class-bag": "true", 
+    "hudson-model-ParametersDefinitionProperty": {}
+  }, 
+  "disable": false, 
+  "concurrentBuild": false, 
+  "hasSlaveAffinity": true, 
+  "label": "@remote", 
   "hasCustomQuietPeriod": false, 
   "quiet_period": "5", 
   "hasCustomScmCheckoutRetryCount": false, 
@@ -14,31 +26,28 @@
   "blockBuildWhenUpstreamBuilding": false, 
   "blockBuildWhenDownstreamBuilding": false, 
   "displayNameOrNull": "", 
-  "scm": {
-    "value": "3", 
-    "userRemoteConfigs": {
-      "url": "@gitUrl", 
-      "credentialsId": "7264d003-cbe7-4de9-9d9d-56f45d35f467", 
-      "name": "", 
-      "refspec": ""
-    }, 
-    "branches": {
-      "name": "@ref"
-    }, 
-    "": "auto"
-  }, 
+  "scm": {"value": "0"}, 
   "triggerByDependency": {}, 
-  "rootPOM": "pom.xml", 
-  "goals": "@goals", 
-  "mavenOpts": "@mavenOpts", 
+  "rootPOM": "@pomLocation", 
+  "goals": "clean install", 
+  "mavenOpts": "", 
   "enableTriggerDownstreamProjects": {"blockTriggerWhenBuilding": {}}, 
   "usePrivateRepository": false, 
-  "explicitLocalRepository": {"stapler-class": "hudson.maven.local_repo.DefaultLocalRepositoryLocator"}, 
+  "explicitLocalRepository": {
+    "stapler-class": "hudson.maven.local_repo.DefaultLocalRepositoryLocator", 
+    "$class": "hudson.maven.local_repo.DefaultLocalRepositoryLocator"
+  }, 
   "hasCustomWorkspace": false, 
   "customWorkspace": "", 
   "validationLevel": "-1", 
-  "settings": {"stapler-class": "jenkins.mvn.DefaultSettingsProvider"}, 
-  "globalSettings": {"stapler-class": "jenkins.mvn.DefaultGlobalSettingsProvider"}, 
+  "settings": {
+    "stapler-class": "jenkins.mvn.DefaultSettingsProvider", 
+    "$class": "jenkins.mvn.DefaultSettingsProvider"
+  }, 
+  "globalSettings": {
+    "stapler-class": "jenkins.mvn.DefaultGlobalSettingsProvider", 
+    "$class": "jenkins.mvn.DefaultGlobalSettingsProvider"
+  }, 
   "runIfResult": "failure", 
   "core:apply": ""
 }

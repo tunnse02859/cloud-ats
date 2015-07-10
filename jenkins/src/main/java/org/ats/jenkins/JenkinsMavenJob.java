@@ -34,22 +34,7 @@ import org.rythmengine.Rythm;
 public class JenkinsMavenJob {
   
   /** .*/
-  private final String name;
-  
-  /** .*/
-  private final String assigned;
-  
-  /** .*/
-  private final String gitURL;
-  
-  /** .*/
-  private final String ref;
-  
-  /** .*/
-  private final String goals;
-  
-  /** .*/
-  private final String mavenOpts;
+  private final String name, remote, pomLocation;
   
   /** .*/
   private final JenkinsMaster master;
@@ -67,28 +52,21 @@ public class JenkinsMavenJob {
    * @param mavenOpts empty string for not specified.
    * @throws IOException 
    */
-  public JenkinsMavenJob(JenkinsMaster master, String name, String assigned, String gitURL, String ref, String goals, String mavenOpts) throws IOException {
+  public JenkinsMavenJob(JenkinsMaster master, String name, String remote, String pomLocation) throws IOException {
     this.name = name;
-    this.assigned = assigned;
-    this.gitURL = gitURL;
-    this.ref = ref;
-    this.goals = goals;
-    this.mavenOpts = mavenOpts;
+    this.remote = remote;
+    this.pomLocation = pomLocation;
     this.master = master;
-    
-    String jobTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-template"));
-    this.jobTmpl = Rythm.render(jobTmpl, this.ref);
-    
-    String jobJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-json-template"));
     
     Map<String, String> params = new HashMap<String, String>();
     params.put("name", this.name);
-    params.put("signed", this.assigned);
-    params.put("gitUrl", this.gitURL);
-    params.put("ref", this.ref);
-    params.put("goals", this.goals);
-    params.put("mavenOpts", this.mavenOpts);
+    params.put("remote", this.remote);
+    params.put("pomLocation", this.pomLocation);
     
+    String jobTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-template"));
+    this.jobTmpl = Rythm.render(jobTmpl, params);
+    
+    String jobJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-json-template"));
     this.jobJsonTmpl = Rythm.render(jobJsonTmpl, params);
   }
   
@@ -167,7 +145,7 @@ public class JenkinsMavenJob {
       post.setEntity(this.buildFormData());
       res = client.execute(post, httpContext);
       body = HttpClientUtil.getContentBodyAsString(res);
-      
+      System.out.println(body);
       if (body.length() == 0) {
         return build();
       }
@@ -243,11 +221,10 @@ public class JenkinsMavenJob {
         }
       }
     }
-    list.add(new BasicNameValuePair("_.assignedLabelString", assigned));
     list.add(new BasicNameValuePair("name", name));
-    list.add(new BasicNameValuePair("_.url", gitURL));
-    list.add(new BasicNameValuePair("goals", goals));
-    list.add(new BasicNameValuePair("mavenOpts", mavenOpts));
+    list.add(new BasicNameValuePair("remote", remote));
+    list.add(new BasicNameValuePair("pomLocation", pomLocation));
+    list.add(new BasicNameValuePair("mavenOpts", ""));
     list.add(new BasicNameValuePair("json", jobJsonTmpl));
 
     return new UrlEncodedFormEntity(list);
@@ -270,21 +247,5 @@ public class JenkinsMavenJob {
   
   public String getName() {
     return name;
-  }
-
-  public String getAssigned() {
-    return assigned;
-  }
-
-  public String getGitURL() {
-    return gitURL;
-  }
-  
-  public String getGoals() {
-    return goals;
-  }
-  
-  public String getMavenOpts() {
-    return mavenOpts;
   }
 }

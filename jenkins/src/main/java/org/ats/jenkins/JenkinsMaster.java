@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
@@ -47,8 +48,12 @@ public class JenkinsMaster {
   public boolean isReady() throws IOException {
     CloseableHttpClient client = HttpClientFactory.getInstance();
     String url = buildURL("api/json");
-    HttpResponse response = HttpClientUtil.execute(client, url);
-    return response.getStatusLine().getStatusCode() == 200;
+    try {
+      HttpResponse response = HttpClientUtil.execute(client, url);
+      return response.getStatusLine().getStatusCode() == 200;
+    } catch (HttpHostConnectException e) {
+      return false;
+    }
   }
   
   public boolean isReady(long timeout) throws IOException {
