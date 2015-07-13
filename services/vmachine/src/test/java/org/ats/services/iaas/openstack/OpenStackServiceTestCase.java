@@ -6,6 +6,9 @@ package org.ats.services.iaas.openstack;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.jenkins.JenkinsSlave;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -17,23 +20,11 @@ import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.event.AbstractEventTestCase;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
-import org.jclouds.openstack.neutron.v2.NeutronApi;
-import org.jclouds.openstack.neutron.v2.domain.Rule;
-import org.jclouds.openstack.neutron.v2.domain.Rule.CreateBuilder;
-import org.jclouds.openstack.neutron.v2.domain.Rule.CreateRule;
-import org.jclouds.openstack.neutron.v2.domain.RuleDirection;
-import org.jclouds.openstack.neutron.v2.domain.RuleEthertype;
-import org.jclouds.openstack.neutron.v2.domain.RuleProtocol;
-import org.jclouds.openstack.neutron.v2.domain.SecurityGroup;
-import org.jclouds.openstack.neutron.v2.extensions.SecurityGroupApi;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Optional;
 import com.google.inject.Guice;
 import com.mongodb.BasicDBObject;
 
@@ -68,28 +59,28 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
 
     initService();
     this.openstackService.addCredential("admin", "admin",  "ADMIN_PASS");
-  }
-  
-  @AfterMethod
-  public void tearDown() throws Exception {
-    this.mongoService.dropDatabase();
-  }
-  
-  @AfterClass
-  public void shutdown() throws Exception {
-    this.eventService.stop();
-    this.mongoService.dropDatabase();
-  }
-  
-  //@Test
-  public void testInitAndDestroyTenant() throws Exception {
+    
     Tenant fsoft = tenantFactory.create("fsoft-testonly");
     tenantService.create(fsoft);
     
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     openstackService.initTenant(tenantRef);
+  }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    openstackService.destroyTenant(tenantRef);
     
-    fsoft = tenantService.get(tenantRef.getId(), "tenant_id", "user_id", "network_id", "subnet_id", "router_id");
+    this.eventService.stop();
+    this.mongoService.dropDatabase();
+  }
+  
+  @Test
+  public void testInitAndDestroyTenant() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    Tenant fsoft = tenantService.get(tenantRef.getId(), "tenant_id", "user_id", "network_id", "subnet_id", "router_id");
+    
     Assert.assertNotNull(fsoft.get("tenant_id"));
     Assert.assertNotNull(fsoft.get("user_id"));
     Assert.assertNotNull(fsoft.get("network_id"));
@@ -100,62 +91,65 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     Assert.assertEquals(list.totalPage(), 1);
     List<VMachine> page = list.getPage(1);
     Assert.assertEquals(page.size(), 1);
-    
-//    openstackService.destroyTenant(tenantRef);
-//    fsoft = tenantService.get(tenantRef.getId(), "tenant_id", "user_id", "network_id", "subnet_id", "router_id");
-//    Assert.assertNull(fsoft.get("tenant_id"));
-//    Assert.assertNull(fsoft.get("user_id"));
-//    Assert.assertNull(fsoft.get("network_id"));
-//    Assert.assertNull(fsoft.get("subnet_id"));
-//    Assert.assertNull(fsoft.get("router_id"));
   }
   
-  //@Test
+  @Test
   public void testVMAction() throws Exception {
-    Tenant fsoft = tenantFactory.create("fsoft-testonly");
-    tenantService.create(fsoft);
-    
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    openstackService.initTenant(tenantRef);
     
-    PageList<VMachine> list = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
-    Assert.assertEquals(list.totalPage(), 1);
-    List<VMachine> page = list.getPage(1);
-    Assert.assertEquals(page.size(), 1);
-    
-    VMachine vm = page.get(0);
+    VMachine vm = openstackService.createTestVM(tenantRef, null, false);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
-    Assert.assertTrue(vm.isSystem());
+    Assert.assertFalse(vm.isSystem());
     Assert.assertFalse(vm.hasUI());
     Assert.assertNull(vm.getPublicIp());
-    Assert.assertEquals(vm.getPrivateIp(), "192.168.1.2");
     
     vm = openstackService.stop(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Stopped);
     
     vm = openstackService.start(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
-    openstackService.destroyTenant(tenantRef);
+    Assert.assertNull(vm.getPublicIp());
   }
   
   @Test
-  public void test() throws Exception {
-    Tenant fsoft = tenantFactory.create("fsoft-testonly");
-    tenantService.create(fsoft);
-    
+  public void testRunJenkinsJob() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    openstackService.addCredential(tenantRef.getId());
+    PageList<VMachine> list = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
+    
+    Assert.assertEquals(list.totalPage(), 1);
+    List<VMachine> page = list.getPage(1);
+    Assert.assertEquals(page.size(), 1);
+    
+    VMachine jenkins = page.get(0);
+    Assert.assertTrue(jenkins.isSystem());
+    
+    VMachine vm = openstackService.createTestVM(tenantRef, null, true);
+    
+    JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIp(), "http", "jenkins", 8080);
 
-    openstackService.createSystemVM(tenantRef, null);
-//    openstackService.createSystemVM(tenantRef, null);
-//    openstackService.createSystemVM(tenantRef, null);
-//    openstackService.createSystemVM(tenantRef, null);
-//    openstackService.createSystemVM(tenantRef, null);
-    
-//    
-//    openstackService.createTestVM(tenantRef, null, true);
-//    openstackService.createTestVM(tenantRef, null, false);
-    
+    if (master.isReady(5 * 60 * 1000)) {
+      Assert.assertTrue(new JenkinsSlave(master, vm.getPrivateIp()).join());
+      JenkinsMavenJob job = new JenkinsMavenJob(master, "demo-selenium", vm.getPrivateIp(), "/home/cloudats/projects/demo-selenium/pom.xml");
+      Assert.assertEquals(job.submit(), 1);
+
+      int start = 0;
+      int last = 0;
+      byte[] bytes;
+      
+      while(job.isBuilding(1, System.currentTimeMillis(), 30*1000)) {
+        bytes = job.getConsoleOutput(1, start);
+        last = bytes.length;
+        byte[] next = new byte[last - start];
+        System.arraycopy(bytes, start, next, 0, next.length);
+        start += (last - start);
+
+        if (next.length > 0) {
+          String output = new String(next);
+          System.out.println(output.trim());
+          if (output.indexOf("TestNG652Configurator") != -1) break; 
+        }
+      }
+      
+    }
   }
-  
 }

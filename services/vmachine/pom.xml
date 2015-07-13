@@ -25,6 +25,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-jenkins</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.ats.services</groupId>
 			<artifactId>database</artifactId>
 		</dependency>

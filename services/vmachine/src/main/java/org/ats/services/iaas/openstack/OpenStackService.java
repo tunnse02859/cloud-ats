@@ -3,8 +3,10 @@
  */
 package org.ats.services.iaas.openstack;
 
-import java.io.OutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
@@ -71,8 +73,6 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
@@ -98,6 +98,9 @@ public class OpenStackService implements IaaSServiceInterface {
   
   @Inject
   private VMachineFactory vmachineFactory;
+  
+  @Inject
+  private Logger logger;
   
   @Inject
   OpenStackService(@Named("org.ats.cloud.openstack.keystone.url") String keystoneURL, 
@@ -180,6 +183,7 @@ public class OpenStackService implements IaaSServiceInterface {
     String identity = tenant + ":" + tenant; 
     String password = tenant;
     BasicDBObject obj = new BasicDBObject("_id", tenant).append("identity", identity).append("password", password);
+    this.col.remove(obj);
     this.col.insert(obj);
   }
   
@@ -195,7 +199,7 @@ public class OpenStackService implements IaaSServiceInterface {
    * @throws CreateVMException
    */
   public void initTenant(TenantReference tenantRef) throws InitializeTenantException, CreateVMException {
-    //
+    addCredential(tenantRef.getId());
     org.ats.services.organization.entity.Tenant atsTenant = tenantRef.get();
     
     KeystoneApi keystoneApi = createKeystoneAPI("admin");
@@ -208,6 +212,7 @@ public class OpenStackService implements IaaSServiceInterface {
       CreateTenantOptions tenantOptions = CreateTenantOptions.Builder.description(tenantRef.getId()).enabled(true);
       Tenant tenant = tenantAdminApi.create(tenantRef.getId(), tenantOptions);
       atsTenant.put("tenant_id", tenant.getId());
+      logger.log(Level.INFO, "Created tenant " + tenantRef.getId());
       
       
       Optional<? extends UserAdminApi> userAdminApiExtension = keystoneApi.getUserAdminApi();
@@ -234,6 +239,7 @@ public class OpenStackService implements IaaSServiceInterface {
           tenantAdminApi.addRoleOnTenant(tenant.getId(), user.getId(), roleId);
           addCredential(tenantRef.getId());
           atsTenant.put("user_id", user.getId());
+          logger.log(Level.INFO, "Created user's tenant " + tenantRef.getId());
           
           //Create tenant's network on openstack
           NeutronApi neutronAPI = createNeutronAPI(tenantRef.getId());
@@ -241,10 +247,12 @@ public class OpenStackService implements IaaSServiceInterface {
           NetworkApi networkAPI = neutronAPI.getNetworkApi(region); 
           Network network = networkAPI.create(CreateNetwork.createBuilder(tenantRef.getId() + "-network").build());
           atsTenant.put("network_id", network.getId());
+          logger.log(Level.INFO, "Created network for tenant " + tenantRef.getId());
           
           CreateSubnet createSubnet = CreateSubnet.createBuilder(network.getId(), "192.168.1.0/24").ipVersion(4).name(tenantRef.getId() + "-subnet").build();
           Subnet subnet = neutronAPI.getSubnetApi(region).create(createSubnet);
           atsTenant.put("subnet_id", subnet.getId());
+          logger.log(Level.INFO, "Created subnet for tenant " + tenantRef.getId());
           
           String externalNetworkId = null;
           for (Network sel : networkAPI.list().concat()) {
@@ -259,6 +267,7 @@ public class OpenStackService implements IaaSServiceInterface {
           
           //Add security group
           updateDefaultSecurityGroup(tenantRef);
+          logger.log(Level.INFO, "Update security group for tenant " + tenantRef.getId());
           
           //Create tenant's router
           Optional<? extends RouterApi> routerApiExtension = neutronAPI.getRouterApi(region);
@@ -273,9 +282,11 @@ public class OpenStackService implements IaaSServiceInterface {
             routerApi.addInterfaceForSubnet(router.getId(), subnet.getId());
             atsTenant.put("router_id", router.getId());
             tenantService.update(atsTenant);
+            logger.log(Level.INFO, "Created router for tenant " + tenantRef.getId());
             
             //Create system vm for public space
             createSystemVM(tenantRef, null);
+            logger.log(Level.INFO, "Created system vm for public space on tenant " + tenantRef.getId());
           } else{
             throw new InitializeTenantException("Can not create a tenant without router. Contact system administrator");
           }
@@ -297,11 +308,23 @@ public class OpenStackService implements IaaSServiceInterface {
   public void destroyTenant(TenantReference tenantRef) throws DestroyTenantException, DestroyVMException {
    org.ats.services.organization.entity.Tenant atsTenant = tenantService.get(tenantRef.getId(), "tenant_id", "user_id", "network_id", "subnet_id", "router_id"); 
 
-   //Destroy router of tenant
    NeutronApi neutronAPI = createNeutronAPI("admin");
    String region = neutronAPI.getConfiguredRegions().iterator().next();
    NetworkApi networkAPI = neutronAPI.getNetworkApi(region);
-
+   
+   //Destroy vm of tenant
+   PageList<VMachine> page = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
+   while (page.hasNext()) {
+     List<VMachine> list = page.next();
+     for (VMachine vm : list) {
+       if (vm.isSystem()) {
+         deallocateFloatingIp(vm);
+       }
+       destroy(vm);
+     }
+   }
+   
+ //Destroy router of tenant
    Optional<? extends RouterApi> routerApiExtension = neutronAPI.getRouterApi(region);
    if(routerApiExtension.isPresent()){
      RouterApi routerApi = routerApiExtension.get();
@@ -312,18 +335,15 @@ public class OpenStackService implements IaaSServiceInterface {
      atsTenant.put("subnet_id", null);
    }
    
-   //Destroy vm of tenant
-   PageList<VMachine> page = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
-   while (page.hasNext()) {
-     List<VMachine> list = page.next();
-     for (VMachine vm : list) {
-       destroy(vm);
-     }
-   }
-   
    //destroy network
    networkAPI.delete(atsTenant.getString("network_id"));
    atsTenant.put("network_id", null);
+   
+   //release floating ip
+   FloatingIPApi floatingIpApi = neutronAPI.getFloatingIPApi(region).get();
+   for (FloatingIP ip : floatingIpApi.list().concat()) {
+     floatingIpApi.delete(ip.getId());
+   }
    
    //Destroy tenant and user
    KeystoneApi keystoneApi = createKeystoneAPI("admin");
@@ -359,9 +379,29 @@ public class OpenStackService implements IaaSServiceInterface {
     do {
       server = serverApi.get(machine.getId());
     } while(!server.getStatus().equals(Server.Status.ACTIVE));
-    machine.setStatus(VMachine.Status.Started);
-    vmachineService.update(machine);
-    return machine;
+
+    try {
+      if (!machine.isSystem()) 
+        machine = allocateFloatingIp(machine);
+      
+      if (SSHClient.checkEstablished(machine.getPublicIp(), 22, 300)) {
+        logger.log(Level.INFO, "Connection to  " + machine.getPublicIp() + " is established");
+        
+        if (!machine.isSystem())
+          machine = deallocateFloatingIp(machine);
+        
+        machine.setStatus(VMachine.Status.Started);
+        vmachineService.update(machine);
+        return machine;
+      } else {
+        throw new StartVMException("Cannot connect to vm " + machine.getPrivateIp()); 
+      }
+    } catch (IOException e) {
+      StartVMException ex = new StartVMException("Cannot connect to vm " + machine.getPrivateIp());
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    
   }
 
   @Override
@@ -393,46 +433,21 @@ public class OpenStackService implements IaaSServiceInterface {
       server = serverApi.get(machine.getId());
     }
     while (server != null);
+    vmachineService.delete(machine);
   }
 
   @Override
   public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
     String flavorId = getFlavorIdByName(tenant, "m1.small");
     String imageId = getImageIdByName(tenant, systemImage);
-    VMachine vm = createVM(imageId, flavorId, true, false, tenant, space);
+    return createVM(imageId, flavorId, true, false, tenant, space);
+  }
 
-    //create floating ip for system vm
-    FloatingIP floatingIp = getFloatingIPAvailable(tenant);
-    NovaApi novaApi = createNovaApi(tenant.getId());
-    String region = novaApi.getConfiguredRegions().iterator().next();
-    org.jclouds.openstack.nova.v2_0.extensions.FloatingIPApi floatingIpApi = novaApi.getFloatingIPApi(region).get();
-    floatingIpApi.addToServer(floatingIp.getFloatingIpAddress(), vm.getId());
-    vm.setPublicIp(floatingIp.getFloatingIpAddress());
-    vmachineService.update(vm);
-    
-    //restart jenkins
-    try {
-      if (SSHClient.checkEstablished(floatingIp.getFloatingIpAddress(), 22, 300)) {
-        Session session = SSHClient.getSession(floatingIp.getFloatingIpAddress(), 22, "cloudats", "#CloudATS");
-        ChannelExec channel = (ChannelExec) session.openChannel("exec");
-        String command = "nohup java -jar jenkins.war --prefix=/jenkins > log.txt 2 > /dev/null &";                
-        channel.setCommand(command);
-        OutputStream out = channel.getOutputStream();
-        channel.connect();
-
-        out.write(("#CloudATS\n").getBytes());
-        out.flush();
-        SSHClient.printOut(System.out, channel);
-        channel.disconnect();
-        session.disconnect();
-      }
-    } catch (Exception e) {
-      CreateVMException ex = new CreateVMException("Cannot connect to vm");
-      ex.setStackTrace(e.getStackTrace());
-      throw ex;
-    }
-    
-    return vm;
+  @Override
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+    String flavorId = getFlavorIdByName(tenant, "m1.small");
+    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
+    return createVM(imageId, flavorId, false, hasUI, tenant, space);
   }
   
   private FloatingIP getFloatingIPAvailable(TenantReference tenant) {
@@ -462,13 +477,6 @@ public class OpenStackService implements IaaSServiceInterface {
     return floatingIpApi.create(CreateFloatingIP.createBuilder(externalNetworkId).build());
   }
 
-  @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
-    String flavorId = getFlavorIdByName(tenant, "m1.small");
-    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
-    return createVM(imageId, flavorId, false, hasUI, tenant, space);
-  }
-
   private String getFlavorIdByName(TenantReference tenantRef, String flavorName) {
     NovaApi novaApi = createNovaApi(tenantRef.getId());
     FlavorApi flavorApi = novaApi.getFlavorApi(novaApi.getConfiguredRegions().iterator().next());
@@ -487,25 +495,22 @@ public class OpenStackService implements IaaSServiceInterface {
     return null;
   }
   
-  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) {
+  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
     NovaApi novaApi = createNovaApi(tenant.getId());
-    ServerApi serverApi = novaApi.getServerApi(novaApi.getConfiguredRegions().iterator().next());
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    ServerApi serverApi = novaApi.getServerApi(region);
+    
     StringBuilder sb = new StringBuilder(tenant.getId()).append(system ? "-system" : "").append(hasUI ? "-ui-" : "-nonui-");
     sb.append(space == null ? "public" : space.getId());
     String serverName = sb.toString();
     sb.setLength(0);
 
     sb.append("#cloud-config").append("\n");
-    if (hasUI) {
+    if (hasUI || system) {
       sb.append("hostname: ").append(serverName).append("\n");
       sb.append("fqdn: ").append(serverName).append(".cloud-ats.org").append("\n");
       sb.append("manage_etc_hosts: true").append("\n");
     }
-    
-//    if (system) {
-//      sb.append("runcmd:").append("\n");
-//      sb.append("- [ service, jenkins, restart ]");
-//    }
     
     ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
     Server server = null;
@@ -515,8 +520,61 @@ public class OpenStackService implements IaaSServiceInterface {
     while (!server.getStatus().equals(Server.Status.ACTIVE));
     
     Address address = server.getAddresses().entries().iterator().next().getValue();
-    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, null, address.getAddr(), Status.Started);
-    vmachineService.create(vm);
+    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, 
+        null, address.getAddr(), Status.Started);
+
+    //create floating ip for system vm
+    vm = allocateFloatingIp(vm);
+    logger.log(Level.INFO, "Associate a floating ip " + vm.getPublicIp() + " with fixed ip " + address.getAddr());
+
+    try {
+      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+        
+        if (!system) {
+          vm = deallocateFloatingIp(vm);
+          logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
+        }
+        vmachineService.create(vm);
+        return vm;
+      } else {
+        throw new CreateVMException("Cannot connect to vm");
+      }
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("Cannot connect to vm");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+  }
+  
+  private VMachine allocateFloatingIp(VMachine vm) {
+    NovaApi novaApi = createNovaApi(vm.getTenant().getId());
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    
+    FloatingIP floatingIp = getFloatingIPAvailable(vm.getTenant());
+    org.jclouds.openstack.nova.v2_0.extensions.FloatingIPApi floatingIpApi = novaApi.getFloatingIPApi(region).get();
+    floatingIpApi.addToServer(floatingIp.getFloatingIpAddress(), vm.getId());
+    
+    vm.setPublicIp(floatingIp.getFloatingIpAddress());
+    return vm;
+  }
+  
+  private VMachine deallocateFloatingIp(VMachine vm) {
+    NovaApi novaApi = createNovaApi(vm.getTenant().getId());
+    NeutronApi neutronApi = createNeutronAPI(vm.getTenant().getId());
+    
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    org.jclouds.openstack.nova.v2_0.extensions.FloatingIPApi floatingIpApi = novaApi.getFloatingIPApi(region).get();
+    floatingIpApi.removeFromServer(vm.getPublicIp(), vm.getId());
+    
+    FloatingIPApi neutronFloatingApi = neutronApi.getFloatingIPApi(region).get();
+    for (FloatingIP floatingIp : neutronFloatingApi.list().concat()) {
+      if (vm.getPublicIp().equals(floatingIp.getFloatingIpAddress())) {
+        neutronFloatingApi.delete(floatingIp.getId());
+        break;
+      }
+    }
+    vm.setPublicIp(null);
     return vm;
   }
   
