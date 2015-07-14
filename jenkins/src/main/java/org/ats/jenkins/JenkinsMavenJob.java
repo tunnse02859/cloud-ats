@@ -224,6 +224,7 @@ public class JenkinsMavenJob {
     list.add(new BasicNameValuePair("name", name));
     list.add(new BasicNameValuePair("remote", remote));
     list.add(new BasicNameValuePair("pomLocation", pomLocation));
+    list.add(new BasicNameValuePair("goals", "clean install"));
     list.add(new BasicNameValuePair("mavenOpts", ""));
     list.add(new BasicNameValuePair("json", jobJsonTmpl));
 

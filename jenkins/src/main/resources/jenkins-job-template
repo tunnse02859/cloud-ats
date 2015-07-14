@@ -47,7 +47,6 @@ _.perModuleEmail on
 _.pruneEmptyDirectories on
 _.pruneEmptyDirectories on
 depthOption infinity
-goals install
 hasSlaveAffinity on
 maven.blockTriggerWhenBuilding  on
 maven.enableTriggerDownstreamProjects on

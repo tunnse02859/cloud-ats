@@ -20,7 +20,8 @@
 		<module>keyword</module>
 		<module>datadriven</module>
 		<module>performance</module>
-		<module>cloud</module>
+		<module>generator</module>
+		<module>vmachine</module>
 	</modules>
 
 </project>

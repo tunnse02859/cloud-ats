@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
 	"org.ats.services" % "organization" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "event" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "datadriven" % "1.0.0-Alpha-1-SNAPSHOT",
-	"org.ats.services" % "functional" % "1.0.0-Alpha-1-SNAPSHOT",
+	"org.ats.services" % "keyword" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "performance" % "1.0.0-Alpha-1-SNAPSHOT"
 )
 
