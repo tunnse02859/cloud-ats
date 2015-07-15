@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.ats.common.PageList;
 import org.ats.common.StringUtil;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -24,6 +25,7 @@ import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
 
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -31,6 +33,8 @@ import play.mvc.Result;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 
 /**
@@ -57,6 +61,32 @@ public class PerformanceController extends Controller {
   private ReferenceFactory<JMeterScriptReference> jmeterReferenceFactory;
   
   /**
+   * 
+   * @return
+   */
+  public Result listPerformanceProject() {
+    
+    PageList<PerformanceProject> list = projectService.list();
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    
+    while (list.hasNext()) {
+      
+      List<PerformanceProject> listPer = list.next();
+      ObjectNode object;
+      for (PerformanceProject per : listPer) {
+         object = Json.newObject();
+         object.put("_id", per.getString("_id"));
+         array.add(object);
+      }
+      
+    }
+    System.out.println(array);
+    return ok(array);
+  }
+  
+  
+  /**
    * Create test performance project by using wizard
    * @return
    * @throws UnsupportedEncodingException
@@ -76,7 +106,7 @@ public class PerformanceController extends Controller {
     
     // declare variables
     String sampler_url;
-    String sampler_assertionTime;
+    String sampler_assertionTime = null;
     long sampler_constantTime;
     String sampler_method;
     String sampler_name;
@@ -87,7 +117,11 @@ public class PerformanceController extends Controller {
     for (JsonNode jsonSampler : nodeSamplers) {
       
       sampler_url = jsonSampler.get("sampler_url").toString();
-      sampler_assertionTime = jsonSampler.get("sampler_assertionTime").toString();
+      
+      if (jsonSampler.get("sampler_assertionTime") != null && "".equals(jsonSampler.get("sampler_assertionTime").toString())) {
+        sampler_assertionTime = jsonSampler.get("sampler_assertionTime").toString();
+      }
+      
       sampler_constantTime = jsonSampler.get("sampler_constantTime").asLong();
       sampler_method = jsonSampler.get("sampler_method").asText();
       sampler_name = jsonSampler.get("sampler_name").toString();
@@ -112,9 +146,86 @@ public class PerformanceController extends Controller {
     }
     
     //create jmeter script
-    JMeterScript script = jmeterFactory.createJmeterScript(projectName, loops, users, ramup, false, duration, arraySamplers);
+    JMeterScript script = jmeterFactory.createJmeterScript("Script 1", loops, users, ramup, false, duration, arraySamplers);
     
     jmeterService.create(script); // save jmeter script into database
+    
+    JMeterScriptReference scriptRef = jmeterReferenceFactory.create(script.getId());
+    
+    PerformanceProject project = projectFactory.create(projectName);
+    project.addScript(scriptRef);
+    projectService.create(project);
+    
+    return status(200);
+  }
+  
+  /**
+   * Update performance test script by wizard
+   * @return
+   * @throws UnsupportedEncodingException 
+   */
+  public Result updatePerformanceTestWizard() throws UnsupportedEncodingException {
+    
+    JsonNode data = request().body().asJson();
+        
+    String scriptId = data.get("script_id").asText();
+    int loops = data.get("loops").asInt();
+    int ramup = data.get("ramup").asInt();
+    int duration = data.get("duration").asInt();
+    int users = data.get("users").asInt();
+    
+    JsonNode nodeSamplers = data.get("samplers");
+    JMeterSampler[] arraySamplers = new JMeterSampler[nodeSamplers.size()];
+    
+    // declare variables
+    String sampler_url;
+    String sampler_assertionTime = null;
+    long sampler_constantTime;
+    String sampler_method;
+    String sampler_name;
+    JsonNode nodeParams;
+    JMeterArgument[] arrayParams;
+    // loops through all samplers
+    int i = 0;
+    for (JsonNode jsonSampler : nodeSamplers) {
+      
+      sampler_url = jsonSampler.get("sampler_url").toString();
+      
+      if (jsonSampler.get("sampler_assertionTime") != null && "".equals(jsonSampler.get("sampler_assertionTime").toString())) {
+        sampler_assertionTime = jsonSampler.get("sampler_assertionTime").toString();
+      }
+      
+      sampler_constantTime = jsonSampler.get("sampler_constantTime").asLong();
+      sampler_method = jsonSampler.get("sampler_method").asText();
+      sampler_name = jsonSampler.get("sampler_name").toString();
+      
+      nodeParams = jsonSampler.get("params");
+      arrayParams = new JMeterArgument[nodeParams.size()];
+      
+      // loops through all parameters in each sampler
+      int j = 0;
+      for (JsonNode jsonParam: nodeParams) {
+        
+        //create parameter object
+        arrayParams[j] = jmeterFactory.createArgument(jsonParam.get("name").toString(), jsonParam.get("value").toString());
+        j ++;
+      }
+      
+      //create sampler object
+      arraySamplers[i] = jmeterFactory.createHttpRequest(Method.valueOf(sampler_method), sampler_name, sampler_url, sampler_assertionTime, sampler_constantTime, arrayParams);
+      
+      i ++;
+      
+    }
+    
+    /*JMeterScript script = jmeterService.get(scriptId);
+    script.setLoops(loops);
+    script.setDuration(duration);
+    script.setNumberThreads(users);
+    script.setRamUp(ramup);
+    script.addSampler(arraySamplers);
+    
+    jmeterService.update(script);*/
     
     return status(200);
   }
@@ -161,7 +272,7 @@ public class PerformanceController extends Controller {
         parse = jmeterFactory.createJMeterParser(content);
         script = parse.parse();
         
-        script.put("name", "step "+ i);
+        script.put("name", "script "+ i);
         
         // create jmeter reference script and add jmeter reference to performance project model
         jmeterReference = jmeterReferenceFactory.create(script.getId());

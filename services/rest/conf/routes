@@ -35,5 +35,7 @@ POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Performance controller
+GET		/api/v1/performance/list			@controllers.PerformanceController.listPerformanceProject()
 POST 	/api/v1/performance/createWizard	@controllers.PerformanceController.createPerformanceTestWizard()
 POST	/api/v1/performance/uploadFile		@controllers.PerformanceController.createPerformanceTestByFile()
+PUT		/api/v1/performance/updateScript 	@controllers.PerformanceController.updatePerformanceTestWizard()
