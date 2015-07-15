@@ -8,13 +8,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.ats.services.DataDrivenModule;
-import org.ats.services.FunctionalServiceModule;
+import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
-import org.ats.services.functional.Suite.SuiteBuilder;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseFactory;
+import org.ats.services.keyword.CaseReference;
+import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.event.AbstractEventTestCase;
 import org.testng.Assert;
@@ -58,7 +62,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
         new EventModule(),
         new OrganizationServiceModule(),
         new DataDrivenModule(),
-        new FunctionalServiceModule());
+        new KeywordServiceModule());
     
     
     this.caseService = injector.getInstance(CaseService.class);

@@ -79,13 +79,13 @@ public class FullExample {
       System.out.println("verifyText failed");
     }
 
-    if (wd.findElement(By.id("i_am_an_id")).getText().equals("not " + text + "")) {
+    if (wd.findElement(By.id("i_am_an_id")).getText().equals("not \" + text + \"")) {
       System.out.println("!verifyText failed");
     }
 
     assertEquals(wd.findElement(By.id("i_am_an_id")).getText(), text);
 
-    assertNotEquals(wd.findElement(By.id("i_am_an_id")).getText(), "not " + text + "");
+    assertNotEquals(wd.findElement(By.id("i_am_an_id")).getText(), "not \" + text + \"");
 
     boolean text_is_present = wd.findElement(By.tagName("html")).getText().contains("I am another div");
 
@@ -95,13 +95,13 @@ public class FullExample {
       System.out.println("verifyTextPresent failed");
     }
 
-    if (wd.findElement(By.tagName("html")).getText().contains("not " + text_present + "")) {
+    if (wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \"")) {
       System.out.println("!verifyTextPresent failed");
     }
 
     assertTrue(wd.findElement(By.tagName("html")).getText().contains(text_present));
 
-    assertFalse(wd.findElement(By.tagName("html")).getText().contains("not " + text_present + ""));
+    assertFalse(wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \""));
 
     String body_text = wd.findElement(By.tagName("html")).getText();
 
@@ -109,13 +109,13 @@ public class FullExample {
       System.out.println("verifyBodyText failed");
     }
 
-    if (wd.findElement(By.tagName("html")).getText().equals("not " + body_text + "")) {
+    if (wd.findElement(By.tagName("html")).getText().equals("not \" + body_text + \"")) {
       System.out.println("!verifyBodyText failed");
     }
 
     assertEquals(wd.findElement(By.tagName("html")).getText(), body_text);
 
-    assertNotEquals(wd.findElement(By.tagName("html")).getText(), "not " + body_text + "");
+    assertNotEquals(wd.findElement(By.tagName("html")).getText(), "not \" + body_text + \"");
 
     String page_source = wd.getPageSource();
 
@@ -123,13 +123,13 @@ public class FullExample {
       System.out.println("verifyPageSource failed");
     }
 
-    if (wd.getPageSource().equals("<!-- --> " + page_source + "")) {
+    if (wd.getPageSource().equals("<!-- --> \" + page_source + \"")) {
       System.out.println("!verifyPageSource failed");
     }
 
     assertEquals(wd.getPageSource(), page_source);
 
-    assertNotEquals(wd.getPageSource(), "<!-- --> " + page_source + "");
+    assertNotEquals(wd.getPageSource(), "<!-- --> \" + page_source + \"");
 
     wd.manage().addCookie(new Cookie.Builder("test_cookie", "this-is-a-cookie").path("/").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());
 
@@ -137,7 +137,7 @@ public class FullExample {
 
     String cookie = wd.manage().getCookieNamed("test_cookie").getValue();
 
-    System.out.println("" + cookie + ";");
+    System.out.println("\" + cookie + \";");
 
     if (!(wd.manage().getCookieNamed("test_cookie") != null)) {
       System.out.println("verifyCookiePresent failed");
@@ -149,13 +149,13 @@ public class FullExample {
       System.out.println("verifyCookieByName failed");
     }
 
-    if (wd.manage().getCookieNamed("test_cookie").getValue().equals("not " + cookie + "")) {
+    if (wd.manage().getCookieNamed("test_cookie").getValue().equals("not \" + cookie + \"")) {
       System.out.println("!verifyCookieByName failed");
     }
 
     assertEquals(wd.manage().getCookieNamed("test_cookie").getValue(), cookie);
 
-    assertNotEquals(wd.manage().getCookieNamed("test_cookie").getValue(), "not " + cookie + "");
+    assertNotEquals(wd.manage().getCookieNamed("test_cookie").getValue(), "not \" + cookie + \"");
 
     if (wd.manage().getCookieNamed("test_cookie") != null) {
       wd.manage().deleteCookie(wd.manage().getCookieNamed("test_cookie"));
@@ -212,11 +212,11 @@ public class FullExample {
     wd.findElement(By.id("comments")).click();
     wd.findElement(By.id("comments")).sendKeys("w00t");
 
-    if (wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not " + link_href + "")) {
+    if (wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not \" + link_href + \"")) {
       System.out.println("!verifyElementAttribute failed");
     }
 
-    assertNotEquals(wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not " + link_href + "");
+    assertNotEquals(wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not \" + link_href + \"");
 
     String comments = wd.findElement(By.id("comments")).getAttribute("value");
 

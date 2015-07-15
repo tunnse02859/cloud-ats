@@ -49,7 +49,7 @@ public class VerifyEval {
 
     Object num_of_div_elements = wd.executeScript("return document.querySelectorAll('body div').length");
 
-    if (!wd.executeScript("return " + num_of_div_elements + "").equals("7")) {
+    if (!wd.executeScript("return \" + num_of_div_elements + \"").equals("7")) {
       System.out.println("verifyEval failed");
     }
 

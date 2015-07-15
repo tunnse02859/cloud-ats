@@ -1,0 +1,33 @@
+/**
+ * 
+ */
+package org.ats.services.keyword.action;
+
+import java.io.IOException;
+
+import org.rythmengine.Rythm;
+
+/**
+ * @author TrinhTV3
+ *
+ * Email: TrinhTV3@fsoft.com.vn
+ */
+@SuppressWarnings("serial")
+public class SwitchToFrameByIndex extends AbstractAction {
+
+  private int index;
+
+  public SwitchToFrameByIndex(int index) {
+    this.index = index;
+  }
+  
+  public String transform() throws IOException {
+    StringBuilder sb = new StringBuilder("wd = (FirefoxDriver) wd.switchTo().frame(@index);\n");
+    return Rythm.render(sb.toString(), index);
+  }
+
+  public String getAction() {
+    return "switchToFrameByIndex";
+  }
+  
+}

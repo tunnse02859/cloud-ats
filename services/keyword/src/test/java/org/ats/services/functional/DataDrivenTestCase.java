@@ -9,7 +9,7 @@ import java.io.FileWriter;
 
 import org.ats.common.StringUtil;
 import org.ats.services.DataDrivenModule;
-import org.ats.services.FunctionalServiceModule;
+import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
@@ -19,7 +19,12 @@ import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.datadriven.DataDrivenService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
-import org.ats.services.functional.Suite.SuiteBuilder;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseFactory;
+import org.ats.services.keyword.CaseReference;
+import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
@@ -75,7 +80,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
         new EventModule(),
         new OrganizationServiceModule(),
         new DataDrivenModule(),
-        new FunctionalServiceModule());
+        new KeywordServiceModule());
     
     this.drivenService = injector.getInstance(DataDrivenService.class);
     this.drivenFactory = injector.getInstance(DataDrivenFactory.class);

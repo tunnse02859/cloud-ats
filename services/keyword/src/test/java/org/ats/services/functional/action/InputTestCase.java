@@ -6,11 +6,12 @@ package org.ats.services.functional.action;
 import java.io.IOException;
 
 import org.ats.services.DataDrivenModule;
-import org.ats.services.FunctionalServiceModule;
+import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.event.EventModule;
-import org.ats.services.functional.ActionFactory;
+import org.ats.services.keyword.ActionFactory;
+import org.ats.services.keyword.action.AbstractAction;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ public class InputTestCase {
         new EventModule(),
         new OrganizationServiceModule(),
         new DataDrivenModule(),
-        new FunctionalServiceModule());
+        new KeywordServiceModule());
     
     this.actionFactory = injector.getInstance(ActionFactory.class);
     ObjectMapper mapper = new ObjectMapper();

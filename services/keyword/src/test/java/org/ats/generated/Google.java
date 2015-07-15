@@ -46,7 +46,7 @@ public class Google {
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).click();
-    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys("username: " + username + " / password : " + password + "");
+    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys("username: \" + username + \" / password : \" + password + \"");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).submit();
 

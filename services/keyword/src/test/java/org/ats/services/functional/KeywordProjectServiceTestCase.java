@@ -6,14 +6,25 @@ package org.ats.services.functional;
 import java.io.File;
 
 import org.ats.services.DataDrivenModule;
-import org.ats.services.FunctionalServiceModule;
+import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
-import org.ats.services.functional.Suite.SuiteBuilder;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseFactory;
+import org.ats.services.keyword.CaseReference;
+import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.CustomKeyword;
+import org.ats.services.keyword.KeywordProject;
+import org.ats.services.keyword.KeywordProjectFactory;
+import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.SuiteReference;
+import org.ats.services.keyword.SuiteService;
+import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
@@ -75,7 +86,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
         new EventModule(),
         new OrganizationServiceModule(),
         new DataDrivenModule(),
-        new FunctionalServiceModule());
+        new KeywordServiceModule());
     
     this.funcService = injector.getInstance(KeywordProjectService.class);
     this.funcFactory = injector.getInstance(KeywordProjectFactory.class);
