@@ -66,6 +66,14 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
     this.put("scripts", null);
   }
   
+  public String getName() {
+    return this.getString("name");
+  }
+  
+  public String getId() {
+    return this.getString("_id");
+  }
+  
   public UserReference getCreator() {
     return userRefFactory.create(((BasicDBObject)this.get("creator")).getString("_id"));
   }

@@ -151,6 +151,6 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     perfService.create(performanceProject);
     
-    generetorService.generate("target/perf",  performanceProject, false, null);
+    generetorService.generate("target/perf",  performanceProject, true);
   }
 }

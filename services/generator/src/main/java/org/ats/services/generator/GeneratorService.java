@@ -4,11 +4,13 @@
 package org.ats.services.generator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
@@ -17,7 +19,6 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterSampler;
-import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.PerformanceProject;
@@ -41,16 +42,16 @@ public class GeneratorService {
   @Inject
   PerformanceProjectService perService;
   
-  public void generate(String outDir, PerformanceProject project, boolean compress, List<String> remotes) throws IOException {
-    File sourceDir = new File(outDir + "/src/test/java/org/ats/generated");
+  public void generate(String outDir, PerformanceProject project, boolean compress) throws IOException {
+    File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    File resourceDir = new File(outDir + "/src/test/resources/jmeter/bin");
+    File resourceDir = new File(outDir + "/" + project.getId()  + "/src/test/resources/jmeter/bin");
     resourceDir.mkdirs();
     
     loadJMeterProperties(resourceDir);
     loadJMeterUtilities(sourceDir);
-    loadJMeterPOM(outDir);
+    loadJMeterPOM(outDir + "/" + project.getId());
     
     String runnerTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/JMeterRunner.java.tmpl"));
@@ -106,11 +107,12 @@ public class GeneratorService {
       os.write(runner.getBytes());
       os.flush();
       os.close();
+      
+      if (compress) compress(project.getId(), outDir + "/" + project.getId(), outDir + "/" + project.getId() + ".zip");
     }
   }
   
   public void generate(String outDir, KeywordProject project, boolean compress) throws IOException {
-  //
   }
   
   private void loadJMeterPOM(String outDir) throws IOException {
@@ -147,6 +149,35 @@ public class GeneratorService {
     
     is = Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/Utils.java.tmpl");
     write(is, new FileOutputStream(new File(sourceDir, "Utils.java")));    
+  }
+  
+  private void compress(String projectId, String from, String to) throws IOException {
+    File fromDir = new File(from);
+    ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream(to));
+    write(projectId, fromDir, outDir);
+    outDir.close();
+  }
+  
+  private void write(String projectId, File file, ZipOutputStream outDir) throws IOException {
+    byte[] buffer = new byte[4096]; // Create a buffer for copying
+    int bytes_read;
+    
+    for (String entry : file.list()) {
+      File f = new File(file, entry);
+      if (f.isDirectory()) {
+        write(projectId, f, outDir);
+        continue;
+      }
+      FileInputStream fis = new FileInputStream(f);
+      
+      String path = f.getPath().substring(f.getPath().indexOf(projectId) + 1);
+      ZipEntry zip = new ZipEntry(path);
+      outDir.putNextEntry(zip);
+      while ((bytes_read = fis.read(buffer)) != -1) {
+        outDir.write(buffer, 0, bytes_read);
+      }
+      fis.close();
+    }
   }
   
   private void write(InputStream is, OutputStream out) throws IOException {
