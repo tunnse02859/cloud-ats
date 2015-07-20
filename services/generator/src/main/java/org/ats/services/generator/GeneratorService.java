@@ -17,6 +17,8 @@ import org.ats.common.StringUtil;
 import org.ats.common.http.HttpURL;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.SuiteReference;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterScript;
@@ -113,6 +115,25 @@ public class GeneratorService {
   }
   
   public void generate(String outDir, KeywordProject project, boolean compress) throws IOException {
+    File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
+    sourceDir.mkdirs();
+    
+    loadKeywordPOM(outDir + "/" + project.getId());
+    
+    for (SuiteReference suiteRef : project.getSuites()) {
+      Suite suite = suiteRef.get();
+      FileOutputStream os = new FileOutputStream(new File(sourceDir, suite.getString("suite_name") + ".java"));
+      os.write(suite.transform().getBytes());
+      os.flush();
+      os.close();
+    }
+    
+    if (compress) compress(project.getId(), outDir + "/" + project.getId(),  outDir + "/" + project.getId()  + ".zip");
+  }
+  
+  private void loadKeywordPOM(String outDir) throws IOException {
+    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
+    write(is, new FileOutputStream(new File(outDir, "pom.xml")));
   }
   
   private void loadJMeterPOM(String outDir) throws IOException {

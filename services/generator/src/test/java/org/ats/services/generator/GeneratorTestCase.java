@@ -3,18 +3,29 @@
  */
 package org.ats.services.generator;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
-import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseFactory;
+import org.ats.services.keyword.CaseReference;
+import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.KeywordProject;
+import org.ats.services.keyword.KeywordProjectFactory;
+import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.Suite.SuiteBuilder;
+import org.ats.services.keyword.SuiteReference;
+import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
@@ -35,9 +46,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -47,7 +62,6 @@ import com.google.inject.TypeLiteral;
 public class GeneratorTestCase  extends AbstractEventTestCase {
   
   private AuthenticationService<User> authService;
-  private OrganizationContext context;
   
   private Tenant tenant;
   private Space space;
@@ -57,6 +71,14 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   private PerformanceProjectService perfService;
   private ReferenceFactory<JMeterScriptReference> jmeterScriptRef;
   private JMeterScriptService  jmeterService;
+  
+  private KeywordProjectService keywordProjectService;
+  private KeywordProjectFactory keywordProjectFactory;
+  private SuiteService suiteService;
+  private ReferenceFactory<SuiteReference> suiteRefFactory;
+  private CaseFactory caseFactory;
+  private CaseService caseService;
+  private ReferenceFactory<CaseReference> caseRefFactory;
   
   private GeneratorService generetorService;
 
@@ -75,13 +97,23 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
-    this.context = this.injector.getInstance(OrganizationContext.class);
     
     //performance
     this.perfFactory = injector.getInstance(PerformanceProjectFactory.class);
     this.perfService = injector.getInstance(PerformanceProjectService.class);
     this.jmeterScriptRef = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<JMeterScriptReference>>(){}));
     this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
+    
+    //keyword
+    this.keywordProjectService = injector.getInstance(KeywordProjectService.class);
+    this.keywordProjectFactory = injector.getInstance(KeywordProjectFactory.class);
+    
+    this.suiteService = injector.getInstance(SuiteService.class);
+    this.suiteRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
+    
+    this.caseService = injector.getInstance(CaseService.class);
+    this.caseFactory = injector.getInstance(CaseFactory.class);
+    this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.generetorService = this.injector.getInstance(GeneratorService.class);
     
@@ -113,6 +145,9 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
     this.user.setPassword("12345");
     this.userService.create(this.user);
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
   }
   
   
@@ -124,9 +159,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   
   @Test
   public void testGeneratePerformanceProject() throws IOException {
-    this.authService.logIn("haint@cloud-ats.net", "12345");
-    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
-    
+
     PerformanceProject performanceProject = perfFactory.create("Test Performance");
     
     JMeterFactory factory = new JMeterFactory();
@@ -152,5 +185,59 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     perfService.create(performanceProject);
     
     generetorService.generate("target/perf",  performanceProject, true);
+  }
+  
+  @Test
+  public void testGenerateKeywordProject() throws IOException {
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
+    
+    SuiteBuilder builder = new SuiteBuilder();
+    builder.packageName("org.ats.generated")
+      .suiteName("FullExample")
+      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
+      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
+      .raw((DBObject)JSON.parse(rootNode.toString()));
+    
+    JsonNode stepsNode = rootNode.get("steps");
+    Case caze = caseFactory.create("test", null);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
+
+    Suite fullExampleSuite= builder.build();
+    suiteService.create(fullExampleSuite);
+    
+    rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
+    
+    builder = new SuiteBuilder();
+    builder.packageName("org.ats.generated")
+      .suiteName("AcceptAlert")
+      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
+      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
+      .raw((DBObject)JSON.parse(rootNode.toString()));
+    
+    stepsNode = rootNode.get("steps");
+    caze = caseFactory.create("test", null);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
+    
+    Suite acceptAlertSuite = builder.build();
+    suiteService.create(acceptAlertSuite);
+    
+    KeywordProject project = keywordProjectFactory.create("Full Example");
+    project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
+    project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
+    
+    keywordProjectService.create(project);
+    
+    generetorService.generate("target/fk",  project, true);
   }
 }
