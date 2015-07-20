@@ -29,7 +29,7 @@ public class JMeterSamplerTestCase {
     arguments.add(param2);
 
     JMeterSampler jMeterSampler = new JMeterSampler(Method.POST, "Register",
-        "http://localhost:8080/signup", null, 0, arguments);
+        "http://localhost:8080/signup", null, 0L, arguments);
     jMeterSampler.setName("SignUp");
     Assert.assertEquals(jMeterSampler.getName(), "SignUp");
     Assert.assertEquals(jMeterSampler.getArguments().size(), 2);

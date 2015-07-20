@@ -28,7 +28,7 @@ public class JMeterSampler extends BasicDBObject {
   
   private List<JMeterArgument> arguments = new ArrayList<JMeterArgument>();
   
-  JMeterSampler(Method method, String name, String url, String assertionText, long constantTime, List<JMeterArgument> arguments) {
+  JMeterSampler(Method method, String name, String url, String assertionText, Long constantTime, List<JMeterArgument> arguments) {
     this.put("method", method.toString());
     this.put("name", name);
     this.put("url", url);
@@ -42,17 +42,6 @@ public class JMeterSampler extends BasicDBObject {
     }
     this.put("arguments", list);
   }
-  
-//  public JMeterSampler from(BasicDBObject obj) {
-//    this.put("method", obj.get("method"));
-//    this.put("name", obj.get("name"));
-//    this.put("url", obj.get("url"));
-//    this.put("assertion_text", obj.get("assertion_text"));
-//    this.put("constant_time", obj.get("constant_time"));
-//    this.put("templates", obj.get("templates"));
-//    this.put("arguments", obj.get("arguments"));
-//    return this;
-//  }
   
   public Method getMethod() {
     return Method.valueOf(this.getString("method"));
@@ -125,7 +114,7 @@ public class JMeterSampler extends BasicDBObject {
         .put("host", httpUrl.getHost())
         .put("port", httpUrl.getPort())
         .put("protocol", httpUrl.getProtocol())
-        .put("path", httpUrl.getPath());
+        .put("path", getMethod() == Method.GET ? httpUrl.getPath() : httpUrl.getFullPath());
     
     if (!httpUrl.getQueryParameters().isEmpty()) {
       for (Map.Entry<String, String> entry : httpUrl.getQueryParameters().entrySet()) {

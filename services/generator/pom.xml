@@ -45,6 +45,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>organization</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>

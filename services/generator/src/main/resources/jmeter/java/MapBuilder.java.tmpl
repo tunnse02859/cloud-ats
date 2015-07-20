@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package org.ats.generated;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
+ *
+ * Mar 11, 2015
+ */
+public class MapBuilder {
+  
+  private Map<String, String> map = new HashMap<String, String>();
+  
+  public MapBuilder append(String key, String value) {
+    map.put(key, value);
+    return this;
+  }
+
+  public Map<String, String> build() {
+    return map;
+  }
+}

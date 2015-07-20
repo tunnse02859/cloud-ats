@@ -44,7 +44,7 @@ public class JMeterScriptTestCase {
         .createArgument("password", "admin.password");
     arguments.add(param);
     JMeterSampler newSampler = new JMeterSampler(Method.POST, "Register",
-        "http://localhost:8080/signup", null, 0, arguments);
+        "http://localhost:8080/signup", null, 0L, arguments);
     jmeter.addSampler(newSampler);
     Assert.assertEquals(jmeter.getSamplers().size(), 5);
   }

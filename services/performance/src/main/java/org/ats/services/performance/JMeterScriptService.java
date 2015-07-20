@@ -50,12 +50,12 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
     for (Object sampler : listSampler) {
       Method method = Method.valueOf(((BasicDBObject) sampler).getString("method"));
-      String samplerName = ((BasicDBObject) obj).getString("name");
-      String url = ((BasicDBObject) obj).getString("url");
-      String assertion_text = ((BasicDBObject) obj).getString("assertion_text");
-      long constant_time = ((BasicDBObject) obj).getLong("constant_time");
+      String samplerName = ((BasicDBObject) sampler).getString("name");
+      String url = ((BasicDBObject) sampler).getString("url");
+      String assertion_text = ((BasicDBObject) sampler).getString("assertion_text");
+      Long constant_time = ((BasicDBObject) sampler).get("constant_time") == null ? null : ((BasicDBObject) sampler).getLong("constant_time");
 
-      BasicDBList listArg = (BasicDBList) obj.get("arguments");
+      BasicDBList listArg = (BasicDBList) ((BasicDBObject) sampler).get("arguments");
       List<JMeterArgument> arguments = new ArrayList<JMeterArgument>();
       for (Object arg : listArg) {
         String paramName = ((BasicDBObject) arg).getString("paramName");

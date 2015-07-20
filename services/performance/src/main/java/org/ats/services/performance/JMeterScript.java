@@ -47,6 +47,10 @@ public class JMeterScript extends BasicDBObject {
     this.put("samplers", list);
   }
   
+  public String getId() {
+    return this.getString("_id");
+  }
+  
   public String getName() {
     return this.getString("name");
   }
@@ -129,18 +133,4 @@ public class JMeterScript extends BasicDBObject {
     
     return Rythm.render(template, params.build());
   }
-  
-//  public JMeterScript from(DBObject source) {
-//    this.put("_id", source.get("_id"));
-//    this.put("name", source.get("name"));
-//    this.put("loops", source.get("loops"));
-//    this.put("number_threads", source.get("number_threads"));
-//    this.put("ram_up", source.get("ram_up"));
-//    this.put("scheduler", source.get("scheduler"));
-//    this.put("duration", source.get("duration"));
-//    this.put("templates", source.get("templates"));
-//    this.put("samplers", source.get("samplers"));
-//    
-//    return this;
-//  }
 }

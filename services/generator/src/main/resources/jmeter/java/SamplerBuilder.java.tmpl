@@ -1,0 +1,154 @@
+/**
+ * 
+ */
+package org.ats.generated;
+
+import java.util.Map;
+
+import org.apache.jmeter.assertions.ResponseAssertion;
+import org.apache.jmeter.assertions.gui.AssertionGui;
+import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.timers.ConstantTimer;
+import org.apache.jmeter.timers.gui.ConstantTimerGui;
+import org.apache.jorphan.collections.HashTree;
+
+/**
+ * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
+ *
+ * Jul 18, 2015
+ */
+public class SamplerBuilder {
+
+  private HashTree threadGroupHashTree;
+  
+  private String name;
+  
+  private String domain;
+  
+  private Integer port;
+  
+  private String protocol;
+  
+  private String path;
+  
+  private String method;
+  
+  private String defaultTimeout;
+  
+  private Map<String, String> params;
+
+  private String assertionText;
+  
+  private String constantTimer;
+  
+  public SamplerBuilder(HashTree threadGroupHashTree) {
+    this.threadGroupHashTree = threadGroupHashTree;
+  }
+  
+  public SamplerBuilder name(String name) {
+    this.name = name;
+    return this;
+  }
+  
+  public SamplerBuilder domain(String domain) {
+    this.domain = domain;
+    return this;
+  }
+  
+  public SamplerBuilder port(Integer port) {
+    this.port = port;
+    return this;
+  }
+  
+  public SamplerBuilder protocol(String protocol) {
+    this.protocol = protocol;
+    return this;
+  }
+  
+  public SamplerBuilder path(String path) {
+    this.path = path;
+    return this;
+  }
+  
+  public SamplerBuilder method(String method) {
+    this.method = method;
+    return this;
+  }
+  
+  public SamplerBuilder defaultTimeout(String defaultTimeout) {
+    this.defaultTimeout = defaultTimeout;
+    return this;
+  }
+  
+  public SamplerBuilder params(Map<String, String> params) {
+    this.params = params;
+    return this;
+  }
+  
+  public SamplerBuilder assertionText(String assertionText) {
+    this.assertionText = assertionText;
+    return this;
+  }
+  
+  public SamplerBuilder constantTimer(String constantTimer) {
+    this.constantTimer = constantTimer;
+    return this;
+  }
+  
+  public void build() {
+    //httpSampler
+    HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();   
+    httpSampler.setProperty(TestElement.TEST_CLASS, HTTPSamplerProxy.class.getName());
+    httpSampler.setProperty(TestElement.GUI_CLASS, HttpTestSampleGui.class.getName());
+    httpSampler.setEnabled(true);
+    httpSampler.setConnectTimeout(defaultTimeout);
+    httpSampler.setResponseTimeout(defaultTimeout);
+    httpSampler.setAutoRedirects(false);
+    httpSampler.setMonitor(false);
+    httpSampler.setDoMultipartPost(false);
+    httpSampler.setName(name);
+    httpSampler.setDomain(domain);
+    httpSampler.setPort(port);
+    httpSampler.setProtocol(protocol);
+    httpSampler.setPath(path);
+    httpSampler.setMethod(method);
+
+    for(Map.Entry<String, String> entry : params.entrySet()) {
+      httpSampler.addArgument(entry.getKey(), entry.getValue());
+    }
+    
+    httpSampler.setFollowRedirects(true);        
+    httpSampler.setUseKeepAlive(true);
+
+    HashTree condition = threadGroupHashTree.add(httpSampler);        
+
+    if (assertionText != null && !assertionText.isEmpty()) {
+
+    //add ResponseAssertion
+      ResponseAssertion ra = new ResponseAssertion(); 
+      ra.setProperty(TestElement.TEST_CLASS, ResponseAssertion.class.getName());
+      ra.setProperty(TestElement.GUI_CLASS, AssertionGui.class.getName());
+
+      ra.setName("Response Assertion");
+      ra.setEnabled(true);
+      ra.setTestFieldResponseData();
+      ra.setToContainsType();
+      ra.addTestString(assertionText);
+      ra.setAssumeSuccess(false);
+      condition.add(ra);
+    }
+    
+    if (constantTimer != null && !constantTimer.isEmpty()) {
+      ConstantTimer ct = new ConstantTimer();
+      ct.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
+      ct.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
+      
+      ct.setName("ConstantTimer");
+      ct.setEnabled(true);
+      ct.setDelay(constantTimer);
+      condition.add(ct);
+    }
+  }
+}

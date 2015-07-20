@@ -1,0 +1,38 @@
+ @args() {
+  String scriptName,
+  int loops,
+  int numberThreads,
+  int ramUp,
+  String samplers
+}
+ 
+ @@Test
+  public void @scriptName () throws Exception {
+
+    ListedHashTree root = new ListedHashTree();
+    TestPlan testPlan = Utils.createTestPlan();
+    ThreadGroup threadGroup = Utils.createThreadGroup(Utils.createLoopController(@loops), @numberThreads, @ramUp);
+    root.add(testPlan);        
+    
+    HashTree threadGroupHashTree = root.add(testPlan, threadGroup);
+    
+    threadGroupHashTree.add(Utils.createCookieManager());
+    threadGroupHashTree.add(Utils.createHeaderManager());
+    threadGroupHashTree.add(Utils.createResultCollector("target/@scriptName@.jtl"));
+    
+    DistributedRunner distributedRunner = new DistributedRunner();
+    distributedRunner.setStdout(System.out);
+    distributedRunner.setStdErr(System.err);
+    
+    SamplerBuilder samplerBuilder = new SamplerBuilder(threadGroupHashTree);
+    @samplers
+    
+    SaveService.saveTree(root, new FileOutputStream("target/@scriptName@.jmx"));
+    root.add(root.getArray()[0], new RemoteThreadsListenerTestElement());
+    root.add(root.getArray()[0], new ListenToTest());
+    
+    distributedRunner.init(hostList, root);
+    distributedRunner.start();
+    
+    this.shutdown();
+  }

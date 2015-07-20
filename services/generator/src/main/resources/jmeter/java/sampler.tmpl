@@ -1,0 +1,24 @@
+@args() {
+  String name,
+  String defaultTimeout,
+  String domain,
+  int port,
+  String protocol,
+  String path,
+  String method,
+  String params,
+  String assertionText,
+  String constantTimer
+}
+    samplerBuilder
+      .name("@name")
+      .defaultTimeout("@defaultTimeout")
+      .domain("@domain")
+      .port(@port)
+      .protocol("@protocol")
+      .path("@path")
+      .method("@method")
+      .params(@params)
+      .assertionText("@assertionText")
+      .constantTimer("@constantTimer")
+      .build();

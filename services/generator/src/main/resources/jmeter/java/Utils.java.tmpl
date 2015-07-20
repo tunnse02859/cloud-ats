@@ -1,0 +1,118 @@
+/**
+ * 
+ */
+package org.ats.generated;
+
+import org.apache.jmeter.control.LoopController;
+import org.apache.jmeter.control.gui.LoopControlPanel;
+import org.apache.jmeter.control.gui.TestPlanGui;
+import org.apache.jmeter.protocol.http.control.CookieManager;
+import org.apache.jmeter.protocol.http.control.Header;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
+import org.apache.jmeter.protocol.http.gui.CookiePanel;
+import org.apache.jmeter.protocol.http.gui.HeaderPanel;
+import org.apache.jmeter.reporters.ResultCollector;
+import org.apache.jmeter.reporters.Summariser;
+import org.apache.jmeter.samplers.SampleSaveConfiguration;
+import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.testelement.TestPlan;
+import org.apache.jmeter.threads.ThreadGroup;
+import org.apache.jmeter.threads.gui.ThreadGroupGui;
+import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jmeter.visualizers.ViewResultsFullVisualizer;
+
+/**
+ * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
+ *
+ * Jul 18, 2015
+ */
+public class Utils {
+
+  public static TestPlan createTestPlan() {
+    TestPlan testPlan = new TestPlan("CloudATS Test Plan"); 
+    testPlan.setProperty(TestElement.TEST_CLASS, TestPlan.class.getName());
+    testPlan.setProperty(TestElement.GUI_CLASS, TestPlanGui.class.getName());
+    testPlan.setEnabled(true);
+    testPlan.setComment("");
+    testPlan.setFunctionalMode(false);
+    testPlan.setSerialized(false);
+    return testPlan;
+  }
+  
+  public static LoopController createLoopController(int loops) {
+    LoopController loopController = new LoopController();
+    loopController.setLoops(loops);
+    loopController.setFirst(true);
+    loopController.setProperty(TestElement.TEST_CLASS, LoopController.class.getName());
+    loopController.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
+    loopController.initialize();
+    return loopController;
+  }
+  
+  public static ThreadGroup createThreadGroup(LoopController loopController, int numberThreads, int ramUp) {
+    ThreadGroup threadGroup = new ThreadGroup();
+    threadGroup.setName("Thread Group");
+    threadGroup.setNumThreads(numberThreads);
+    threadGroup.setRampUp(ramUp);
+    threadGroup.setSamplerController(loopController);
+    threadGroup.setProperty(TestElement.TEST_CLASS, ThreadGroup.class.getName());
+    threadGroup.setProperty(TestElement.GUI_CLASS, ThreadGroupGui.class.getName());
+    
+    return threadGroup;
+  }
+  
+  public static CookieManager createCookieManager() {
+    CookieManager cookie = new CookieManager();
+    cookie.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
+    cookie.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
+    cookie.setName("HTTP Cookie Manager");
+    cookie.setEnabled(true);
+    cookie.setClearEachIteration(false);
+    return cookie;
+  }
+  
+  public static HeaderManager createHeaderManager() {
+    HeaderManager header = new HeaderManager();
+    header.setProperty(TestElement.TEST_CLASS, HeaderManager.class.getName());
+    header.setProperty(TestElement.GUI_CLASS, HeaderPanel.class.getName());
+    header.setName("HTTP Header Manager");
+    header.setEnabled(true);
+    
+    header.add(new Header("Cache-Control", "max-age=0"));
+    header.add(new Header("Accept-Language", "en-US,en;q=0.5"));
+    header.add(new Header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"));
+    header.add(new Header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:30.0) Gecko/20100101 Firefox/30.0"));
+    header.add(new Header("Accept-Encoding", "gzip, deflate"));
+    return header;
+  }
+  
+  public static ResultCollector createResultCollector(String output) {
+  //add ResultCollector
+    Summariser summer = null;
+    String summariserName = JMeterUtils.getPropDefault("summariser.name", "summary");//$NON-NLS-1$
+    if (summariserName.length() > 0) {
+      summer = new Summariser(summariserName);
+    }
+
+    SampleSaveConfiguration conf = new SampleSaveConfiguration(true);        
+    conf.setResponseData(false);
+    conf.setResponseHeaders(false);
+    conf.setRequestHeaders(false);
+    conf.setSamplerData(false);
+    conf.setUrl(false);
+    conf.setFileName(false);
+    conf.setFieldNames(false);
+    conf.setHostname(false);
+    conf.setIdleTime(true);
+
+    ResultCollector resultCollector = new ResultCollector(summer);        
+    resultCollector.setProperty(TestElement.TEST_CLASS, ResultCollector.class.getName());
+    resultCollector.setProperty(TestElement.GUI_CLASS, ViewResultsFullVisualizer.class.getName());      
+    resultCollector.setSaveConfig(conf);
+    resultCollector.setFilename(output);
+    resultCollector.setEnabled(true);
+    resultCollector.setName("View Results Tree");
+    
+    return resultCollector;
+  }
+}

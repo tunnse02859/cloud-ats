@@ -1,0 +1,59 @@
+@args() {
+  String scripts
+}
+package org.ats.generated;
+
+
+import java.io.FileOutputStream;
+import java.lang.Thread.State;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.jmeter.engine.DistributedRunner;
+import org.apache.jmeter.save.SaveService;
+import org.apache.jmeter.testelement.TestPlan;
+import org.apache.jmeter.threads.RemoteThreadsListenerTestElement;
+import org.apache.jmeter.threads.ThreadGroup;
+import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jorphan.collections.HashTree;
+import org.apache.jorphan.collections.ListedHashTree;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+public class JMeterRunner {
+
+  private List<String> hostList = new ArrayList<String>();
+  
+  @@BeforeClass
+  public void setup() {
+    JMeterUtils.loadJMeterProperties("src/test/resources/jmeter/bin/jmeter.properties");
+    JMeterUtils.setJMeterHome("src/test/resources/jmeter");
+    JMeterUtils.initLogging();
+    
+    String hosts = System.getProperty("jmeter.hosts");
+    if (hosts == null || hosts.isEmpty()) throw new IllegalArgumentException("Need at least an host to run jmeter");
+    
+    String[] args = hosts.split(",");
+    for (String arg : args) {
+      hostList.add(arg.trim());
+    }
+  }
+
+  @scripts
+  
+  private void shutdown() {
+    String reaperRE = JMeterUtils.getPropDefault("rmi.thread.name", "^RMI Reaper$");
+    Thread reaper = null;
+    for(Thread t : Thread.getAllStackTraces().keySet()){
+        String name = t.getName();
+        if (name.matches(reaperRE)) {
+          reaper = t;
+        }
+    }
+
+    if (reaper != null) {
+      while(reaper.getState() == State.WAITING) {
+      }
+    }
+  }
+}
