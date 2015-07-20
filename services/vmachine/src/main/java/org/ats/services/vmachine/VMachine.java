@@ -80,7 +80,7 @@ public class VMachine extends AbstractEntity<VMachine> {
   
   public SpaceReference getSpace() {
     BasicDBObject obj = (BasicDBObject) this.get("space");
-    return spaceRefFactory.create(obj.getString("_id"));
+    return obj == null ? null : spaceRefFactory.create(obj.getString("_id"));
   }
   
   public void setStatus(Status status) {

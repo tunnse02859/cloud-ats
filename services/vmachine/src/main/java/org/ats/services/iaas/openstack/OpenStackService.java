@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsSlave;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.iaas.CreateVMException;
 import org.ats.services.iaas.DestroyTenantException;
@@ -176,6 +178,7 @@ public class OpenStackService implements IaaSServiceInterface {
   public void addCredential(String tenant, String username, String password) {
     String identity = tenant + ":" + username;
     BasicDBObject obj = new BasicDBObject("_id", tenant).append("identity", identity).append("password", password);
+    this.col.remove(obj);
     this.col.insert(obj);
   }
   
@@ -447,7 +450,26 @@ public class OpenStackService implements IaaSServiceInterface {
   public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
     String flavorId = getFlavorIdByName(tenant, "m1.small");
     String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
-    return createVM(imageId, flavorId, false, hasUI, tenant, space);
+    VMachine vm =  createVM(imageId, flavorId, false, hasUI, tenant, space);
+    
+    if (!hasUI) return vm;
+    
+    //vm ui test should join jenkins master as slave
+    BasicDBObject query = new BasicDBObject("tenant", vm.getTenant().toJSon());
+    query.append("space", vm.getSpace() == null ? null : vm.getSpace().toJSon());
+    PageList<VMachine> page = vmachineService.query(query);
+    if (page.count() == 0) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
+    
+    VMachine systemVM = page.next().get(0);
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    try {
+      if (new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) return vm;
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    throw new CreateVMException("Can not create test vm");
   }
   
   private FloatingIP getFloatingIPAvailable(TenantReference tenant) {

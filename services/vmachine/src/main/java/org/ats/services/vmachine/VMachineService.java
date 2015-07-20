@@ -12,6 +12,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -20,6 +21,7 @@ import com.mongodb.DBObject;
  *
  * Jul 2, 2015
  */
+@Singleton
 public class VMachineService extends AbstractMongoCRUD<VMachine>{
 
   /** .*/
