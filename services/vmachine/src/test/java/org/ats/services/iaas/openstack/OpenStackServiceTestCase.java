@@ -8,7 +8,6 @@ import java.util.List;
 import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
-import org.ats.jenkins.JenkinsSlave;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -127,29 +126,26 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     
     JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIp(), "http", "jenkins", 8080);
 
-    if (master.isReady(5 * 60 * 1000)) {
-      Assert.assertTrue(new JenkinsSlave(master, vm.getPrivateIp()).join());
-      JenkinsMavenJob job = new JenkinsMavenJob(master, "demo-selenium", vm.getPrivateIp(), "/home/cloudats/projects/demo-selenium/pom.xml");
-      Assert.assertEquals(job.submit(), 1);
+    JenkinsMavenJob job = new JenkinsMavenJob(master, "demo-selenium", vm.getPrivateIp(), "/home/cloudats/projects/demo-selenium/pom.xml", "clean install");
+    Assert.assertEquals(job.submit(), 1);
 
-      int start = 0;
-      int last = 0;
-      byte[] bytes;
-      
-      while(job.isBuilding(1, System.currentTimeMillis(), 30*1000)) {
-        bytes = job.getConsoleOutput(1, start);
-        last = bytes.length;
-        byte[] next = new byte[last - start];
-        System.arraycopy(bytes, start, next, 0, next.length);
-        start += (last - start);
+    int start = 0;
+    int last = 0;
+    byte[] bytes;
 
-        if (next.length > 0) {
-          String output = new String(next);
-          System.out.println(output.trim());
-          if (output.indexOf("TestNG652Configurator") != -1) break; 
-        }
+    while(job.isBuilding(1, System.currentTimeMillis(), 30*1000)) {
+      bytes = job.getConsoleOutput(1, start);
+      last = bytes.length;
+      byte[] next = new byte[last - start];
+      System.arraycopy(bytes, start, next, 0, next.length);
+      start += (last - start);
+
+      if (next.length > 0) {
+        String output = new String(next);
+        System.out.println(output.trim());
+        if (output.indexOf("TestNG652Configurator") != -1) break; 
       }
-      
     }
+
   }
 }

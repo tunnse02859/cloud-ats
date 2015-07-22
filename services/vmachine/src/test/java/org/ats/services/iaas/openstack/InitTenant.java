@@ -26,7 +26,7 @@ import com.google.inject.Guice;
  *
  * Jul 17, 2015
  */
-public class InitTenantTest extends AbstractEventTestCase {
+public class InitTenant extends AbstractEventTestCase {
 
   private OpenStackService openstackService;
   

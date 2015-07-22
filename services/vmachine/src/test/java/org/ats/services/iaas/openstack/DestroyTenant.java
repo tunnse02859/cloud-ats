@@ -22,7 +22,7 @@ import com.google.inject.Guice;
  *
  * Jul 17, 2015
  */
-public class DestroyTenantTest extends AbstractEventTestCase {
+public class DestroyTenant extends AbstractEventTestCase {
 private OpenStackService openstackService;
   
   @BeforeClass

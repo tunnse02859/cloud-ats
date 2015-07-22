@@ -4,6 +4,7 @@
 package org.ats.services.iaas.openstack;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,6 +76,8 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
@@ -455,21 +458,38 @@ public class OpenStackService implements IaaSServiceInterface {
     if (!hasUI) return vm;
     
     //vm ui test should join jenkins master as slave
-    BasicDBObject query = new BasicDBObject("tenant", vm.getTenant().toJSon());
-    query.append("space", vm.getSpace() == null ? null : vm.getSpace().toJSon());
-    PageList<VMachine> page = vmachineService.query(query);
-    if (page.count() == 0) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
+    VMachine systemVM = vmachineService.getSystemVM(tenant, space);
+    if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
     
-    VMachine systemVM = page.next().get(0);
     JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
     try {
-      if (new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) return vm;
+      if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) throw new CreateVMException("Can not create jenkins slave for test vm");
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
       ex.setStackTrace(e.getStackTrace());
       throw ex;
     }
-    throw new CreateVMException("Can not create test vm");
+    
+    //register Guacamole vnc
+    try {
+      String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+      Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      channel.setCommand(command);
+      
+      OutputStream out = channel.getOutputStream();
+      channel.connect();
+      
+      out.write("#CloudATS\n".getBytes());
+      out.flush();
+      channel.disconnect();
+      session.disconnect();
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("Can not register Guacamole node");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    return vm;
   }
   
   private FloatingIP getFloatingIPAvailable(TenantReference tenant) {

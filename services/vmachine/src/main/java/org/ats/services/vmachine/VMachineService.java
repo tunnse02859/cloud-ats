@@ -5,6 +5,7 @@ package org.ats.services.vmachine;
 
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -43,6 +44,25 @@ public class VMachineService extends AbstractMongoCRUD<VMachine>{
     
     this.col.createIndex(new BasicDBObject("tenant._id", 1));
     this.col.createIndex(new BasicDBObject("space._id", 1));
+  }
+  
+  public VMachine getSystemVM(TenantReference tenantRef, SpaceReference spaceRef) {
+    return findOneAvailabel(tenantRef, spaceRef, true, false);
+  }
+  
+  public VMachine getTestVMAvailabel(TenantReference tenantRef, SpaceReference spaceRef, boolean hasUI) {
+    return findOneAvailabel(tenantRef, spaceRef, false, hasUI);
+  }
+  
+  public VMachine findOneAvailabel(TenantReference tenantRef, SpaceReference spaceRef, boolean system, boolean hasUI) {
+    BasicDBObject query = new BasicDBObject("tenant", tenantRef.toJSon());
+    query.put("space", spaceRef == null ? null : spaceRef.toJSon());
+    query.put("system", system);
+    query.put("ui", hasUI);
+    query.put("status", VMachine.Status.Started.toString());
+    
+    PageList<VMachine> list = query(query);
+    return list.count() > 0 ? list.next().get(0) : null;
   }
   
   @Override
