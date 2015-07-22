@@ -29,7 +29,7 @@
   "scm": {"value": "0"}, 
   "triggerByDependency": {}, 
   "rootPOM": "@pomLocation", 
-  "goals": "clean install", 
+  "goals": "@goals", 
   "mavenOpts": "", 
   "enableTriggerDownstreamProjects": {"blockTriggerWhenBuilding": {}}, 
   "usePrivateRepository": false, 

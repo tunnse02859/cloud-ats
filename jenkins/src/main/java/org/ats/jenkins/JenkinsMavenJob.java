@@ -34,7 +34,7 @@ import org.rythmengine.Rythm;
 public class JenkinsMavenJob {
   
   /** .*/
-  private final String name, remote, pomLocation;
+  private final String name, remote, pomLocation, goals;
   
   /** .*/
   private final JenkinsMaster master;
@@ -52,16 +52,18 @@ public class JenkinsMavenJob {
    * @param mavenOpts empty string for not specified.
    * @throws IOException 
    */
-  public JenkinsMavenJob(JenkinsMaster master, String name, String remote, String pomLocation) throws IOException {
+  public JenkinsMavenJob(JenkinsMaster master, String name, String remote, String pomLocation, String goals) throws IOException {
     this.name = name;
     this.remote = remote;
     this.pomLocation = pomLocation;
+    this.goals = goals;
     this.master = master;
     
     Map<String, String> params = new HashMap<String, String>();
     params.put("name", this.name);
     params.put("remote", this.remote);
     params.put("pomLocation", this.pomLocation);
+    params.put("goals", this.goals);
     
     String jobTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-job-template"));
     this.jobTmpl = Rythm.render(jobTmpl, params);
@@ -221,12 +223,12 @@ public class JenkinsMavenJob {
         }
       }
     }
-    list.add(new BasicNameValuePair("name", name));
-    list.add(new BasicNameValuePair("remote", remote));
-    list.add(new BasicNameValuePair("pomLocation", pomLocation));
-    list.add(new BasicNameValuePair("goals", "clean install"));
+    list.add(new BasicNameValuePair("name", this.name));
+    list.add(new BasicNameValuePair("remote", this.remote));
+    list.add(new BasicNameValuePair("pomLocation", this.pomLocation));
+    list.add(new BasicNameValuePair("goals", this.goals));
     list.add(new BasicNameValuePair("mavenOpts", ""));
-    list.add(new BasicNameValuePair("json", jobJsonTmpl));
+    list.add(new BasicNameValuePair("json", this.jobJsonTmpl));
 
     return new UrlEncodedFormEntity(list);
   }
