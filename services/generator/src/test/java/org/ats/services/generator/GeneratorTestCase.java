@@ -40,6 +40,7 @@ import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -184,7 +185,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     perfService.create(performanceProject);
     
-    generetorService.generate("target/perf",  performanceProject, true);
+    Assert.assertEquals(generetorService.generate("target/perf",  performanceProject, true), "target/perf/" + performanceProject.getId() + ".zip");
   }
   
   @Test
@@ -238,6 +239,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     keywordProjectService.create(project);
     
-    generetorService.generate("target/fk",  project, true);
+    Assert.assertEquals(generetorService.generate("target/fk",  project, true), "target/fk/" + project.getId() + ".zip");
+    
   }
 }

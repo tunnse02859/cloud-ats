@@ -44,7 +44,15 @@ public class GeneratorService {
   @Inject
   PerformanceProjectService perService;
   
-  public void generate(String outDir, PerformanceProject project, boolean compress) throws IOException {
+  /**
+   * 
+   * @param outDir
+   * @param project
+   * @param compress
+   * @return The path to the project located
+   * @throws IOException
+   */
+  public String generate(String outDir, PerformanceProject project, boolean compress) throws IOException {
     File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
@@ -101,20 +109,32 @@ public class GeneratorService {
       }
       
       String samplers = samplerBuilder.toString();
-      
       scriptBuilder.append(engine.render(scriptTemplate, scriptName, loops, numberThreads, ramUp, samplers));
-      
-      String runner = engine.render(runnerTemplate, scriptBuilder.toString());
-      FileOutputStream os = new FileOutputStream(new File(sourceDir, "JMeterRunner.java"));
-      os.write(runner.getBytes());
-      os.flush();
-      os.close();
-      
-      if (compress) compress(project.getId(), outDir + "/" + project.getId(), outDir + "/" + project.getId() + ".zip");
     }
+    
+    String runner = engine.render(runnerTemplate, scriptBuilder.toString());
+    FileOutputStream os = new FileOutputStream(new File(sourceDir, "JMeterRunner.java"));
+    os.write(runner.getBytes());
+    os.flush();
+    os.close();
+    
+    if (compress) {
+      compress(project.getId(), outDir + "/" + project.getId(), outDir + "/" + project.getId() + ".zip");
+      return outDir + "/" + project.getId() + ".zip";
+    }
+    
+    return outDir + "/" + project.getId();
   }
   
-  public void generate(String outDir, KeywordProject project, boolean compress) throws IOException {
+  /**
+   * 
+   * @param outDir
+   * @param project
+   * @param compress
+   * @return The path to project located
+   * @throws IOException
+   */
+  public String generate(String outDir, KeywordProject project, boolean compress) throws IOException {
     File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
@@ -128,7 +148,12 @@ public class GeneratorService {
       os.close();
     }
     
-    if (compress) compress(project.getId(), outDir + "/" + project.getId(),  outDir + "/" + project.getId()  + ".zip");
+    if (compress) {
+      compress(project.getId(), outDir + "/" + project.getId(),  outDir + "/" + project.getId()  + ".zip");
+      return outDir + "/" + project.getId()  + ".zip";
+    }
+    
+    return outDir + "/" + project.getId();
   }
   
   private void loadKeywordPOM(String outDir) throws IOException {
