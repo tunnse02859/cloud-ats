@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.services.DataDrivenModule;
-import org.ats.services.FunctionalServiceModule;
+import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -58,7 +58,7 @@ public class Global extends GlobalSettings {
           new EventModule(eventConf), 
           new OrganizationServiceModule(),
           new DataDrivenModule(),
-          new FunctionalServiceModule());
+          new KeywordServiceModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);
