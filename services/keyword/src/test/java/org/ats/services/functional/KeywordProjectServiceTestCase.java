@@ -167,7 +167,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     KeywordProject project = null;
 
     try {
-      project = funcFactory.create("Jira Automation");
+      project = funcFactory.create(context, "Jira Automation");
       Assert.fail();
     } catch (IllegalStateException e) {
 
@@ -180,7 +180,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertNotNull(this.context.getTenant());
 
     try {
-      project = funcFactory.create("Jira Automation");
+      project = funcFactory.create(context, "Jira Automation");
     } catch (IllegalStateException e) {
       e.printStackTrace();
       Assert.fail();
@@ -202,7 +202,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create("Jira Automation");
+    KeywordProject project = funcFactory.create(context, "Jira Automation");
     funcService.create(project);
     
     SuiteReference suiteRef = suiteRefFactory.create(suite.getId());
@@ -247,7 +247,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create("Jira Automation");
+    KeywordProject project = funcFactory.create(context, "Jira Automation");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));

@@ -87,7 +87,7 @@ public class Suite extends AbstractTemplate {
 
     return engine.render(suite, this.get("package_name"), 
         this.get("extra_imports"), 
-        this.get("suite_name"), 
+        StringUtil.normalizeName((String) this.get("suite_name")), 
         this.get("driver_var"), 
         this.get("init_driver"), 
         this.get("timeout_seconds"), 

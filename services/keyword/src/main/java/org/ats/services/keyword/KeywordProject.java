@@ -49,7 +49,7 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
       ReferenceFactory<SpaceReference> spaceRefFactory,
       ReferenceFactory<SuiteReference> suiteRefFactory,
       KeywordProjectService projectService,
-      OrganizationContext context,
+      @Assisted("context") OrganizationContext context,
       @Assisted("name") String name) {
     
     this.tenantRefFactory = tenantRefFactory;

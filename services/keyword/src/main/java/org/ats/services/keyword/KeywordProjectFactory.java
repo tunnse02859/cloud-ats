@@ -3,6 +3,8 @@
  */
 package org.ats.services.keyword;
 
+import org.ats.services.OrganizationContext;
+
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -12,6 +14,6 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface KeywordProjectFactory {
 
-  public KeywordProject create(@Assisted("name") String name);
+  public KeywordProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name);
   
 }

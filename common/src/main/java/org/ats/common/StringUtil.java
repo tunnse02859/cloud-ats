@@ -24,4 +24,10 @@ public class StringUtil {
     }
     return new String(baos.toByteArray(), "UTF-8");
   }
+  
+  public static String normalizeName(String name) {
+    name = name.replace(' ', '_');
+    name = name.replace('-', '_');
+    return name;
+  }
 }

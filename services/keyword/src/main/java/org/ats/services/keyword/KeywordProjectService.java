@@ -5,6 +5,7 @@ package org.ats.services.keyword;
 
 import java.util.logging.Logger;
 
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 
@@ -30,6 +31,9 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   private KeywordProjectFactory factory;
   
   @Inject
+  private OrganizationContext context;
+  
+  @Inject
   KeywordProjectService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -46,7 +50,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   
   @Override
   public KeywordProject transform(DBObject source) {
-    KeywordProject project = factory.create((String) source.get("name"));
+    KeywordProject project = factory.create(context, (String) source.get("name"));
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

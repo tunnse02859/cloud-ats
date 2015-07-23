@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
+import org.ats.common.StringUtil;
 import org.ats.services.datadriven.DataDriven;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.keyword.action.AbstractAction;
@@ -108,7 +109,7 @@ public class Case extends AbstractTemplate {
       
       sb.append("\n");
       sb.append("  @Test (dataProvider = \"").append(dataDriven.getName()).append("\")\n");
-      sb.append("  public void ").append(getName()).append("(JsonNode data) throws Exception {\n");
+      sb.append("  public void ").append(StringUtil.normalizeName(getName())).append("(JsonNode data) throws Exception {\n");
       
       while (nodeIterator.hasNext()) {
         Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodeIterator.next();
