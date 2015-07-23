@@ -589,7 +589,7 @@ public class OpenStackService implements IaaSServiceInterface {
     }
   }
   
-  private VMachine allocateFloatingIp(VMachine vm) {
+  public VMachine allocateFloatingIp(VMachine vm) {
     NovaApi novaApi = createNovaApi(vm.getTenant().getId());
     String region = novaApi.getConfiguredRegions().iterator().next();
     
@@ -601,7 +601,7 @@ public class OpenStackService implements IaaSServiceInterface {
     return vm;
   }
   
-  private VMachine deallocateFloatingIp(VMachine vm) {
+  public VMachine deallocateFloatingIp(VMachine vm) {
     NovaApi novaApi = createNovaApi(vm.getTenant().getId());
     NeutronApi neutronApi = createNeutronAPI(vm.getTenant().getId());
     
