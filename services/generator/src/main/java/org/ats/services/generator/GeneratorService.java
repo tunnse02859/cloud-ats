@@ -53,15 +53,16 @@ public class GeneratorService {
    * @throws IOException
    */
   public String generate(String outDir, PerformanceProject project, boolean compress) throws IOException {
-    File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
+    String projectHash = project.getId().substring(0, 8);
+    File sourceDir = new File(outDir + "/" + projectHash  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    File resourceDir = new File(outDir + "/" + project.getId()  + "/src/test/resources/jmeter/bin");
+    File resourceDir = new File(outDir + "/" + projectHash  + "/src/test/resources/jmeter/bin");
     resourceDir.mkdirs();
     
     loadJMeterProperties(resourceDir);
     loadJMeterUtilities(sourceDir);
-    loadJMeterPOM(outDir + "/" + project.getId());
+    loadJMeterPOM(outDir + "/" + projectHash);
     
     String runnerTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/JMeterRunner.java.tmpl"));
@@ -78,7 +79,7 @@ public class GeneratorService {
     
     for (JMeterScriptReference ref : project.getScripts()) {
       JMeterScript jScript = ref.get();
-      String scriptName = normalize(jScript.getName());
+      String scriptName = StringUtil.normalizeName(jScript.getName());
       int loops = jScript.getLoops();
       int numberThreads = jScript.getNumberThreads();
       int ramUp = jScript.getRamUp();
@@ -119,11 +120,11 @@ public class GeneratorService {
     os.close();
     
     if (compress) {
-      compress(project.getId(), outDir + "/" + project.getId(), outDir + "/" + project.getId() + ".zip");
-      return outDir + "/" + project.getId() + ".zip";
+      compress(projectHash, outDir + "/" + projectHash, outDir + "/" + projectHash + ".zip");
+      return outDir + "/" + projectHash + ".zip";
     }
     
-    return outDir + "/" + project.getId();
+    return outDir + "/" + projectHash;
   }
   
   /**
@@ -135,25 +136,26 @@ public class GeneratorService {
    * @throws IOException
    */
   public String generate(String outDir, KeywordProject project, boolean compress) throws IOException {
-    File sourceDir = new File(outDir + "/" + project.getId()  + "/src/test/java/org/ats/generated");
+    String projectHash = project.getId().substring(0, 8);
+    File sourceDir = new File(outDir + "/" + projectHash  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    loadKeywordPOM(outDir + "/" + project.getId());
+    loadKeywordPOM(outDir + "/" + projectHash);
     
     for (SuiteReference suiteRef : project.getSuites()) {
       Suite suite = suiteRef.get();
-      FileOutputStream os = new FileOutputStream(new File(sourceDir, suite.getString("suite_name") + ".java"));
+      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getString("suite_name") + ".java")));
       os.write(suite.transform().getBytes());
       os.flush();
       os.close();
     }
     
     if (compress) {
-      compress(project.getId(), outDir + "/" + project.getId(),  outDir + "/" + project.getId()  + ".zip");
-      return outDir + "/" + project.getId()  + ".zip";
+      compress(projectHash, outDir + "/" + projectHash,  outDir + "/" + projectHash  + ".zip");
+      return outDir + "/" + projectHash  + ".zip";
     }
     
-    return outDir + "/" + project.getId();
+    return outDir + "/" + projectHash;
   }
   
   private void loadKeywordPOM(String outDir) throws IOException {
@@ -216,7 +218,7 @@ public class GeneratorService {
       }
       FileInputStream fis = new FileInputStream(f);
       
-      String path = f.getPath().substring(f.getPath().indexOf(projectId) + 1);
+      String path = f.getPath().substring(f.getPath().indexOf(projectId));
       ZipEntry zip = new ZipEntry(path);
       outDir.putNextEntry(zip);
       while ((bytes_read = fis.read(buffer)) != -1) {
@@ -233,11 +235,5 @@ public class GeneratorService {
     }
     is.close();
     out.close();
-  }
-  
-  private String normalize(String name) {
-    name = name.replace(' ', '_');
-    name = name.replace('-', '_');
-    return name;
   }
 }

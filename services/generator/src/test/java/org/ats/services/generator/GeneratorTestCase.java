@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
+import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -63,6 +64,7 @@ import com.mongodb.util.JSON;
 public class GeneratorTestCase  extends AbstractEventTestCase {
   
   private AuthenticationService<User> authService;
+  private OrganizationContext context;
   
   private Tenant tenant;
   private Space space;
@@ -98,6 +100,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
+    this.context = injector.getInstance(OrganizationContext.class);
     
     //performance
     this.perfFactory = injector.getInstance(PerformanceProjectFactory.class);
@@ -185,7 +188,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     perfService.create(performanceProject);
     
-    Assert.assertEquals(generetorService.generate("target/perf",  performanceProject, true), "target/perf/" + performanceProject.getId() + ".zip");
+    Assert.assertEquals(generetorService.generate("target/perf",  performanceProject, true), "target/perf/" + performanceProject.getId().substring(0, 8) + ".zip");
   }
   
   @Test
@@ -233,13 +236,13 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     Suite acceptAlertSuite = builder.build();
     suiteService.create(acceptAlertSuite);
     
-    KeywordProject project = keywordProjectFactory.create("Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
     project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
     project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
     
     keywordProjectService.create(project);
     
-    Assert.assertEquals(generetorService.generate("target/fk",  project, true), "target/fk/" + project.getId() + ".zip");
+    Assert.assertEquals(generetorService.generate("target/fk",  project, true), "target/fk/" + project.getId().substring(0, 8) + ".zip");
     
   }
 }
