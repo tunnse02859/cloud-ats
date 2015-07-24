@@ -26,6 +26,9 @@ import org.ats.common.http.HttpClientUtil;
 import org.json.JSONObject;
 import org.rythmengine.Rythm;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
  *
@@ -87,24 +90,22 @@ public class JenkinsMavenJob {
     String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
     CloseableHttpClient client = HttpClientFactory.getInstance();
     HttpResponse response = HttpClientUtil.execute(client, url);
-    JSONObject json = new JSONObject(HttpClientUtil.getContentBodyAsString(response));
-    return json.getBoolean("building");
+    
+    String str = HttpClientUtil.getContentBodyAsString(response);
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode root = mapper.readTree(str);
+    return root.get("building").asBoolean();
   }
   
   public boolean isBuilding(int buildNumber, long start, long timeout) throws Exception  {
-    String url = master.buildURL("job/" + encodeURIComponent(name) + "/" + buildNumber + "/api/json");
-    CloseableHttpClient client = HttpClientFactory.getInstance();
-    HttpResponse response = null;
     try {
-      response = HttpClientUtil.execute(client, url);
-      JSONObject json = new JSONObject(HttpClientUtil.getContentBodyAsString(response));
-      return json.getBoolean("building");
+      return isBuilding(buildNumber);
     } catch (Exception e) {
       if ((System.currentTimeMillis() - start) < timeout) {
         Thread.sleep(3000);
         return isBuilding(buildNumber, start, timeout);
       }
-      throw new Exception("The request " + url + " has reponse code " + response.getStatusLine().getStatusCode());
+      throw e;
     }
   }
   
