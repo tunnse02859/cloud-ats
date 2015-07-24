@@ -26,7 +26,96 @@ import com.jcraft.jsch.Session;
  * Apr 24, 2014
  */
 public class SSHClient {
-  
+
+  public static void getFile(String host, int port, String username, String password, String source, OutputStream desc) {
+    try {
+
+      Session session = getSession(host, port, username, password);
+
+      String command = "scp -f "+ source;
+      Channel channel = session.openChannel("exec");
+      ((ChannelExec)channel).setCommand(command);
+
+      // get I/O streams for remote scp
+      OutputStream out = channel.getOutputStream();
+      InputStream in = channel.getInputStream();
+
+      channel.connect();
+
+      byte[] buf = new byte[1024];
+      // send '\0'
+      buf[0] = 0; out.write(buf, 0, 1); out.flush();
+
+      while(true){
+        int c=checkAck(in);
+        if(c!='C'){
+          break;
+        }
+
+        // read '0644 '
+        in.read(buf, 0, 5);
+
+        long filesize=0L;
+        while(true){
+          if(in.read(buf, 0, 1)<0){
+            // error
+            break; 
+          }
+          if(buf[0]==' ')break;
+          filesize=filesize*10L+(long)(buf[0]-'0');
+        }
+
+        String file=null;
+        for(int i=0;;i++){
+          in.read(buf, i, 1);
+          if(buf[i]==(byte)0x0a){
+            file=new String(buf, 0, i);
+            break;
+          }
+        }
+
+        //System.out.println("filesize="+filesize+", file="+file);
+
+        // send '\0'
+        buf[0]=0; out.write(buf, 0, 1); out.flush();
+
+        // read a content of lfile
+        int foo;
+        while(true){
+          if(buf.length<filesize) foo=buf.length;
+          else foo=(int)filesize;
+          foo=in.read(buf, 0, foo);
+          if(foo<0){
+            // error 
+            break;
+          }
+          desc.write(buf, 0, foo);
+          filesize-=foo;
+          if(filesize==0L) break;
+        }
+        desc.close();
+        desc = null;
+
+        if(checkAck(in)!=0){
+          System.exit(0);
+        }
+
+        // send '\0'
+        buf[0]=0; out.write(buf, 0, 1); out.flush();
+      }
+
+      session.disconnect();
+
+    } catch (Exception e) {
+      System.out.println(e);
+      try {
+        if (desc != null)
+          desc.close();
+      } catch (Exception ee) {
+      }
+    }
+  }
+
   public static void sendFile(String host, int port, String username, String password, String folderDest, String fileDest, File file) {
 
     FileInputStream fis = null;
@@ -117,7 +206,7 @@ public class SSHClient {
       }
     }
   }
-  
+
   private static int checkAck(InputStream in) throws IOException{
     int b=in.read();
     // b may be 0 for success,
@@ -144,7 +233,7 @@ public class SSHClient {
     }
     return b;
   }
-  
+
   public static void sendFile(String host, int port, String username, String password, String folderDest, String fileDest, InputStream source)
       throws Exception {
     Session session = getSession(host, port, username, password);
@@ -171,10 +260,10 @@ public class SSHClient {
       baos.write(buff, 0, l);
     }
     bis.close();
-    
+
     long filesize = baos.size();
     System.out.println(folderDest + "/" + fileDest + " has size: " + filesize);
-    
+
     command = "C0644 " + filesize + " ";
     command += fileDest;
     command += "\n";
@@ -182,10 +271,10 @@ public class SSHClient {
     out.flush();
 
     System.out.println("command = " + command);
-    
+
     // send a content of lfile
     out.write(baos.toByteArray());
-      
+
     // send '\0'
     out.flush();
     out.close();
@@ -193,7 +282,7 @@ public class SSHClient {
     channel.disconnect();
     session.disconnect();
   }
-  
+
   /**
    * 
    * @param host the host ip
@@ -225,24 +314,24 @@ public class SSHClient {
     session.connect();
     return session;
   }
-  
+
   public static Channel execCommand(String host, int port, String uname, String pwd, String cmd, InputStream is, OutputStream err) throws JSchException, IOException {
     Session session = getSession(host, port, uname, pwd);
     return execCommand(session, cmd, is, err);
   }
-  
+
   public static Channel execCommand(Session session, String command, InputStream is, OutputStream error) throws JSchException, IOException {
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     channel.setCommand(command);
     channel.setInputStream(is);
-    
+
     ((ChannelExec)channel).setErrStream(error);
 
     channel.connect();
-    
+
     return channel;
   }
-  
+
   public static int printOut(PrintStream out, Channel channel) throws IOException {
     InputStream in=channel.getInputStream();
     byte[] tmp=new byte[1024];
@@ -255,12 +344,12 @@ public class SSHClient {
       if(channel.isClosed()){
         if(in.available()>0) continue;
         return channel.getExitStatus();
-//        out.println("exit-status: "+channel.getExitStatus());
+        //        out.println("exit-status: "+channel.getExitStatus());
       }
       try{Thread.sleep(1000);}catch(Exception ee){}
     }
   }
-  
+
   public static int printOut(Queue<String> queue, Channel channel) throws IOException {
     InputStream in=channel.getInputStream();
     byte[] tmp=new byte[1024];
@@ -273,7 +362,7 @@ public class SSHClient {
       if(channel.isClosed()){
         if(in.available()>0) continue;
         return channel.getExitStatus();
-//        out.println("exit-status: "+channel.getExitStatus());
+        //        out.println("exit-status: "+channel.getExitStatus());
       }
       try{Thread.sleep(1000);}catch(Exception ee){}
     }
