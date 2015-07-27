@@ -24,6 +24,9 @@ import com.google.inject.name.Names;
 public class VMachineServiceModule extends AbstractModule {
   
   /** .*/
+  public static final String VM_CONF = "ats.cloud.vm.conf";
+  
+  /** .*/
   private Properties configuration;
   
   public VMachineServiceModule(String configPath) throws FileNotFoundException, IOException {
