@@ -159,7 +159,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
   }
   
-  //@Test
+  @Test
   public void testExecutePerformanceProject() throws Exception {
     PerformanceProject project = perfFactory.create("Test Performance");
     
