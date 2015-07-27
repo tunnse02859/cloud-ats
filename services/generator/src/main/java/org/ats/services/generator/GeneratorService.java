@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,10 +50,11 @@ public class GeneratorService {
    * @param outDir
    * @param project
    * @param compress
+   * @param scripts 
    * @return The path to the project located
    * @throws IOException
    */
-  public String generate(String outDir, PerformanceProject project, boolean compress) throws IOException {
+  public String generate(String outDir, PerformanceProject project, boolean compress, List<JMeterScriptReference> scripts) throws IOException {
     String projectHash = project.getId().substring(0, 8);
     File sourceDir = new File(outDir + "/" + projectHash  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
@@ -77,7 +79,8 @@ public class GeneratorService {
     
     StringBuilder scriptBuilder = new StringBuilder();
     
-    for (JMeterScriptReference ref : project.getScripts()) {
+    for (JMeterScriptReference ref : scripts) {
+      if (!project.getScripts().contains(ref)) continue;
       JMeterScript jScript = ref.get();
       String scriptName = StringUtil.normalizeName(jScript.getName());
       int loops = jScript.getLoops();
@@ -110,7 +113,7 @@ public class GeneratorService {
       }
       
       String samplers = samplerBuilder.toString();
-      scriptBuilder.append(engine.render(scriptTemplate, scriptName, loops, numberThreads, ramUp, samplers));
+      scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp, samplers));
     }
     
     String runner = engine.render(runnerTemplate, scriptBuilder.toString());

@@ -5,6 +5,7 @@ package org.ats.services.generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
@@ -168,27 +169,33 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler loginPost = factory.createHttpPost("Login codeproject post", 
-        "https://www.codeproject.com/script/Membership/LogOn.aspx?rp=%2f%3floginkey%3dfalse", 
+        "https://www.codeproject.com/script/Membership/LogOn.aspx?rp=%2f%3floginkey%3dfalse",
         "kakalot", 0,
         factory.createArgument("FormName", "MenuBarForm"),
         factory.createArgument("Email", "kakalot8x08@gmail.com"),
         factory.createArgument("Password", "tititi"));
     
     JMeterSampler gotoArticle = factory.createHttpGet("Go to top article", 
-        "http://www.codeproject.com/script/Articles/TopArticles.aspx?ta_so=5", 
+        "http://www.codeproject.com/script/Articles/TopArticles.aspx?ta_so=5",
         null, 0);
     
-    JMeterScript jmeter = factory.createJmeterScript(
-        "Test Name",
-        1, 100, 5, false, 0,
-        loginPost, gotoArticle);
+    JMeterScript loginScript = factory.createJmeterScript(
+        "Login",
+        1, 20, 5, false, 0,
+        loginPost);
+    jmeterService.create(loginScript);
     
-    jmeterService.create(jmeter);
-    performanceProject.addScript(jmeterScriptRef.create(jmeter.getId()));
+    JMeterScript gotoArticleScript = factory.createJmeterScript(
+        "GotoArticle", 1, 20, 5, false, 0, gotoArticle);
+    jmeterService.create(gotoArticleScript);
+    
+    performanceProject.addScript(jmeterScriptRef.create(loginScript.getId()));
+    performanceProject.addScript(jmeterScriptRef.create(gotoArticleScript.getId()));
     
     perfService.create(performanceProject);
     
-    Assert.assertEquals(generetorService.generate("target/perf",  performanceProject, true), "target/perf/" + performanceProject.getId().substring(0, 8) + ".zip");
+    Assert.assertEquals(generetorService.generate("target/perf",  performanceProject, true, Arrays.<JMeterScriptReference>asList(jmeterScriptRef.create(loginScript.getId()), jmeterScriptRef.create(gotoArticleScript.getId()))), 
+        "target/perf/" + performanceProject.getId().substring(0, 8) + ".zip");
   }
   
   @Test

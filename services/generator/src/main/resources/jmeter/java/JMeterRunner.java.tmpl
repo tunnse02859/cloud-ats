@@ -41,7 +41,11 @@ public class JMeterRunner {
 
   @scripts
   
-  private void shutdown() {
+  private void shutdown() throws InterruptedException {
+   shutdown(0);
+  }
+  
+  private void shutdown(int retry) throws InterruptedException {
     String reaperRE = JMeterUtils.getPropDefault("rmi.thread.name", "^RMI Reaper$");
     Thread reaper = null;
     for(Thread t : Thread.getAllStackTraces().keySet()){
@@ -54,6 +58,11 @@ public class JMeterRunner {
     if (reaper != null) {
       while(reaper.getState() == State.WAITING) {
       }
+    } else {
+      if (retry > 3) return;
+      retry++;
+      Thread.sleep(5000);
+      shutdown(retry);
     }
   }
 }

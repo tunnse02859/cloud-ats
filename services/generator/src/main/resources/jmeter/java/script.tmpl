@@ -1,4 +1,5 @@
  @args() {
+  String scriptId,
   String scriptName,
   int loops,
   int numberThreads,
@@ -18,7 +19,7 @@
     
     threadGroupHashTree.add(Utils.createCookieManager());
     threadGroupHashTree.add(Utils.createHeaderManager());
-    threadGroupHashTree.add(Utils.createResultCollector("target/@scriptName@.jtl"));
+    threadGroupHashTree.add(Utils.createResultCollector("target/@scriptId@.jtl"));
     
     DistributedRunner distributedRunner = new DistributedRunner();
     distributedRunner.setStdout(System.out);
@@ -27,7 +28,7 @@
     SamplerBuilder samplerBuilder = new SamplerBuilder(threadGroupHashTree);
     @samplers
     
-    SaveService.saveTree(root, new FileOutputStream("target/@scriptName@.jmx"));
+    SaveService.saveTree(root, new FileOutputStream("target/@scriptId@.jmx"));
     root.add(root.getArray()[0], new RemoteThreadsListenerTestElement());
     root.add(root.getArray()[0], new ListenToTest());
     
