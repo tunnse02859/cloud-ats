@@ -3,6 +3,7 @@
  */
 package org.ats.services.iaas.openstack;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -76,7 +77,9 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -572,7 +575,7 @@ public class OpenStackService implements IaaSServiceInterface {
     try {
       if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
         logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
-        
+        if (!hasUI && !system) waitJMeterServerRunning(vm);
         if (!system) {
           vm = deallocateFloatingIp(vm);
           logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
@@ -691,6 +694,18 @@ public class OpenStackService implements IaaSServiceInterface {
       createBuilder.portRangeMin(8081);
       createBuilder.portRangeMax(8081);
       securityGroupApi.create(createBuilder.build());
+    }
+  }
+  
+  private void waitJMeterServerRunning(VMachine vm) throws JSchException, IOException, InterruptedException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Channel channel = SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", "service jmeter-2.13 status", null, null);
+    SSHClient.write(bos, channel);
+    String status = new String(bos.toByteArray());
+    logger.info("JMeter Server is " + status);
+    if (!"Running".equals(status.trim())) {
+      Thread.sleep(5000);
+      waitJMeterServerRunning(vm);
     }
   }
 }
