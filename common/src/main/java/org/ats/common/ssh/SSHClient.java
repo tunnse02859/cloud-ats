@@ -331,6 +331,23 @@ public class SSHClient {
 
     return channel;
   }
+  
+  public static void write(OutputStream os, Channel channel) throws IOException {
+    InputStream in=channel.getInputStream();
+    byte[] tmp=new byte[1024];
+    while(true){
+      while(in.available()>0){
+        int i=in.read(tmp, 0, 1024);
+        if(i<0)break;
+        os.write(tmp, 0, i);
+      }
+      if(channel.isClosed()){
+        if(in.available()>0) continue;
+        return;
+      }
+      try{Thread.sleep(1000);}catch(Exception ee){}
+    }
+  }
 
   public static int printOut(PrintStream out, Channel channel) throws IOException {
     InputStream in=channel.getInputStream();
