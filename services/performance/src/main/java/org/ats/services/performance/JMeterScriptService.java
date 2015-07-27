@@ -12,6 +12,7 @@ import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.performance.JMeterSampler.Method;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -21,6 +22,7 @@ import com.mongodb.DBObject;
  *
  * Jun 11, 2015
  */
+@Singleton
 public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
 
   /** .*/
