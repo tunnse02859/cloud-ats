@@ -2,9 +2,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.services.DataDrivenModule;
+import org.ats.services.ExecutorModule;
+import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
+import org.ats.services.PerformanceServiceModule;
+import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
@@ -52,13 +56,19 @@ public class Global extends GlobalSettings {
   public void onStart(Application app) {
     String dbConf = Play.application().configuration().getString(DatabaseModule.DB_CONF);
     String eventConf = Play.application().configuration().getString(EventModule.EVENT_CONF);
+    String vmConf = Play.application().configuration().getString(VMachineServiceModule.VM_CONF);
+    
     try {
       injector = Guice.createInjector(
           new DatabaseModule(dbConf), 
           new EventModule(eventConf), 
           new OrganizationServiceModule(),
           new DataDrivenModule(),
-          new KeywordServiceModule());
+          new KeywordServiceModule(),
+          new PerformanceServiceModule(),
+          new GeneratorModule(),
+          new VMachineServiceModule(vmConf),
+          new ExecutorModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);
