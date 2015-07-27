@@ -570,7 +570,6 @@ public class OpenStackService implements IaaSServiceInterface {
 
     //create floating ip for system vm
     vm = allocateFloatingIp(vm);
-    logger.log(Level.INFO, "Associate a floating ip " + vm.getPublicIp() + " with fixed ip " + address.getAddr());
 
     try {
       if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
@@ -578,7 +577,6 @@ public class OpenStackService implements IaaSServiceInterface {
         if (!hasUI && !system) waitJMeterServerRunning(vm);
         if (!system) {
           vm = deallocateFloatingIp(vm);
-          logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
         }
         vmachineService.create(vm);
         return vm;
@@ -601,6 +599,7 @@ public class OpenStackService implements IaaSServiceInterface {
     floatingIpApi.addToServer(floatingIp.getFloatingIpAddress(), vm.getId());
     
     vm.setPublicIp(floatingIp.getFloatingIpAddress());
+    logger.log(Level.INFO, "Associate a floating ip " + vm.getPublicIp() + " with fixed ip " + vm.getPrivateIp());
     return vm;
   }
   
@@ -620,6 +619,7 @@ public class OpenStackService implements IaaSServiceInterface {
       }
     }
     vm.setPublicIp(null);
+    logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
     return vm;
   }
   

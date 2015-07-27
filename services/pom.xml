@@ -21,6 +21,7 @@
 		<module>datadriven</module>
 		<module>performance</module>
 		<module>generator</module>
+		<module>executor</module>
 		<module>vmachine</module>
 	</modules>
 
