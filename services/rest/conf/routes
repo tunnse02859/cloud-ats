@@ -32,6 +32,12 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 # Keyword project controller
 POST	/api/v1/keyword					@controllers.KeywordProjectController.newData()
 GET		/api/v1/getList/:tenant/:space		@controllers.KeywordProjectController.getListKeywordProject(tenant,space)
+GET		/api/v1/getListTestCase			@controllers.KeywordProjectController.getListTestCase()
+POST	/api/v1/testcase				@controllers.KeywordProjectController.newTestCase()
+GET		/api/v1/getCustomKeywords/:tenant/:space/:projectID		@controllers.KeywordProjectController.getCustomKeywords(tenant,space,projectID)
+POST	/api/v1/addCustomKeyword		@controllers.KeywordProjectController.addCustomKeyword()
+DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordName	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordName)		
+PUT		/api/v1/update					@controllers.KeywordProjectController.update()
 
 # Upload script
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()

@@ -58,12 +58,17 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     ObjectMapper mapper = new ObjectMapper();
 
     DataDrivenReference driven = null;
+    String info = null;
     if (sel1.get("data_driven") != null) {
       driven = drivenRefFactory.create(((BasicDBObject)sel1.get("data_driven")).getString("_id"));
     }
+    if(sel1.get("info") != null) {
+      info = sel1.getString("info");
+    }
     
-    Case caze = caseFactory.create(sel1.getString("name"), driven);
+    Case caze = caseFactory.create(sel1.getString("name"), driven,info);
     caze.put("_id", sel1.get("_id"));
+    
     if (sel1.get("actions") != null) {
       BasicDBList actions = (BasicDBList) sel1.get("actions");
       for (Object bar : actions) {
