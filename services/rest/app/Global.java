@@ -64,7 +64,6 @@ public class Global extends GlobalSettings {
           new EventModule(eventConf), 
           new OrganizationServiceModule(),
           new DataDrivenModule(),
-          new KeywordServiceModule(),
           new PerformanceServiceModule(),
           new GeneratorModule(),
           new VMachineServiceModule(vmConf),
