@@ -39,3 +39,12 @@ GET		/api/v1/performance/list			@controllers.PerformanceController.listPerforman
 POST 	/api/v1/performance/createWizard	@controllers.PerformanceController.createPerformanceTestWizard()
 POST	/api/v1/performance/uploadFile		@controllers.PerformanceController.createPerformanceTestByFile()
 PUT		/api/v1/performance/updateScript 	@controllers.PerformanceController.updatePerformanceTestWizard()
+
+# Keyword controller
+GET		/api/v1/keyword/getTestsuites/:projectId		@controllers.KeywordProjectController.getTestsuites(projectId)
+GET		/api/v1/keyword/getListFuncProject				@controllers.KeywordProjectController.getListProject()
+POST	/api/v1/keyword/createKeywordProject			@controllers.KeywordProjectController.createKeywordProject()
+POST	/api/v1/keyword/createTestSuite					@controllers.KeywordProjectController.createTestSuite()
+POST	/api/v1/keyword/runKeywordProject				@controllers.KeywordProjectController.runKeywordProject()
+GET		/api/v1/keyword/deleteTestSuite/:suiteId					@controllers.KeywordProjectController.deleteTestSuite(suiteId)
+

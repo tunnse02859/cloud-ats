@@ -63,6 +63,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     }
     
     Case caze = caseFactory.create(sel1.getString("name"), driven);
+    caze.put("_id", sel1.get("_id"));
     if (sel1.get("actions") != null) {
       BasicDBList actions = (BasicDBList) sel1.get("actions");
       for (Object bar : actions) {

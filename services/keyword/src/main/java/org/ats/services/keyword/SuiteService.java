@@ -85,9 +85,12 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     
     SuiteReference suiteRef = suiteRefFactory.create(obj.getId());
     PageList<KeywordProject> list = projectService.findIn("suites", suiteRef);
-    KeywordProject project = list.next().get(0);
-    project.removeSuite(suiteRef);
-    projectService.update(project);
+    while (list.hasNext()) {
+      KeywordProject project = list.next().get(0);
+      project.removeSuite(suiteRef);
+      projectService.update(project);
+    }
+    
   }
   
   @Override

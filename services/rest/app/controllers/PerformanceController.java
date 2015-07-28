@@ -169,7 +169,9 @@ public class PerformanceController extends Controller {
     JsonNode data = request().body().asJson();
         
     String scriptId = data.get("script_id").asText();
+    
     int loops = data.get("loops").asInt();
+    System.out.println("AAAloop:" + loops);
     int ramup = data.get("ramup").asInt();
     int duration = data.get("duration").asInt();
     int users = data.get("users").asInt();
@@ -218,14 +220,14 @@ public class PerformanceController extends Controller {
       
     }
     
-    /*JMeterScript script = jmeterService.get(scriptId);
+    JMeterScript script = jmeterService.get(scriptId);
     script.setLoops(loops);
     script.setDuration(duration);
     script.setNumberThreads(users);
     script.setRamUp(ramup);
     script.addSampler(arraySamplers);
     
-    jmeterService.update(script);*/
+    jmeterService.update(script);
     
     return status(200);
   }
