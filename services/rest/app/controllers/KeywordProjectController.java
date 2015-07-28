@@ -58,8 +58,6 @@ public class KeywordProjectController extends Controller{
   
   @Inject CaseFactory caseFactory;
   
-  @Inject ReferenceFactory<SuiteReference> suiteRef;
-  
   @Inject
   private SuiteService suiteService;
   
@@ -125,7 +123,7 @@ public class KeywordProjectController extends Controller{
       }
       suite = suiteBuilder.build();
       suiteService.create(suite);
-      keywordProject.addSuite(suiteRef.create(suite.getId()));
+      keywordProject.addSuite(suiteRefFactory.create(suite.getId()));
     }
     keywordProjectService.create(keywordProject);
       
@@ -178,10 +176,10 @@ public class KeywordProjectController extends Controller{
           Suite suite = suiteRef.get();
           ArrayNode arrayCases = Json.newObject().arrayNode();
           
-         /* for (CaseReference caseRef : suite.getCases()) {
+          for (CaseReference caseRef : suite.getCases()) {
             Case caze =  caseRef.get();
             arrayCases.add(Json.parse(caze.toString()));
-          }*/
+          }
           
           totalCases += arrayCases.size();
           suite.put("cases", arrayCases);
@@ -245,7 +243,7 @@ public class KeywordProjectController extends Controller{
     CaseReference caseRef;
     for (JsonNode testCase : cases) {
       
-      caseRef = caseRefFactory.create(testCase.get("_id").toString());
+      caseRef = caseRefFactory.create(testCase.get("_id").asText());
       
       builder.addCases(caseRef);
     }
@@ -319,10 +317,10 @@ public class KeywordProjectController extends Controller{
     return ok();
   }
   
-  public Result getCustomKeywords(String tenant, String space, String projectID) {
+  public Result getCustomKeywords(String tenant, String space, String projectId) {
     BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
     query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
-    query.append("_id",projectID);
+    query.append("_id",projectId);
     
     PageList<KeywordProject> list = keywordProjectService.query(query);
     list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
@@ -343,21 +341,21 @@ public class KeywordProjectController extends Controller{
     KeywordProject keywordProject;
     for(int i = 0; i < customKeyNode.size(); i++) {
       String nameCustomKeyword = customKeyNode.get(i).get("name").asText();
-      String projectID = keywordProjectNode.get(i).get("projectID").asText();
+      String projectId = keywordProjectNode.get("projectId").asText();
       customKeyword = new CustomKeyword(nameCustomKeyword);
       //Add action for custom keyword
       for(JsonNode action:customKeyNode.get(i).get("steps")) {
         customKeyword.addAction(action); 
       }
-      keywordProject = keywordProjectService.get(projectID);
+      keywordProject = keywordProjectService.get(projectId);
       keywordProject.addCustomKeyword(customKeyword);
       keywordProjectService.update(keywordProject);
     }
     return ok();
   }
   
-  public Result removeCustomKeyword(String projectID,String customKeywordName) {
-    KeywordProject keywordProject = keywordProjectService.get(projectID);
+  public Result removeCustomKeyword(String projectId,String customKeywordName) {
+    KeywordProject keywordProject = keywordProjectService.get(projectId);
     keywordProject.removeCustomKeyword(customKeywordName);
     keywordProjectService.update(keywordProject);
     return ok();
@@ -365,11 +363,11 @@ public class KeywordProjectController extends Controller{
   
   public Result update() {
     JsonNode node = request().body().asJson();
-    JsonNode nodeProject = node.get("projectID");
+    JsonNode nodeProject = node.get("projectId");
     JsonNode nodeCustomKeyword = node.get("customKeyword");
     KeywordProject keywordProject ;
-    String projectID = nodeProject.get(0).get("projectID").asText();
-    keywordProject = keywordProjectService.get(projectID);
+    String projectId = nodeProject.get("projectId").asText();
+    keywordProject = keywordProjectService.get(projectId);
     for(int i = 0; i < nodeCustomKeyword.size(); i++) {
       JsonNode customKeyword = nodeCustomKeyword.get(i);
       String nameCustomKeyword = customKeyword.get("name").asText();
