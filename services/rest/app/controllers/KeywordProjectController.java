@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.datadriven.DataDrivenService;
 import org.ats.services.keyword.Case;
@@ -57,8 +58,6 @@ public class KeywordProjectController extends Controller{
   
   @Inject CaseFactory caseFactory;
   
-  @Inject ReferenceFactory<CaseReference> caseRef;
-  
   @Inject ReferenceFactory<SuiteReference> suiteRef;
   
   @Inject
@@ -68,13 +67,13 @@ public class KeywordProjectController extends Controller{
   private KeywordProjectService keywordProjectService;
   
   @Inject
-  private KeywordProjectFactory projectFactory;
-  
-  @Inject
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   
   @Inject
   private ReferenceFactory<CaseReference> caseRefFactory;
+  
+  @Inject
+  private OrganizationContext context;
   
   private Suite suite;
   
@@ -85,7 +84,7 @@ public class KeywordProjectController extends Controller{
     //define variable for cases
     JsonNode casesNode = json.get("cases");
     String nameKeywordProject = json.get("wizardData").get("project_name").asText();
-    KeywordProject keywordProject = keywordProjectFactory.create(nameKeywordProject);
+    KeywordProject keywordProject = keywordProjectFactory.create(context, nameKeywordProject);
     Map<String, Case> listCase = new HashMap<String, Case>();
  
     for(int i = 0; i < casesNode.size(); i++) {
@@ -122,7 +121,7 @@ public class KeywordProjectController extends Controller{
       
       for(JsonNode node:caseInSuiteNode) {
         Case caseInSuite = listCase.get(node.get("name").asText());
-        suiteBuilder.addCases(caseRef.create(caseInSuite.getId()));
+        suiteBuilder.addCases(caseRefFactory.create(caseInSuite.getId()));
       }
       suite = suiteBuilder.build();
       suiteService.create(suite);
@@ -203,7 +202,7 @@ public class KeywordProjectController extends Controller{
     JsonNode data = request().body().asJson();
     
     String projectName = data.get("projectName").asText();
-    KeywordProject project = projectFactory.create(projectName);
+    KeywordProject project = keywordProjectFactory.create(context, projectName);
     
     keywordProjectService.create(project);
     
