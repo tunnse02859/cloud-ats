@@ -2,11 +2,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.services.DataDrivenModule;
-<<<<<<< HEAD
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
-=======
->>>>>>> Functional Keyword - manage TestCase and CustomKeyword
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
