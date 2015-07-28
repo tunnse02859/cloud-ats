@@ -222,7 +222,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
       .raw((DBObject)JSON.parse(rootNode.toString()));
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create("test", null);
+    Case caze = caseFactory.create("test", null, null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -243,7 +243,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
       .raw((DBObject)JSON.parse(rootNode.toString()));
     
     stepsNode = rootNode.get("steps");
-    caze = caseFactory.create("test", null);
+    caze = caseFactory.create("test", null, null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
