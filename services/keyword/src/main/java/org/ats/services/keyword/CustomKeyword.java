@@ -5,7 +5,9 @@ package org.ats.services.keyword;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBList;
@@ -23,7 +25,13 @@ public class CustomKeyword extends BasicDBObject {
   private List<JsonNode> actions = new ArrayList<JsonNode>();
   
   public CustomKeyword(String name) {
+    this.put("_id", UUID.randomUUID().toString());
+    this.put("created_date", new Date());
     this.put("name", name);
+  }
+  
+  public String getId() {
+    return this.getString("_id");
   }
   
   public void setName(String name) {

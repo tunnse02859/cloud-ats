@@ -2,8 +2,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.services.DataDrivenModule;
+<<<<<<< HEAD
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
+=======
+>>>>>>> Functional Keyword - manage TestCase and CustomKeyword
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
@@ -68,7 +71,8 @@ public class Global extends GlobalSettings {
           new PerformanceServiceModule(),
           new GeneratorModule(),
           new VMachineServiceModule(vmConf),
-          new ExecutorModule());
+          new ExecutorModule(),
+          new KeywordServiceModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);

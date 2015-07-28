@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -161,6 +162,22 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
   }
   
   public Collection<CustomKeyword> getCustomKeywords() {
+    Object obj = this.get("custom_keywords");
+    if (obj ==  null) return Collections.emptyList();
+    BasicDBList list = (BasicDBList) obj;
+    Iterator<CustomKeyword> iterator = customKeywords.values().iterator();
+    List<CustomKeyword> listCustom = new ArrayList<CustomKeyword>();
+    while(iterator.hasNext()) {
+      listCustom.add(iterator.next());
+      //iterator.next().put("_id", ((BasicDBObject) list.get(i)).getString("_id"));
+    }
+    for (int i = 0; i < list.size(); i++) {
+      /*while(iterator.hasNext()) {
+        //iterator.next().put("_id", ((BasicDBObject) list.get(i)).getString("_id"));
+        
+      }*/
+      listCustom.get(i).put("_id", ((BasicDBObject) list.get(i)).getString("_id") );
+    }
     return Collections.unmodifiableCollection(customKeywords.values());
   }
 }

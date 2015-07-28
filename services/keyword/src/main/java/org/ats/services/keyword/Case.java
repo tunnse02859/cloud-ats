@@ -45,11 +45,12 @@ public class Case extends AbstractTemplate {
   private ReferenceFactory<DataDrivenReference> drivenRefFactory;
   
   @Inject
-  private Case(@Assisted("name") String name, @Nullable @Assisted("dataDriven") DataDrivenReference ref) {
+  private Case(@Assisted("name") String name, @Nullable @Assisted("dataDriven") DataDrivenReference ref, @Nullable @Assisted("info") String info) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("data_driven", ref != null ? ref.toJSon() : null);
     this.put("actions",  null);
+    this.put("info", info != null ? info : null);
   }
   
   public String getId() {
@@ -62,6 +63,14 @@ public class Case extends AbstractTemplate {
   
   public String getName() {
     return this.getString("name");
+  }
+  
+  public void setInfo(String info) {
+    this.put("info", info);
+  }
+  
+  public String getInfo() {
+    return this.getString("info");
   }
   
   public void setDataDriven(DataDrivenReference driven) {

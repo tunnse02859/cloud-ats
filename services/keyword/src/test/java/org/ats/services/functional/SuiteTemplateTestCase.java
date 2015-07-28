@@ -154,7 +154,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     
     JsonNode stepsNode = rootNode.get("steps");
 
-    Case caze = caseFactory.create("test", null);
+    Case caze = caseFactory.create("test", null,null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
