@@ -317,22 +317,16 @@ public class KeywordProjectController extends Controller{
     return ok();
   }
   
-  public Result getCustomKeywords(String tenant, String space, String projectId) {
-    BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
-    query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
-    query.append("_id",projectId);
-    
-    PageList<KeywordProject> list = keywordProjectService.query(query);
-    list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
+  public Result getCustomKeywords(String tenant, String space, String projectID) {
+    KeywordProject keywordProject = keywordProjectService.get(projectID);
+    Collection<CustomKeyword> listCustomKeyword =  keywordProject.getCustomKeywords();
     ArrayNode array = Json.newObject().arrayNode();
-    List<KeywordProject> listKeywordProject = list.next();
-    Collection<CustomKeyword> listCustom = listKeywordProject.get(0).getCustomKeywords();
-    Iterator<CustomKeyword> iterator = listCustom.iterator();
-    while(iterator.hasNext()) {
-      array.add(Json.parse(iterator.next().toString()));
+    for(CustomKeyword item: listCustomKeyword) {
+      array.add(Json.parse(item.toString()));
     }
     return ok(array);
   }
+  
   public Result addCustomKeyword() {
     JsonNode node = request().body().asJson();
     JsonNode customKeyNode = node.get("customKeyword");
