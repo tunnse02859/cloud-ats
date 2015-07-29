@@ -37,14 +37,15 @@ POST	/api/v1/testcase					@controllers.KeywordProjectController.newTestCase()
 GET		/api/v1/getCustomKeywords/:tenant/:space/:projectID			@controllers.KeywordProjectController.getCustomKeywords(tenant,space,projectID)
 POST	/api/v1/addCustomKeyword									@controllers.KeywordProjectController.addCustomKeyword()
 DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordName	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordName)		
-PUT		/api/v1/update												@controllers.KeywordProjectController.update()
+PUT		/api/v1/updateCustomKeyword												@controllers.KeywordProjectController.updateCustomKeyword()
 GET		/api/v1/keyword/getTestsuites/:projectId					@controllers.KeywordProjectController.getTestsuites(projectId)
 GET		/api/v1/keyword/getListFuncProject							@controllers.KeywordProjectController.getListProject()
 POST	/api/v1/keyword/createKeywordProject						@controllers.KeywordProjectController.createKeywordProject()
 POST	/api/v1/keyword/createTestSuite								@controllers.KeywordProjectController.createTestSuite()
 POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectController.runKeywordProject()
 GET		/api/v1/keyword/deleteTestSuite/:suiteId					@controllers.KeywordProjectController.deleteTestSuite(suiteId)
-
+PUT		/api/v1/updateCase											@controllers.KeywordProjectController.updateCase()
+DELETE	/api/v1/removeCase/:caseId			@controllers.KeywordProjectController.removeCase(caseId)
 # Upload script
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
 # Map static resources from the /public folder to the /assets URL path

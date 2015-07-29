@@ -6,6 +6,7 @@ package org.ats.services.keyword;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class Case extends AbstractTemplate {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("data_driven", ref != null ? ref.toJSon() : null);
+    this.put("create_date", new Date());
     this.put("actions",  null);
     this.put("info", info != null ? info : null);
   }
