@@ -197,7 +197,10 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
         jmeterScriptRef.create(loginScript.getId()),
         jmeterScriptRef.create(gotoArticleScript.getId())));
     
-    waitUntilJobFinish(job);
+    Assert.assertEquals(job.getStatus(), Status.Queued);
+    Assert.assertNull(job.getTestVMachineId());
+    
+    job = (PerformanceJob) waitUntilJobFinish(job);
     
     job = (PerformanceJob) executorService.get(job.getId());
     
@@ -263,7 +266,10 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
         suiteRefFactory.create(fullExampleSuite.getId()),
         suiteRefFactory.create(acceptAlertSuite.getId())));
     
-    waitUntilJobFinish(job);
+    Assert.assertEquals(job.getStatus(), Status.Queued);
+    Assert.assertNull(job.getTestVMachineId());
+    
+    job = (KeywordJob) waitUntilJobFinish(job);
     
     job = (KeywordJob) executorService.get(job.getId());
     Assert.assertEquals(job.getStatus(), AbstractJob.Status.Completed);
@@ -272,11 +278,12 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     Assert.assertTrue(job.getRawDataOutput().keySet().contains("report"));
   }
   
-  private void waitUntilJobFinish(AbstractJob<?> job) throws InterruptedException {
-    while (job.getStatus() == Status.Running) {
+  private AbstractJob<?> waitUntilJobFinish(AbstractJob<?> job) throws InterruptedException {
+    while (job.getStatus() != Status.Completed) {
       job = executorService.get(job.getId());
       Thread.sleep(3000);
     }
+    return job;
   }
 
 }

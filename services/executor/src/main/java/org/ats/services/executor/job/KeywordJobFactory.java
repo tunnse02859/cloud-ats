@@ -3,7 +3,12 @@
  */
 package org.ats.services.executor.job;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.ats.services.executor.job.AbstractJob.Status;
+import org.ats.services.keyword.SuiteReference;
 
 import com.google.inject.assistedinject.Assisted;
 
@@ -14,6 +19,11 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface KeywordJobFactory {
 
-  public KeywordJob create(@Assisted("id") String id, @Assisted("projectId") String projectId, @Assisted("vmachineId") String vmachineId, @Assisted("status") Status status);
+  public KeywordJob create(
+      @Assisted("id") String id, 
+      @Assisted("projectId") String projectId,
+      @Assisted("suites") List<SuiteReference> suites,
+      @Nullable @Assisted("vmachineId") String vmachineId, 
+      @Assisted("status") Status status);
   
 }
