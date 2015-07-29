@@ -43,7 +43,6 @@ GET		/api/v1/keyword/getListFuncProject							@controllers.KeywordProjectControl
 POST	/api/v1/keyword/createKeywordProject						@controllers.KeywordProjectController.createKeywordProject()
 POST	/api/v1/keyword/createTestSuite								@controllers.KeywordProjectController.createTestSuite()
 POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectController.runKeywordProject()
-GET		/api/v1/keyword/deleteTestSuite/:suiteId					@controllers.KeywordProjectController.deleteTestSuite(suiteId)
 PUT		/api/v1/updateCase											@controllers.KeywordProjectController.updateCase()
 DELETE	/api/v1/removeCase/:caseId			@controllers.KeywordProjectController.removeCase(caseId)
 GET		/api/v1/keyword/deleteTestSuite/:suiteId/:projectId					@controllers.KeywordProjectController.deleteTestSuite(suiteId, projectId)
