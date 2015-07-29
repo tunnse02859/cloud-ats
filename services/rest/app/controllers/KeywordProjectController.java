@@ -177,28 +177,33 @@ public class KeywordProjectController extends Controller{
         object.put("projectName", project.getString("name"));
         
         ArrayNode arraySuites = Json.newObject().arrayNode();
-        
-        int totalCases = 0;
+        Map<String,Integer> mapAllSuite = new HashMap<String,Integer>();
         for (SuiteReference suiteRef : project.getSuites()) {
           
-          Suite suite = suiteRef.get();
+          Suite suite = suiteRef.get();         
+          
           ArrayNode arrayCases = Json.newObject().arrayNode();
           
           for (CaseReference caseRef : suite.getCases()) {
             Case caze =  caseRef.get();
             arrayCases.add(Json.parse(caze.toString()));
+            
+            Integer count = mapAllSuite.get(caze.getId());
+            if(count == null){
+              count = new Integer(0);
+            }
+            count = count +1 ;
+            mapAllSuite.put(caze.getId(),count);            
           }
           
-          totalCases += arrayCases.size();
-          suite.put("cases", arrayCases);
+          suite.put("cases", arrayCases.toString());
           arraySuites.add(Json.parse(suite.toString()));
           
         }
-        object.put("totalCases", totalCases);
+        object.put("totalCases", mapAllSuite.size());
         object.put("suites", arraySuites);
         array.add(object);
       }
-      
     }
     return ok(array);
   }
@@ -229,17 +234,53 @@ public class KeywordProjectController extends Controller{
     for (JsonNode json : suiteIds) {
       
       String suiteId = json.get("_id").asText();
-      suiteRef = suiteRefFactory.create(suiteId);
-      project.addSuite(suiteRef);
+      System.out.println(suiteId);
+      //suiteRef = suiteRefFactory.create(suiteId);
+      //project.addSuite(suiteRef);
     }
     
-    keywordProjectService.update(project);
+    //keywordProjectService.update(project);
     return ok();
+  }
+  
+  public Result updateTestSuite() {
+    JsonNode json = request().body().asJson().get("data");
+    
+    String projectId = json.get("projectId").asText();
+    String suiteId = json.get("suiteId").asText();
+    
+    JsonNode cases = json.get("cases");
+    
+    Suite suite = suiteService.get(suiteId);
+    String name = suite.getString("suite_name");
+    suite.removeField("cases");
+    
+    SuiteBuilder builder = new SuiteBuilder();
+    for (JsonNode caze : cases) {
+       CaseReference cazeRef = caseRefFactory.create(caze.get("_id").asText());
+       builder.addCases(cazeRef);
+    }
+    
+    suite = builder.build();
+    
+    suite.put("_id", suiteId);
+    suite.put("suite_name", name);
+    
+    suiteService.update(suite);
+    
+    ObjectNode object = Json.newObject();
+    object.put("totalTestCases", totalTestCasesInProject(projectId));
+    
+    return ok(object);
   }
   
   public Result createTestSuite() {
     
     JsonNode data = request().body().asJson().get("data");
+    String projectId = data.get("_id").asText();
+    
+    KeywordProject project = keywordProjectService.get(projectId);
+    
     
     String suiteName = data.get("suite_name").asText();
     
@@ -260,16 +301,44 @@ public class KeywordProjectController extends Controller{
     
     suiteService.create(suite);
     
-    String suiteId = suite.getId();
+    SuiteReference suiteRef = suiteRefFactory.create(suite.getId());
+    project.addSuite(suiteRef);
     
-    return ok(suiteId);
+    keywordProjectService.update(project);
+    String suiteId = suite.getId();
+    ObjectNode object = Json.newObject();
+    object.put("suiteId", suiteId);
+    object.put("totalTestCases", totalTestCasesInProject(projectId));
+    return ok(object);
   }
   
-  public Result deleteTestSuite(String id) {
+  public int totalTestCasesInProject(String id) {
     
-    suiteService.delete(id);
-    return ok();
+    KeywordProject project = keywordProjectService.get(id);
+    
+    Map<String, Integer> allMap = new HashMap<String, Integer>();
+    
+    for (SuiteReference suiteRef : project.getSuites()) {
+      
+      Suite suite = suiteRef.get();
+      
+      for (CaseReference caseRef : suite.getCases()) {
+        allMap.put(caseRef.getId(), 0);
+      }
+    }
+    
+    return allMap.size();
   }
+  
+  public Result deleteTestSuite(String suiteId, String projectId) {
+    
+    
+    suiteService.delete(suiteId);
+    ObjectNode object = Json.newObject();
+    object.put("totalTestCases", totalTestCasesInProject(projectId));
+    return ok(object);
+  }
+  
   public Result getListKeywordProject(String tenant, String space) {
     
     BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));

@@ -46,6 +46,8 @@ POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectControll
 GET		/api/v1/keyword/deleteTestSuite/:suiteId					@controllers.KeywordProjectController.deleteTestSuite(suiteId)
 PUT		/api/v1/updateCase											@controllers.KeywordProjectController.updateCase()
 DELETE	/api/v1/removeCase/:caseId			@controllers.KeywordProjectController.removeCase(caseId)
+GET		/api/v1/keyword/deleteTestSuite/:suiteId/:projectId					@controllers.KeywordProjectController.deleteTestSuite(suiteId, projectId)
+PUT		/api/v1/keyword/updateTestSuite								@controllers.KeywordProjectController.updateTestSuite()
 # Upload script
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
 # Map static resources from the /public folder to the /assets URL path
