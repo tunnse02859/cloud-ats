@@ -33,7 +33,7 @@ public abstract class AbstractJob<T extends AbstractJob<T>> extends BasicDBObjec
   }
   
   public void setVMachineId(String vmachineId) {
-    this.put("vmachine_id", vmachineId);
+    this.put("vm_id", vmachineId);
   }
   
   public String getTestVMachineId() {
@@ -67,7 +67,7 @@ public abstract class AbstractJob<T extends AbstractJob<T>> extends BasicDBObjec
   public abstract Type getType();
 
   public static enum Status {
-    Completed, Running;
+    Completed, Running, Queued;
   }
   
   public static enum Type {

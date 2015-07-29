@@ -5,6 +5,8 @@ package org.ats.services.executor.job;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.performance.JMeterScriptReference;
 
@@ -18,9 +20,9 @@ import com.google.inject.assistedinject.Assisted;
 public interface PerformanceJobFactory {
 
   public PerformanceJob create(@Assisted("id") String id, 
-      @Assisted("projectId") String projectId, 
-      @Assisted("vmachineId") String vmachineId, 
-      @Assisted("status") Status status,
-      @Assisted("scripts") List<JMeterScriptReference> scripts);
+      @Assisted("projectId") String projectId,
+      @Assisted("scripts") List<JMeterScriptReference> scripts,
+      @Nullable @Assisted("vmachineId") String vmachineId, 
+      @Assisted("status") Status status);
   
 }

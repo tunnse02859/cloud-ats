@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
 
@@ -30,10 +32,10 @@ public class PerformanceJob extends AbstractJob<PerformanceJob> {
   
   @Inject
   PerformanceJob(@Assisted("id") String id, 
-      @Assisted("projectId") String projectId, 
-      @Assisted("vmachineId") String vmachineId, 
-      @Assisted("status") Status status,
-      @Assisted("scripts") List<JMeterScriptReference> scripts) {
+      @Assisted("projectId") String projectId,
+      @Assisted("scripts") List<JMeterScriptReference> scripts,
+      @Nullable @Assisted("vmachineId") String vmachineId, 
+      @Assisted("status") Status status) {
     
     super(id, projectId, vmachineId);
     

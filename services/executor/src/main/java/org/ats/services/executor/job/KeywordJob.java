@@ -3,12 +3,17 @@
  */
 package org.ats.services.executor.job;
 
+import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.ats.common.MapBuilder;
+import org.ats.services.keyword.SuiteReference;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.mongodb.BasicDBList;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -18,11 +23,25 @@ import com.google.inject.assistedinject.Assisted;
 @SuppressWarnings("serial")
 public class KeywordJob extends AbstractJob<KeywordJob> {
 
+  private List<SuiteReference> suites;
+  
   @Inject
-  KeywordJob(@Assisted("id") String id, @Assisted("projectId") String projectId, @Assisted("vmachineId") String vmachineId, @Assisted("status") Status status) {
+  KeywordJob(
+      @Assisted("id") String id, 
+      @Assisted("projectId") String projectId,
+      @Assisted("suites") List<SuiteReference> suites,
+      @Nullable @Assisted("vmachineId") String vmachineId, 
+      @Assisted("status") Status status) {
+    
     super(id, projectId, vmachineId);
     setStatus(status);
     this.put("type", Type.Keyword.toString());
+    this.suites = suites;
+    BasicDBList list = new BasicDBList();
+    for (SuiteReference ref : suites) {
+      list.add(ref.toJSon());
+    }
+    this.put("suites", list);
   }
 
   @Override
@@ -35,4 +54,7 @@ public class KeywordJob extends AbstractJob<KeywordJob> {
     return Type.Keyword;
   }
 
+  public List<SuiteReference> getSuites() {
+    return this.suites;
+  }
 }

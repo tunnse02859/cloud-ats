@@ -4,10 +4,13 @@
 package org.ats.services.executor.event;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import org.ats.common.StringUtil;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
@@ -17,9 +20,13 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
+import org.ats.services.executor.job.AbstractJob.Status;
+import org.ats.services.generator.GeneratorService;
 import org.ats.services.iaas.openstack.OpenStackService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.SuiteReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.JMeterScriptReference;
@@ -42,6 +49,8 @@ import com.mongodb.BasicDBObject;
 public class TrackingJobActor extends UntypedActor {
 
   @Inject ExecutorService executorService;
+  
+  @Inject GeneratorService generatorService;
   
   @Inject KeywordProjectService keywordService;
   
@@ -73,6 +82,20 @@ public class TrackingJobActor extends UntypedActor {
 
   private void processPerformanceJob(PerformanceJob job) throws Exception {
     PerformanceProject project = perfService.get(job.getProjectId());
+    
+    switch (job.getStatus()) {
+    case Queued:
+      doExecute(job, project);
+    case Running:
+      doTracking(job, project);
+      break;
+    default:
+      break;
+    }
+  }
+  
+  private void doTracking(PerformanceJob job, PerformanceProject project) throws Exception {
+    
     TenantReference tenant = project.getTenant();
     SpaceReference space = project.getSpace();
     
@@ -117,9 +140,60 @@ public class TrackingJobActor extends UntypedActor {
       cache.remove(job.getId());
     }
   }
+  
+  private void doExecute(PerformanceJob job, PerformanceProject project) throws Exception {
+    
+    VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
+    
+    if (testVM == null) {
+      testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), false);
+      //Sleep 15s after creating new vm to make sure system be stable
+      Thread.sleep(15 * 1000);
+    }
+
+    String path = generatorService.generate("/tmp", project, true, job.getScripts());
+    String projectHash = project.getId().substring(0, 8);
+
+    SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", projectHash + ".zip", new File(path));
+    SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, System.out);
+
+    StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
+
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, projectHash, 
+        null , "/home/cloudats/projects/" + projectHash + "/pom.xml", goalsBuilder.toString());
+
+    jenkinsJob.submit();
+
+    testVM.setStatus(VMachine.Status.InProgress);
+    vmachineService.update(testVM);
+    
+    job.setStatus(Status.Running);
+    job.setVMachineId(testVM.getId());
+    executorService.update(job);
+    
+    Event event  = eventFactory.create(job, "performance-job-tracking");
+    event.broadcast();
+  }
 
   private void processKeywordJob(KeywordJob job) throws Exception {
     KeywordProject project = keywordService.get(job.getProjectId());
+    
+    switch (job.getStatus()) {
+    case Queued:
+      doExecute(job, project);
+    case Running:
+      doTracking(job, project);
+      break;
+    default:
+      break;
+    }
+  }
+  
+  private void doTracking(KeywordJob job, KeywordProject project) throws Exception {
+    
     TenantReference tenant = project.getTenant();
     SpaceReference space = project.getSpace();
     
@@ -165,6 +239,52 @@ public class TrackingJobActor extends UntypedActor {
       jkJob.delete();
       cache.remove(job.getId());
     }
+  }
+  
+  private void doExecute(KeywordJob job, KeywordProject project) throws Exception {
+
+    VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
+
+    if (testVM == null) {
+      testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), true);
+      //Sleep 15s after creating new vm to make sure system be stable
+      Thread.sleep(15 * 1000);
+    }
+
+    String path = generatorService.generate("/tmp", project, true);
+    testVM = openstackService.allocateFloatingIp(testVM);
+
+    SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
+    
+    SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
+    SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+        "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
+
+    testVM = openstackService.deallocateFloatingIp(testVM);
+
+    StringBuilder goalsBuilder = new StringBuilder("clean test -Dtest=");
+    for (Iterator<SuiteReference> i = job.getSuites().iterator(); i.hasNext(); ) {
+      Suite suite = i.next().get();
+      goalsBuilder.append(StringUtil.normalizeName(suite.getString("suite_name")));
+      if (i.hasNext()) goalsBuilder.append(',');
+    }
+
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
+        testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+
+    jenkinsJob.submit();
+
+    testVM.setStatus(VMachine.Status.InProgress);
+    vmachineService.update(testVM);
+
+    job.setStatus(Status.Running);
+    job.setVMachineId(testVM.getId());
+    executorService.update(job);
+    
+    Event event  = eventFactory.create(job, "keyword-job-tracking");
+    event.broadcast();
   }
   
   private void updateLog(AbstractJob<?> job, JenkinsMavenJob jkJob) throws IOException {
