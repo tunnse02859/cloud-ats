@@ -56,9 +56,10 @@ public class JenkinsMaster {
     }
   }
   
-  public boolean isReady(long timeout) throws IOException {
+  public boolean isReady(long timeout) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
     while (true) {
+      Thread.sleep(3000);
       if (this.isReady()) return true;
       if ((System.currentTimeMillis() - start) < timeout) continue;
       return false;

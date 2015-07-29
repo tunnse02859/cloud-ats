@@ -466,6 +466,15 @@ public class OpenStackService implements IaaSServiceInterface {
     if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
     
     JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    
+    try {
+      jenkinsMaster.isReady(60 * 1000);
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    
     try {
       if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) throw new CreateVMException("Can not create jenkins slave for test vm");
     } catch (Exception e) {
