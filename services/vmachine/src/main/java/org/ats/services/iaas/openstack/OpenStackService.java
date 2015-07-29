@@ -349,6 +349,7 @@ public class OpenStackService implements IaaSServiceInterface {
    atsTenant.put("network_id", null);
    
    //release floating ip
+   neutronAPI = createNeutronAPI(tenantRef.getId());
    FloatingIPApi floatingIpApi = neutronAPI.getFloatingIPApi(region).get();
    for (FloatingIP ip : floatingIpApi.list().concat()) {
      floatingIpApi.delete(ip.getId());

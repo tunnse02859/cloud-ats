@@ -133,7 +133,7 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     
     SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", projectHash + ".zip", new File(path));
     SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, System.out);
+        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, null);
     
     testVM = openstackService.deallocateFloatingIp(testVM);
     
