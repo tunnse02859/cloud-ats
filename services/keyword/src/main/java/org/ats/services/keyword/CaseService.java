@@ -86,8 +86,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
   @Override
   public void delete(Case obj) {
     if (obj == null) return;
-    super.delete(obj);
-    
+    //super.delete(obj);
     CaseReference caseRef = caseRefFactory.create(obj.getId());
     PageList<Suite> list = suiteService.findIn("cases", caseRef);
     List<Suite> holder = new ArrayList<Suite>();
@@ -103,6 +102,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     for (Suite suite : holder) {
       suiteService.update(suite);
     }
+    super.deleteBy(new BasicDBObject("_id", obj.getId()));
   }
   
   @Override

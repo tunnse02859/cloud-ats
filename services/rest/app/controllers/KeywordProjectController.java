@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -27,6 +28,7 @@ import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.bson.BSONObject;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -38,6 +40,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 /**
  * @author NamBV2
  *
@@ -48,15 +51,20 @@ import com.mongodb.BasicDBObject;
 @Authenticated
 public class KeywordProjectController extends Controller{
   
-  @Inject KeywordProjectFactory keywordProjectFactory;
+  @Inject 
+  private KeywordProjectFactory keywordProjectFactory;
   
-  @Inject DataDrivenService dataDrivenService;
+  @Inject 
+  private DataDrivenService dataDrivenService;
   
-  @Inject ReferenceFactory<DataDrivenReference> dataRef;
+  @Inject 
+  private ReferenceFactory<DataDrivenReference> dataRef;
   
-  @Inject CaseService caseService;
+  @Inject 
+  private CaseService caseService;
   
-  @Inject CaseFactory caseFactory;
+  @Inject 
+  private CaseFactory caseFactory;
   
   @Inject
   private SuiteService suiteService;
@@ -330,12 +338,12 @@ public class KeywordProjectController extends Controller{
   public Result addCustomKeyword() {
     JsonNode node = request().body().asJson();
     JsonNode customKeyNode = node.get("customKeyword");
-    JsonNode keywordProjectNode = node.get("keywordProject");
+    JsonNode keywordProjectNode = node.get("projectId");
     CustomKeyword customKeyword ;
     KeywordProject keywordProject;
     for(int i = 0; i < customKeyNode.size(); i++) {
       String nameCustomKeyword = customKeyNode.get(i).get("name").asText();
-      String projectId = keywordProjectNode.get("projectId").asText();
+      String projectId = keywordProjectNode.asText();
       customKeyword = new CustomKeyword(nameCustomKeyword);
       //Add action for custom keyword
       for(JsonNode action:customKeyNode.get(i).get("steps")) {
@@ -355,36 +363,63 @@ public class KeywordProjectController extends Controller{
     return ok();
   }
   
-  public Result update() {
+  public Result updateCustomKeyword() {
     JsonNode node = request().body().asJson();
     JsonNode nodeProject = node.get("projectId");
     JsonNode nodeCustomKeyword = node.get("customKeyword");
     KeywordProject keywordProject ;
-    String projectId = nodeProject.get("projectId").asText();
+    String projectId = nodeProject.asText();
     keywordProject = keywordProjectService.get(projectId);
     for(int i = 0; i < nodeCustomKeyword.size(); i++) {
       JsonNode customKeyword = nodeCustomKeyword.get(i);
-      String nameCustomKeyword = customKeyword.get("name").asText();
+      CustomKeyword newCustomKeyword = new CustomKeyword(customKeyword.get("name").toString());
+      for(JsonNode action:customKeyword.get("steps")) {
+        newCustomKeyword.addAction(action); 
+      }
       String idCustomKeyword = customKeyword.get("_id").asText();  
       for(CustomKeyword item : keywordProject.getCustomKeywords()) {
         if(idCustomKeyword.equals(item.getId().toString())) {
-          List<JsonNode> listActions = item.getActions();
-          item.setName(nameCustomKeyword);
-          System.out.println(listActions.get(0).toString()+"***");
-          //listActions.clear();
+          String _idCurrentProject = item.getId().toString();
+          keywordProject.removeCustomKeyword(item.getName());
+          newCustomKeyword.put("_id", _idCurrentProject);
+          keywordProject.addCustomKeyword(newCustomKeyword);
           
-          /*for(int j = 0; j <item.getActions().size(); j++) {
-            System.out.println(item.getActions().get(j)+"&&&&");
-          }*/
-          for(JsonNode action:nodeCustomKeyword.get(i).get("steps")) {
-            item.addAction(action);
-            System.out.println(action.toString()+"-+_+_+");
-          }
+          keywordProjectService.update(keywordProject);
         }
       }
-      keywordProjectService.update(keywordProject);
       
     }
+    return ok();
+  }
+  
+  public Result updateCase() {
+    System.out.println("update....");
+    JsonNode node = request().body().asJson();
+    JsonNode nodeCase = node.get("cases");
+    String _idCase = nodeCase.get(0).get("_id").asText();
+    String nameNewCase = nodeCase.get(0).get("name").asText();
+    Case caze;
+    String info = nodeCase.get(0).get("info").asText();
+    if("".equals(info)) {
+      caze = caseFactory.create(nameNewCase, null,null); 
+    } else {
+      caze = caseFactory.create(nameNewCase, null,info);
+    }
+    for(JsonNode action:nodeCase.get(0).get("steps")) {
+      caze.addAction(action); 
+    }
+    caseService.delete(_idCase);
+    caze.put("_id", _idCase);
+    caseService.create(caze);
+    return ok();
+  }
+  
+  public Result removeCase(String caseId) {
+    System.out.println(caseService.get(caseId)+"----");
+    System.out.println(caseService.count()+"****");
+    caseService.delete(caseId);
+//    caseService.deleteBy(new BasicDBObject("_id", caseId));
+    System.out.println(caseService.count()+"+++++");
     return ok();
   }
    
