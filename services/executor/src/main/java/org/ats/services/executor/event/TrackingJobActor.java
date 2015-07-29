@@ -81,16 +81,21 @@ public class TrackingJobActor extends UntypedActor {
   }
 
   private void processPerformanceJob(PerformanceJob job) throws Exception {
-    PerformanceProject project = perfService.get(job.getProjectId());
-    
-    switch (job.getStatus()) {
-    case Queued:
-      doExecute(job, project);
-    case Running:
-      doTracking(job, project);
-      break;
-    default:
-      break;
+    try {
+      PerformanceProject project = perfService.get(job.getProjectId());
+      switch (job.getStatus()) {
+      case Queued:
+        doExecute(job, project);
+      case Running:
+        doTracking(job, project);
+        break;
+      default:
+        break;
+      }
+    } catch(Exception e) {
+      job.setStatus(Status.Completed);
+      executorService.update(job);
+      throw e;
     }
   }
   
@@ -179,16 +184,21 @@ public class TrackingJobActor extends UntypedActor {
   }
 
   private void processKeywordJob(KeywordJob job) throws Exception {
-    KeywordProject project = keywordService.get(job.getProjectId());
-    
-    switch (job.getStatus()) {
-    case Queued:
-      doExecute(job, project);
-    case Running:
-      doTracking(job, project);
-      break;
-    default:
-      break;
+    try {
+      KeywordProject project = keywordService.get(job.getProjectId());
+      switch (job.getStatus()) {
+      case Queued:
+        doExecute(job, project);
+      case Running:
+        doTracking(job, project);
+        break;
+      default:
+        break;
+      }
+    } catch (Exception e) {
+      job.setStatus(Status.Completed);
+      executorService.update(job);
+      throw e;
     }
   }
   
