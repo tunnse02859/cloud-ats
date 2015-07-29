@@ -22,9 +22,9 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
-import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
@@ -43,8 +43,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -78,6 +76,8 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
   private User user;
   
   private Suite suite;
+  
+  private Case caze;
 
   @BeforeClass
   public void init() throws Exception {
@@ -142,10 +142,12 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw((DBObject)JSON.parse(rootNode.toString()));
+      .raw(null);
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create("test", null,null);
+    
+    caze = caseFactory.create("test", null, "info");
+    
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -230,6 +232,18 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
       e.printStackTrace();
       Assert.fail();
     }
+    
+    //test delete case in suite
+    
+    Case otherCase = caseService.get(caze.getId());
+    
+    Assert.assertEquals(otherCase, caze);
+    
+    caseService.delete(caze.getId());
+    Assert.assertNull(caseService.get(caze.getId()));
+    
+    suite = suiteService.get(suite.getId());
+    Assert.assertEquals(suite.getCases().size(), 0);
     
     suiteService.delete(suite);
     project = funcService.get(project.getId());

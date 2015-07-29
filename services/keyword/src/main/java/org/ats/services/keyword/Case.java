@@ -50,7 +50,7 @@ public class Case extends AbstractTemplate {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("data_driven", ref != null ? ref.toJSon() : null);
-    this.put("create_date", new Date());
+    this.put("created_date", new Date());
     this.put("actions",  null);
     this.put("info", info != null ? info : null);
   }
@@ -65,6 +65,10 @@ public class Case extends AbstractTemplate {
   
   public String getName() {
     return this.getString("name");
+  }
+  
+  public Date getCreatedDate() {
+    return this.getDate("created_date");
   }
   
   public void setInfo(String info) {
