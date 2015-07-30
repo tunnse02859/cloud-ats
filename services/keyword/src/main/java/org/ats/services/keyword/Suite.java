@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,17 @@ public class Suite extends AbstractTemplate {
   
   private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
   
-  Suite(String packageName, String extraImports, String suiteName, String driverVar, String initDriver, int timeoutSeconds, Map<String, CaseReference> cases , List<DataDrivenReference> dataDrivens, DBObject raw) { 
+  Suite(String packageName, 
+      String extraImports, 
+      String suiteName, 
+      String driverVar, 
+      String initDriver, 
+      int timeoutSeconds, 
+      Map<String, CaseReference> cases , 
+      List<DataDrivenReference> dataDrivens, 
+      DBObject raw,
+      String projectId) {
+    
     this.put("_id", UUID.randomUUID().toString());
     this.put("package_name", packageName);
     this.put("extra_imports", extraImports);
@@ -41,6 +52,7 @@ public class Suite extends AbstractTemplate {
     this.put("driver_var", driverVar);
     this.put("init_driver", initDriver);
     this.put("timeout_seconds", timeoutSeconds);
+    this.put("created_date", new Date());
     
     this.cases = cases;
     BasicDBList list = new BasicDBList();
@@ -52,10 +64,23 @@ public class Suite extends AbstractTemplate {
     this.dataDrivens = dataDrivens;
     
     this.put("raw", raw);
+    this.put("project_id", projectId);
   }
   
   public String getId() {
     return this.getString("_id");
+  }
+  
+  public String getProjectId() {
+    return this.getString("project_id");
+  }
+  
+  public String getName() {
+    return this.getString("suite_name");
+  }
+  
+  public Date getCreatedDate() {
+    return this.getDate("created_date");
   }
   
   public void removeCase(CaseReference caseRef) {
@@ -121,6 +146,8 @@ public class Suite extends AbstractTemplate {
 
     private DBObject raw;
     
+    private String projectId;
+    
     public SuiteBuilder packageName(String name) {
       this.packageName = name;
       return this;
@@ -170,8 +197,13 @@ public class Suite extends AbstractTemplate {
       return this;
     }
     
+    public SuiteBuilder projectId(String projectId) {
+      this.projectId = projectId;
+      return this;
+    }
+    
     public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens, raw);
+      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens, raw, projectId);
     }
     
   }

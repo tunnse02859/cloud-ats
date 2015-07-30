@@ -158,7 +158,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
       .raw((DBObject)JSON.parse(rootNode.toString()));
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create("test", dataRef,null);
+    Case caze = caseFactory.create("fake", "test", dataRef,null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
