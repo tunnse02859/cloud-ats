@@ -1,4 +1,4 @@
-package org.ats.jmeter.report;
+package org.ats.service.report.jmeter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,7 +42,6 @@ public class JtlHandler extends DefaultHandler {
     this.performaneJobId = performaneJobId;
     PerformanceJob job = (PerformanceJob) this.executorService.get(performaneJobId);
     this.content = job.getRawDataOutput();
-
   }
 
   public void startParsing() throws SAXException, IOException, ParserConfigurationException {
@@ -62,7 +61,6 @@ public class JtlHandler extends DefaultHandler {
         e.printStackTrace();
       }
     }
-
   }
 
   public Map<String, Report> getTotalUrlMap() {
@@ -96,7 +94,6 @@ public class JtlHandler extends DefaultHandler {
     if (qName.equalsIgnoreCase("assertionResult")) {
       isInAssertion = true;
     }
-
   }
 
   @Override
@@ -138,5 +135,4 @@ public class JtlHandler extends DefaultHandler {
   public void setTotalUrlMap(Map<String, Report> totalUrlMap) {
     this.totalUrlMap = totalUrlMap;
   }
-
 }

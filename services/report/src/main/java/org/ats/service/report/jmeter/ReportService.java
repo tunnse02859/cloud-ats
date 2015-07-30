@@ -1,4 +1,4 @@
-package org.ats.jmeter.report;
+package org.ats.service.report.jmeter;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -20,12 +20,11 @@ import com.mongodb.DBObject;
 
 @Singleton
 public class ReportService extends AbstractMongoCRUD<Report> {
-  public static String PERFORMANCE = "performance";
-  public static String FUNCTIONAL = "functional";
+  
+  private final String COL_NAME = "report";
+  
   @Inject
   private ReportJmeterFactory reportJmeterFactory;
-
-  private final String COL_NAME = "report";
 
   @Inject
   public ReportService(MongoDBService mongoService, Logger logger) {
@@ -56,8 +55,8 @@ public class ReportService extends AbstractMongoCRUD<Report> {
       summaryReport.setNumberFailuresAssertion(dbSummary.getInt("number_failures_assertion"));
       summaryReport.setPercentFailuresAssertion(dbSummary.getDouble("percent_failures_assertion"));      
       report.setSummaryReport(summaryReport);
-
     }
+    
     BasicDBObject dbHits = (BasicDBObject) source.get("hits_per_second");
     if (dbHits != null) {
       Map<Long, PointReport> hitsMap = new TreeMap<Long, PointReport>();
@@ -88,17 +87,16 @@ public class ReportService extends AbstractMongoCRUD<Report> {
       }
 
       report.setTransPersecond(transMap);
-
     }
     return report;
   }
 
-  public PageList<Report> getList(String JobId, String jobType) throws SAXException, IOException, ParserConfigurationException {
+  public PageList<Report> getList(String jobId, Type jobType) throws SAXException, IOException, ParserConfigurationException {
     PageList<Report> list = null;
-    if (jobType.equalsIgnoreCase(ReportService.PERFORMANCE)) {
-      list = query(new BasicDBObject("performane_job_id", JobId));
+    if (jobType  == Type.PERFORMANCE) {
+      list = query(new BasicDBObject("performane_job_id", jobId));
       if (list.count() == 0) {
-        JtlHandler jtlHandler = reportJmeterFactory.create(JobId);
+        JtlHandler jtlHandler = reportJmeterFactory.create(jobId);
         jtlHandler.startParsing();
         Iterator<Map.Entry<String, Report>> iterator = jtlHandler.getTotalUrlMap().entrySet().iterator();
         while (iterator.hasNext()) {
@@ -108,13 +106,15 @@ public class ReportService extends AbstractMongoCRUD<Report> {
           report.setTransPersecond(report.getTransPerSecond());
           create(entry.getValue());
         }
-       // list = query(new BasicDBObject("performane_job_id", JobId));
       }
       return list;
-    } else if (jobType.equalsIgnoreCase(ReportService.FUNCTIONAL)) {
-
+    } else if (jobType == Type.FUNCTIONAL) {
+      
     }
     return null;
   }
 
+  public static enum Type {
+    PERFORMANCE, FUNCTIONAL;
+  }
 }

@@ -1,7 +1,7 @@
-package org.ats.jmeter;
+package org.ats.service;
 
-import org.ats.jmeter.report.ReportJmeterFactory;
-import org.ats.jmeter.report.ReportService;
+import org.ats.service.report.jmeter.ReportJmeterFactory;
+import org.ats.service.report.jmeter.ReportService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -13,6 +13,4 @@ public class ReportModule extends AbstractModule {
     bind(ReportService.class);    
     install(new FactoryModuleBuilder().build(ReportJmeterFactory.class));
   }
-  
-
 }
