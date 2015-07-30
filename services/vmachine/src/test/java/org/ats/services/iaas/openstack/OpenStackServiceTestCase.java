@@ -97,6 +97,8 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     
     VMachine vm = openstackService.createTestVM(tenantRef, null, false);
+    openstackService.deallocateFloatingIp(vm);
+    
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
     Assert.assertFalse(vm.isSystem());
     Assert.assertFalse(vm.hasUI());
@@ -123,6 +125,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     Assert.assertTrue(jenkins.isSystem());
     
     VMachine vm = openstackService.createTestVM(tenantRef, null, true);
+    openstackService.deallocateFloatingIp(vm);
     
     JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIp(), "http", "jenkins", 8080);
 
