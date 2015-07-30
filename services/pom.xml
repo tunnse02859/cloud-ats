@@ -23,6 +23,7 @@
 		<module>generator</module>
 		<module>executor</module>
 		<module>vmachine</module>
+		<module>report</module>
 	</modules>
 
 </project>
