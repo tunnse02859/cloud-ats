@@ -468,7 +468,7 @@ public class OpenStackService implements IaaSServiceInterface {
     JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
     
     try {
-      jenkinsMaster.isReady(60 * 1000);
+      jenkinsMaster.isReady(5 * 60 * 1000);
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
       ex.setStackTrace(e.getStackTrace());
@@ -550,7 +550,14 @@ public class OpenStackService implements IaaSServiceInterface {
     return null;
   }
   
-  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
+  private VMachine createVM(
+      String imageId, 
+      String flavorId, 
+      boolean system, 
+      boolean hasUI, 
+      TenantReference tenant, 
+      SpaceReference space) throws CreateVMException {
+    
     NovaApi novaApi = createNovaApi(tenant.getId());
     String region = novaApi.getConfiguredRegions().iterator().next();
     ServerApi serverApi = novaApi.getServerApi(region);
@@ -578,18 +585,18 @@ public class OpenStackService implements IaaSServiceInterface {
     VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, 
         null, address.getAddr(), Status.Started);
 
-    //create floating ip for system vm
+    //create floating ip for vm
     vm = allocateFloatingIp(vm);
 
     try {
       if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
         logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+        
         if (!hasUI && !system) waitJMeterServerRunning(vm);
-        if (!system) {
-          vm = deallocateFloatingIp(vm);
-        }
+        
         vmachineService.create(vm);
         return vm;
+        
       } else {
         throw new CreateVMException("Cannot connect to vm");
       }
@@ -614,6 +621,9 @@ public class OpenStackService implements IaaSServiceInterface {
   }
   
   public VMachine deallocateFloatingIp(VMachine vm) {
+    
+    if (vm.getPublicIp() == null) return vm;
+    
     NovaApi novaApi = createNovaApi(vm.getTenant().getId());
     NeutronApi neutronApi = createNeutronAPI(vm.getTenant().getId());
     
@@ -629,6 +639,7 @@ public class OpenStackService implements IaaSServiceInterface {
       }
     }
     vm.setPublicIp(null);
+    vmachineService.update(vm);
     logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
     return vm;
   }
