@@ -57,8 +57,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -213,6 +211,9 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
 
   @Test
   public void testExecuteKeywordProject() throws Exception {
+    
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
     
@@ -222,10 +223,10 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw((DBObject)JSON.parse(rootNode.toString()));
+      .raw(null).projectId(project.getId());
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create("test", null, null);
+    Case caze = caseFactory.create(project.getId(), "test", null, null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -243,10 +244,10 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
       .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw((DBObject)JSON.parse(rootNode.toString()));
+      .raw(null).projectId(project.getId());
     
     stepsNode = rootNode.get("steps");
-    caze = caseFactory.create("test", null, null);
+    caze = caseFactory.create(project.getId(), "test", null, null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -256,7 +257,6 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     Suite acceptAlertSuite = builder.build();
     suiteService.create(acceptAlertSuite);
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
     project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
     project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
     
