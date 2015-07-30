@@ -1,0 +1,16 @@
+target
+.*
+rebel.xml
+ObjectStore
+PutObjectStoreDirHere
+logs
+project/project
+project/target
+node_modules
+*.jks
+target
+tmp
+dist
+.cache
+bin
+test-output
