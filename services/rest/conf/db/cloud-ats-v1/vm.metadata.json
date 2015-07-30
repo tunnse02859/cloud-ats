@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"cloud-ats-v1.vm"},{"v":1,"key":{"tenant._id":1},"name":"tenant._id_1","ns":"cloud-ats-v1.vm"},{"v":1,"key":{"space._id":1},"name":"space._id_1","ns":"cloud-ats-v1.vm"}]}
