@@ -4,6 +4,7 @@
 package org.ats.services.functional;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -75,10 +77,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
 
   private User user;
   
-  private Suite suite;
-  
-  private Case caze;
-
   @BeforeClass
   public void init() throws Exception {
     this.injector = Guice.createInjector(
@@ -132,30 +130,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
     this.user.setPassword("12345");
     this.userService.create(this.user);
-    
-    ObjectMapper m = new ObjectMapper();
-    JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
-    
-    SuiteBuilder builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("FullExample")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null);
-    
-    JsonNode stepsNode = rootNode.get("steps");
-    
-    caze = caseFactory.create("test", null, "info");
-    
-    for (JsonNode json : stepsNode) {
-      caze.addAction(json);
-    }
-    caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
-
-    this.suite = builder.build();
-    suiteService.create(suite);
   }
 
   @AfterMethod
@@ -199,13 +173,37 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
   }
   
   @Test
-  public void testSuite() {
+  public void testSuite() throws JsonProcessingException, IOException {
     
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
     KeywordProject project = funcFactory.create(context, "Jira Automation");
     funcService.create(project);
+    
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
+    
+    SuiteBuilder builder = new SuiteBuilder();
+    builder.packageName("org.ats.generated")
+      .suiteName("FullExample")
+      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
+      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
+      .raw(null).projectId(project.getId());
+    
+    JsonNode stepsNode = rootNode.get("steps");
+    
+    Case caze = caseFactory.create(project.getId(), "test", null, "info");
+    
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
+
+    Suite suite = builder.build();
+    suiteService.create(suite);
     
     SuiteReference suiteRef = suiteRefFactory.create(suite.getId());
     

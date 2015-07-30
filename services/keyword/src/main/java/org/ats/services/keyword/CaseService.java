@@ -50,24 +50,31 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     this.logger = logger;
 
     this.createTextIndex("name");
+    
+    this.col.createIndex(new BasicDBObject("created_date", 1));
+    this.col.createIndex(new BasicDBObject("project_id", 1));
+  }
+  
+  public PageList<Case> getCases(String projectId) {
+    return super.query(new BasicDBObject("project_id", projectId));
   }
   
   @Override
   public Case transform(DBObject source) {
-    BasicDBObject sel1 = (BasicDBObject) source;
+    BasicDBObject dbObj = (BasicDBObject) source;
     ObjectMapper mapper = new ObjectMapper();
 
     DataDrivenReference driven = null;
-    if (sel1.get("data_driven") != null) {
-      driven = drivenRefFactory.create(((BasicDBObject)sel1.get("data_driven")).getString("_id"));
+    if (dbObj.get("data_driven") != null) {
+      driven = drivenRefFactory.create(((BasicDBObject)dbObj.get("data_driven")).getString("_id"));
     }
     
-    Case caze = caseFactory.create(sel1.getString("name"), driven, sel1.getString("info"));
-    caze.put("_id", sel1.get("_id"));
-    caze.put("created_date", sel1.get("created_date"));
+    Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven, dbObj.getString("info"));
+    caze.put("_id", dbObj.get("_id"));
+    caze.put("created_date", dbObj.get("created_date"));
     
-    if (sel1.get("actions") != null) {
-      BasicDBList actions = (BasicDBList) sel1.get("actions");
+    if (dbObj.get("actions") != null) {
+      BasicDBList actions = (BasicDBList) dbObj.get("actions");
       for (Object bar : actions) {
         try {
           caze.addAction(mapper.readTree(bar.toString()));
