@@ -49,8 +49,6 @@ GET		/api/v1/keyword/deleteTestSuite/:suiteId/:projectId					@controllers.Keywor
 PUT		/api/v1/keyword/updateTestSuite								@controllers.KeywordProjectController.updateTestSuite()
 # Upload script
 POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Performance controller
 GET		/api/v1/performance/list			@controllers.PerformanceController.listPerformanceProject()
@@ -59,3 +57,8 @@ POST	/api/v1/performance/uploadFile		@controllers.PerformanceController.createPe
 PUT		/api/v1/performance/updateScript 	@controllers.PerformanceController.updatePerformanceTestWizard()
 
 
+#################################
+GET     /api/v1/keyword/build                    @controllers.KeywordController.build()
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

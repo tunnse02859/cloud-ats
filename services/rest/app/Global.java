@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.services.DataDrivenModule;
@@ -27,10 +26,10 @@ import play.libs.F;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http;
-import play.mvc.Http.Response;
-import play.mvc.Result;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestHeader;
+import play.mvc.Http.Response;
+import play.mvc.Result;
 import play.mvc.Results.Status;
 
 import com.google.inject.Guice;
@@ -51,7 +50,7 @@ public class Global extends GlobalSettings {
   
   /** .*/
   private Injector injector;
-
+  
   @Override
   public void onStart(Application app) {
     String dbConf = Play.application().configuration().getString(DatabaseModule.DB_CONF);
@@ -74,7 +73,8 @@ public class Global extends GlobalSettings {
       EventService eventService = injector.getInstance(EventService.class);
       eventService.setInjector(injector);
       eventService.start();
-    } catch (IOException e) {
+      
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     super.onStart(app);

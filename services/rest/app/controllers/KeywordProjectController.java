@@ -1,13 +1,9 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -28,7 +24,6 @@ import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.bson.BSONObject;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -40,7 +35,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 /**
  * @author NamBV2
  *
@@ -98,9 +92,9 @@ public class KeywordProjectController extends Controller{
       String caseName = casesNode.get(i).get("name").asText();
       if(casesNode.get(i).get("driven") != null ) {
         String dataRefId = casesNode.get(i).get("driven").get("id").asText();
-        caze = caseFactory.create(caseName, dataRef.create(dataRefId),null);
+        caze = caseFactory.create("fake", caseName, dataRef.create(dataRefId),null);
       } else {
-        caze = caseFactory.create(caseName, null,null);
+        caze = caseFactory.create("fake", caseName, null,null);
       }
       
       //Add action for test cases
@@ -123,7 +117,7 @@ public class KeywordProjectController extends Controller{
       .suiteName(nameSuite)
       .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
       .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS);
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS).projectId(keywordProject.getId());
       
       for(JsonNode node:caseInSuiteNode) {
         Case caseInSuite = listCase.get(node.get("name").asText());
@@ -289,6 +283,8 @@ public class KeywordProjectController extends Controller{
     SuiteBuilder builder = new SuiteBuilder();
     
     builder.suiteName(suiteName);
+    builder.projectId("fake");
+    
     CaseReference caseRef;
     for (JsonNode testCase : cases) {
       
@@ -379,9 +375,9 @@ public class KeywordProjectController extends Controller{
       String caseName = casesNode.get(i).get("name").asText();
       String info = casesNode.get(i).get("info").asText();
       if("".equals(info)) {
-        caze = caseFactory.create(caseName, null,null); 
+        caze = caseFactory.create("fake", caseName, null,null); 
       } else {
-        caze = caseFactory.create(caseName, null,info);
+        caze = caseFactory.create("fake", caseName, null,info);
       }
       
       //Add action for test cases
@@ -470,9 +466,9 @@ public class KeywordProjectController extends Controller{
     Case caze;
     String info = nodeCase.get(0).get("info").asText();
     if("".equals(info)) {
-      caze = caseFactory.create(nameNewCase, null,null); 
+      caze = caseFactory.create("fake", nameNewCase, null,null); 
     } else {
-      caze = caseFactory.create(nameNewCase, null,info);
+      caze = caseFactory.create("fake", nameNewCase, null,info);
     }
     for(JsonNode action:nodeCase.get(0).get("steps")) {
       caze.addAction(action); 
