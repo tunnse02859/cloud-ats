@@ -1,11 +1,14 @@
-package org.ats.jmeter.report;
+package org.ats.service.report.jmeter;
 
 import java.util.Date;
 import java.util.Map;
 
 public class Calculation {
+  
   private static final double MILLIS_PER_SECOND = 1000.0;
+  
   private static final int KB_TO_BY = 1024;
+  
   private static int millisPerBucket = 1000;
 
   public static void calculateAssertion(Report report, boolean failureValue, boolean errorValue) {
@@ -68,7 +71,6 @@ public class Calculation {
       }
       point.setValue(point.getValue() + 1);
       transPerSecond.put(bucketTrans, point);
-
     }
 
     // standard deviation
@@ -93,7 +95,6 @@ public class Calculation {
 
     // averageBytes
     summary.setAverageBytes(summary.totalBytes / summary.samples);
-
   }
 
   private static double calculateStDev(int number, int elementN1, double prev_avg, double pre_std_dev, double current_avg) {
@@ -101,5 +102,4 @@ public class Calculation {
     double variance = (number * delta * delta + (elementN1 - current_avg) * (elementN1 - current_avg) + number * pre_std_dev * pre_std_dev) / (number + 1);
     return Math.sqrt(variance);
   }
-
 }

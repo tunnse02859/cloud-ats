@@ -1,4 +1,4 @@
-package org.ats.jmeter.report;
+package org.ats.service.report.jmeter;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -8,10 +8,8 @@ import com.mongodb.BasicDBObject;
 @SuppressWarnings("serial")
 public class Report extends BasicDBObject {  
   
- 
   private String performaneJobId;
   private String functionalJobId;
-  
   private String label ;
 
   private SummaryReport summaryReport;
@@ -19,8 +17,8 @@ public class Report extends BasicDBObject {
   private Map<Long, PointReport> hitsPerSecond ;
   private Map<Long, PointReport> transPersecond ;
   
-  public Report(){
-    
+  public Report() {
+    this(null, null, null);
   }
   
   public Report(String label, String performaneJobId, String  functionalJobId) {
@@ -81,7 +79,6 @@ public class Report extends BasicDBObject {
       dbObj.put(entry.getKey().toString(), entry.getValue());
     }
     this.put("trans_per_second", dbObj);
-
   }
 
   public Map<Long, PointReport> getTransPerSecond() {
@@ -96,5 +93,4 @@ public class Report extends BasicDBObject {
     this.label = label;
     this.put("label", label);
   }
-
 }
