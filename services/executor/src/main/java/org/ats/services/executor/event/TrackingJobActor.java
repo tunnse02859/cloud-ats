@@ -95,6 +95,10 @@ public class TrackingJobActor extends UntypedActor {
     } catch(Exception e) {
       job.setStatus(Status.Completed);
       executorService.update(job);
+      
+      VMachine vm = vmachineService.get(job.getTestVMachineId());
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
       throw e;
     }
   }
@@ -106,6 +110,7 @@ public class TrackingJobActor extends UntypedActor {
     
     VMachine systemVM = vmachineService.getSystemVM(tenant, space);
     JenkinsMaster jkMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    
     JenkinsMavenJob jkJob = cache.get(job.getId());
     if (jkJob == null) {
       jkJob = new JenkinsMavenJob(jkMaster, job.getId(), null, null, null);
@@ -113,33 +118,42 @@ public class TrackingJobActor extends UntypedActor {
     }
     
     boolean isBuilding = jkJob.isBuilding(1, System.currentTimeMillis(), 60 * 1000);
+    
     if (isBuilding) {
+      
       updateLog(job, jkJob);
       
       Thread.sleep(15000L);
       
       Event event  = eventFactory.create(job, "performance-job-tracking");
       event.broadcast();
+      
     } else {
+      
       updateLog(job, jkJob);
       
       //Download result
       BasicDBList list = new BasicDBList();
       for (JMeterScriptReference ref : job.getScripts()) {
+        
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        
         SSHClient.getFile(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
             "/home/cloudats/projects/" + job.getId() + "/target/" + ref.getId() + ".jtl",  bos);
-        list.add(new BasicDBObject("_id", ref.getId()).append("content", new String(bos.toByteArray())));
+        
+        if (bos.size() > 0)
+          list.add(new BasicDBObject("_id", ref.getId()).append("content", new String(bos.toByteArray())));
       }
       job.put("report", list);
       //End download result
 
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
-      
+
+      //Reset test vm status and release floating ip
       VMachine testVM = vmachineService.get(job.getTestVMachineId());
       testVM.setStatus(VMachine.Status.Started);
-      vmachineService.update(testVM);
+      testVM = openstackService.deallocateFloatingIp(testVM);
       
       jkJob.delete();
       cache.remove(job.getId());
@@ -161,8 +175,11 @@ public class TrackingJobActor extends UntypedActor {
     String projectHash = project.getId().substring(0, 8);
 
     SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", projectHash + ".zip", new File(path));
+    
+    Thread.sleep(3000);
+    
     SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, System.out);
+        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, null);
 
     StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
 
@@ -198,6 +215,10 @@ public class TrackingJobActor extends UntypedActor {
     } catch (Exception e) {
       job.setStatus(Status.Completed);
       executorService.update(job);
+      
+      VMachine vm = vmachineService.get(job.getTestVMachineId());
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
       throw e;
     }
   }
@@ -229,22 +250,21 @@ public class TrackingJobActor extends UntypedActor {
     } else {
       updateLog(job, jkJob);
       
-      testVM = openstackService.allocateFloatingIp(testVM);
-      
       //Download result
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
           "/home/cloudats/projects/" + job.getId() + "/target/surefire-reports/testng-results.xml",  bos);
       
-      job.put("report", new String(bos.toByteArray()));
+      if (bos.size() > 0)
+        job.put("report", new String(bos.toByteArray()));
       //End download result
 
-      testVM = openstackService.deallocateFloatingIp(testVM);
-      
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
+      
+      //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
-      vmachineService.update(testVM);
+      testVM = openstackService.deallocateFloatingIp(testVM);
       
       jkJob.delete();
       cache.remove(job.getId());
@@ -262,23 +282,16 @@ public class TrackingJobActor extends UntypedActor {
       Thread.sleep(15 * 1000);
     }
 
-    String path = generatorService.generate("/tmp", project, true);
-    testVM = openstackService.allocateFloatingIp(testVM);
+    String path = generatorService.generate("/tmp", project, true, job.getSuites());
 
-    SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
-    
     SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
+    
+    Thread.sleep(3000);
+    
     SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
         "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
 
-    testVM = openstackService.deallocateFloatingIp(testVM);
-
-    StringBuilder goalsBuilder = new StringBuilder("clean test -Dtest=");
-    for (Iterator<SuiteReference> i = job.getSuites().iterator(); i.hasNext(); ) {
-      Suite suite = i.next().get();
-      goalsBuilder.append(StringUtil.normalizeName(suite.getString("suite_name")));
-      if (i.hasNext()) goalsBuilder.append(',');
-    }
+    StringBuilder goalsBuilder = new StringBuilder("clean test");
 
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
     JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
