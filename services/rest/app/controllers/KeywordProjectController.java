@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -181,7 +182,6 @@ public class KeywordProjectController extends Controller{
           for (CaseReference caseRef : suite.getCases()) {
             Case caze =  caseRef.get();
             arrayCases.add(Json.parse(caze.toString()));
-            
             Integer count = mapAllSuite.get(caze.getId());
             if(count == null){
               count = new Integer(0);
@@ -212,8 +212,11 @@ public class KeywordProjectController extends Controller{
     keywordProjectService.create(project);
     
     String id = project.getId();
+    ObjectNode object = Json.newObject();
+    object.put("totalTestCases", totalTestCasesInProject(id));
+    object.put("_id", id);
     
-    return ok(id);
+    return ok(object);
   }
   
   public Result runKeywordProject() {
@@ -247,11 +250,20 @@ public class KeywordProjectController extends Controller{
     
     Suite suite = suiteService.get(suiteId);
     String name = suite.getString("suite_name");
-    suite.removeField("cases");
+    
+    List<String> cazes = new ArrayList<String>();
+    for (CaseReference cazeRef : suite.getCases()) {
+      cazes.add(cazeRef.getId());
+    }
+    
+    for (String cazeId : cazes) {
+      suite.removeCase(caseRefFactory.create(cazeId));
+    }
     
     SuiteBuilder builder = new SuiteBuilder();
     for (JsonNode caze : cases) {
        CaseReference cazeRef = caseRefFactory.create(caze.get("_id").asText());
+       Case test = cazeRef.get();
        builder.addCases(cazeRef);
     }
     
@@ -259,6 +271,7 @@ public class KeywordProjectController extends Controller{
     
     suite.put("_id", suiteId);
     suite.put("suite_name", name);
+    suite.put("project_id", projectId);
     
     suiteService.update(suite);
     
