@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.ats.service.report.Report;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.PerformanceJob;
 import org.xml.sax.Attributes;
@@ -23,7 +24,8 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 public class JtlHandler extends DefaultHandler {
-
+  
+  private String parsingType = "STRING";
   private String urlTotal = "*SummaryReport*";
   private Map<String, Report> totalUrlMap = new HashMap<String, Report>();
   private String content = "";
@@ -58,15 +60,18 @@ public class JtlHandler extends DefaultHandler {
     if (content.isEmpty()) {
       throw new ParserConfigurationException("Error content parsing is empty");
     }
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    SAXParser saxParser = factory.newSAXParser();
-    InputStream ins = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-    saxParser.parse(ins, this);
-    try {
-      ins.close();
-    } catch (Exception e) {
-      throw e;
+    if ("STRING".equalsIgnoreCase(parsingType)) {
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser saxParser = factory.newSAXParser();
+      InputStream ins = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+      saxParser.parse(ins, this);
+      try {
+        ins.close();
+      } catch (Exception e) {
+        throw e;
+      }
     }
+
   }
 
   public Map<String, Report> getTotalUrlMap() {

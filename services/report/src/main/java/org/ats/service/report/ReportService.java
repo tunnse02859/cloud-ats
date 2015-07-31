@@ -1,4 +1,4 @@
-package org.ats.service.report.jmeter;
+package org.ats.service.report;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -9,6 +9,15 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.ats.common.PageList;
+import org.ats.service.report.function.ReportTestNgFactory;
+import org.ats.service.report.function.SuiteReport;
+import org.ats.service.report.function.TestNgHandler;
+import org.ats.service.report.jmeter.JtlHandler;
+import org.ats.service.report.jmeter.PointReport;
+import org.ats.service.report.jmeter.ReportJmeterFactory;
+import org.ats.service.report.jmeter.SummaryReport;
+
+
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.xml.sax.SAXException;
@@ -20,11 +29,14 @@ import com.mongodb.DBObject;
 
 @Singleton
 public class ReportService extends AbstractMongoCRUD<Report> {
-  
+
   private final String COL_NAME = "report";
-  
+
   @Inject
   private ReportJmeterFactory reportJmeterFactory;
+  
+  @Inject
+  private ReportTestNgFactory reportTestNgFactory;
 
   @Inject
   public ReportService(MongoDBService mongoService, Logger logger) {
@@ -40,7 +52,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
     report.setPerformaneJobId(((BasicDBObject) source).getString("performane_job_id"));
     report.setFunctionalJobId(((BasicDBObject) source).getString("functional_job_id"));
     report.setScriptId(((BasicDBObject) source).getString("script_id"));
-    BasicDBObject dbSummary = (BasicDBObject) source.get("summary");    
+    BasicDBObject dbSummary = (BasicDBObject) source.get("summary");
     if (dbSummary != null) {
       SummaryReport summaryReport = new SummaryReport();
       summaryReport.setLabel(dbSummary.getString("label"));
@@ -55,10 +67,10 @@ public class ReportService extends AbstractMongoCRUD<Report> {
       summaryReport.setAverageBytes(dbSummary.getDouble("average_bytes"));
       summaryReport.setNumberAssertion(dbSummary.getInt("number_assertion"));
       summaryReport.setNumberFailuresAssertion(dbSummary.getInt("number_failures_assertion"));
-      summaryReport.setPercentFailuresAssertion(dbSummary.getDouble("percent_failures_assertion"));      
+      summaryReport.setPercentFailuresAssertion(dbSummary.getDouble("percent_failures_assertion"));
       report.setSummaryReport(summaryReport);
     }
-    
+
     BasicDBObject dbHits = (BasicDBObject) source.get("hits_per_second");
     if (dbHits != null) {
       Map<Long, PointReport> hitsMap = new TreeMap<Long, PointReport>();
@@ -90,12 +102,32 @@ public class ReportService extends AbstractMongoCRUD<Report> {
 
       report.setTransPersecond(transMap);
     }
+
+    BasicDBObject dbSuiteReports = (BasicDBObject) source.get("suite_reports");
+    if (dbSuiteReports != null) {
+
+      Map<String, SuiteReport> suiteMap = new TreeMap<String, SuiteReport>();
+      for (String key : suiteMap.keySet()) {
+        BasicDBObject suitedb = (BasicDBObject) suiteMap.get(key);
+        SuiteReport suiteReport = new SuiteReport();
+        suiteReport.setName(suitedb.getString("name"));
+        suiteReport.setRunningTime(suitedb.getDate("running_time"));
+        suiteReport.setTotalTestCase(suitedb.getInt("total_test_case"));
+        suiteReport.setTotalFail(suitedb.getInt("total_fail"));
+        suiteReport.setTotalPass(suitedb.getInt("total_pass"));
+        suiteReport.setTotalSkip(suitedb.getInt("total_skip"));
+        suiteReport.setTestResult(suitedb.getBoolean("test_result"));
+        suiteMap.put(suiteReport.getName(), suiteReport);
+      }
+      report.setSuiteReports(suiteMap);
+    }
+
     return report;
   }
 
   public PageList<Report> getList(String jobId, Type jobType, String scriptId) throws SAXException, IOException, ParserConfigurationException {
     PageList<Report> list = null;
-    if (jobType  == Type.PERFORMANCE) {
+    if (jobType == Type.PERFORMANCE) {
       list = query(new BasicDBObject("performane_job_id", jobId).append("script_id", scriptId));
       if (list.count() == 0) {
         JtlHandler jtlHandler = reportJmeterFactory.create(jobId, scriptId);
@@ -106,14 +138,26 @@ public class ReportService extends AbstractMongoCRUD<Report> {
           Report report = entry.getValue();
           report.setHitPerSecond(report.getHitsPerSecond());
           report.setTransPersecond(report.getTransPerSecond());
-          create(entry.getValue());
+          create(report);
         }
       }
       return list;
     } else if (jobType == Type.FUNCTIONAL) {
-      
+      list = query(new BasicDBObject("functional_job_id", jobId));
+      if (list.count() == 0) {
+        TestNgHandler testNgHandler = reportTestNgFactory.create(jobId);
+        testNgHandler.startParsing();
+        Map<String, SuiteReport> listSuiteReport = testNgHandler.getListSuiteReport();
+        Report report = new Report();
+        report.setLabel("Function report of " + jobId);
+        report.setFunctionalJobId(jobId);
+        report.setSuiteReports(listSuiteReport);
+        create(report);
+      }
+      return list;
     }
     return null;
+
   }
 
   public static enum Type {
