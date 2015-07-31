@@ -257,9 +257,6 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     Suite acceptAlertSuite = builder.build();
     suiteService.create(acceptAlertSuite);
     
-    project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
-    project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
-    
     keywordProjectService.create(project);
     
     KeywordJob job = executorService.execute(project, Arrays.asList(

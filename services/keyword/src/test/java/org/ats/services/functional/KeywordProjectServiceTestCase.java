@@ -24,7 +24,6 @@ import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.Suite.SuiteBuilder;
-import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
@@ -59,8 +58,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
 
   private SuiteService suiteService;
   
-  private ReferenceFactory<SuiteReference> suiteRefFactory;
-  
   private CaseFactory caseFactory;
   
   private CaseService caseService;
@@ -90,7 +87,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.funcFactory = injector.getInstance(KeywordProjectFactory.class);
     
     this.suiteService = injector.getInstance(SuiteService.class);
-    this.suiteRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
     
     this.caseService = injector.getInstance(CaseService.class);
     this.caseFactory = injector.getInstance(CaseFactory.class);
@@ -205,32 +201,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Suite suite = builder.build();
     suiteService.create(suite);
     
-    SuiteReference suiteRef = suiteRefFactory.create(suite.getId());
-    
-    project.addSuite(suiteRef);
-    funcService.update(project);
-    
-    project = funcService.get(project.getId());
-    Assert.assertEquals(project.getSuites().size(), 1);
-    Assert.assertEquals(project.getSuites().get(0).get(), suite);
-    
-    try {
-      project.addSuite(suiteRef);
-      Assert.fail();
-    } catch (IllegalArgumentException e) {
-    }
-    
-    project.removeSuite(suiteRef);
-    funcService.update(project);
-    
-    try {
-      project.addSuite(suiteRef);
-      funcService.update(project);
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-      Assert.fail();
-    }
-    
     //test delete case in suite
     
     Case otherCase = caseService.get(caze.getId());
@@ -242,16 +212,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     
     suite = suiteService.get(suite.getId());
     Assert.assertEquals(suite.getCases().size(), 0);
-    
-    suiteService.delete(suite);
-    project = funcService.get(project.getId());
-    Assert.assertEquals(project.getSuites().size(), 0);
-    
-    try {
-      project.addSuite(suiteRef);
-      Assert.fail();
-    } catch (IllegalArgumentException e) {
-    }
   }
   
   @Test
