@@ -1,5 +1,6 @@
-package org.ats.service.report.jmeter;
+package org.ats.service.report.testNg;
 
+import java.io.File;
 import java.util.Arrays;
 
 import org.ats.common.PageList;
@@ -7,6 +8,7 @@ import org.ats.service.ReportModule;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
+import org.ats.service.report.jmeter.ReportJmeterFactory;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
@@ -21,16 +23,21 @@ import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
+import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.iaas.openstack.OpenStackService;
+import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
+import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
@@ -49,11 +56,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-public class TestJmeterReport extends AbstractEventTestCase {
+public class TestNgReport extends AbstractEventTestCase {
 
   private AuthenticationService<User> authService;
   private OrganizationContext context;
@@ -77,7 +86,6 @@ public class TestJmeterReport extends AbstractEventTestCase {
   private ExecutorService executorService;
   private OpenStackService openstackService;
 
-  private ReportJmeterFactory reportJmeterFactory;
   private ReportService reportService;
 
   @BeforeClass
@@ -140,67 +148,77 @@ public class TestJmeterReport extends AbstractEventTestCase {
 
     this.authService.logIn("haint@cloud-ats.net", "12345");
 
-    this.reportJmeterFactory = injector.getInstance(ReportJmeterFactory.class);
     this.reportService = injector.getInstance(ReportService.class);
   }
 
   @AfterClass
   public void shutdown() throws Exception {
     this.openstackService.destroyTenant(tenantRefFactory.create(this.tenant.getId()));
-    this.mongoService.dropDatabase();
+    //this.mongoService.dropDatabase();
 
   }
 
   @Test
-  public void testParseJtlContent() throws Exception {
+  public void testParseTestNgContent() throws Exception {
 
-    PerformanceProject project = perfFactory.create("Test Performance");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
 
-    JMeterFactory factory = new JMeterFactory();
-    JMeterSampler loginPost = factory.createHttpPost("Login codeproject post",
-        "https://www.codeproject.com/script/Membership/LogOn.aspx?rp=%2f%3floginkey%3dfalse", "kakalot", 0, factory.createArgument("FormName", "MenuBarForm"),
-        factory.createArgument("Email", "kakalot8x08@gmail.com"), factory.createArgument("Password", "tititi"));
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
 
-    JMeterSampler gotoArticle = factory.createHttpGet("Go to top article", "http://www.codeproject.com/script/Articles/TopArticles.aspx?ta_so=5", null, 0);
+    SuiteBuilder builder = new SuiteBuilder();
+    builder.packageName("org.ats.generated").suiteName("FullExample").driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR).initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+        .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS).raw(null).projectId(project.getId());
 
-    JMeterScript loginScript = factory.createJmeterScript("LoginCodeProject", 1, 20, 5, false, 0, loginPost);
+    JsonNode stepsNode = rootNode.get("steps");
+    Case caze = caseFactory.create(project.getId(), "test", null, null);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
 
-    jmeterService.create(loginScript);
-    project.addScript(jmeterScriptRef.create(loginScript.getId()));
+    Suite fullExampleSuite = builder.build();
+    suiteService.create(fullExampleSuite);
 
-    JMeterScript gotoArticleScript = factory.createJmeterScript("GoToArticle", 1, 20, 5, false, 0, gotoArticle);
+    rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
 
-    jmeterService.create(gotoArticleScript);
-    project.addScript(jmeterScriptRef.create(gotoArticleScript.getId()));
+    builder = new SuiteBuilder();
+    builder.packageName("org.ats.generated").suiteName("AcceptAlert").driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR).initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+        .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS).raw(null).projectId(project.getId());
 
-    perfService.create(project);
+    stepsNode = rootNode.get("steps");
+    caze = caseFactory.create(project.getId(), "test", null, null);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    builder.addCases(caseRefFactory.create(caze.getId()));
 
-    PerformanceJob job = executorService.execute(project,
-        Arrays.asList(jmeterScriptRef.create(loginScript.getId()), jmeterScriptRef.create(gotoArticleScript.getId())));
+    Suite acceptAlertSuite = builder.build();
+    suiteService.create(acceptAlertSuite);
+
+    project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
+    project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
+
+    keywordProjectService.create(project);
+
+    KeywordJob job = executorService.execute(project,
+        Arrays.asList(suiteRefFactory.create(fullExampleSuite.getId()), suiteRefFactory.create(acceptAlertSuite.getId())));
 
     Assert.assertEquals(job.getStatus(), Status.Queued);
     Assert.assertNull(job.getTestVMachineId());
 
-    job = (PerformanceJob) waitUntilJobFinish(job);
+    job = (KeywordJob) waitUntilJobFinish(job);
 
-    job = (PerformanceJob) executorService.get(job.getId());
-
+    job = (KeywordJob) executorService.get(job.getId());
     Assert.assertEquals(job.getStatus(), AbstractJob.Status.Completed);
     Assert.assertNotNull(job.getRawDataOutput());
-    Assert.assertEquals(job.getRawDataOutput().size(), 2);
-    Assert.assertTrue(job.getRawDataOutput().keySet().contains(loginScript.getId()));
-    Assert.assertTrue(job.getRawDataOutput().keySet().contains(gotoArticleScript.getId()));
+    Assert.assertEquals(job.getRawDataOutput().size(), 1);
+    Assert.assertTrue(job.getRawDataOutput().keySet().contains("report"));
 
-    {
-      PageList<Report> list = reportService.getList(job.getId(), Type.PERFORMANCE, loginScript.getId());
-      System.out.println("LIST:" + list.count());
-      Assert.assertTrue(list.count() > 0);
-    }
-    {
-      PageList<Report> list = reportService.getList(job.getId(), Type.PERFORMANCE, gotoArticleScript.getId());
-      System.out.println("LIST:" + list.count());
-      Assert.assertTrue(list.count() > 0);
-    }
+    PageList<Report> list = reportService.getList(job.getId(), Type.FUNCTIONAL, null);    
+    Assert.assertTrue(list.count() > 0);
 
   }
 
@@ -211,4 +229,5 @@ public class TestJmeterReport extends AbstractEventTestCase {
     }
     return job;
   }
+
 }

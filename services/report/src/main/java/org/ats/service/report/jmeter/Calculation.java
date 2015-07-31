@@ -3,6 +3,8 @@ package org.ats.service.report.jmeter;
 import java.util.Date;
 import java.util.Map;
 
+import org.ats.service.report.Report;
+
 public class Calculation {
   
   private static final double MILLIS_PER_SECOND = 1000.0;
