@@ -26,8 +26,9 @@ public class JtlHandler extends DefaultHandler {
 
   private String urlTotal = "*SummaryReport*";
   private Map<String, Report> totalUrlMap = new HashMap<String, Report>();
-  private Map<String, String> content = new HashMap<String, String>();
+  private String content = "";
   private String performaneJobId;
+  private String scriptId;
   private ExecutorService executorService;
   private String tmpValue;
   private Report reportAll;
@@ -37,11 +38,20 @@ public class JtlHandler extends DefaultHandler {
   private boolean errorValue = true;
 
   @Inject
-  public JtlHandler(ExecutorService executorService, @Assisted("performaneJobId") String performaneJobId) {
+  public JtlHandler(ExecutorService executorService, @Assisted("performaneJobId") String performaneJobId,  @Assisted("scriptId") String scriptId) {
     this.executorService = executorService;
     this.performaneJobId = performaneJobId;
+    this.scriptId = scriptId;
     PerformanceJob job = (PerformanceJob) this.executorService.get(performaneJobId);
-    this.content = job.getRawDataOutput();
+    Iterator<Map.Entry<String, String>> iterator = job.getRawDataOutput().entrySet().iterator();
+    while(iterator.hasNext()){
+      Map.Entry<String, String> entry = iterator.next();
+      if(entry.getKey().equals(scriptId)){
+        this.content = entry.getValue();
+        break;
+      }
+    }
+    
   }
 
   public void startParsing() throws SAXException, IOException, ParserConfigurationException {
@@ -50,16 +60,12 @@ public class JtlHandler extends DefaultHandler {
     }
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser saxParser = factory.newSAXParser();
-    Iterator<Map.Entry<String, String>> iterator = content.entrySet().iterator();
-    while (iterator.hasNext()) {
-      String content = iterator.next().getValue();
-      InputStream ins = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-      saxParser.parse(ins, this);
-      try {
-        ins.close();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    InputStream ins = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+    saxParser.parse(ins, this);
+    try {
+      ins.close();
+    } catch (Exception e) {
+      throw e;
     }
   }
 
@@ -73,7 +79,7 @@ public class JtlHandler extends DefaultHandler {
       HttpSamplerObj httpSamplerObj = new HttpSamplerObj(attributes);
       reportAll = totalUrlMap.get(urlTotal);
       if (reportAll == null) {
-        reportAll = new Report(urlTotal, performaneJobId, null);
+        reportAll = new Report(urlTotal, performaneJobId, null,scriptId );
         reportAll.setSummaryReport(new SummaryReport(urlTotal));
         reportAll.setTransPersecond(new TreeMap<Long, PointReport>());
         reportAll.setHitPerSecond(new TreeMap<Long, PointReport>());
@@ -83,7 +89,7 @@ public class JtlHandler extends DefaultHandler {
       String url = httpSamplerObj.getLable();
       reportUrl = totalUrlMap.get(url);
       if (reportUrl == null) {
-        reportUrl = new Report(url, performaneJobId, null);
+        reportUrl = new Report(url, performaneJobId, null,scriptId);
         reportUrl.setSummaryReport(new SummaryReport(url));
         reportUrl.setTransPersecond(new TreeMap<Long, PointReport>());
         reportUrl.setHitPerSecond(new TreeMap<Long, PointReport>());

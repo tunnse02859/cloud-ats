@@ -18,6 +18,42 @@
 			<artifactId>executor</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats</groupId>
+			<artifactId>cloud-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>keyword</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>performance</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>generator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>vmachine</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>organization</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
