@@ -30,12 +30,6 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   private final String COL_NAME = "func-suite";
   
   @Inject
-  private KeywordProjectService projectService;
-  
-  @Inject
-  private ReferenceFactory<SuiteReference> suiteRefFactory;
-  
-  @Inject
   private ReferenceFactory<CaseReference> caseRefFactory;
   
   @Inject
@@ -110,26 +104,4 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     if (suite.getProjectId() == null) throw new IllegalArgumentException("Suite (" + suite.getId() + ") can not create without project_id ");
     super.update(suite);
   }
-  
-  @Override
-  public void delete(Suite obj) {
-    if (obj == null) return;
-    super.delete(obj);
-    
-    SuiteReference suiteRef = suiteRefFactory.create(obj.getId());
-    PageList<KeywordProject> list = projectService.findIn("suites", suiteRef);
-    while (list.hasNext()) {
-      KeywordProject project = list.next().get(0);
-      project.removeSuite(suiteRef);
-      projectService.update(project);
-    }
-    
-  }
-  
-  @Override
-  public void delete(String id) {
-    Suite suite = get(id);
-    delete(suite);
-  }
-
 }

@@ -5,6 +5,7 @@ package org.ats.services.generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
@@ -243,12 +244,12 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     Suite acceptAlertSuite = builder.build();
     suiteService.create(acceptAlertSuite);
     
-    project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
-    project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
-    
     keywordProjectService.create(project);
     
-    Assert.assertEquals(generetorService.generate("target/fk",  project, true, project.getSuites()), "target/fk/" + project.getId().substring(0, 8) + ".zip");
-    
+    Assert.assertEquals(
+        generetorService.generate("target/fk",  project, true, Arrays.<SuiteReference>asList(
+            suiteRefFactory.create(fullExampleSuite.getId()), 
+            suiteRefFactory.create(acceptAlertSuite.getId()))), 
+        "target/fk/" + project.getId().substring(0, 8) + ".zip");
   }
 }

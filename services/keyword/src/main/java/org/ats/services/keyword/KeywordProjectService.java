@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.keyword.KeywordProject.Status;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
@@ -80,10 +81,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));
-//    project.put("creator", source.get("creator"));
-//    project.put("space", source.get("space"));
-//    project.put("tenant", source.get("tenant"));
-    project.put("suites", source.get("suites"));
+    project.setStatus(source.get("status") == null ? Status.READY : Status.valueOf((String) source.get("status")));
     
     //transform custom keywords
     if (source.get("custom_keywords") == null) return project;
