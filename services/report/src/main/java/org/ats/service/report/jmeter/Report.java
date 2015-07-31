@@ -11,6 +11,7 @@ public class Report extends BasicDBObject {
   private String performaneJobId;
   private String functionalJobId;
   private String label ;
+  private String scriptId;
 
   private SummaryReport summaryReport;
 
@@ -18,22 +19,34 @@ public class Report extends BasicDBObject {
   private Map<Long, PointReport> transPersecond ;
   
   public Report() {
-    this(null, null, null);
+    this(null, null, null, null);
   }
   
-  public Report(String label, String performaneJobId, String  functionalJobId) {
+  public Report(String label, String performaneJobId, String  functionalJobId, String scriptId) {
     this.label = label;
-    this.put("label", label);    
+    this.put("label", label);
     this.performaneJobId = performaneJobId;
-    this.put("performane_job_id", performaneJobId);    
+    this.put("performane_job_id", performaneJobId);
     this.functionalJobId = functionalJobId;
     this.put("functional_job_id", functionalJobId);
+    this.scriptId = scriptId;
+    this.put("script_id", scriptId);
   }
 
+  public String getScriptId() {
+    return scriptId;
+  }
+
+  public void setScriptId(String scriptId) {
+    this.scriptId = scriptId;
+    this.put("script_id", scriptId);
+  }
+  
+  
   public String getPerformaneJobId() {
     return performaneJobId;
-  }
-
+  }  
+  
   public void setPerformaneJobId(String performaneJobId) {
     this.performaneJobId = performaneJobId;
     this.put("performane_job_id", performaneJobId);
@@ -93,4 +106,6 @@ public class Report extends BasicDBObject {
     this.label = label;
     this.put("label", label);
   }
+
+  
 }

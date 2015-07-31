@@ -29,6 +29,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
   @Inject
   public ReportService(MongoDBService mongoService, Logger logger) {
     this.col = mongoService.getDatabase().getCollection(COL_NAME);
+    this.col.createIndex(new BasicDBObject("performane_job_id", 1));
     this.logger = logger;
   }
 
@@ -38,6 +39,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
     report.setLabel(((BasicDBObject) source).getString("label"));
     report.setPerformaneJobId(((BasicDBObject) source).getString("performane_job_id"));
     report.setFunctionalJobId(((BasicDBObject) source).getString("functional_job_id"));
+    report.setScriptId(((BasicDBObject) source).getString("script_id"));
     BasicDBObject dbSummary = (BasicDBObject) source.get("summary");    
     if (dbSummary != null) {
       SummaryReport summaryReport = new SummaryReport();
@@ -91,12 +93,12 @@ public class ReportService extends AbstractMongoCRUD<Report> {
     return report;
   }
 
-  public PageList<Report> getList(String jobId, Type jobType) throws SAXException, IOException, ParserConfigurationException {
+  public PageList<Report> getList(String jobId, Type jobType, String scriptId) throws SAXException, IOException, ParserConfigurationException {
     PageList<Report> list = null;
     if (jobType  == Type.PERFORMANCE) {
-      list = query(new BasicDBObject("performane_job_id", jobId));
+      list = query(new BasicDBObject("performane_job_id", jobId).append("script_id", scriptId));
       if (list.count() == 0) {
-        JtlHandler jtlHandler = reportJmeterFactory.create(jobId);
+        JtlHandler jtlHandler = reportJmeterFactory.create(jobId, scriptId);
         jtlHandler.startParsing();
         Iterator<Map.Entry<String, Report>> iterator = jtlHandler.getTotalUrlMap().entrySet().iterator();
         while (iterator.hasNext()) {
