@@ -3,6 +3,9 @@
  */
 package org.ats.services.performance;
 
+import java.util.List;
+
+import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
@@ -136,6 +139,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
   
   @Test
   public void testScript() throws Exception {
+    
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
@@ -149,23 +153,21 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,
+        1, 100, 5, false, 0,performanceProject.getId(), 
         loginPost);
     JMeterScript newJMeter = factory.createJmeterScript(
         "New Script",
-        1, 100, 5, false, 0,
+        1, 100, 5, false, 0, performanceProject.getId(), 
         loginPost);
     
-    jmeterService.create(jmeter);
-    performanceProject.addScript(jmeterScriptRef.create(jmeter.getName()));
-    service.update(performanceProject);
+    jmeterService.create(jmeter, newJMeter);
     
-    Assert.assertEquals(performanceProject.getScripts().size(), 1);
-    Assert.assertEquals(performanceProject.getScripts().get(0).getId(), "Test Name");
+    PageList<JMeterScript> pages = jmeterService.getJmeterScripts(performanceProject.getId());
     
-    performanceProject.addScript(jmeterScriptRef.create(newJMeter.getName()));
-    service.update(performanceProject);
-    Assert.assertEquals(performanceProject.getScripts().size(), 2);
+    Assert.assertEquals(2, pages.count());
+    List<JMeterScript> list = pages.next();
     
+    Assert.assertEquals("Test Name", list.get(0).getName());
+    Assert.assertEquals(performanceProject.getId(), jmeter.getProjectId());
   }
 }

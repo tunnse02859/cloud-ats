@@ -5,8 +5,11 @@ package org.ats.services.generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.ats.common.PageList;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
@@ -179,20 +182,28 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     JMeterScript loginScript = factory.createJmeterScript(
         "Login",
-        1, 20, 5, false, 0,
+        1, 20, 5, false, 0, project.getId(), 
         loginPost);
     jmeterService.create(loginScript);
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
-        "GotoArticle", 1, 20, 5, false, 0, gotoArticle);
+        "GotoArticle", 1, 20, 5, false, 0, project.getId(), gotoArticle);
     jmeterService.create(gotoArticleScript);
-    
-    project.addScript(jmeterScriptRef.create(loginScript.getId()));
-    project.addScript(jmeterScriptRef.create(gotoArticleScript.getId()));
     
     perfService.create(project);
     
-    Assert.assertEquals(generetorService.generate("target/perf",  project, true, project.getScripts()), 
+    PageList<JMeterScript> pages = jmeterService.getJmeterScripts(project.getId());
+    
+    List<JMeterScript> list ;
+    List<JMeterScriptReference> listRef = new ArrayList<JMeterScriptReference>();
+    while (pages.hasNext()) {
+      list = pages.next();
+      
+      for (JMeterScript script : list) {
+         listRef.add(jmeterScriptRef.create(script.getId()));
+      }
+    }
+    Assert.assertEquals(generetorService.generate("target/perf",  project, true, listRef), 
         "target/perf/" + project.getId().substring(0, 8) + ".zip");
   }
   

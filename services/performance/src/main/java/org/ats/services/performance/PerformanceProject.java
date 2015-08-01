@@ -88,34 +88,4 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
     return tenantRefFactory.create(((BasicDBObject)this.get("tenant")).getString("_id"));
   }
   
-  public void addScript(JMeterScriptReference... scripts) {
-    Object obj = this.get("scripts");
-    BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
-    for (JMeterScriptReference script : scripts) {
-      list.add(script.toJSon());
-    }
-    this.put("scripts", list);
-  }
-  
-  public void removeScript(JMeterScriptReference ref) {
-    Object obj = this.get("scripts");
-    if (obj == null) return;
-    
-    BasicDBList list = (BasicDBList) obj;
-    list.remove(ref.toJSon());
-    this.put("list", list);
-  }
-  
-  public List<JMeterScriptReference> getScripts() {
-    Object obj = this.get("scripts");
-    if (obj == null) return Collections.emptyList();
-    
-    BasicDBList list = (BasicDBList) obj;
-    List<JMeterScriptReference> scripts = new ArrayList<JMeterScriptReference>();
-    for (int i = 0; i < list.size(); i++) {
-      scripts.add(scriptRefFactory.create(((BasicDBObject) list.get(i)).getString("_id")));
-    }
-    
-    return Collections.unmodifiableList(scripts);
-  }
 }
