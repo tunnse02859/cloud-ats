@@ -78,6 +78,61 @@ public class KeywordProjectController extends Controller{
   
   private Suite suite;
   
+  public Result newData() {
+    
+    JsonNode json = request().body().asJson();
+    
+    //define variable for cases
+    JsonNode casesNode = json.get("cases");
+    String nameKeywordProject = json.get("wizardData").get("project_name").asText();
+    KeywordProject keywordProject = keywordProjectFactory.create(context, nameKeywordProject);
+    Map<String, Case> listCase = new HashMap<String, Case>();
+ 
+    for(int i = 0; i < casesNode.size(); i++) {
+      Case caze;
+      String caseName = casesNode.get(i).get("name").asText();
+      if(casesNode.get(i).get("driven") != null ) {
+        String dataRefId = casesNode.get(i).get("driven").get("id").asText();
+        caze = caseFactory.create("fake", caseName, dataRef.create(dataRefId),null);
+      } else {
+        caze = caseFactory.create("fake", caseName, null,null);
+      }
+      
+      //Add action for test cases
+      for(JsonNode action:casesNode.get(i).get("steps")) {
+        caze.addAction(action); 
+      }
+      listCase.put(caze.get("name").toString(),caze);
+      caseService.create(caze);
+    }
+    
+    for(int j = 0; j < json.get("suites").size(); j++) {
+      
+      //define variable for suites
+      JsonNode suitesNode = json.get("suites").get(j);
+      String nameSuite = suitesNode.get("name").asText();
+      JsonNode caseInSuiteNode = suitesNode.get("cases");
+      
+      SuiteBuilder suiteBuilder = new SuiteBuilder();
+      suiteBuilder.packageName("org.ats.generated")
+      .suiteName(nameSuite)
+      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
+      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
+      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS).projectId(keywordProject.getId());
+      
+      for(JsonNode node:caseInSuiteNode) {
+        Case caseInSuite = listCase.get(node.get("name").asText());
+        suiteBuilder.addCases(caseRefFactory.create(caseInSuite.getId()));
+      }
+      suite = suiteBuilder.build();
+      suiteService.create(suite);
+    }
+    keywordProjectService.create(keywordProject);
+      
+    return ok(Json.parse(keywordProject.toString()));
+  }
+  
+ 
   public Result getTestsuites(String projectId) {
     
     KeywordProject project = keywordProjectService.get(projectId);
