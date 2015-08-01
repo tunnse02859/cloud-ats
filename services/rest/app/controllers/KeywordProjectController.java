@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,61 +79,6 @@ public class KeywordProjectController extends Controller{
   
   private Suite suite;
   
-  public Result newData() {
-    
-    JsonNode json = request().body().asJson();
-    
-    //define variable for cases
-    JsonNode casesNode = json.get("cases");
-    String nameKeywordProject = json.get("wizardData").get("project_name").asText();
-    KeywordProject keywordProject = keywordProjectFactory.create(context, nameKeywordProject);
-    Map<String, Case> listCase = new HashMap<String, Case>();
- 
-    for(int i = 0; i < casesNode.size(); i++) {
-      Case caze;
-      String caseName = casesNode.get(i).get("name").asText();
-      if(casesNode.get(i).get("driven") != null ) {
-        String dataRefId = casesNode.get(i).get("driven").get("id").asText();
-        caze = caseFactory.create("fake", caseName, dataRef.create(dataRefId),null);
-      } else {
-        caze = caseFactory.create("fake", caseName, null,null);
-      }
-      
-      //Add action for test cases
-      for(JsonNode action:casesNode.get(i).get("steps")) {
-        caze.addAction(action); 
-      }
-      listCase.put(caze.get("name").toString(),caze);
-      caseService.create(caze);
-    }
-    
-    for(int j = 0; j < json.get("suites").size(); j++) {
-      
-      //define variable for suites
-      JsonNode suitesNode = json.get("suites").get(j);
-      String nameSuite = suitesNode.get("name").asText();
-      JsonNode caseInSuiteNode = suitesNode.get("cases");
-      
-      SuiteBuilder suiteBuilder = new SuiteBuilder();
-      suiteBuilder.packageName("org.ats.generated")
-      .suiteName(nameSuite)
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS).projectId(keywordProject.getId());
-      
-      for(JsonNode node:caseInSuiteNode) {
-        Case caseInSuite = listCase.get(node.get("name").asText());
-        suiteBuilder.addCases(caseRefFactory.create(caseInSuite.getId()));
-      }
-      suite = suiteBuilder.build();
-      suiteService.create(suite);
-    }
-    keywordProjectService.create(keywordProject);
-      
-    return ok(Json.parse(keywordProject.toString()));
-  }
-  
- 
   public Result getTestsuites(String projectId) {
     
     KeywordProject project = keywordProjectService.get(projectId);
@@ -345,28 +291,9 @@ public class KeywordProjectController extends Controller{
     return ok(object);
   }
   
-  public Result getListKeywordProject(String tenant, String space) {
-    
-    BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
-    query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
-    
-    PageList<KeywordProject> list = keywordProjectService.query(query);
+  public Result getListTestCase(String projectId) {
+    PageList<Case> list = caseService.getCases(projectId);
     list.setSortable(new MapBuilder<String, Boolean>("created_date", true).build());
-    
-    ArrayNode array = Json.newObject().arrayNode();
-    while(list.hasNext()) {
-      List<KeywordProject> listProject = list.next();
-      for(KeywordProject item : listProject) {
-        array.add(Json.parse(item.toString()));
-      }
-    }
-    System.out.println(array);
-    return ok(array);
-    
-  }
-  
-  public Result getListTestCase() {
-    PageList<Case> list = caseService.list();
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
       List<Case> listCases = list.next();
@@ -380,21 +307,44 @@ public class KeywordProjectController extends Controller{
   public Result newTestCase() {
     JsonNode node = request().body().asJson();
     JsonNode casesNode = node.get("cases");
+    JsonNode projectIdNode = node.get("projectId");
+    String projectId = projectIdNode.asText();
     for(int i = 0; i < casesNode.size(); i++) {
       Case caze;
       String caseName = casesNode.get(i).get("name").asText();
-      String info = casesNode.get(i).get("info").asText();
-      if("".equals(info)) {
-        caze = caseFactory.create("fake", caseName, null,null); 
-      } else {
-        caze = caseFactory.create("fake", caseName, null,info);
+      String idCaseExisted = "";
+      boolean exisit = false;
+      
+      //check existing of testcase
+      PageList<Case> list = caseService.getCases(projectId);
+      while(list.hasNext()) {
+        List<Case> listCases = list.next();
+        for(Case item : listCases) {
+          if(caseName.trim().equals(item.getName().trim())) {
+            exisit = true;
+            idCaseExisted = item.getId().toString();
+          }
+        }
       }
       
-      //Add action for test cases
-      for(JsonNode action:casesNode.get(i).get("steps")) {
-        caze.addAction(action); 
+      if(exisit == false) {
+        System.out.println("--not exist");
+        caze = caseFactory.create(projectId,caseName, null,"");
+        //Add action for test cases
+        for(JsonNode action:casesNode.get(i).get("steps")) {
+          caze.addAction(action); 
+        }
+        caseService.create(caze);
+      } else {
+        System.out.println("-- exist");
+        caze = caseService.get(idCaseExisted);
+        
+        //Add action for test cases
+        for(JsonNode action:casesNode.get(i).get("steps")) {
+          caze.addAction(action); 
+        }
+        caseService.update(caze);
       }
-      caseService.create(caze);
     }
     
     return ok();
@@ -419,21 +369,23 @@ public class KeywordProjectController extends Controller{
     for(int i = 0; i < customKeyNode.size(); i++) {
       String nameCustomKeyword = customKeyNode.get(i).get("name").asText();
       String projectId = keywordProjectNode.asText();
+      keywordProject = keywordProjectService.get(projectId);
       customKeyword = new CustomKeyword(nameCustomKeyword);
+      
       //Add action for custom keyword
       for(JsonNode action:customKeyNode.get(i).get("steps")) {
         customKeyword.addAction(action); 
       }
-      keywordProject = keywordProjectService.get(projectId);
+      
       keywordProject.addCustomKeyword(customKeyword);
       keywordProjectService.update(keywordProject);
     }
     return ok();
   }
   
-  public Result removeCustomKeyword(String projectId,String customKeywordName) {
+  public Result removeCustomKeyword(String projectId,String customKeywordId) {
     KeywordProject keywordProject = keywordProjectService.get(projectId);
-    keywordProject.removeCustomKeyword(customKeywordName);
+    keywordProject.removeCustomKeyword(customKeywordId);
     keywordProjectService.update(keywordProject);
     return ok();
   }
@@ -447,11 +399,13 @@ public class KeywordProjectController extends Controller{
     keywordProject = keywordProjectService.get(projectId);
     for(int i = 0; i < nodeCustomKeyword.size(); i++) {
       JsonNode customKeyword = nodeCustomKeyword.get(i);
-      CustomKeyword newCustomKeyword = new CustomKeyword(customKeyword.get("name").toString());
+      String idCustomKeyword = customKeyword.get("_id").asText();
+      CustomKeyword newCustomKeyword = new CustomKeyword(customKeyword.get("name").asText());
+      
       for(JsonNode action:customKeyword.get("steps")) {
         newCustomKeyword.addAction(action); 
       }
-      String idCustomKeyword = customKeyword.get("_id").asText();  
+      
       for(CustomKeyword item : keywordProject.getCustomKeywords()) {
         if(idCustomKeyword.equals(item.getId().toString())) {
           String _idCurrentProject = item.getId().toString();
@@ -468,33 +422,41 @@ public class KeywordProjectController extends Controller{
   }
   
   public Result updateCase() {
-    System.out.println("update....");
     JsonNode node = request().body().asJson();
     JsonNode nodeCase = node.get("cases");
-    String _idCase = nodeCase.get(0).get("_id").asText();
-    String nameNewCase = nodeCase.get(0).get("name").asText();
-    Case caze;
-    String info = nodeCase.get(0).get("info").asText();
-    if("".equals(info)) {
-      caze = caseFactory.create("fake", nameNewCase, null,null); 
-    } else {
-      caze = caseFactory.create("fake", nameNewCase, null,info);
+    JsonNode projectIdNode = node.get("projectId");
+    String caseId = nodeCase.get(0).get("_id").asText();
+    String projectId = projectIdNode.asText();
+    
+    PageList<Case> list = caseService.getCases(projectId);
+    while(list.hasNext()) {
+      List<Case> listCases = list.next();
+      for(Case item: listCases) {
+        if(caseId.equals(item.getId().toString())) {
+          item.clearActions();
+          if(item.getActions() == null) {
+            System.out.println("empty");
+            for(JsonNode action:nodeCase.get(0).get("steps")) {
+              item.addAction(action);
+            }
+          }
+          caseService.update(item);
+        }
+      }
     }
-    for(JsonNode action:nodeCase.get(0).get("steps")) {
-      caze.addAction(action); 
-    }
-    caseService.delete(_idCase);
-    caze.put("_id", _idCase);
-    caseService.create(caze);
     return ok();
   }
   
-  public Result removeCase(String caseId) {
-    System.out.println(caseService.get(caseId)+"----");
-    System.out.println(caseService.count()+"****");
-    caseService.delete(caseId);
-//    caseService.deleteBy(new BasicDBObject("_id", caseId));
-    System.out.println(caseService.count()+"+++++");
+  public Result removeCase(String caseId,String projectId) {
+    PageList<Case> list = caseService.getCases(projectId);
+    while(list.hasNext()) {
+      List<Case> listCases = list.next();
+      for(Case caze: listCases) {
+        if(caseId.equals(caze.getId().toString())) {
+          caseService.delete(caseId);
+        }
+      }
+    }
     return ok();
   }
    

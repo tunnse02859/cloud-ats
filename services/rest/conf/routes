@@ -37,11 +37,13 @@ POST    /api/v1/project/keyword             @controllers.KeywordController.creat
 
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
 GET		/api/v1/getList/:tenant/:space		@controllers.KeywordProjectController.getListKeywordProject(tenant,space)
-GET		/api/v1/getListTestCase				@controllers.KeywordProjectController.getListTestCase()
+GET		/api/v1/getListTestCase/:projectId				@controllers.KeywordProjectController.getListTestCase(projectId)
+
 POST	/api/v1/testcase					@controllers.KeywordProjectController.newTestCase()
-GET		/api/v1/getCustomKeywords/:tenant/:space/:projectID			@controllers.KeywordProjectController.getCustomKeywords(tenant,space,projectID)
+
+GET		/api/v1/getCustomKeywords/:tenant/:space/:projectId			@controllers.KeywordProjectController.getCustomKeywords(tenant,space,projectId)
 POST	/api/v1/addCustomKeyword									@controllers.KeywordProjectController.addCustomKeyword()
-DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordName	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordName)		
+DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordId	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordId)		
 PUT		/api/v1/updateCustomKeyword												@controllers.KeywordProjectController.updateCustomKeyword()
 GET		/api/v1/keyword/getTestsuites/:projectId					@controllers.KeywordProjectController.getTestsuites(projectId)
 GET		/api/v1/keywords/getListFuncProject							@controllers.KeywordProjectController.getListProject()
@@ -49,7 +51,7 @@ POST	/api/v1/keyword/createKeywordProject						@controllers.KeywordProjectContro
 POST	/api/v1/keyword/createTestSuite								@controllers.KeywordProjectController.createTestSuite()
 POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectController.runKeywordProject()
 PUT		/api/v1/updateCase											@controllers.KeywordProjectController.updateCase()
-DELETE	/api/v1/removeCase/:caseId			@controllers.KeywordProjectController.removeCase(caseId)
+DELETE	/api/v1/removeCase/:caseId/:projectId			@controllers.KeywordProjectController.removeCase(caseId,projectId)
 GET		/api/v1/keyword/deleteTestSuite/:suiteId/:projectId					@controllers.KeywordProjectController.deleteTestSuite(suiteId, projectId)
 PUT		/api/v1/keyword/updateTestSuite								@controllers.KeywordProjectController.updateTestSuite()
 # Upload script

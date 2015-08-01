@@ -108,6 +108,11 @@ public class Case extends AbstractTemplate {
     return this;
   }
   
+  public void clearActions() {
+    this.remove("actions");
+    this.actions.clear();
+  }
+  
   public List<JsonNode> getActions() {
     return Collections.unmodifiableList(actions);
   }
