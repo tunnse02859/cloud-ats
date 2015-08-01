@@ -65,7 +65,6 @@ public class KeywordController extends Controller {
         array.add(Json.parse(project.toString()));
       }
     }
-    
     return ok(array);
   }
   
@@ -85,6 +84,8 @@ public class KeywordController extends Controller {
     
     KeywordProject project = keywordProjectFactory.create(context, name);
     keywordProjectService.create(project);
+
     return ok(Json.parse(project.toString()));
   }
+
 }
