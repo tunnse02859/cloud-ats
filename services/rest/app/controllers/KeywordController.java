@@ -79,4 +79,12 @@ public class KeywordController extends Controller {
     return ok(Json.parse(project.toString()));
   }
 
+  public Result create() {
+    JsonNode json = request().body().asJson();
+    String name = json.get("name").asText();
+    
+    KeywordProject project = keywordProjectFactory.create(context, name);
+    keywordProjectService.create(project);
+    return ok(Json.parse(project.toString()));
+  }
 }

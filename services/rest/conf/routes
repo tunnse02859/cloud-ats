@@ -33,6 +33,7 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
 GET     /api/v1/project/keywords            @controllers.KeywordController.list()
 GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
+POST    /api/v1/project/keyword             @controllers.KeywordController.create()
 
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
 GET		/api/v1/getList/:tenant/:space		@controllers.KeywordProjectController.getListKeywordProject(tenant,space)
