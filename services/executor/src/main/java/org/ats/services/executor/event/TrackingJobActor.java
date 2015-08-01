@@ -277,6 +277,8 @@ public class TrackingJobActor extends UntypedActor {
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
     }
+    
+    if (testVM.getPublicIp() == null) testVM = openstackService.allocateFloatingIp(testVM);
 
     String path = generatorService.generate("/tmp", project, true, job.getSuites());
 
@@ -301,6 +303,9 @@ public class TrackingJobActor extends UntypedActor {
     job.setStatus(Status.Running);
     job.setVMachineId(testVM.getId());
     executorService.update(job);
+    
+    project.setStatus(KeywordProject.Status.RUNNING);
+    keywordService.update(project);
     
     Event event  = eventFactory.create(job, "keyword-job-tracking");
     event.broadcast();
