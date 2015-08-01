@@ -72,6 +72,8 @@ public class JMeterFactoryTestCase {
   
   @Test
   public void testCreateJmeterScript() throws Exception {
+    
+    String projectId = "234lsdkjglsk2345";
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler signinRequest = factory.createHttpGet("Signin Page", "http://172.27.4.48:9000/signin", null, 0);
     JMeterSampler loginPost = factory.createHttpPost("Login", "http://172.27.4.48:9000/signin", null, 0,
@@ -85,8 +87,11 @@ public class JMeterFactoryTestCase {
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,
+        1, 100, 5, false, 0,projectId,
         signinRequest, loginPost, oRequest, signoutRequest);
     System.out.println(jmeter);
+    System.out.println(jmeter.getProjectId());
+    
+    Assert.assertEquals(jmeter.getProjectId(), projectId);
   }
 }

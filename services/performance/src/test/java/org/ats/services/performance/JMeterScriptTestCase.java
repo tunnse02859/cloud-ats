@@ -20,6 +20,7 @@ public class JMeterScriptTestCase {
   @Test
   public void testCRUD() throws Exception {
     
+    String projectId = "tranvantrinhsdljgksdg235234534";
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler signinRequest = factory.createHttpGet("Signin Page", "http://localhost:9000/signin", "this is assertion text", 1000);
     JMeterSampler loginPost = factory.createHttpPost("Login", "http://localhost:9000/signin", null, 0,
@@ -30,7 +31,7 @@ public class JMeterScriptTestCase {
     JMeterSampler signoutRequest = factory.createHttpGet("Signout", "http://localhost:9000/signout", null, 0);
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,
+        1, 100, 5, false, 0,projectId, 
         signinRequest, loginPost, oRequest, signoutRequest);
     
     jmeter.setName("Test Script");

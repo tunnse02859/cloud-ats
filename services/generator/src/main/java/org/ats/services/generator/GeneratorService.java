@@ -83,7 +83,7 @@ public class GeneratorService {
     
     for (JMeterScriptReference ref : scripts) {
       
-      if (!project.getScripts().contains(ref)) continue;
+      if (ref.get().getProjectId() == null) continue;
       
       JMeterScript jScript = ref.get();
       String scriptName = StringUtil.normalizeName(jScript.getName());

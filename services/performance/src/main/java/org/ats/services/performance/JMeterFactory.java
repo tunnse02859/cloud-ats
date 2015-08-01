@@ -20,8 +20,8 @@ import org.rythmengine.Rythm;
  */
 public class JMeterFactory {
 
-  public JMeterParser createJMeterParser(String source) throws Exception {
-    return new JMeterParser(source);
+  public JMeterParser createJMeterParser(String source, String projectId) throws Exception {
+    return new JMeterParser(source, projectId);
   }
   
   public String createPom(String groupId, String artifactId) throws IOException {
@@ -33,12 +33,12 @@ public class JMeterFactory {
     return Rythm.render(template, params);
   }
   
-  public JMeterScript createJmeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, JMeterSampler... samplers) {
+  public JMeterScript createJmeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String projectId, JMeterSampler... samplers) {
     List<JMeterSampler> list = new ArrayList<JMeterSampler>();
     for (JMeterSampler sampler : samplers) {
       list.add(sampler);
     }
-    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, list);
+    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, projectId, list);
   }
   
   public String createArguments(JMeterArgument... arguments) throws IOException {

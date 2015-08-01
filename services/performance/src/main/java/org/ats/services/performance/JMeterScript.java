@@ -28,7 +28,7 @@ public class JMeterScript extends BasicDBObject {
   /** .*/
   private List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
 
-  JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, List<JMeterSampler>  samplers) {
+  JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String project_id, List<JMeterSampler>  samplers) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", testName);
     this.put("loops", loops);
@@ -45,10 +45,19 @@ public class JMeterScript extends BasicDBObject {
     }
     
     this.put("samplers", list);
+    this.put("project_id", project_id);
   }
   
   public String getId() {
     return this.getString("_id");
+  }
+  
+  public String getProjectId () {
+    return this.getString("project_id");
+  }
+  
+  public void setProjectId(String projectId) {
+    this.put("project_id", projectId);
   }
   
   public String getName() {

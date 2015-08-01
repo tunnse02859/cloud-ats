@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.performance.JMeterSampler.Method;
@@ -36,7 +37,11 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     //create text index
     this.createTextIndex("name");
   }
-
+  
+  public PageList<JMeterScript> getJmeterScripts(String projectId) {
+    return query(new BasicDBObject("project_id", projectId));
+  }
+  
   @Override
   public JMeterScript transform(DBObject source) {
     BasicDBObject obj = (BasicDBObject) source;
@@ -47,7 +52,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     int ram_up = obj.getInt("ram_up");
     boolean scheduler = obj.getBoolean("scheduler");
     int duration = obj.getInt("duration");
-
+    String projectId = obj.getString("project_id");
     BasicDBList listSampler = (BasicDBList) obj.get("samplers");
     List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
     for (Object sampler : listSampler) {
@@ -66,8 +71,9 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
       }
       samplers.add(new JMeterSampler(method, samplerName, url, assertion_text, constant_time, arguments));
     }
-
-    JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, samplers);
+    
+    
+    JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, projectId, samplers);
     script.put("_id", source.get("_id"));
     return script;
   }

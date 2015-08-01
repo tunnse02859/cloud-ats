@@ -26,12 +26,18 @@ public class JMeterParser {
   /** .*/
   private final String source;
   
-  JMeterParser(String source) throws Exception {
+  private String projectId;
+  JMeterParser(String source, String projectId) throws Exception {
     this.source = source;
+    this.projectId = projectId;
   }
   
   public String getSource() {
     return source;
+  }
+  
+  public String getProjectId() {
+    return projectId;
   }
   
   public JMeterScript parse() throws Exception {
@@ -122,6 +128,6 @@ public class JMeterParser {
     }
     // End find samplers
     
-    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, samplers);
+    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, getProjectId(), samplers);
   }
 }

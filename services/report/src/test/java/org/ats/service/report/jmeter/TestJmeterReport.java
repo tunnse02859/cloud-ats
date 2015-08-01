@@ -168,19 +168,18 @@ public class TestJmeterReport extends AbstractEventTestCase {
     
     JMeterScript loginScript = factory.createJmeterScript(
         "LoginCodeProject",
-        1, 20, 5, false, 0,
+        1, 20, 5, false, 0, project.getId(), 
         loginPost);
     
+    
     jmeterService.create(loginScript);
-    project.addScript(jmeterScriptRef.create(loginScript.getId()));
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
         "GoToArticle", 
-        1, 20, 5, false, 0, 
+        1, 20, 5, false, 0, project.getId(),
         gotoArticle);
     
     jmeterService.create(gotoArticleScript);
-    project.addScript(jmeterScriptRef.create(gotoArticleScript.getId()));
     
     perfService.create(project);
     

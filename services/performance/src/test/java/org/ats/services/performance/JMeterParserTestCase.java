@@ -21,6 +21,8 @@ public class JMeterParserTestCase {
   /** .*/
   String source;
   
+  String projectId;
+  
   @BeforeClass
   public void setUp() throws IOException {
     JMeterFactory factory = new JMeterFactory();
@@ -36,7 +38,7 @@ public class JMeterParserTestCase {
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,
+        1, 100, 5, false, 0, projectId,
         signinRequest, loginPost, oRequest, signoutRequest);
     
     this.source = jmeter.transform();
@@ -48,10 +50,13 @@ public class JMeterParserTestCase {
   @Test
   public void test() throws Exception {
     JMeterFactory factory = new JMeterFactory();
-    JMeterParser parser = factory.createJMeterParser(source);
+    JMeterParser parser = factory.createJMeterParser(source, projectId);
     JMeterScript script = parser.parse();
     
     Assert.assertEquals("Test Name", script.getName());
+    
+    Assert.assertEquals(projectId, script.getProjectId());
+    
     Assert.assertEquals(1, script.getLoops());
     Assert.assertEquals(100, script.getNumberThreads());
     Assert.assertEquals(5, script.getRamUp());
