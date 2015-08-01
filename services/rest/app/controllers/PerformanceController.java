@@ -144,17 +144,13 @@ public class PerformanceController extends Controller {
       i ++;
       
     }
+
+    PerformanceProject project = projectFactory.create(projectName);
+    projectService.create(project);
     
     //create jmeter script
-    JMeterScript script = jmeterFactory.createJmeterScript("Script 1", loops, users, ramup, false, duration, arraySamplers);
-    
+    JMeterScript script = jmeterFactory.createJmeterScript("Script 1", loops, users, ramup, false, duration, project.getId(), arraySamplers);
     jmeterService.create(script); // save jmeter script into database
-    
-    JMeterScriptReference scriptRef = jmeterReferenceFactory.create(script.getId());
-    
-    PerformanceProject project = projectFactory.create(projectName);
-    project.addScript(scriptRef);
-    projectService.create(project);
     
     return status(200);
   }
@@ -271,14 +267,13 @@ public class PerformanceController extends Controller {
         content = StringUtil.readStream(fis);
         
         // create jmeter parser by file content and build jmeter script 
-        parse = jmeterFactory.createJMeterParser(content);
+        parse = jmeterFactory.createJMeterParser(content, project.getId());
         script = parse.parse();
         
         script.put("name", "script "+ i);
         
         // create jmeter reference script and add jmeter reference to performance project model
         jmeterReference = jmeterReferenceFactory.create(script.getId());
-        project.addScript(jmeterReference);
         
         // save jmeter script into database
         jmeterService.create(script);
