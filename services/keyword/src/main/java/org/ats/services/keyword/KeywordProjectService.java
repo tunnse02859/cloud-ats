@@ -93,7 +93,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
       BasicDBObject dbObj = (BasicDBObject) obj;
       String name = dbObj.getString("name");
       CustomKeyword customKeyword = new CustomKeyword(name);
-      
+      customKeyword.put("_id", dbObj.get("_id"));
       if (dbObj.get("actions") == null) continue;
       
       BasicDBList actions = (BasicDBList) dbObj.get("actions");
