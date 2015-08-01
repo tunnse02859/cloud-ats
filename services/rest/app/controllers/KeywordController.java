@@ -3,32 +3,27 @@
  */
 package controllers;
 
-import java.io.File;
-import java.util.Arrays;
-
+import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
-import org.ats.services.executor.job.KeywordJob;
-import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
-import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 
 /**
@@ -57,63 +52,31 @@ public class KeywordController extends Controller {
   @Inject KeywordProjectService keywordProjectService;
   
   @Inject ExecutorService executorService;
-
-  public Result build() throws Exception {
+  
+  public Result list() {
+    PageList<KeywordProject> list = keywordProjectService.list();
+    ArrayNode array = Json.newObject().arrayNode();
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
-    
-    ObjectMapper m = new ObjectMapper();
-    JsonNode rootNode = m.readTree(new File("conf/dump/full_example.json"));
-    
-    SuiteBuilder builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("FullExample")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(project.getId());
-    
-    JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create(project.getId(), "test", null, "info");
-    for (JsonNode json : stepsNode) {
-      caze.addAction(json);
+    while(list.hasNext()) {
+      for (KeywordProject project : list.next()) {
+        project.put("type", "keyword");
+        project.put("totalSuites", suiteService.getSuites(project.getId()).count());
+        project.put("totalCases", caseService.getCases(project.getId()).count());
+        array.add(Json.parse(project.toString()));
+      }
     }
-    caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
-
-    Suite fullExampleSuite= builder.build();
-    suiteService.create(fullExampleSuite);
     
-    rootNode = m.readTree(new File("conf/dump/acceptAlert.json"));
-    
-    builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("AcceptAlert")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(project.getId());
-    
-    stepsNode = rootNode.get("steps");
-    caze = caseFactory.create(project.getId(), "test", null, "info");
-    for (JsonNode json : stepsNode) {
-      caze.addAction(json);
-    }
-    caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
-    
-    Suite acceptAlertSuite = builder.build();
-    suiteService.create(acceptAlertSuite);
-    
-    project.addSuite(suiteRefFactory.create(fullExampleSuite.getId()));
-    project.addSuite(suiteRefFactory.create(acceptAlertSuite.getId()));
-    
-    keywordProjectService.create(project);
-    
-    KeywordJob job = executorService.execute(project, Arrays.asList(
-        suiteRefFactory.create(fullExampleSuite.getId()),
-        suiteRefFactory.create(acceptAlertSuite.getId())));
-    
-    return ok(job.getId());
+    return ok(array);
   }
+  
+  public Result get(String projectId) {
+    KeywordProject project = keywordProjectService.get(projectId);
+    if (project == null) return status(404);
+    
+    project.put("type", "keyword");
+    project.put("totalSuites", suiteService.getSuites(project.getId()).count());
+    project.put("totalCases", caseService.getCases(project.getId()).count());
+    return ok(Json.parse(project.toString()));
+  }
+
 }

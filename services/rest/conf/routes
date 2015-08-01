@@ -30,6 +30,10 @@ DELETE	/api/v1/data/delete/:dataId			@controllers.DataDrivenController.delete(da
 PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
 # Keyword project controller
+
+GET     /api/v1/project/keywords            @controllers.KeywordController.list()
+GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
+
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
 GET		/api/v1/getList/:tenant/:space		@controllers.KeywordProjectController.getListKeywordProject(tenant,space)
 GET		/api/v1/getListTestCase				@controllers.KeywordProjectController.getListTestCase()
@@ -39,7 +43,7 @@ POST	/api/v1/addCustomKeyword									@controllers.KeywordProjectController.addC
 DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordName	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordName)		
 PUT		/api/v1/updateCustomKeyword												@controllers.KeywordProjectController.updateCustomKeyword()
 GET		/api/v1/keyword/getTestsuites/:projectId					@controllers.KeywordProjectController.getTestsuites(projectId)
-GET		/api/v1/keyword/getListFuncProject							@controllers.KeywordProjectController.getListProject()
+GET		/api/v1/keywords/getListFuncProject							@controllers.KeywordProjectController.getListProject()
 POST	/api/v1/keyword/createKeywordProject						@controllers.KeywordProjectController.createKeywordProject()
 POST	/api/v1/keyword/createTestSuite								@controllers.KeywordProjectController.createTestSuite()
 POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectController.runKeywordProject()
@@ -55,10 +59,6 @@ GET		/api/v1/performance/list			@controllers.PerformanceController.listPerforman
 POST 	/api/v1/performance/createWizard	@controllers.PerformanceController.createPerformanceTestWizard()
 POST	/api/v1/performance/uploadFile		@controllers.PerformanceController.createPerformanceTestByFile()
 PUT		/api/v1/performance/updateScript 	@controllers.PerformanceController.updatePerformanceTestWizard()
-
-
-#################################
-GET     /api/v1/keyword/build                    @controllers.KeywordController.build()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
