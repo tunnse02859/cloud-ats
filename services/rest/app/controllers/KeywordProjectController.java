@@ -126,7 +126,6 @@ public class KeywordProjectController extends Controller{
       }
       suite = suiteBuilder.build();
       suiteService.create(suite);
-      keywordProject.addSuite(suiteRefFactory.create(suite.getId()));
     }
     keywordProjectService.create(keywordProject);
       
@@ -138,19 +137,20 @@ public class KeywordProjectController extends Controller{
     
     KeywordProject project = keywordProjectService.get(projectId);
     
-    List<org.ats.services.keyword.SuiteReference> listSuites = project.getSuites();
+    PageList<Suite> listSuites = suiteService.getSuites(projectId);
     
     ArrayNode array = Json.newObject().arrayNode();
     ObjectNode object ;
-      
-    for (org.ats.services.keyword.SuiteReference suiteRef : listSuites) {
-      
-      Suite suite = suiteRef.get();
-      object = Json.newObject();
-      object.put("_id", suiteRef.getId());
-      object.put("name", suite.getString("suite_name"));
-      array.add(object);
+     
+    while (listSuites.hasNext()) {
+      for (Suite suite : listSuites.next()) {
+        object = Json.newObject();
+        object.put("_id", suite.getId());
+        object.put("name", suite.getString("suite_name"));
+        array.add(object);
+      }
     }
+    
     return ok(array);
   }
   
@@ -173,27 +173,27 @@ public class KeywordProjectController extends Controller{
         
         ArrayNode arraySuites = Json.newObject().arrayNode();
         Map<String,Integer> mapAllSuite = new HashMap<String,Integer>();
-        for (SuiteReference suiteRef : project.getSuites()) {
-          
-          Suite suite = suiteRef.get();         
-          
-          ArrayNode arrayCases = Json.newObject().arrayNode();
-          
-          for (CaseReference caseRef : suite.getCases()) {
-            Case caze =  caseRef.get();
-            arrayCases.add(Json.parse(caze.toString()));
-            Integer count = mapAllSuite.get(caze.getId());
-            if(count == null){
-              count = new Integer(0);
+        PageList<Suite> listSuite = suiteService.getSuites(project.getId());
+        while(listSuite.hasNext()) {
+          for (Suite suite : listSuite.next()) {
+            ArrayNode arrayCases = Json.newObject().arrayNode();
+            
+            for (CaseReference caseRef : suite.getCases()) {
+              Case caze =  caseRef.get();
+              arrayCases.add(Json.parse(caze.toString()));
+              Integer count = mapAllSuite.get(caze.getId());
+              if(count == null){
+                count = new Integer(0);
+              }
+              count = count +1 ;
+              mapAllSuite.put(caze.getId(),count);            
             }
-            count = count +1 ;
-            mapAllSuite.put(caze.getId(),count);            
+            
+            suite.put("cases", arrayCases.toString());
+            arraySuites.add(Json.parse(suite.toString()));
           }
-          
-          suite.put("cases", arrayCases.toString());
-          arraySuites.add(Json.parse(suite.toString()));
-          
         }
+        
         object.put("totalCases", mapAllSuite.size());
         object.put("suites", arraySuites);
         array.add(object);
@@ -310,9 +310,6 @@ public class KeywordProjectController extends Controller{
     
     suiteService.create(suite);
     
-    SuiteReference suiteRef = suiteRefFactory.create(suite.getId());
-    project.addSuite(suiteRef);
-    
     keywordProjectService.update(project);
     String suiteId = suite.getId();
     ObjectNode object = Json.newObject();
@@ -327,12 +324,12 @@ public class KeywordProjectController extends Controller{
     
     Map<String, Integer> allMap = new HashMap<String, Integer>();
     
-    for (SuiteReference suiteRef : project.getSuites()) {
-      
-      Suite suite = suiteRef.get();
-      
-      for (CaseReference caseRef : suite.getCases()) {
-        allMap.put(caseRef.getId(), 0);
+    PageList<Suite> listSuite = suiteService.getSuites(id);
+    while (listSuite.hasNext()) {
+      for (Suite suite : listSuite.next()) {
+        for (CaseReference caseRef : suite.getCases()) {
+          allMap.put(caseRef.getId(), 0);
+        }
       }
     }
     
