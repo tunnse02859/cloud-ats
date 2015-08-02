@@ -242,25 +242,23 @@ public class PerformanceController extends Controller {
     MultipartFormData body = request().body().asMultipartFormData();
     List<FilePart> listFiles = body.getFiles();
     
-    String projectName = request().getQueryString("project_name");
+    String scriptName = request().getQueryString("script_name");
+    String projectId = request().getQueryString("project_id");
     
+    PerformanceProject project = projectService.get(projectId);
     // return badRequest if file amount is lower 1
     if (listFiles.size() <= 0) {
       return badRequest();
     }
-    
-    int i = 0;
-    
+    long i = jmeterService.getJmeterScripts(projectId).count();
+     
     // create performance project model 
-    PerformanceProject project = projectFactory.create(projectName);
-    
-    // declare variables
     FileInputStream fis;
     String content;
     JMeterParser parse;
     JMeterScript script;
-    JMeterScriptReference jmeterReference;
     
+    ArrayNode array = Json.newObject().arrayNode();
     // loop though files
     for (FilePart file : listFiles) {
       i ++;
@@ -273,11 +271,10 @@ public class PerformanceController extends Controller {
         parse = jmeterFactory.createJMeterParser(content, project.getId());
         script = parse.parse();
         
-        script.put("name", "script "+ i);
+        script.put("name", "script" + i);
+        script.put("project_id", project.getId());
         
-        // create jmeter reference script and add jmeter reference to performance project model
-        jmeterReference = jmeterReferenceFactory.create(script.getId());
-        
+        array.add(Json.parse(script.toString()));
         // save jmeter script into database
         jmeterService.create(script);
         
@@ -286,10 +283,7 @@ public class PerformanceController extends Controller {
       }
     }
     
-    // save performance project into database
-    projectService.create(project);
-    
-    return ok();
+    return ok(array);
   }
   
   public Result list() {
@@ -314,18 +308,40 @@ public class PerformanceController extends Controller {
     
     PerformanceProject project = projectFactory.create(name);
     projectService.create(project);
-    return ok(Json.parse(project.toString()));
+    return ok(project.getId());
   }
   
   public Result get(String projectId) {
     
-    System.out.println(projectId);
     PerformanceProject project = projectService.get(projectId);
     if (project == null) return status(404);
     
+    PageList<JMeterScript> pages = jmeterService.getJmeterScripts(projectId);
+    ArrayNode array = Json.newObject().arrayNode();
+    List<JMeterScript> list;
+    while (pages.hasNext()) {
+      
+      list = pages.next();
+      for (JMeterScript script : list) {
+        
+        array.add(Json.parse(script.toString()));
+      }
+    }
     project.put("type", "performance");
     project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
-    
+    project.put("scripts", array.toString());
     return ok(Json.parse(project.toString()));
+  }
+  
+  public Result run(String projectId) {
+    
+    System.out.println(projectId);
+    
+    JsonNode data = request().body().asJson().get("suiteIds");
+    for (JsonNode json : data) {
+      System.out.println(json.get("_id").asText());
+    }
+    
+    return ok();
   }
 }
