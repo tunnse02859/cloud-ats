@@ -34,7 +34,11 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
   private ReferenceFactory<UserReference> userRefFactory;
   private ReferenceFactory<SpaceReference> spaceRefFactory;
   private ReferenceFactory<JMeterScriptReference> scriptRefFactory;
-
+  
+  public static enum Status {
+    READY, RUNNING
+  }
+  
   @Inject
   PerformanceProject(ReferenceFactory<TenantReference> tenantRefFactory, 
       ReferenceFactory<UserReference> userRefFactory,
@@ -63,7 +67,8 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
     this.put("created_date", new Date());
     this.setActive(true);
     this.put("_id", UUID.randomUUID().toString());
-    this.put("scripts", null);
+    //this.put("scripts", null);
+    setStatus(Status.READY);
   }
   
   public String getName() {
@@ -72,6 +77,14 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
   
   public String getId() {
     return this.getString("_id");
+  }
+  
+  public Status getStatus() {
+    return this.get("status") != null ? Status.valueOf(this.getString("status")) : Status.READY;
+  }
+  
+  public void setStatus(Status status) {
+    this.put("status", status.toString());
   }
   
   public UserReference getCreator() {
