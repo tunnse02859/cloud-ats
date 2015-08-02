@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
+import org.ats.services.OrganizationContext;
+import org.ats.services.keyword.KeywordProject;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterArgument;
@@ -60,6 +62,7 @@ public class PerformanceController extends Controller {
   @Inject
   private ReferenceFactory<JMeterScriptReference> jmeterReferenceFactory;
   
+  @Inject OrganizationContext context;
   /**
    * 
    * @return
@@ -287,5 +290,42 @@ public class PerformanceController extends Controller {
     projectService.create(project);
     
     return ok();
+  }
+  
+  public Result list() {
+    PageList<PerformanceProject> list = projectService.list();
+    ArrayNode array = Json.newObject().arrayNode();
+    
+    while(list.hasNext()) {
+      for (PerformanceProject project : list.next()) {
+        project.put("type", "performance");
+        project.put("totalScripts", jmeterService.getJmeterScripts(project.getId()).count());
+        array.add(Json.parse(project.toString()));
+      }
+    }
+    
+    return ok(array);
+  }
+  
+  public Result create() {
+    
+    JsonNode json = request().body().asJson();
+    String name = json.get("name").asText();
+    
+    PerformanceProject project = projectFactory.create(name);
+    projectService.create(project);
+    return ok(Json.parse(project.toString()));
+  }
+  
+  public Result get(String projectId) {
+    
+    System.out.println(projectId);
+    PerformanceProject project = projectService.get(projectId);
+    if (project == null) return status(404);
+    
+    project.put("type", "performance");
+    project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
+    
+    return ok(Json.parse(project.toString()));
   }
 }
