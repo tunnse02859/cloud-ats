@@ -27,7 +27,7 @@ import com.mongodb.DBObject;
 public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
 
   /** .*/
-  private final String COL_NAME = "jmeter-script";
+  private final String COL_NAME = "performance-jmeter-script";
 
   @Inject
   JMeterScriptService(MongoDBService mongo, Logger logger) {
