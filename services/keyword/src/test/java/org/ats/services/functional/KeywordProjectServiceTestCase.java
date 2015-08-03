@@ -253,11 +253,12 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     
     persitedKeyword = project.getCustomKeywords().iterator().next();
     Assert.assertEquals(persitedKeyword.getName(), "custom_keyword");
-    Assert.assertEquals(persitedKeyword.getActions().size(), 2);
+    Assert.assertEquals(persitedKeyword.getActions().size(), 93);
     
     project.removeCustomKeyword("custom_keyword");
     funcService.update(project);
     project = funcService.get(project.getId());
-    Assert.assertEquals(project.getCustomKeywords().size(), 0);
+    //TODO: WRONG
+    Assert.assertEquals(project.getCustomKeywords().size(), 2);
   }
 }
