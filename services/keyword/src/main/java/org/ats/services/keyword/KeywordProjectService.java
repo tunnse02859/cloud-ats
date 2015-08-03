@@ -29,7 +29,7 @@ import com.mongodb.DBObject;
 public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
 
   /** .*/
-  private final String COL_NAME = "func-project";
+  private final String COL_NAME = "keyword-project";
   
   @Inject
   private KeywordProjectFactory factory;

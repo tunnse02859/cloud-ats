@@ -30,7 +30,7 @@ import com.mongodb.DBObject;
 public class CaseService extends AbstractMongoCRUD<Case>{
 
   /** .*/
-  private final String COL_NAME = "func-case";
+  private final String COL_NAME = "keyword-case";
   
   @Inject
   private ReferenceFactory<DataDrivenReference> drivenRefFactory;
@@ -69,12 +69,12 @@ public class CaseService extends AbstractMongoCRUD<Case>{
       driven = drivenRefFactory.create(((BasicDBObject)dbObj.get("data_driven")).getString("_id"));
     }
     
-    Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven, dbObj.getString("info"));
+    Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven);
     caze.put("_id", dbObj.get("_id"));
     caze.put("created_date", dbObj.get("created_date"));
     
-    if (dbObj.get("actions") != null) {
-      BasicDBList actions = (BasicDBList) dbObj.get("actions");
+    if (dbObj.get("steps") != null) {
+      BasicDBList actions = (BasicDBList) dbObj.get("steps");
       for (Object bar : actions) {
         try {
           caze.addAction(mapper.readTree(bar.toString()));

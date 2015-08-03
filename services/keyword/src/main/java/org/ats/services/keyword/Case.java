@@ -46,14 +46,13 @@ public class Case extends AbstractTemplate {
   private ReferenceFactory<DataDrivenReference> drivenRefFactory;
   
   @Inject
-  private Case(@Assisted("projectId") String projectId, @Assisted("name") String name, @Nullable @Assisted("dataDriven") DataDrivenReference ref, @Nullable @Assisted("info") String info) {
+  private Case(@Assisted("projectId") String projectId, @Assisted("name") String name, @Nullable @Assisted("dataDriven") DataDrivenReference ref) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("project_id", projectId);
     this.put("name", name);
     this.put("data_driven", ref != null ? ref.toJSon() : null);
     this.put("created_date", new Date());
-    this.put("actions",  null);
-    this.put("info", info != null ? info : null);
+    this.put("steps",  new BasicDBList());
   }
   
   public String getId() {
@@ -76,14 +75,6 @@ public class Case extends AbstractTemplate {
     return this.getDate("created_date");
   }
   
-  public void setInfo(String info) {
-    this.put("info", info);
-  }
-  
-  public String getInfo() {
-    return this.getString("info");
-  }
-  
   public void setDataDriven(DataDrivenReference driven) {
     this.put("data_driven", driven.toJSon());
   }
@@ -104,12 +95,12 @@ public class Case extends AbstractTemplate {
     for (JsonNode action : this.actions) {
       list.add(JSON.parse(action.toString()));
     }
-    this.put("actions",  list);
+    this.put("steps",  list);
     return this;
   }
   
   public void clearActions() {
-    this.remove("actions");
+    this.remove("steps");
     this.actions.clear();
   }
   
