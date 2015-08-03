@@ -3,6 +3,10 @@
  */
 package controllers;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.ats.common.PageList;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
@@ -15,8 +19,12 @@ import play.mvc.Result;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -51,6 +59,24 @@ public class CaseController extends Controller {
       caze.addAction(action); 
     }
     caseService.create(caze);
-    return ok(Json.parse(caze.toString()));
+    return status(201, Json.parse(caze.toString()));
+  }
+  
+  public Result update(String projectId) throws Exception {
+    JsonNode node = request().body().asJson();
+    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
+    
+    Case caze = caseService.transform(obj);
+    Case oldCase = caseService.get(caze.getId());
+    
+    if (!projectId.equals(caze.getProjectId()) 
+        || !caze.getId().equals(oldCase.getId())
+        || oldCase == null) return status(400);
+    
+    if (caze.equals(oldCase)) return status(204);
+    
+    caseService.update(caze);
+    
+    return status(200);
   }
 }

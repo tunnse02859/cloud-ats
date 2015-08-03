@@ -93,9 +93,9 @@ public class KeywordProjectController extends Controller{
       String caseName = casesNode.get(i).get("name").asText();
       if(casesNode.get(i).get("driven") != null ) {
         String dataRefId = casesNode.get(i).get("driven").get("id").asText();
-        caze = caseFactory.create("fake", caseName, dataRef.create(dataRefId),null);
+        caze = caseFactory.create("fake", caseName, dataRef.create(dataRefId));
       } else {
-        caze = caseFactory.create("fake", caseName, null,null);
+        caze = caseFactory.create("fake", caseName, null);
       }
       
       //Add action for test cases
@@ -385,7 +385,7 @@ public class KeywordProjectController extends Controller{
     
     if(exisit == false) {
       System.out.println("--not exist");
-      caze = caseFactory.create(projectId,caseName, null,"");
+      caze = caseFactory.create(projectId,caseName, null);
       //Add action for test cases
       for(JsonNode action:casesNode.get("steps")) {
         caze.addAction(action); 

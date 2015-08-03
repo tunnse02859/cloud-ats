@@ -84,7 +84,7 @@ public class KeywordController extends Controller {
     
     KeywordProject project = keywordProjectFactory.create(context, name);
     keywordProjectService.create(project);
-    return ok(project.getId());
+    return status(201, project.getId());
   }
 
 }

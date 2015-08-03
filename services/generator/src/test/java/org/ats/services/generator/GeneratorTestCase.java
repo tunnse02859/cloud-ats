@@ -224,7 +224,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
       .raw(null).projectId(project.getId());
     
     JsonNode stepsNode = rootNode.get("steps");
-    Case caze = caseFactory.create(project.getId(), "test", null,null);
+    Case caze = caseFactory.create(project.getId(), "test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -245,7 +245,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
       .raw(null).projectId(project.getId());
     
     stepsNode = rootNode.get("steps");
-    caze = caseFactory.create(project.getId(), "test", null,null);
+    caze = caseFactory.create(project.getId(), "test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }

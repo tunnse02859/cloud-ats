@@ -5,6 +5,7 @@ package org.ats.services.functional;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
@@ -38,12 +39,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -251,14 +255,20 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     project = funcService.get(project.getId());
     Assert.assertEquals(project.getCustomKeywords().size(), 2);
     
-    persitedKeyword = project.getCustomKeywords().iterator().next();
-    Assert.assertEquals(persitedKeyword.getName(), "custom_keyword");
-    Assert.assertEquals(persitedKeyword.getActions().size(), 93);
-    
     project.removeCustomKeyword("custom_keyword");
     funcService.update(project);
     project = funcService.get(project.getId());
     //TODO: WRONG
     Assert.assertEquals(project.getCustomKeywords().size(), 2);
+  }
+  
+  @Test
+  public void testJsonTranforms() throws Exception {
+    String jsonSource = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"The first new test case\",\"data_driven\":null,\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
+    ObjectMapper mapper = new ObjectMapper();
+    HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
+    BasicDBObject obj = new BasicDBObject(map);
+    Case caze = caseService.transform(obj);
+    Assert.assertEquals(new ObjectMapper().readTree(caze.toString()).toString(), jsonSource);
   }
 }
