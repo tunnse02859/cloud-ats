@@ -27,7 +27,7 @@ import com.mongodb.DBObject;
 public class SuiteService extends AbstractMongoCRUD<Suite> {
 
   /** .*/
-  private final String COL_NAME = "func-suite";
+  private final String COL_NAME = "keyword-suite";
   
   @Inject
   private ReferenceFactory<CaseReference> caseRefFactory;

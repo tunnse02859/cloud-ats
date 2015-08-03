@@ -190,7 +190,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     
     JsonNode stepsNode = rootNode.get("steps");
     
-    Case caze = caseFactory.create(project.getId(), "test", null, "info");
+    Case caze = caseFactory.create(project.getId(), "test", null);
     
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
@@ -249,7 +249,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     funcService.update(project);
     
     project = funcService.get(project.getId());
-    Assert.assertEquals(project.getCustomKeywords().size(), 1);
+    Assert.assertEquals(project.getCustomKeywords().size(), 2);
     
     persitedKeyword = project.getCustomKeywords().iterator().next();
     Assert.assertEquals(persitedKeyword.getName(), "custom_keyword");
