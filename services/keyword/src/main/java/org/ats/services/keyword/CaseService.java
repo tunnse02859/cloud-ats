@@ -5,7 +5,9 @@ package org.ats.services.keyword;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -13,11 +15,13 @@ import org.ats.services.data.MongoDBService;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -71,13 +75,26 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     
     Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven);
     caze.put("_id", dbObj.get("_id"));
-    caze.put("created_date", dbObj.get("created_date"));
+    
+    Object date = dbObj.get("created_date");
+    if (date instanceof Date) {
+      caze.put("created_date", dbObj.get("created_date"));
+    } else if (date instanceof Map) {
+      Object value = ((Map) date).get("$date");
+      DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+      caze.put("created_date", parser.parseDateTime(value.toString()).toDate());
+    }
     
     if (dbObj.get("steps") != null) {
-      BasicDBList actions = (BasicDBList) dbObj.get("steps");
+      ArrayList<Object> actions = (ArrayList<Object>) dbObj.get("steps");
       for (Object bar : actions) {
         try {
-          caze.addAction(mapper.readTree(bar.toString()));
+          if (bar instanceof Map) {
+            JsonNode json = mapper.valueToTree(bar);
+            caze.addAction(mapper.readTree(json.toString()));
+          } else if (bar instanceof DBObject) {
+            caze.addAction(mapper.readTree(bar.toString()));
+          }
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

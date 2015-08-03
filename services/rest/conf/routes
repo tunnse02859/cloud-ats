@@ -43,6 +43,7 @@ POST    /api/v1/project/keyword             @controllers.KeywordController.creat
 
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.create(projectId)
+PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.update(projectId)
 
 ########################################################################################################
 
