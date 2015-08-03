@@ -29,15 +29,22 @@ GET		/api/v1/data/dataSet/:dataSetId		@controllers.DataDrivenController.getDataS
 DELETE	/api/v1/data/delete/:dataId			@controllers.DataDrivenController.delete(dataId)
 PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
-# Keyword project controller
+#######################################################################################################
+
+# Keyword project controller 
 
 GET     /api/v1/project/keywords            @controllers.KeywordController.list()
+#TODO: remove
+GET     /api/v1/keyword/getListFuncProject  @controllers.KeywordController.list()
 GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
 POST    /api/v1/project/keyword             @controllers.KeywordController.create()
 
 # Case controller
 
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
+POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.create(projectId)
+
+########################################################################################################
 
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
 GET		/api/v1/getListTestCase/:projectId				@controllers.KeywordProjectController.getListTestCase(projectId)

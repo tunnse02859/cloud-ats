@@ -111,6 +111,10 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
     this.put("custom_keywords", list);
   }
   
+  /**
+   * TODO: need check
+   * @param keywordName
+   */
   public void removeCustomKeyword(String keywordName) {
     this.customKeywords.remove(keywordName);
     BasicDBList list = new BasicDBList();
