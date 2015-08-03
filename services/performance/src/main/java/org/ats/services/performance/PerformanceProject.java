@@ -3,10 +3,7 @@
  */
 package org.ats.services.performance;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.ats.services.OrganizationContext;
@@ -19,7 +16,6 @@ import org.ats.services.organization.entity.reference.UserReference;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -33,7 +29,6 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
   private ReferenceFactory<TenantReference> tenantRefFactory;
   private ReferenceFactory<UserReference> userRefFactory;
   private ReferenceFactory<SpaceReference> spaceRefFactory;
-  private ReferenceFactory<JMeterScriptReference> scriptRefFactory;
   
   public static enum Status {
     READY, RUNNING
@@ -43,14 +38,12 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
   PerformanceProject(ReferenceFactory<TenantReference> tenantRefFactory, 
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
-      ReferenceFactory<JMeterScriptReference> scriptRefFactory,
       OrganizationContext context,
       @Assisted("name") String name) {
     
     this.tenantRefFactory = tenantRefFactory;
     this.userRefFactory = userRefFactory;
     this.spaceRefFactory = spaceRefFactory;
-    this.scriptRefFactory = scriptRefFactory;
     
     if (context == null || context.getUser() == null) 
       throw new IllegalStateException("You need logged in system to creat new functional project");

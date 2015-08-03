@@ -25,7 +25,7 @@ import com.mongodb.DBObject;
 @Singleton
 public class PerformanceProjectService extends AbstractMongoCRUD<PerformanceProject> {
   
-  private final String COL_NAME = "perf-project";
+  private final String COL_NAME = "performance-project";
   
   @Inject
   private PerformanceProjectFactory factory;
