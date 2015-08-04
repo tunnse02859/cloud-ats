@@ -76,7 +76,7 @@ public class Suite extends AbstractTemplate {
   }
   
   public String getName() {
-    return this.getString("suite_name");
+    return this.getString("name");
   }
   
   public Date getCreatedDate() {
