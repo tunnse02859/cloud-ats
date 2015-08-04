@@ -38,7 +38,7 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     this.logger = logger;
     
     //create text index
-    this.createTextIndex("suite_name");
+    this.createTextIndex("name");
     
     this.col.createIndex(new BasicDBObject("created_date", 1));
     this.col.createIndex(new BasicDBObject("project_id", 1));
@@ -55,7 +55,7 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     SuiteBuilder builder = new SuiteBuilder();
     
     builder.packageName(obj.getString("package_name"))
-      .suiteName(obj.getString("suite_name"))
+      .suiteName(obj.getString("name"))
       .driverVar(obj.getString("driver_var"))
       .initDriver(obj.getString("init_driver"))
       .timeoutSeconds(obj.getInt("timeout_seconds"))
