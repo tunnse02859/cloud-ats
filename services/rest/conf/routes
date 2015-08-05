@@ -93,5 +93,9 @@ POST	/api/v1/project/performance/run/:projectId				@controllers.PerformanceContr
 GET		/api/v1/project/performance/:projectId/scripts				@controllers.ScriptController.list(projectId)
 POST	/api/v1/project/performance/:projectId/createScriptByFile	@controllers.ScriptController.createByFile(projectId)
 POST	/api/v1/project/performance/:projectId/script				@controllers.ScriptController.createBySamplers(projectId)
+GET		/api/v1/project/performance/script/:id						@controllers.ScriptController.get(id)
+DELETE	/api/v1/project/performance/script/:id						@controllers.ScriptController.delete(id)
+PUT		/api/v1/project/performance/script							@controllers.ScriptController.update()
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
