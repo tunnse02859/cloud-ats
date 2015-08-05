@@ -263,12 +263,22 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
   }
   
   @Test
-  public void testJsonTranforms() throws Exception {
+  public void testCaseJsonTranforms() throws Exception {
     String jsonSource = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"The first new test case\",\"data_driven\":null,\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
     ObjectMapper mapper = new ObjectMapper();
     HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
     BasicDBObject obj = new BasicDBObject(map);
     Case caze = caseService.transform(obj);
     Assert.assertEquals(new ObjectMapper().readTree(caze.toString()).toString(), jsonSource);
+  }
+  
+  @Test
+  public void testSuiteJsonTranforms() throws Exception {
+    String jsonSource = "{\"_id\":\"eaf35abe-1060-4fa0-9bd0-faa8f0d9dd1a\",\"package_name\":\"org.ats.generated\",\"extra_imports\":null,\"name\":\"1\",\"driver_var\":\"FirefoxDriver wd;\",\"init_driver\":\"wd = new FirefoxDriver();\",\"timeout_seconds\":60,\"created_date\":{\"$date\":\"2015-08-05T07:59:41.749Z\"},\"cases\":[{\"_id\":\"e783a5c8-13ce-41aa-9010-3f56a188199b\"}],\"raw\":null,\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\"}";
+    ObjectMapper mapper = new ObjectMapper();
+    HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
+    BasicDBObject obj = new BasicDBObject(map);
+    Suite suite = suiteService.transform(obj);
+    Assert.assertEquals(new ObjectMapper().readTree(suite.toString()).toString(), jsonSource);
   }
 }

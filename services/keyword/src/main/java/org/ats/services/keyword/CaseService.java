@@ -78,7 +78,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     
     Object date = dbObj.get("created_date");
     if (date instanceof Date) {
-      caze.put("created_date", dbObj.get("created_date"));
+      caze.put("created_date", date);
     } else if (date instanceof Map) {
       Object value = ((Map) date).get("$date");
       DateTimeFormatter parser = ISODateTimeFormat.dateTime();
