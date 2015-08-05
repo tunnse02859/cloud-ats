@@ -51,6 +51,8 @@ PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.up
 
 GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.create(projectId)
+PUT     /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.update(projectId)
+DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteController.delete(projectId, suiteId)
 
 ########################################################################################################
 
