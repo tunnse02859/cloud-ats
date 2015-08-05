@@ -20,6 +20,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -37,7 +38,7 @@ public class SuiteController extends Controller {
   public Result list(String projectId) {
     
     PageList<Suite> list = suiteService.getSuites(projectId);
-    list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    //list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
@@ -70,5 +71,32 @@ public class SuiteController extends Controller {
     suiteService.create(suite);
     
     return status(201, Json.parse(suite.toString()));
+  }
+  
+  public Result update(String projectId) throws Exception {
+    JsonNode node = request().body().asJson();
+    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
+
+    Suite suite = suiteService.transform(obj);
+    Suite oldSuite = suiteService.get(suite.getId());
+    
+
+    if (!projectId.equals(suite.getProjectId()) 
+        || !suite.getId().equals(oldSuite.getId())
+        || oldSuite == null) return status(400);
+    
+    if (suite.equals(oldSuite)) return status(204);
+    
+    suiteService.update(suite);
+    
+    return status(200);
+  }
+  
+  public Result delete(String projectId, String suiteId)  throws Exception {
+    Suite suite = suiteService.get(suiteId);
+    if (suite == null || !projectId.equals(suite.getProjectId())) return status(404);
+    
+    suiteService.delete(suiteId);
+    return status(200);
   }
 }
