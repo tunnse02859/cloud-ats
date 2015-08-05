@@ -48,7 +48,7 @@ public class Suite extends AbstractTemplate {
     this.put("_id", UUID.randomUUID().toString());
     this.put("package_name", packageName);
     this.put("extra_imports", extraImports);
-    this.put("suite_name", suiteName);
+    this.put("name", suiteName);
     this.put("driver_var", driverVar);
     this.put("init_driver", initDriver);
     this.put("timeout_seconds", timeoutSeconds);
@@ -112,7 +112,7 @@ public class Suite extends AbstractTemplate {
 
     return engine.render(suite, this.get("package_name"), 
         this.get("extra_imports"), 
-        StringUtil.normalizeName((String) this.get("suite_name")), 
+        StringUtil.normalizeName((String) this.get("name")), 
         this.get("driver_var"), 
         this.get("init_driver"), 
         this.get("timeout_seconds"), 

@@ -31,19 +31,26 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
 #######################################################################################################
 
+#TODO: remove
+GET     /api/v1/keyword/getListFuncProject  @controllers.KeywordController.list()
+##
+
 # Keyword project controller 
 
 GET     /api/v1/project/keywords            @controllers.KeywordController.list()
-#TODO: remove
-GET     /api/v1/keyword/getListFuncProject  @controllers.KeywordController.list()
 GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
 POST    /api/v1/project/keyword             @controllers.KeywordController.create()
 
 # Case controller
-
+GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.create(projectId)
 PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.update(projectId)
+
+# Suite controller
+
+GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController.list(projectId)
+POST    /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.create(projectId)
 
 ########################################################################################################
 
