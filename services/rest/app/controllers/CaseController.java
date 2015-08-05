@@ -3,10 +3,7 @@
  */
 package controllers;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
@@ -19,12 +16,9 @@ import play.mvc.Result;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -42,10 +36,23 @@ public class CaseController extends Controller {
   public Result list(String projectId) {
     
     PageList<Case> list = caseService.getCases(projectId);
+    list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
       for (Case caze : list.next()) {
         array.add(Json.parse(caze.toString()));
+      }
+    }
+    return ok(array);
+  }
+  
+  public Result references(String projectId) {
+    PageList<Case> list = caseService.getCases(projectId);
+    ArrayNode array = Json.newObject().arrayNode();
+    while(list.hasNext()) {
+      for (Case caze : list.next()) {
+        array.add(Json.newObject().put("_id", caze.getId()).put("name", caze.getName()));
       }
     }
     return ok(array);
