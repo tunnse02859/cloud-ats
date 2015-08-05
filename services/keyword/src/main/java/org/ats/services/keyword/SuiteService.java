@@ -3,7 +3,10 @@
  */
 package org.ats.services.keyword;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -11,10 +14,11 @@ import org.ats.services.data.MongoDBService;
 import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -69,17 +73,28 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
       return suite;
     }
     
-    BasicDBList cases = (BasicDBList) obj.get("cases");
+    ArrayList<Object> cases = (ArrayList<Object>)  obj.get("cases");
     for (Object foo : cases) {
-      BasicDBObject sel1 = (BasicDBObject) foo;
-
-      CaseReference caseRef = caseRefFactory.create(sel1.getString("_id"));
-      builder.addCases(caseRef);
+      if (foo instanceof Map) {
+        CaseReference caseRef = caseRefFactory.create((String)((Map)foo).get("_id"));
+        builder.addCases(caseRef);
+      } else if (foo instanceof DBObject) {
+        CaseReference caseRef = caseRefFactory.create(((BasicDBObject)foo).getString("_id"));
+        builder.addCases(caseRef);
+      }
     }
     
     Suite suite = builder.build();
     suite.put("_id", source.get("_id"));
-    suite.put("created_date", obj.getDate("created_date"));
+    
+    Object date = obj.get("created_date"); 
+    if (date instanceof Date) {
+      suite.put("created_date", date);
+    } else if (date instanceof Map) {
+      Object value = ((Map) date).get("$date");
+      DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+      suite.put("created_date", parser.parseDateTime(value.toString()).toDate());
+    }
     return suite;
   }
   
