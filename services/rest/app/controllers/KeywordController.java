@@ -3,9 +3,13 @@
  */
 package controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
+import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
@@ -87,4 +91,17 @@ public class KeywordController extends Controller {
     return status(201, project.getId());
   }
 
+  public Result run(String projectId) throws Exception {
+    JsonNode data = request().body().asJson();
+    List<SuiteReference> suites = new ArrayList<SuiteReference>(data.size());
+    for (JsonNode sel : data) {
+      suites.add(suiteRefFactory.create(sel.asText()));
+    }
+    
+    KeywordProject project = keywordProjectService.get(projectId);
+    if (project == null) return status(404);
+    
+    KeywordJob job = executorService.execute(project, suites);
+    return ok(Json.parse(job.toString()));
+  }
 }

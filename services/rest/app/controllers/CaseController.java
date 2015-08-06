@@ -86,4 +86,12 @@ public class CaseController extends Controller {
     
     return status(200);
   }
+  
+  public Result delete(String projectId, String caseId)  throws Exception {
+    Case caze = caseService.get(caseId);
+    if (caze == null || !projectId.equals(caze.getProjectId())) return status(404);
+    
+    caseService.delete(caseId);
+    return status(200);
+  }
 }
