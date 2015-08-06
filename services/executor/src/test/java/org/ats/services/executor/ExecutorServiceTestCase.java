@@ -271,6 +271,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     Assert.assertNotNull(job.getRawDataOutput());
     Assert.assertEquals(job.getRawDataOutput().size(), 1);
     Assert.assertTrue(job.getRawDataOutput().keySet().contains("report"));
+    
   }
   
   private AbstractJob<?> waitUntilJobFinish(AbstractJob<?> job) throws InterruptedException {

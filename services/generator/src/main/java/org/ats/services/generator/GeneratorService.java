@@ -18,7 +18,6 @@ import java.util.zip.ZipOutputStream;
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
 import org.ats.common.http.HttpURL;
-import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
@@ -26,7 +25,6 @@ import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
-import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.rythmengine.RythmEngine;
 
@@ -56,17 +54,16 @@ public class GeneratorService {
    * @return The path to the project located
    * @throws IOException
    */
-  public String generate(String outDir, PerformanceProject project, boolean compress, List<JMeterScriptReference> scripts) throws IOException {
-    String projectHash = project.getId().substring(0, 8);
-    File sourceDir = new File(outDir + "/" + projectHash  + "/src/test/java/org/ats/generated");
+  public String generatePerformance(String outDir, String jobId, boolean compress, List<JMeterScriptReference> scripts) throws IOException {
+    File sourceDir = new File(outDir + "/" + jobId  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    File resourceDir = new File(outDir + "/" + projectHash  + "/src/test/resources/jmeter/bin");
+    File resourceDir = new File(outDir + "/" + jobId  + "/src/test/resources/jmeter/bin");
     resourceDir.mkdirs();
     
     loadJMeterProperties(resourceDir);
     loadJMeterUtilities(sourceDir);
-    loadJMeterPOM(outDir + "/" + projectHash);
+    loadJMeterPOM(outDir + "/" + jobId);
     
     String runnerTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/JMeterRunner.java.tmpl"));
@@ -130,11 +127,11 @@ public class GeneratorService {
     os.close();
     
     if (compress) {
-      compress(projectHash, outDir + "/" + projectHash, outDir + "/" + projectHash + ".zip");
-      return outDir + "/" + projectHash + ".zip";
+      compress(jobId, outDir + "/" + jobId, outDir + "/" + jobId + ".zip");
+      return outDir + "/" + jobId + ".zip";
     }
     
-    return outDir + "/" + projectHash;
+    return outDir + "/" + jobId;
   }
   
   /**
@@ -145,28 +142,27 @@ public class GeneratorService {
    * @return The path to project located
    * @throws IOException
    */
-  public String generate(String outDir, KeywordProject project, boolean compress, List<SuiteReference> suites) throws IOException {
-    String projectHash = project.getId().substring(0, 8);
-    File sourceDir = new File(outDir + "/" + projectHash  + "/src/test/java/org/ats/generated");
+  public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites) throws IOException {
+    File sourceDir = new File(outDir + "/" + jobId  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    loadKeywordPOM(outDir + "/" + projectHash);
+    loadKeywordPOM(outDir + "/" + jobId);
     
     for (SuiteReference suiteRef : suites) {
       
       Suite suite = suiteRef.get();
-      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getString("suite_name") + ".java")));
+      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getName() + ".java")));
       os.write(suite.transform().getBytes());
       os.flush();
       os.close();
     }
     
     if (compress) {
-      compress(projectHash, outDir + "/" + projectHash,  outDir + "/" + projectHash  + ".zip");
-      return outDir + "/" + projectHash  + ".zip";
+      compress(jobId, outDir + "/" + jobId,  outDir + "/" + jobId  + ".zip");
+      return outDir + "/" + jobId  + ".zip";
     }
     
-    return outDir + "/" + projectHash;
+    return outDir + "/" + jobId;
   }
   
   private void loadKeywordPOM(String outDir) throws IOException {

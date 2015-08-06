@@ -167,21 +167,21 @@ public class TrackingJobActor extends UntypedActor {
       Thread.sleep(15 * 1000);
     }
 
-    String path = generatorService.generate("/tmp", project, true, job.getScripts());
-    String projectHash = project.getId().substring(0, 8);
+    String path = generatorService.generatePerformance("/tmp", job.getId(), true, job.getScripts());
+//    String projectHash = project.getId().substring(0, 8);
 
-    SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", projectHash + ".zip", new File(path));
+    SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
     
     Thread.sleep(3000);
     
     SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  projectHash + ".zip", null, null);
+        "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
 
     StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
 
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
-    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, projectHash, 
-        null , "/home/cloudats/projects/" + projectHash + "/pom.xml", goalsBuilder.toString());
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
+        null , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
     jenkinsJob.submit();
 
@@ -280,7 +280,7 @@ public class TrackingJobActor extends UntypedActor {
     
     if (testVM.getPublicIp() == null) testVM = openstackService.allocateFloatingIp(testVM);
 
-    String path = generatorService.generate("/tmp", project, true, job.getSuites());
+    String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
 
     SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
     
