@@ -394,6 +394,8 @@ public class OpenStackService implements IaaSServiceInterface {
       if (!machine.isSystem()) 
         machine = allocateFloatingIp(machine);
       
+      Thread.sleep(60 * 1000); //sleep 1m to connection established
+      
       if (SSHClient.checkEstablished(machine.getPublicIp(), 22, 300)) {
         logger.log(Level.INFO, "Connection to  " + machine.getPublicIp() + " is established");
         
@@ -406,7 +408,7 @@ public class OpenStackService implements IaaSServiceInterface {
       } else {
         throw new StartVMException("Cannot connect to vm " + machine.getPrivateIp()); 
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       StartVMException ex = new StartVMException("Cannot connect to vm " + machine.getPrivateIp());
       ex.setStackTrace(e.getStackTrace());
       throw ex;
@@ -587,8 +589,11 @@ public class OpenStackService implements IaaSServiceInterface {
 
     //create floating ip for vm
     vm = allocateFloatingIp(vm);
-
+    
     try {
+      
+      Thread.sleep(60 * 1000); //sleep 1m to connection established
+      
       if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
         logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
         

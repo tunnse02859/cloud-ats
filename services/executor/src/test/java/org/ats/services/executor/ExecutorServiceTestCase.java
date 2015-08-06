@@ -199,12 +199,15 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     job = (PerformanceJob) waitUntilJobFinish(job);
     
     job = (PerformanceJob) executorService.get(job.getId());
+
+    project = perfService.get(project.getId());
     
     Assert.assertEquals(job.getStatus(), AbstractJob.Status.Completed);
     Assert.assertNotNull(job.getRawDataOutput());
     Assert.assertEquals(job.getRawDataOutput().size(), 2);
     Assert.assertTrue(job.getRawDataOutput().keySet().contains(loginScript.getId()));
     Assert.assertTrue(job.getRawDataOutput().keySet().contains(gotoArticleScript.getId()));
+    Assert.assertEquals(project.getStatus(), PerformanceProject.Status.READY);
   }
 
   @Test
@@ -266,12 +269,14 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     job = (KeywordJob) waitUntilJobFinish(job);
     
+    project = keywordProjectService.get(project.getId());
+    
     job = (KeywordJob) executorService.get(job.getId());
     Assert.assertEquals(job.getStatus(), AbstractJob.Status.Completed);
     Assert.assertNotNull(job.getRawDataOutput());
     Assert.assertEquals(job.getRawDataOutput().size(), 1);
     Assert.assertTrue(job.getRawDataOutput().keySet().contains("report"));
-    
+    Assert.assertEquals(project.getStatus(), KeywordProject.Status.READY);
   }
   
   private AbstractJob<?> waitUntilJobFinish(AbstractJob<?> job) throws InterruptedException {
