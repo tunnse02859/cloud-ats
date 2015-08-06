@@ -173,6 +173,10 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
         "http://www.codeproject.com/script/Articles/TopArticles.aspx?ta_so=5",
         null, 0);
     
+    JMeterSampler google = factory.createHttpGet("Go to Google", 
+        "https://www.google.com",
+        null, 0);
+    
     JMeterScript loginScript = factory.createJmeterScript(
         "LoginCodeProject",
         1, 20, 5, false, 0, project.getId(), 
@@ -183,7 +187,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     JMeterScript gotoArticleScript = factory.createJmeterScript(
         "GoToArticle", 
         1, 20, 5, false, 0, project.getId(), 
-        gotoArticle);
+        gotoArticle, google);
     
     jmeterService.create(gotoArticleScript);
     
