@@ -39,6 +39,7 @@ GET     /api/v1/keyword/getListFuncProject  @controllers.KeywordController.list(
 
 GET     /api/v1/project/keywords            @controllers.KeywordController.list()
 GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
+POST    /api/v1/project/keyword/:projectId/run  @controllers.KeywordController.run(projectId)
 POST    /api/v1/project/keyword             @controllers.KeywordController.create()
 
 # Case controller
@@ -46,6 +47,7 @@ GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseCon
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.create(projectId)
 PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.update(projectId)
+DELETE  /api/v1/project/keyword/:projectId/case/:caseId    @controllers.CaseController.delete(projectId, caseId)
 
 # Suite controller
 

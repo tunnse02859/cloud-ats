@@ -3,7 +3,6 @@
  */
 package controllers;
 
-import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.Suite;
