@@ -136,7 +136,7 @@ public class Case extends AbstractTemplate {
     } else {
       sb.append("\n");
       sb.append("  @Test\n");
-      sb.append("  public void ").append(getName()).append("() throws Exception {\n");
+      sb.append("  public void ").append(StringUtil.normalizeName(getName())).append("() throws Exception {\n");
     }
     
     for (JsonNode json : actions) {
