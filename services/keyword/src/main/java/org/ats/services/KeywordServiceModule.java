@@ -7,6 +7,9 @@ import org.ats.services.keyword.ActionFactory;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.CustomKeywordFactory;
+import org.ats.services.keyword.CustomKeywordReference;
+import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.SuiteReference;
@@ -32,10 +35,13 @@ public class KeywordServiceModule extends AbstractModule {
     bind(SuiteService.class);
     bind(ActionFactory.class);
     bind(VariableFactory.class);
+    bind(CustomKeywordService.class);
 
     install(new FactoryModuleBuilder().build(KeywordProjectFactory.class));
     install(new FactoryModuleBuilder().build(CaseFactory.class));
     install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
+    install(new FactoryModuleBuilder().build(CustomKeywordFactory.class));
+    install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<CustomKeywordReference>>(){}));
   }
 }

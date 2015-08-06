@@ -63,9 +63,9 @@ GET		/api/v1/getListTestCase/:projectId				@controllers.KeywordProjectController
 
 POST	/api/v1/testcase					@controllers.KeywordProjectController.newTestCase()
 
-GET		/api/v1/getCustomKeywords/:tenant/:space/:projectId			@controllers.KeywordProjectController.getCustomKeywords(tenant,space,projectId)
+GET		/api/v1/getCustomKeywords/:projectId			@controllers.KeywordProjectController.getCustomKeywords(projectId)
 POST	/api/v1/addCustomKeyword									@controllers.KeywordProjectController.addCustomKeyword()
-DELETE /api/v1/removeCustomKeyword/:projectID/:customKeywordId	@controllers.KeywordProjectController.removeCustomKeyword(projectID,customKeywordId)		
+DELETE /api/v1/removeCustomKeyword/:projectId:customKeywordId	@controllers.KeywordProjectController.removeCustomKeyword(projectId,customKeywordId)		
 PUT		/api/v1/updateCustomKeyword												@controllers.KeywordProjectController.updateCustomKeyword()
 GET		/api/v1/keyword/getTestsuites/:projectId					@controllers.KeywordProjectController.getTestsuites(projectId)
 GET		/api/v1/keywords/getListFuncProject							@controllers.KeywordProjectController.getListProject()
