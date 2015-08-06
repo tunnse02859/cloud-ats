@@ -3,6 +3,8 @@ package org.ats.service.report.jmeter;
 import java.util.Date;
 import java.util.Map;
 
+import org.ats.service.report.Report;
+
 public class Calculation {
   
   private static final double MILLIS_PER_SECOND = 1000.0;
@@ -51,7 +53,7 @@ public class Calculation {
       if (point == null) {
         point = new PointReport();
         point.setTimestamp(bucketHis);
-        point.setDate(new Date(bucketHis));
+        point.setDate(new Date(bucketHis.longValue()));
         point.setValue(0);
       }
       point.setValue(point.getValue() + 1);
@@ -66,7 +68,7 @@ public class Calculation {
       if (point == null) {
         point = new PointReport();
         point.setTimestamp(bucketTrans);
-        point.setDate(new Date(bucketTrans));
+        point.setDate(new Date(bucketTrans.longValue()));
         point.setValue(0);
       }
       point.setValue(point.getValue() + 1);
@@ -94,7 +96,7 @@ public class Calculation {
     summary.setKbPerSecond(summary.totalBytes * MILLIS_PER_SECOND / KB_TO_BY / (summary.lastTimeFinal - summary.firsTimestamp));
 
     // averageBytes
-    summary.setAverageBytes(summary.totalBytes / summary.samples);
+    summary.setAverageBytes((double)summary.totalBytes / summary.samples);
   }
 
   private static double calculateStDev(int number, int elementN1, double prev_avg, double pre_std_dev, double current_avg) {
