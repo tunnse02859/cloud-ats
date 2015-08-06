@@ -95,6 +95,10 @@ public class TrackingJobActor extends UntypedActor {
       VMachine vm = vmachineService.get(job.getTestVMachineId());
       vm.setStatus(VMachine.Status.Started);
       vmachineService.update(vm);
+      
+      PerformanceProject project = perfService.get(job.getProjectId());
+      project.setStatus(PerformanceProject.Status.READY);
+      perfService.update(project);
       throw e;
     }
   }
@@ -151,6 +155,9 @@ public class TrackingJobActor extends UntypedActor {
       testVM.setStatus(VMachine.Status.Started);
       testVM = openstackService.deallocateFloatingIp(testVM);
       
+      project.setStatus(PerformanceProject.Status.READY);
+      perfService.update(project);
+      
       jkJob.delete();
       cache.remove(job.getId());
     }
@@ -192,6 +199,9 @@ public class TrackingJobActor extends UntypedActor {
     job.setVMachineId(testVM.getId());
     executorService.update(job);
     
+    project.setStatus(PerformanceProject.Status.RUNNING);
+    perfService.update(project);
+    
     Event event  = eventFactory.create(job, "performance-job-tracking");
     event.broadcast();
   }
@@ -215,6 +225,10 @@ public class TrackingJobActor extends UntypedActor {
       VMachine vm = vmachineService.get(job.getTestVMachineId());
       vm.setStatus(VMachine.Status.Started);
       vmachineService.update(vm);
+      
+      KeywordProject project = keywordService.get(job.getProjectId());
+      project.setStatus(KeywordProject.Status.READY);
+      keywordService.update(project);
       throw e;
     }
   }
@@ -261,6 +275,9 @@ public class TrackingJobActor extends UntypedActor {
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       testVM = openstackService.deallocateFloatingIp(testVM);
+      
+      project.setStatus(KeywordProject.Status.READY);
+      keywordService.update(project);
       
       jkJob.delete();
       cache.remove(job.getId());

@@ -290,8 +290,9 @@ public class SSHClient {
    * @param timeout the timeout seconds
    * @return connect established
    * @throws IOException
+   * @throws InterruptedException 
    */
-  public static boolean checkEstablished(final String host, final int port, int timeout) throws IOException {
+  public static boolean checkEstablished(final String host, final int port, int timeout) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
     while(true) {
       try {
@@ -299,9 +300,11 @@ public class SSHClient {
         socket.close();
         return true;
       } catch(Exception e) {
+        System.out.println(e.getMessage());
         if((System.currentTimeMillis() - start) > timeout * 1000)
           return false;
-      } 
+      }
+      Thread.sleep(60 * 1000);
     }
   }
 
