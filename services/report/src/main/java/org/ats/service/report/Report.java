@@ -1,7 +1,11 @@
-package org.ats.service.report.jmeter;
+package org.ats.service.report;
 
 import java.util.Iterator;
 import java.util.Map;
+
+import org.ats.service.report.function.SuiteReport;
+import org.ats.service.report.jmeter.PointReport;
+import org.ats.service.report.jmeter.SummaryReport;
 
 import com.mongodb.BasicDBObject;
 
@@ -11,29 +15,44 @@ public class Report extends BasicDBObject {
   private String performaneJobId;
   private String functionalJobId;
   private String label ;
+  private String scriptId;
 
   private SummaryReport summaryReport;
 
   private Map<Long, PointReport> hitsPerSecond ;
   private Map<Long, PointReport> transPersecond ;
+  private Map<String, SuiteReport> suiteReports;
+  
   
   public Report() {
-    this(null, null, null);
+    this(null, null, null, null);
   }
   
-  public Report(String label, String performaneJobId, String  functionalJobId) {
+  public Report(String label, String performaneJobId, String  functionalJobId, String scriptId) {
     this.label = label;
-    this.put("label", label);    
+    this.put("label", label);
     this.performaneJobId = performaneJobId;
-    this.put("performane_job_id", performaneJobId);    
+    this.put("performane_job_id", performaneJobId);
     this.functionalJobId = functionalJobId;
     this.put("functional_job_id", functionalJobId);
+    this.scriptId = scriptId;
+    this.put("script_id", scriptId);
   }
 
+  public String getScriptId() {
+    return scriptId;
+  }
+
+  public void setScriptId(String scriptId) {
+    this.scriptId = scriptId;
+    this.put("script_id", scriptId);
+  }
+  
+  
   public String getPerformaneJobId() {
     return performaneJobId;
-  }
-
+  }  
+  
   public void setPerformaneJobId(String performaneJobId) {
     this.performaneJobId = performaneJobId;
     this.put("performane_job_id", performaneJobId);
@@ -93,4 +112,24 @@ public class Report extends BasicDBObject {
     this.label = label;
     this.put("label", label);
   }
+
+  public Map<String, SuiteReport> getSuiteReports() {
+    return suiteReports;
+  }
+
+  public void setSuiteReports(Map<String, SuiteReport> suiteReports) {
+    this.suiteReports = suiteReports;   
+    
+    BasicDBObject dbObj = new BasicDBObject();
+    Iterator<Map.Entry<String, SuiteReport>> iterator = suiteReports.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, SuiteReport> entry = iterator.next();
+      dbObj.put(entry.getKey().toString(), entry.getValue());
+    }
+    this.put("suite_reports", dbObj);
+    
+    
+  }
+
+  
 }
