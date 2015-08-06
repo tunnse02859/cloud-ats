@@ -337,9 +337,9 @@ public class PerformanceController extends Controller {
     
     System.out.println(projectId);
     
-    JsonNode data = request().body().asJson().get("suiteIds");
+    JsonNode data = request().body().asJson();
     for (JsonNode json : data) {
-      System.out.println(json.get("_id").asText());
+      System.out.println(json.asText());
     }
     
     return ok();
