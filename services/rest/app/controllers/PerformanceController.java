@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.ats.common.PageList;
@@ -329,7 +330,6 @@ public class PerformanceController extends Controller {
     }
     project.put("type", "performance");
     project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
-    project.put("scripts", array.toString());
     return ok(Json.parse(project.toString()));
   }
   
@@ -344,4 +344,5 @@ public class PerformanceController extends Controller {
     
     return ok();
   }
+  
 }
