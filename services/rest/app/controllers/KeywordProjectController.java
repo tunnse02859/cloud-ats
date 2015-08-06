@@ -17,6 +17,8 @@ import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.CustomKeyword;
+import org.ats.services.keyword.CustomKeywordFactory;
+import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
@@ -36,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 /**
  * @author NamBV2
  *
@@ -77,6 +80,12 @@ public class KeywordProjectController extends Controller{
   private OrganizationContext context;
   
   private Suite suite;
+  
+  @Inject
+  private CustomKeywordFactory customFactory;
+  
+  @Inject
+  private CustomKeywordService customService;
   
   public Result newData() {
     
@@ -408,12 +417,14 @@ public class KeywordProjectController extends Controller{
     return ok(array);
   }
   
-  public Result getCustomKeywords(String tenant, String space, String projectID) {
-    KeywordProject keywordProject = keywordProjectService.get(projectID);
-    Collection<CustomKeyword> listCustomKeyword =  keywordProject.getCustomKeywords();
+  public Result getCustomKeywords(String projectId) {
+    PageList<CustomKeyword> list = customService.getCustomKeywords(projectId);
     ArrayNode array = Json.newObject().arrayNode();
-    for(CustomKeyword item: listCustomKeyword) {
-      array.add(Json.parse(item.toString()));
+    while(list.hasNext()) {
+      List<CustomKeyword> listCustomKeywords = list.next();
+      for(CustomKeyword item : listCustomKeywords) {
+        array.add(Json.parse(item.toString()));
+      }
     }
     return ok(array);
   }
@@ -422,63 +433,44 @@ public class KeywordProjectController extends Controller{
     JsonNode node = request().body().asJson();
     JsonNode customKeyNode = node.get("customKeyword");
     JsonNode keywordProjectNode = node.get("projectId");
-    CustomKeyword customKeyword ;
-    KeywordProject keywordProject;
-    ArrayNode array = Json.newObject().arrayNode();
     String nameCustomKeyword = customKeyNode.get("name").asText();
     String projectId = keywordProjectNode.asText();
-    keywordProject = keywordProjectService.get(projectId);
-    customKeyword = new CustomKeyword(nameCustomKeyword);
+    CustomKeyword customKeyword ;
+    customKeyword = customFactory.create(projectId, nameCustomKeyword);
     
     //Add action for custom keyword
     for(JsonNode action:customKeyNode.get("steps")) {
       customKeyword.addAction(action); 
     }
-    
-    keywordProject.addCustomKeyword(customKeyword);
-    keywordProjectService.update(keywordProject);
+    customService.create(customKeyword);
+    ArrayNode array = Json.newObject().arrayNode();
     array.add(Json.parse(customKeyword.toString()));
-    
     return ok(array);
   }
   
-  public Result removeCustomKeyword(String projectId,String customKeywordId) {
-    KeywordProject keywordProject = keywordProjectService.get(projectId);
-    keywordProject.removeCustomKeyword(customKeywordId);
-    keywordProjectService.update(keywordProject);
+  public Result removeCustomKeyword(String projectId, String customKeywordId) {
+    CustomKeyword customKeyword = customService.get(customKeywordId);
+    if (customKeyword == null || !projectId.equals(suite.getProjectId())) return status(404);
+    customService.delete(customKeywordId);
     return ok();
   }
   
   public Result updateCustomKeyword() {
     JsonNode node = request().body().asJson();
-    JsonNode nodeProject = node.get("projectId");
     JsonNode nodeCustomKeyword = node.get("customKeyword");
-    KeywordProject keywordProject ;
-    String projectId = nodeProject.asText();
-    ArrayNode array = Json.newObject().arrayNode();
-    keywordProject = keywordProjectService.get(projectId);
 
-    JsonNode customKeyword = nodeCustomKeyword;
-    String idCustomKeyword = customKeyword.get("_id").asText();
-    CustomKeyword newCustomKeyword = new CustomKeyword(customKeyword.get("name").asText());
+    BasicDBObject obj = Json.fromJson(nodeCustomKeyword, BasicDBObject.class);
+    CustomKeyword customKey = customService.transform(obj);
+    CustomKeyword oldCustomKey = customService.get(customKey.getId());
+    if (!oldCustomKey.equals(customKey.getProjectId()) 
+        || !oldCustomKey.getId().equals(customKey.getId())
+        || oldCustomKey == null) return status(400);
     
-    for(JsonNode action:customKeyword.get("steps")) {
-      newCustomKeyword.addAction(action); 
-    }
+    if (customKey.equals(oldCustomKey)) return status(204);
+    customService.update(customKey);
     
-    for(CustomKeyword item : keywordProject.getCustomKeywords()) {
-      if(idCustomKeyword.equals(item.getId().toString())) {
-        String _idCurrentProject = item.getId().toString();
-        keywordProject.removeCustomKeyword(item.getName());
-        newCustomKeyword.put("_id", _idCurrentProject);
-        keywordProject.addCustomKeyword(newCustomKeyword);
-        
-        keywordProjectService.update(keywordProject);
-      }
-    }
-    array.add(Json.parse(newCustomKeyword.toString()));
- 
-    return ok(array);
+    return status(200);
+    
   }
   
   public Result updateCase() {
