@@ -56,6 +56,10 @@ POST    /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController
 PUT     /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.update(projectId)
 DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteController.delete(projectId, suiteId)
 
+# Custom keyword controller
+
+POST    /api/v1/project/keyword/:projectId/custom   @controllers.CustomKeywordController.create(projectId)
+
 ########################################################################################################
 
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
