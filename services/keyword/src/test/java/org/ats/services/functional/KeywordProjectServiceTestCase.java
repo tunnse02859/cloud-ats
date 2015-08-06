@@ -5,8 +5,11 @@ package org.ats.services.functional;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import org.ats.common.PageList;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
@@ -20,6 +23,8 @@ import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.CustomKeyword;
+import org.ats.services.keyword.CustomKeywordFactory;
+import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
@@ -78,6 +83,10 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
 
   private User user;
   
+  private CustomKeywordService customService;
+  
+  private CustomKeywordFactory customFactory;
+  
   @BeforeClass
   public void init() throws Exception {
     this.injector = Guice.createInjector(
@@ -96,6 +105,9 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.caseFactory = injector.getInstance(CaseFactory.class);
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
 
+    this.customService = injector.getInstance(CustomKeywordService.class);
+    this.customFactory = injector.getInstance(CustomKeywordFactory.class);
+    
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     this.context = this.injector.getInstance(OrganizationContext.class);
 
@@ -224,42 +236,46 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
     KeywordProject project = funcFactory.create(context, "Jira Automation");
+    String projectId = project.getId();
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
     JsonNode stepsNode = rootNode.get("steps");
     
-    CustomKeyword keyword = new CustomKeyword("custom_keyword");
+    CustomKeyword customKeyword = customFactory.create(projectId, "custom_keyword");
     for (JsonNode json : stepsNode) {
-      keyword.addAction(json);
+      customKeyword.addAction(json);
     }
-    project.addCustomKeyword(keyword);
-    funcService.create(project);
+    customService.create(customKeyword);
     
-    project = funcService.get(project.getId());
-    Assert.assertEquals(project.getCustomKeywords().size(), 1);
+    PageList<CustomKeyword> lists = customService.getCustomKeywords(projectId);
+    List<CustomKeyword> listCustomKeywords ;
+    listCustomKeywords = new ArrayList<CustomKeyword>();
+    while(lists.hasNext()) {
+      listCustomKeywords = lists.next();
+    }
+    Assert.assertEquals(listCustomKeywords.size(), 1);
     
-    CustomKeyword persitedKeyword = project.getCustomKeywords().iterator().next();
-    Assert.assertEquals(persitedKeyword.getName(), keyword.getName());
-    Assert.assertEquals(persitedKeyword.getActions(), keyword.getActions());
+    customService.delete(customKeyword);
+    listCustomKeywords = new ArrayList<CustomKeyword>();
+    while(customService.getCustomKeywords(projectId).hasNext()) {
+      listCustomKeywords = lists.next();
+    }
+    Assert.assertEquals(listCustomKeywords.size(), 0);
     
     String actions = "[{\"type\":\"get\",\"url\":\"http://saucelabs.com/test/guinea-pig/\"}, {\"type\":\"clickElement\",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"}}]";
-    stepsNode = m.readTree(actions);
-    keyword = new CustomKeyword("custom_keyword");
-    for (JsonNode json : stepsNode) {
-      keyword.addAction(json);
+    JsonNode stepsNode2 = m.readTree(actions);
+    customKeyword = customFactory.create(projectId, "custom_keyword");
+    for(JsonNode json : stepsNode2) {
+      customKeyword.addAction(json);
     }
-    project.addCustomKeyword(keyword);
-    funcService.update(project);
+    customService.create(customKeyword);
     
-    project = funcService.get(project.getId());
-    Assert.assertEquals(project.getCustomKeywords().size(), 2);
+    Assert.assertEquals(customKeyword.getActions().size(), 2);
     
-    project.removeCustomKeyword("custom_keyword");
-    funcService.update(project);
-    project = funcService.get(project.getId());
-    //TODO: WRONG
-    Assert.assertEquals(project.getCustomKeywords().size(), 2);
+    customKeyword.clearActions();
+    
+    Assert.assertEquals(customKeyword.getActions().size(), 0);
   }
   
   @Test
@@ -270,6 +286,17 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     BasicDBObject obj = new BasicDBObject(map);
     Case caze = caseService.transform(obj);
     Assert.assertEquals(new ObjectMapper().readTree(caze.toString()).toString(), jsonSource);
+  }
+  
+  @Test
+  public void testCustomKeywordJsonTranforms() throws Exception {
+    String jsonSource = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"Update-Customkeyword\",\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
+    ObjectMapper mapper = new ObjectMapper();
+    HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
+    BasicDBObject obj = new BasicDBObject(map);
+    System.out.println(obj);
+    CustomKeyword customKeyword = customService.transform(obj);
+    Assert.assertEquals(new ObjectMapper().readTree(customKeyword.toString()).toString(), jsonSource);
   }
   
   @Test
