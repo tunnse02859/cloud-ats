@@ -6,6 +6,7 @@ package org.ats.services.executor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
@@ -63,7 +64,7 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
 
   public PerformanceJob execute(PerformanceProject project, List<JMeterScriptReference> scripts) throws Exception {
     
-    String projectHash = project.getId().substring(0, 8);
+    String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     PerformanceJob job = perfFactory.create(projectHash, project.getId(), scripts, null, Status.Queued);
     create(job);
     
@@ -75,7 +76,7 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
   
   public KeywordJob execute(KeywordProject project, List<SuiteReference> suites) throws Exception {
 
-    String projectHash = project.getId().substring(0, 8);
+    String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, null, Status.Queued);
     create(job);
 

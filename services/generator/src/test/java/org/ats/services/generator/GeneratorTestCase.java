@@ -203,7 +203,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
          listRef.add(jmeterScriptRef.create(script.getId()));
       }
     }
-    Assert.assertEquals(generetorService.generate("target/perf",  project, true, listRef), 
+    Assert.assertEquals(generetorService.generatePerformance("target/perf",  project.getId().substring(0, 8), true, listRef), 
         "target/perf/" + project.getId().substring(0, 8) + ".zip");
   }
   
@@ -258,9 +258,12 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     keywordProjectService.create(project);
     
     Assert.assertEquals(
-        generetorService.generate("target/fk",  project, true, Arrays.<SuiteReference>asList(
+        generetorService.generateKeyword("target/fk",  project.getId().substring(0, 8), true, Arrays.<SuiteReference>asList(
             suiteRefFactory.create(fullExampleSuite.getId()), 
             suiteRefFactory.create(acceptAlertSuite.getId()))), 
         "target/fk/" + project.getId().substring(0, 8) + ".zip");
+    
+    Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/FullExample.java").exists());
+    Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/AcceptAlert.java").exists());
   }
 }
