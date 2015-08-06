@@ -3,6 +3,8 @@
  */
 package org.ats.services.performance;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.ats.common.PageList;
@@ -26,9 +28,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author NamBV2
@@ -169,5 +175,16 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     
     Assert.assertEquals("Test Name", list.get(0).getName());
     Assert.assertEquals(performanceProject.getId(), jmeter.getProjectId());
+  }
+  
+  @Test
+  public void testScriptTransform() throws JsonParseException, JsonMappingException, IOException {
+    String jsonSource = "{\"_id\":\"92eba01e-f1a1-4d6c-a5eb-586487e009af\",\"name\":\"Testsdgsdgsgsgsdg\",\"loops\":1,\"number_threads\":1,\"ram_up\":5,\"scheduler\":false,\"duration\":0,\"samplers\":[{\"method\":\"GET\",\"name\":\"dsgsdg\",\"url\":\"sdgsdg\",\"assertion_text\":\"sdgsdgdg\",\"constant_time\":0,\"arguments\":[{\"paramName\":\"sdgsd\",\"paramValue\":\"gsdgsdg\"}]}],\"project_id\":\"73e29bd5-29aa-4b06-ab03-0162c5f0ec25\"}";
+    ObjectMapper mapper = new ObjectMapper();
+    HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
+    BasicDBObject obj = new BasicDBObject(map);
+    JMeterScript script = jmeterService.transform(obj);
+    Assert.assertEquals(new ObjectMapper().readTree(script.toString()).toString(), jsonSource);
+    
   }
 }

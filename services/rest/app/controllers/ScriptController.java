@@ -198,6 +198,7 @@ public class ScriptController extends Controller {
     
     JsonNode data = request().body().asJson();
     
+    System.out.println(data.toString());
     BasicDBObject obj = Json.fromJson(data, BasicDBObject.class);
     
     JMeterScript script = service.transform(obj);
@@ -211,6 +212,8 @@ public class ScriptController extends Controller {
     if (script.equals(oldScript)) {
       return status(204);
     }
+    
+    service.update(script);
     return status(202);
   }
 }
