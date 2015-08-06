@@ -41,5 +41,26 @@ public class HttpURLTestCase {
     Assert.assertEquals("code.google.com", url.getHost());
     Assert.assertEquals("www.code.google.com", url.getDomain());
     Assert.assertEquals("http://www.code.google.com/search?q=cheer", url.getNormalizeURL());
+    Assert.assertEquals("/search", url.getPath());
+    Assert.assertEquals("/search?q=cheer", url.getFullPath());
+  }
+  
+  @Test
+  public void testNoPath() throws Exception {
+    HttpURL url = new HttpURL("http://cloud-ats.net");
+    Assert.assertEquals("http", url.getProtocol());
+    Assert.assertEquals("cloud-ats.net", url.getHost());
+    Assert.assertEquals("cloud-ats.net", url.getDomain());
+    Assert.assertEquals(80, url.getPort());
+    Assert.assertEquals("/", url.getPath());
+    Assert.assertEquals("/", url.getFullPath());
+    
+    url = new HttpURL("https://cloud-ats.net/#/public");
+    Assert.assertEquals("https", url.getProtocol());
+    Assert.assertEquals("cloud-ats.net", url.getHost());
+    Assert.assertEquals("cloud-ats.net", url.getDomain());
+    Assert.assertEquals(443, url.getPort());
+    Assert.assertEquals("/public", url.getRef());
+    Assert.assertEquals("/#/public", url.getFullPath());
   }
 }
