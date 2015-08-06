@@ -4,6 +4,9 @@
 package org.ats.services.keyword;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
@@ -12,7 +15,10 @@ import org.ats.services.datadriven.DataDrivenFactory;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,13 +60,25 @@ public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
     
     CustomKeyword cutomKeyword = customKeywordFactory.create(dbObject.getString("project_id"), dbObject.getString("name"));
     cutomKeyword.put("_id", dbObject.get("_id"));
-    cutomKeyword.put("created_date", dbObject.get("created_date"));
+    Object date = dbObject.get("created_date");
+    if (date instanceof Date) {
+      cutomKeyword.put("created_date", date);
+    } else if (date instanceof Map) {
+      Object value = ((Map) date).get("$date");
+      DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+      cutomKeyword.put("created_date", parser.parseDateTime(value.toString()).toDate());
+    }
     
-    if(dbObject.get("steps") != null) {
-      BasicDBList actions = (BasicDBList) dbObject.get("steps");
-      for(Object obj : actions) {
+    if (dbObject.get("steps") != null) {
+      ArrayList<Object> actions = (ArrayList<Object>) dbObject.get("steps");
+      for (Object bar : actions) {
         try {
-          cutomKeyword.addAction(mapper.readTree(obj.toString()));
+          if (bar instanceof Map) {
+            JsonNode json = mapper.valueToTree(bar);
+            cutomKeyword.addAction(mapper.readTree(json.toString()));
+          } else if (bar instanceof DBObject) {
+            cutomKeyword.addAction(mapper.readTree(bar.toString()));
+          }
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

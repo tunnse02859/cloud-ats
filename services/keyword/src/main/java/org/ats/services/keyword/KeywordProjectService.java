@@ -47,6 +47,9 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   private UserService userService;
   
   @Inject
+  private CustomKeywordFactory customKeyFactory;
+  
+  @Inject
   KeywordProjectService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -92,9 +95,11 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
     for (Object obj : list) {
       BasicDBObject dbObj = (BasicDBObject) obj;
       String name = dbObj.getString("name");
-      CustomKeyword customKeyword = new CustomKeyword(name);
+      //CustomKeyword customKeyword = new CustomKeyword(name);
+      CustomKeyword customKeyword = customKeyFactory.create(project.getId(), name);
       customKeyword.put("_id", dbObj.get("_id"));
-      if (dbObj.get("actions") == null) continue;
+      
+      /*if (dbObj.get("actions") == null) continue;
       
       BasicDBList actions = (BasicDBList) dbObj.get("actions");
       for (Object action : actions) {
@@ -104,7 +109,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
           e.printStackTrace();
         }
       }
-      project.addCustomKeyword(customKeyword);
+      project.addCustomKeyword(customKeyword);*/
     }
     project.put("custom_keywords", source.get("custom_keywords"));
     return project;
