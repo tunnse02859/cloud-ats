@@ -11,10 +11,7 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.datadriven.DataDrivenFactory;
-import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.organization.base.AbstractMongoCRUD;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -22,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -35,7 +31,7 @@ import com.mongodb.DBObject;
 @Singleton
 public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
   
-  private final String COL_NAME = "func-custom";
+  private final String COL_NAME = "keyword-custom";
   
   @Inject
   private CustomKeywordFactory customKeywordFactory;
