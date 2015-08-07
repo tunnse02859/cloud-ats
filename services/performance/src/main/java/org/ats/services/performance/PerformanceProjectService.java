@@ -76,7 +76,7 @@ public class PerformanceProjectService extends AbstractMongoCRUD<PerformanceProj
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));
-    project.put("scripts", source.get("scripts"));
+    //project.put("scripts", source.get("scripts"));
 //    project.put("creator", source.get("creator"));
 //    project.put("space", source.get("space"));
 //    project.put("tenant", source.get("tenant"));
