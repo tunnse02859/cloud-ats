@@ -74,17 +74,23 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
         Method method = Method.valueOf(data.get("method").asText());
         String samplerName = data.get("name").asText();
         String url = data.get("url").asText();
-        String asserttion_text = data.get("assertion_text").asText();
+        String asserttion_text = null;
+        if (data.has("assertion_text") && !"null".equals(data.get("assertion_text").asText())) {
+           asserttion_text = data.get("assertion_text").asText();
+        }
         Long constant_time = data.get("constant_time").asLong();
         
-        JsonNode listArg2 = data.get("arguments");
-        List<JMeterArgument> arguments = new ArrayList<JMeterArgument>();
-        for (JsonNode json : listArg2) {
-          String paramName = json.get("paramName").asText();
-          String paramValue = json.get("paramValue").asText();
-          arguments.add(new JMeterArgument(paramName, paramValue));
+        JsonNode listArg = data.get("arguments");
+        List<JMeterArgument> arguments =  new ArrayList<JMeterArgument>();
+        if (listArg.size() > 0) {
+          for (JsonNode json : listArg) {
+            String paramName = json.get("paramName").asText();
+            String paramValue = json.get("paramValue").asText();
+            if (!"".equals(paramName) && !"".equals(paramValue)) {
+              arguments.add(new JMeterArgument(paramName, paramValue));
+            }
+          }
         }
-        
         samplers.add(new JMeterSampler(method, samplerName, url, asserttion_text, constant_time, arguments));
       } catch (IOException e) {
         throw new RuntimeException(e);
