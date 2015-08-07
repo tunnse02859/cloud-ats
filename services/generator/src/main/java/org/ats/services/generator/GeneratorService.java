@@ -109,7 +109,13 @@ public class GeneratorService {
         String params = paramBuilder.toString();
         
         String assertionText = jSampler.getAssertionText();
+        
+        if("null".equals(assertionText)) assertionText = "";
+        
         String constantTimer = Long.toString(jSampler.getConstantTime());
+        
+        if ("null".equals(constantTimer)) constantTimer = "";
+        
         samplerBuilder.append(engine.render(samplerTemplate, samplerName, defaultTimeout, domain, port, protocol, path, method, params, assertionText, constantTimer));
       }
       
