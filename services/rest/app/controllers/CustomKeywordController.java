@@ -18,6 +18,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -55,5 +56,30 @@ public class CustomKeywordController extends Controller {
     }
     customService.create(keyword);
     return status(201, Json.parse(keyword.toString()));
+  }
+  
+  public Result update(String projectId) {
+    JsonNode node = request().body().asJson();
+    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
+    
+    CustomKeyword keyword = customService.transform(obj);
+    CustomKeyword oldKeyword = customService.get(keyword.getId());
+    
+    if (!projectId.equals(keyword.getProjectId()) 
+        || !keyword.getId().equals(oldKeyword.getId())
+        || oldKeyword == null) return status(400);
+    
+    if (keyword.equals(oldKeyword)) return status(204);
+    
+    customService.update(keyword);
+    return status(200);
+  }
+  
+  public Result delete(String projectId, String keywordId)  throws Exception {
+    CustomKeyword keyword = customService.get(keywordId);
+    if (keyword == null || !projectId.equals(keyword.getProjectId())) return status(404);
+    
+    customService.delete(keywordId);
+    return status(200);
   }
 }

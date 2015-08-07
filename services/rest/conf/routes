@@ -60,7 +60,8 @@ DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteC
 
 GET     /api/v1/project/keyword/:projectId/customs  @controllers.CustomKeywordController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/custom   @controllers.CustomKeywordController.create(projectId)
-
+PUT		/api/v1/project/keyword/:projectId/custom	@controllers.CustomKeywordController.update(projectId)
+DELETE	/api/v1/project/keyword/:projectId/custom/:customKeywordId	@controllers.CustomKeywordController.delete(projectId, customKeywordId)
 ########################################################################################################
 
 POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
