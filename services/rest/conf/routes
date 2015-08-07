@@ -58,6 +58,7 @@ DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteC
 
 # Custom keyword controller
 
+GET     /api/v1/project/keyword/:projectId/customs  @controllers.CustomKeywordController.list(projectId)
 POST    /api/v1/project/keyword/:projectId/custom   @controllers.CustomKeywordController.create(projectId)
 
 ########################################################################################################
