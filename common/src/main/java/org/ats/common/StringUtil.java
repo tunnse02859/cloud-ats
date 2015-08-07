@@ -26,8 +26,11 @@ public class StringUtil {
   }
   
   public static String normalizeName(String name) {
-    name = name.replace(' ', '_');
-    name = name.replace('-', '_');
-    return name;
+    char[] chars = name.toCharArray();
+    StringBuilder sb = new StringBuilder();
+    for (char ch : chars) {
+      if (Character.isJavaIdentifierStart(ch)) sb.append(ch);
+    }
+    return sb.toString();
   }
 }

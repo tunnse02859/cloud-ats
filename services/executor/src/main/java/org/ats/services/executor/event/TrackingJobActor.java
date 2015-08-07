@@ -153,7 +153,7 @@ public class TrackingJobActor extends UntypedActor {
       //Reset test vm status and release floating ip
       VMachine testVM = vmachineService.get(job.getTestVMachineId());
       testVM.setStatus(VMachine.Status.Started);
-      testVM = openstackService.deallocateFloatingIp(testVM);
+      vmachineService.update(testVM);
       
       project.setStatus(PerformanceProject.Status.READY);
       perfService.update(project);
@@ -275,6 +275,7 @@ public class TrackingJobActor extends UntypedActor {
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       testVM = openstackService.deallocateFloatingIp(testVM);
+      vmachineService.update(testVM);
       
       project.setStatus(KeywordProject.Status.READY);
       keywordService.update(project);
