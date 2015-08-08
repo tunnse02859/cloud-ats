@@ -81,9 +81,9 @@ public class TrackingJobActor extends UntypedActor {
       PerformanceProject project = perfService.get(job.getProjectId());
       switch (job.getStatus()) {
       case Queued:
-        doExecute(job, project);
+        doExecutePerformanceJob(job, project);
       case Running:
-        doTracking(job, project);
+        doTrackingPerformanceJob(job, project);
         break;
       default:
         break;
@@ -105,7 +105,7 @@ public class TrackingJobActor extends UntypedActor {
     }
   }
   
-  private void doTracking(PerformanceJob job, PerformanceProject project) throws Exception {
+  private void doTrackingPerformanceJob(PerformanceJob job, PerformanceProject project) throws Exception {
     
     TenantReference tenant = project.getTenant();
     SpaceReference space = project.getSpace();
@@ -162,10 +162,13 @@ public class TrackingJobActor extends UntypedActor {
       
       jkJob.delete();
       cache.remove(job.getId());
+      
+      Event event  = eventFactory.create(job, "performance-job-tracking");
+      event.broadcast();
     }
   }
   
-  private void doExecute(PerformanceJob job, PerformanceProject project) throws Exception {
+  private void doExecutePerformanceJob(PerformanceJob job, PerformanceProject project) throws Exception {
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
@@ -201,9 +204,6 @@ public class TrackingJobActor extends UntypedActor {
     job.setVMachineId(testVM.getId());
     executorService.update(job);
     
-    project.setStatus(PerformanceProject.Status.RUNNING);
-    perfService.update(project);
-    
     Event event  = eventFactory.create(job, "performance-job-tracking");
     event.broadcast();
   }
@@ -213,9 +213,9 @@ public class TrackingJobActor extends UntypedActor {
       KeywordProject project = keywordService.get(job.getProjectId());
       switch (job.getStatus()) {
       case Queued:
-        doExecute(job, project);
+        doExecuteKeywordJob(job, project);
       case Running:
-        doTracking(job, project);
+        doTrackingKeywordJob(job, project);
         break;
       default:
         break;
@@ -237,7 +237,7 @@ public class TrackingJobActor extends UntypedActor {
     }
   }
   
-  private void doTracking(KeywordJob job, KeywordProject project) throws Exception {
+  private void doTrackingKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
     
     TenantReference tenant = project.getTenant();
     SpaceReference space = project.getSpace();
@@ -257,10 +257,11 @@ public class TrackingJobActor extends UntypedActor {
       
       updateLog(job, jkJob);
       
-      Thread.sleep(3000L);
+      Thread.sleep(15000L);
       
       Event event  = eventFactory.create(job, "keyword-job-tracking");
       event.broadcast();
+      
     } else {
       updateLog(job, jkJob);
       
@@ -286,10 +287,13 @@ public class TrackingJobActor extends UntypedActor {
       
       jkJob.delete();
       cache.remove(job.getId());
+      
+      Event event  = eventFactory.create(job, "keyword-job-tracking");
+      event.broadcast();
     }
   }
   
-  private void doExecute(KeywordJob job, KeywordProject project) throws Exception {
+  private void doExecuteKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
 
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
@@ -325,9 +329,6 @@ public class TrackingJobActor extends UntypedActor {
     job.setStatus(Status.Running);
     job.setVMachineId(testVM.getId());
     executorService.update(job);
-    
-    project.setStatus(KeywordProject.Status.RUNNING);
-    keywordService.update(project);
     
     Event event  = eventFactory.create(job, "keyword-job-tracking");
     event.broadcast();
