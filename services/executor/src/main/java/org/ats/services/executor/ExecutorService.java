@@ -19,11 +19,13 @@ import org.ats.services.executor.job.KeywordJobFactory;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.executor.job.PerformanceJobFactory;
 import org.ats.services.keyword.KeywordProject;
+import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.PerformanceProject;
+import org.ats.services.performance.PerformanceProjectService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,8 +42,14 @@ import com.mongodb.DBObject;
 public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
 
   @Inject
+  private KeywordProjectService keywordService;
+  
+  @Inject
   private KeywordJobFactory keywordFactory;
 
+  @Inject
+  private PerformanceProjectService perfService;
+  
   @Inject
   private PerformanceJobFactory perfFactory;
 
@@ -63,6 +71,8 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
   }
 
   public PerformanceJob execute(PerformanceProject project, List<JMeterScriptReference> scripts) throws Exception {
+    project.setStatus(PerformanceProject.Status.RUNNING);
+    perfService.update(project);
     
     String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     PerformanceJob job = perfFactory.create(projectHash, project.getId(), scripts, null, Status.Queued);
@@ -75,7 +85,9 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
   }
   
   public KeywordJob execute(KeywordProject project, List<SuiteReference> suites) throws Exception {
-
+    project.setStatus(KeywordProject.Status.RUNNING);
+    keywordService.update(project);
+    
     String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, null, Status.Queued);
     create(job);

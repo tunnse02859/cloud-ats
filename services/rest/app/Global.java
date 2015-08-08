@@ -1,7 +1,6 @@
 import java.lang.reflect.Method;
 
 import org.ats.service.ReportModule;
-import org.ats.service.report.ReportService;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
@@ -33,6 +32,7 @@ import play.mvc.Http.RequestHeader;
 import play.mvc.Http.Response;
 import play.mvc.Result;
 import play.mvc.Results.Status;
+import actors.EventTrackingActor;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -75,6 +75,7 @@ public class Global extends GlobalSettings {
       //start event service
       EventService eventService = injector.getInstance(EventService.class);
       eventService.setInjector(injector);
+      eventService.addActor(EventTrackingActor.class, "server-bus");
       eventService.start();
       
     } catch (Exception e) {
