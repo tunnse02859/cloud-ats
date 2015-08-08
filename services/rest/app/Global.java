@@ -1,5 +1,7 @@
 import java.lang.reflect.Method;
 
+import org.ats.service.ReportModule;
+import org.ats.service.report.ReportService;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
@@ -67,7 +69,8 @@ public class Global extends GlobalSettings {
           new GeneratorModule(),
           new VMachineServiceModule(vmConf),
           new ExecutorModule(),
-          new KeywordServiceModule());
+          new KeywordServiceModule(),
+          new ReportModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);

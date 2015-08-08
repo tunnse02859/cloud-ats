@@ -159,8 +159,10 @@ public class ScriptController extends Controller {
       for (JsonNode jsonParam: nodeParams) {
         
         //create parameter object
-        arrayParams[j] = jmeterFactory.createArgument(jsonParam.get("paramName").asText(), jsonParam.get("paramValue").asText());
-        j ++;
+        if ((!"".equals(jsonParam.get("paramName").asText())) && (!"".equals(jsonParam.get("paramValue").asText())) ) {
+          arrayParams[j] = jmeterFactory.createArgument(jsonParam.get("paramName").asText(), jsonParam.get("paramValue").asText());
+          j ++;
+        }
       }
       
       //create sampler object
