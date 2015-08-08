@@ -2,6 +2,7 @@ package org.ats.service.report;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import org.ats.service.report.function.SuiteReport;
 import org.ats.service.report.jmeter.PointReport;
@@ -29,6 +30,7 @@ public class Report extends BasicDBObject {
   }
   
   public Report(String label, String performaneJobId, String  functionalJobId, String scriptId) {
+    this.put("_id", UUID.randomUUID().toString());
     this.label = label;
     this.put("label", label);
     this.performaneJobId = performaneJobId;
@@ -37,6 +39,10 @@ public class Report extends BasicDBObject {
     this.put("functional_job_id", functionalJobId);
     this.scriptId = scriptId;
     this.put("script_id", scriptId);
+  }
+  
+  public String getId() {
+    return this.getString("_id");
   }
 
   public String getScriptId() {
