@@ -123,7 +123,9 @@ public class KeywordController extends Controller {
     KeywordProject project = keywordProjectService.get(projectId);
     if (project == null) return status(404);
     
+    if (project.getStatus() == KeywordProject.Status.RUNNING) return status(204);
+    
     KeywordJob job = executorService.execute(project, suites);
-    return ok(Json.parse(job.toString()));
+    return status(201, Json.parse(job.toString()));
   }
 }
