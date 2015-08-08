@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
 	"org.ats.services" % "performance" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "vmachine" % "1.0.0-Alpha-1-SNAPSHOT",
 	"org.ats.services" % "generator" % "1.0.0-Alpha-1-SNAPSHOT",
-	"org.ats.services" % "executor" % "1.0.0-Alpha-1-SNAPSHOT"
+	"org.ats.services" % "executor" % "1.0.0-Alpha-1-SNAPSHOT",
+	"org.ats.services" % "report" % "1.0.0-Alpha-1-SNAPSHOT"
 )
 
 
