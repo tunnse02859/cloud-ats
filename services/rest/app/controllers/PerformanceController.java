@@ -12,7 +12,12 @@ import java.util.List;
 
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
+import org.ats.service.report.Report;
+import org.ats.service.report.ReportService;
+import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
+import org.ats.services.executor.ExecutorService;
+import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -64,6 +69,11 @@ public class PerformanceController extends Controller {
   private ReferenceFactory<JMeterScriptReference> jmeterReferenceFactory;
   
   @Inject OrganizationContext context;
+  
+  @Inject ExecutorService executorService;
+  
+  @Inject ReportService reportService;
+  
   /**
    * 
    * @return
@@ -333,16 +343,42 @@ public class PerformanceController extends Controller {
     return ok(Json.parse(project.toString()));
   }
   
-  public Result run(String projectId) {
-    
-    System.out.println(projectId);
+  public Result run(String projectId) throws Exception {
     
     JsonNode data = request().body().asJson();
+    
+    List<JMeterScriptReference> scripts = new ArrayList<JMeterScriptReference>(); 
+    JMeterScriptReference ref;
     for (JsonNode json : data) {
-      System.out.println(json.asText());
+      
+      ref = jmeterReferenceFactory.create(json.asText());
+      scripts.add(ref);
     }
     
-    return ok();
+    PerformanceProject project = projectService.get(projectId);
+    if (project == null) {
+      return status(404);
+    }
+    
+    PerformanceJob job = executorService.execute(project, scripts);
+    return status(200, Json.parse(job.toString()));
   }
   
+  public Result report() throws Exception {
+    
+    String jobId = "96f2d9d3-3fb970c4";
+    String scriptId = "26ec6a2a-59cb-4c0d-9dd9-291559ea97b0";
+    
+    PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, scriptId);
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    while (pages.hasNext()) {
+       List<Report> list = pages.next();
+       
+       for (Report report : list) {         
+         array.add(Json.parse(report.toString()));         
+       }
+    }
+    return status(200, array);
+  }
 }

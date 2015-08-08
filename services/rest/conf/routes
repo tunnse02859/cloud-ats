@@ -86,5 +86,6 @@ PUT		/api/v1/project/performance/script							@controllers.ScriptController.upda
 GET		/api/v1/project/performance/:projectId/scripts				@controllers.ScriptController.list(projectId)
 POST	/api/v1/project/performance/:projectId/createScriptByFile	@controllers.ScriptController.createByFile(projectId)
 POST	/api/v1/project/performance/:projectId/script				@controllers.ScriptController.createBySamplers(projectId)
+GET		/api/v1/project/performance/report							@controllers.PerformanceController.report()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
