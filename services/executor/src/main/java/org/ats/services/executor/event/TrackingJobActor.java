@@ -93,8 +93,10 @@ public class TrackingJobActor extends UntypedActor {
       executorService.update(job);
       
       VMachine vm = vmachineService.get(job.getTestVMachineId());
-      vm.setStatus(VMachine.Status.Started);
-      vmachineService.update(vm);
+      if (vm != null) {
+        vm.setStatus(VMachine.Status.Started);
+        vmachineService.update(vm);
+      }
       
       PerformanceProject project = perfService.get(job.getProjectId());
       project.setStatus(PerformanceProject.Status.READY);
@@ -223,8 +225,10 @@ public class TrackingJobActor extends UntypedActor {
       executorService.update(job);
       
       VMachine vm = vmachineService.get(job.getTestVMachineId());
-      vm.setStatus(VMachine.Status.Started);
-      vmachineService.update(vm);
+      if (vm != null) {
+        vm.setStatus(VMachine.Status.Started);
+        vmachineService.update(vm);
+      }
       
       KeywordProject project = keywordService.get(job.getProjectId());
       project.setStatus(KeywordProject.Status.READY);
