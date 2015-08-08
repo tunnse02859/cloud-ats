@@ -3,12 +3,15 @@
  */
 package controllers;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
+import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
@@ -29,6 +32,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -57,6 +61,8 @@ public class KeywordController extends Controller {
   
   @Inject ExecutorService executorService;
   
+  private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+  
   public Result list() {
     PageList<KeywordProject> list = keywordProjectService.list();
     ArrayNode array = Json.newObject().arrayNode();
@@ -66,6 +72,13 @@ public class KeywordController extends Controller {
         project.put("type", "keyword");
         project.put("totalSuites", suiteService.getSuites(project.getId()).count());
         project.put("totalCases", caseService.getCases(project.getId()).count());
+        PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
+        jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+        
+        if (jobList.totalPage() > 0) {
+          AbstractJob<?> lastJob = jobList.next().get(0);
+          project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
+        }
         array.add(Json.parse(project.toString()));
       }
     }
@@ -79,6 +92,15 @@ public class KeywordController extends Controller {
     project.put("type", "keyword");
     project.put("totalSuites", suiteService.getSuites(project.getId()).count());
     project.put("totalCases", caseService.getCases(project.getId()).count());
+    
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    if (jobList.totalPage() > 0) {
+      AbstractJob<?> lastJob = jobList.next().get(0);
+      project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
+    }
+    
     return ok(Json.parse(project.toString()));
   }
 
