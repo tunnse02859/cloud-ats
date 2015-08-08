@@ -64,27 +64,6 @@ PUT		/api/v1/project/keyword/:projectId/custom	@controllers.CustomKeywordControl
 DELETE	/api/v1/project/keyword/:projectId/custom/:customKeywordId	@controllers.CustomKeywordController.delete(projectId, customKeywordId)
 ########################################################################################################
 
-POST	/api/v1/keyword						@controllers.KeywordProjectController.newData()
-GET		/api/v1/getListTestCase/:projectId				@controllers.KeywordProjectController.getListTestCase(projectId)
-
-POST	/api/v1/testcase					@controllers.KeywordProjectController.newTestCase()
-
-GET		/api/v1/getCustomKeywords/:projectId			@controllers.KeywordProjectController.getCustomKeywords(projectId)
-POST	/api/v1/addCustomKeyword									@controllers.KeywordProjectController.addCustomKeyword()
-DELETE /api/v1/removeCustomKeyword/:projectId:customKeywordId	@controllers.KeywordProjectController.removeCustomKeyword(projectId,customKeywordId)		
-PUT		/api/v1/updateCustomKeyword												@controllers.KeywordProjectController.updateCustomKeyword()
-GET		/api/v1/keyword/getTestsuites/:projectId					@controllers.KeywordProjectController.getTestsuites(projectId)
-GET		/api/v1/keywords/getListFuncProject							@controllers.KeywordProjectController.getListProject()
-POST	/api/v1/keyword/createKeywordProject						@controllers.KeywordProjectController.createKeywordProject()
-POST	/api/v1/keyword/createTestSuite								@controllers.KeywordProjectController.createTestSuite()
-POST	/api/v1/keyword/runKeywordProject							@controllers.KeywordProjectController.runKeywordProject()
-PUT		/api/v1/updateCase											@controllers.KeywordProjectController.updateCase()
-DELETE	/api/v1/removeCase/:caseId/:projectId			@controllers.KeywordProjectController.removeCase(caseId,projectId)
-GET		/api/v1/keyword/deleteTestSuite/:suiteId/:projectId					@controllers.KeywordProjectController.deleteTestSuite(suiteId, projectId)
-PUT		/api/v1/keyword/updateTestSuite								@controllers.KeywordProjectController.updateTestSuite()
-# Upload script
-POST 	/api/v1/functional/upload			@controllers.FunctionalController.upload()
-
 # Performance controller
 GET		/api/v1/performance/list			@controllers.PerformanceController.listPerformanceProject()
 POST 	/api/v1/performance/createWizard	@controllers.PerformanceController.createPerformanceTestWizard()
