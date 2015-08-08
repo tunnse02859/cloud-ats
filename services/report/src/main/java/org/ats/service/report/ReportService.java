@@ -42,6 +42,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
   @Override
   public Report transform(DBObject source) {
     Report report = new Report();
+    report.put("_id", source.get("_id"));
     report.setLabel(((BasicDBObject) source).getString("label"));
     report.setPerformaneJobId(((BasicDBObject) source).getString("performane_job_id"));
     report.setFunctionalJobId(((BasicDBObject) source).getString("functional_job_id"));
