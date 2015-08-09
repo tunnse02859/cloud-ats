@@ -10,6 +10,8 @@ import org.ats.service.report.function.ReportTestNgFactory;
 import org.ats.service.report.function.SuiteReport;
 import org.ats.service.report.function.TestNgHandler;
 import org.ats.service.report.jmeter.JtlHandler;
+import org.ats.service.report.jmeter.JtlHandler.FileContentType;
+import org.ats.service.report.jmeter.JtlHandler.ParsingType;
 import org.ats.service.report.jmeter.PointReport;
 import org.ats.service.report.jmeter.ReportJmeterFactory;
 import org.ats.service.report.jmeter.SummaryReport;
@@ -35,7 +37,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
   @Inject
   public ReportService(MongoDBService mongoService, Logger logger) {
     this.col = mongoService.getDatabase().getCollection(COL_NAME);
-    this.col.createIndex(new BasicDBObject("performane_job_id", 1));
+    this.col.createIndex(new BasicDBObject("_id", 1));
     this.logger = logger;
   }
 
@@ -102,8 +104,8 @@ public class ReportService extends AbstractMongoCRUD<Report> {
     if (dbSuiteReports != null) {
 
       Map<String, SuiteReport> suiteMap = new TreeMap<String, SuiteReport>();
-      for (String key : suiteMap.keySet()) {
-        BasicDBObject suitedb = (BasicDBObject) suiteMap.get(key);
+      for (String key : dbSuiteReports.keySet()) {
+        BasicDBObject suitedb = (BasicDBObject) dbSuiteReports.get(key);
         SuiteReport suiteReport = new SuiteReport();
         suiteReport.setName(suitedb.getString("name"));
         suiteReport.setRunningTime(suitedb.getDate("running_time"));
@@ -112,8 +114,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
         suiteReport.setTotalPass(suitedb.getInt("total_pass"));
         suiteReport.setTotalSkip(suitedb.getInt("total_skip"));
         suiteReport.setTestResult(suitedb.getBoolean("test_result"));
-        suiteMap.put(suiteReport.getName(), suiteReport);
-      }
+        suiteMap.put(suiteReport.getName(), suiteReport);      }
       report.setSuiteReports(suiteMap);
     }
 
@@ -126,7 +127,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
       list = query(new BasicDBObject("performane_job_id", jobId).append("script_id", scriptId));
       if (list.count() == 0) {
         JtlHandler jtlHandler = reportJmeterFactory.create(jobId, scriptId);
-        jtlHandler.startParsing();
+        jtlHandler.startParsing(ParsingType.STRING,FileContentType.CSV);
         Iterator<Map.Entry<String, Report>> iterator = jtlHandler.getTotalUrlMap().entrySet().iterator();
         while (iterator.hasNext()) {
           Map.Entry<String, Report> entry = iterator.next();

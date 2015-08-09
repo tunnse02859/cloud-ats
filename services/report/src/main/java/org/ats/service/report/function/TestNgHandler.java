@@ -73,10 +73,10 @@ public class TestNgHandler extends DefaultHandler {
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+
     if ("suite".equalsIgnoreCase(qName)) {
       isInSuite = true;
       tmpSuiteReport = new SuiteReport();
-      tmpSuiteReport.setName(attributes.getValue("name"));
       tmpSuiteReport.setTestResult(true);
       try {
         tmpSuiteReport.setRunningTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(attributes.getValue("started-at")));
@@ -84,23 +84,37 @@ public class TestNgHandler extends DefaultHandler {
         System.out.println(e.toString());
       }
     }
+
+    if ("class".equalsIgnoreCase(qName)) {
+      if (isInSuite) {
+        String name = attributes.getValue("name");
+        if (name == null || name.isEmpty()) {
+          name = "testSuite";
+        }
+        if (name.contains(".")) {
+          name = name.substring(name.lastIndexOf(".") + 1);
+        }
+        tmpSuiteReport.setName(name);
+      }
+
+    }
     if ("test-method".equalsIgnoreCase(qName)) {
       if (isInSuite) {
         tmpSuiteReport.setTotalTestCase(tmpSuiteReport.getTotalTestCase() + 1);
         if ("PASS".equalsIgnoreCase(attributes.getValue("status"))) {
-          
+
           tmpSuiteReport.setTotalPass(tmpSuiteReport.getTotalPass() + 1);
-          
+
         } else if ("FAIL".equalsIgnoreCase(attributes.getValue("status"))) {
-          if(tmpSuiteReport.isTestResult()){
+          if (tmpSuiteReport.isTestResult()) {
             tmpSuiteReport.setTestResult(false);
           }
-          tmpSuiteReport.setTotalFail(tmpSuiteReport.getTotalFail() + 1);         
+          tmpSuiteReport.setTotalFail(tmpSuiteReport.getTotalFail() + 1);
           tmpSuiteReport.setTestResult(false);
         } else if ("SKIP".equalsIgnoreCase(attributes.getValue("status"))) {
-          
+
           tmpSuiteReport.setTotalSkip(tmpSuiteReport.getTotalSkip() + 1);
-          
+
         } else {
 
         }
