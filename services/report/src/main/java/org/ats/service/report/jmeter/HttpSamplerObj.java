@@ -1,5 +1,7 @@
 package org.ats.service.report.jmeter;
 
+import java.util.Map;
+
 import org.xml.sax.Attributes;
 
 /**
@@ -37,12 +39,18 @@ public class HttpSamplerObj {
   private  String threadName = "";
   private  String dataType = "";
   private  String dataEncoding = "";
+  private  String failureMessage = null;
   
   private  int bytes = 0;
   private  int sampleCount = 0;
   private  int errorCount = 0;
   private  int numberActiveGroup = 0;
   private  int numberActiveAllGroup = 0;
+  
+  
+  
+  
+  
  
   public HttpSamplerObj(Attributes attributes) {
     this.elapsedTime = Integer.parseInt(attributes.getValue("t"));
@@ -64,6 +72,42 @@ public class HttpSamplerObj {
     this.dataEncoding = attributes.getValue("de");
   }
   
+  
+  public HttpSamplerObj(Map<String,String> dataReport){  
+    
+    this.elapsedTime = Integer.parseInt(dataReport.get("elapsed"));
+    this.latencyTime = Integer.parseInt(dataReport.get("Latency"));   
+    this.timeStamp = Long.parseLong(dataReport.get("timeStamp"));
+    
+    this.bytes = Integer.parseInt(dataReport.get("bytes"));
+    this.sampleCount = Integer.parseInt(dataReport.get("SampleCount"));
+    this.errorCount = Integer.parseInt(dataReport.get("ErrorCount"));
+    this.numberActiveGroup = Integer.parseInt(dataReport.get("grpThreads"));
+    this.numberActiveAllGroup = Integer.parseInt(dataReport.get("allThreads"));
+    
+    this.reponseCode = dataReport.get("responseCode");
+    this.successFlag = dataReport.get("success");
+    this.lable = dataReport.get("label");
+    this.reponseMessage = dataReport.get("responseMessage");
+    this.threadName = dataReport.get("threadName");
+    this.dataType = dataReport.get("dataType");
+    this.dataEncoding = dataReport.get("Encoding");
+    
+    //fix for parse csv file 
+    
+    this.failureMessage = dataReport.get("failureMessage");
+  }
+  
+  public String getFailureMessage() {
+    return failureMessage;
+  }
+
+
+  public void setFailureMessage(String failureMessage) {
+    this.failureMessage = failureMessage;
+  }
+
+
   public int getElapsedTime() {
     return elapsedTime;
   }

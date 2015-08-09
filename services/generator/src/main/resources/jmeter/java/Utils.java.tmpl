@@ -101,9 +101,9 @@ public class Utils {
     conf.setSamplerData(false);
     conf.setUrl(false);
     conf.setFileName(false);
-    conf.setFieldNames(false);
+    conf.setFieldNames(true);
     conf.setHostname(false);
-    conf.setIdleTime(true);
+    conf.setAsXml(false);
 
     ResultCollector resultCollector = new ResultCollector(summer);        
     resultCollector.setProperty(TestElement.TEST_CLASS, ResultCollector.class.getName());
