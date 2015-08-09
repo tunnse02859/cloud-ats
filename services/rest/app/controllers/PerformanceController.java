@@ -7,9 +7,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
 import org.ats.service.report.Report;
@@ -17,6 +19,7 @@ import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
+import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.organization.acl.Authenticated;
@@ -44,6 +47,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author TrinhTV3
@@ -74,6 +78,7 @@ public class PerformanceController extends Controller {
   
   @Inject ReportService reportService;
   
+  private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   /**
    * 
    * @return
@@ -328,16 +333,37 @@ public class PerformanceController extends Controller {
     if (project == null) return status(404);
     
     PageList<JMeterScript> pages = jmeterService.getJmeterScripts(projectId);
-    ArrayNode array = Json.newObject().arrayNode();
+    ArrayNode arrayScript = Json.newObject().arrayNode();
     List<JMeterScript> list;
     while (pages.hasNext()) {
       
       list = pages.next();
       for (JMeterScript script : list) {
         
-        array.add(Json.parse(script.toString()));
+        arrayScript.add(Json.parse(script.toString()));
       }
     }
+    PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
+    
+    ArrayNode arrayJob = Json.newObject().arrayNode();
+    while (pageJobs.hasNext()) {
+      List<AbstractJob<?>> listJobs = pageJobs.next();
+      
+      for (AbstractJob<?> job : listJobs) {
+        
+        job.put("created_date", formater.format(job.getCreatedDate()));
+        arrayJob.add(Json.parse(job.toString()));
+      }
+    }
+    PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
+    jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    if (jobFirstList.count() > 0) {
+      AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
+      project.put("last_running", formater.format(lastRunningJob.getCreatedDate()));
+      project.put("jobs", arrayJob.toString());
+    }
+    
     project.put("type", "performance");
     project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
     return ok(Json.parse(project.toString()));
@@ -364,21 +390,66 @@ public class PerformanceController extends Controller {
     return status(200, Json.parse(job.toString()));
   }
   
-  public Result report() throws Exception {
+  public Result report(String projectId, String jobId) throws Exception {
     
-    String jobId = "96f2d9d3-3fb970c4";
-    String scriptId = "26ec6a2a-59cb-4c0d-9dd9-291559ea97b0";
+    PerformanceJob job = (PerformanceJob) executorService.get(jobId);
     
-    PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, scriptId);
+    ArrayNode totals = Json.newObject().arrayNode();
     
-    ArrayNode array = Json.newObject().arrayNode();
-    while (pages.hasNext()) {
-       List<Report> list = pages.next();
-       
-       for (Report report : list) {         
-         array.add(Json.parse(report.toString()));         
-       }
+    for (JMeterScriptReference script : job.getScripts()) {
+      ArrayNode array = Json.newObject().arrayNode();
+      PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, script.getId());
+      while (pages.hasNext()) {
+        List<Report> list = pages.next();
+        
+        for (Report report : list) {         
+          array.add(Json.parse(report.toString()));         
+        }
+      }
+      totals.add(array);
     }
-    return status(200, array);
+    
+    return status(200, totals);
   }
+  
+  public Result getReport(String id) {
+    
+    Report report = reportService.get(id);
+    return status(200, Json.parse(report.toString()));
+  }
+  
+  public Result getLastestRun(String projectId) throws Exception {
+    PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
+    
+    String jobId = lastRunningJob.getId();
+    
+    PerformanceJob job = (PerformanceJob) executorService.get(jobId);
+    
+    ArrayNode total = Json.newObject().arrayNode();
+    ObjectNode object = Json.newObject();
+    for (JMeterScriptReference scriptRef : job.getScripts()) {
+      
+      ArrayNode reports = Json.newObject().arrayNode();
+      PageList<Report> listReport = reportService.getList(jobId, Type.PERFORMANCE, scriptRef.getId());
+      
+      while (listReport.hasNext()) {
+        List<Report> list = listReport.next();
+        
+        for (Report report : list) {
+          
+          reports.add(Json.parse(report.toString()));
+        }
+      }
+      
+      total.add(reports);
+      
+    }
+    object.put("jobId", jobId);
+    object.put("total", total);
+    
+    return status(200, object);
+  }
+  
 }
