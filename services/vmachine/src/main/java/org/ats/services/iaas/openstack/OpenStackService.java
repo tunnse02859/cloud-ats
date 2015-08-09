@@ -613,6 +613,8 @@ public class OpenStackService implements IaaSServiceInterface {
   }
   
   public VMachine allocateFloatingIp(VMachine vm) {
+    if (vm.getPublicIp() != null) return vm;
+    
     NovaApi novaApi = createNovaApi(vm.getTenant().getId());
     String region = novaApi.getConfiguredRegions().iterator().next();
     

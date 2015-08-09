@@ -87,6 +87,7 @@ public class KeywordController extends Controller {
   
   public Result get(String projectId) {
     KeywordProject project = keywordProjectService.get(projectId);
+    
     if (project == null) return status(404);
     
     project.put("type", "keyword");
@@ -99,6 +100,8 @@ public class KeywordController extends Controller {
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
       project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
+      project.put("log", lastJob.getLog());
+      project.put("lastSuites", lastJob.get("suites"));
     }
     
     return ok(Json.parse(project.toString()));

@@ -101,6 +101,10 @@ public class TrackingJobActor extends UntypedActor {
       PerformanceProject project = perfService.get(job.getProjectId());
       project.setStatus(PerformanceProject.Status.READY);
       perfService.update(project);
+      
+      //bubble event
+      Event event = eventFactory.create(job, "performance-job-tracking");
+      event.broadcast();
       throw e;
     }
   }
@@ -175,6 +179,7 @@ public class TrackingJobActor extends UntypedActor {
     
     if (testVM == null) {
       testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), false);
+      testVM = openstackService.deallocateFloatingIp(testVM);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
     }
@@ -227,12 +232,17 @@ public class TrackingJobActor extends UntypedActor {
       VMachine vm = vmachineService.get(job.getTestVMachineId());
       if (vm != null) {
         vm.setStatus(VMachine.Status.Started);
-        vmachineService.update(vm);
+        if (vm.getPublicIp() != null) openstackService.deallocateFloatingIp(vm);
+        else vmachineService.update(vm);
       }
       
       KeywordProject project = keywordService.get(job.getProjectId());
       project.setStatus(KeywordProject.Status.READY);
       keywordService.update(project);
+      
+      //bubble event
+      Event event = eventFactory.create(job, "keyword-job-tracking");
+      event.broadcast();
       throw e;
     }
   }
@@ -280,7 +290,6 @@ public class TrackingJobActor extends UntypedActor {
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       testVM = openstackService.deallocateFloatingIp(testVM);
-      vmachineService.update(testVM);
       
       project.setStatus(KeywordProject.Status.READY);
       keywordService.update(project);
@@ -304,7 +313,11 @@ public class TrackingJobActor extends UntypedActor {
       Thread.sleep(15 * 1000);
     }
     
-    if (testVM.getPublicIp() == null) testVM = openstackService.allocateFloatingIp(testVM);
+    if (testVM.getPublicIp() == null) {
+      testVM = openstackService.allocateFloatingIp(testVM);
+      Thread.sleep(15 * 1000);
+      SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
+    }
 
     String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
 
