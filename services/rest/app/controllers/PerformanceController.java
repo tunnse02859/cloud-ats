@@ -20,6 +20,7 @@ import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
+import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.organization.acl.Authenticated;
@@ -306,10 +307,17 @@ public class PerformanceController extends Controller {
     PageList<PerformanceProject> list = projectService.list();
     ArrayNode array = Json.newObject().arrayNode();
     
+    
     while(list.hasNext()) {
       for (PerformanceProject project : list.next()) {
         project.put("type", "performance");
         project.put("totalScripts", jmeterService.getJmeterScripts(project.getId()).count());
+        
+        PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString()));
+        pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+        if (pages.count() > 0) {
+          project.put("lastRunning", formater.format(pages.next().get(0).getCreatedDate()));
+        }
         array.add(Json.parse(project.toString()));
       }
     }
@@ -362,6 +370,8 @@ public class PerformanceController extends Controller {
       AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
       project.put("last_running", formater.format(lastRunningJob.getCreatedDate()));
       project.put("jobs", arrayJob.toString());
+      project.put("lastScripts", lastRunningJob.get("scripts"));
+      project.put("log", lastRunningJob.getLog());
     }
     
     project.put("type", "performance");
@@ -384,6 +394,10 @@ public class PerformanceController extends Controller {
     PerformanceProject project = projectService.get(projectId);
     if (project == null) {
       return status(404);
+    }
+    
+    if (project.getStatus() == PerformanceProject.Status.RUNNING) {
+      return status(204);
     }
     
     PerformanceJob job = executorService.execute(project, scripts);
@@ -419,8 +433,12 @@ public class PerformanceController extends Controller {
   }
   
   public Result getLastestRun(String projectId) throws Exception {
-    PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    BasicDBObject query = new BasicDBObject("project_id", projectId)
+    .append("status", AbstractJob.Status.Completed.toString());
+    
+    PageList<AbstractJob<?>> jobFirstList = executorService.query(query, 1);
     jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
     AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
     
     String jobId = lastRunningJob.getId();
