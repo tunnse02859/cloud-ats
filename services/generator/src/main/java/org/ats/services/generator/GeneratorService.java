@@ -157,7 +157,7 @@ public class GeneratorService {
     for (SuiteReference suiteRef : suites) {
       
       Suite suite = suiteRef.get();
-      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getName() + ".java")));
+      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getName()) + ".java"));
       os.write(suite.transform().getBytes());
       os.flush();
       os.close();
