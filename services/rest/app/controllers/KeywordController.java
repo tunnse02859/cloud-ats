@@ -9,6 +9,9 @@ import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.service.report.Report;
+import org.ats.service.report.ReportService;
+import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -61,6 +64,8 @@ public class KeywordController extends Controller {
   
   @Inject ExecutorService executorService;
   
+  @Inject ReportService reportService;
+  
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   public Result list() {
@@ -78,6 +83,7 @@ public class KeywordController extends Controller {
         if (jobList.totalPage() > 0) {
           AbstractJob<?> lastJob = jobList.next().get(0);
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
+          project.put("job_id", lastJob.getId());
         }
         array.add(Json.parse(project.toString()));
       }
@@ -102,6 +108,7 @@ public class KeywordController extends Controller {
       project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
       project.put("log", lastJob.getLog());
       project.put("lastSuites", lastJob.get("suites"));
+      project.put("job_id", lastJob.getId());
     }
     
     return ok(Json.parse(project.toString()));
@@ -115,7 +122,7 @@ public class KeywordController extends Controller {
     keywordProjectService.create(project);
     return status(201, project.getId());
   }
-
+  
   public Result run(String projectId) throws Exception {
     JsonNode data = request().body().asJson();
     List<SuiteReference> suites = new ArrayList<SuiteReference>(data.size());
@@ -131,4 +138,21 @@ public class KeywordController extends Controller {
     KeywordJob job = executorService.execute(project, suites);
     return status(201, Json.parse(job.toString()));
   }
+  
+  public Result report(String projectId,String jobId) throws Exception{                    
+    
+    PageList<Report> pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    while (pages.hasNext()) {
+       List<Report> list = pages.next();       
+       for (Report report : list) {
+         System.out.println(report.toString());
+         array.add(Json.parse(report.toString()));   
+         
+       }
+    }
+    return status(200, array);    
+  }
+  
 }

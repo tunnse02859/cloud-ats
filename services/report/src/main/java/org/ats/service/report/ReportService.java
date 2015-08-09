@@ -104,6 +104,7 @@ public class ReportService extends AbstractMongoCRUD<Report> {
     if (dbSuiteReports != null) {
 
       Map<String, SuiteReport> suiteMap = new TreeMap<String, SuiteReport>();
+
       for (String key : dbSuiteReports.keySet()) {
         BasicDBObject suitedb = (BasicDBObject) dbSuiteReports.get(key);
         SuiteReport suiteReport = new SuiteReport();
