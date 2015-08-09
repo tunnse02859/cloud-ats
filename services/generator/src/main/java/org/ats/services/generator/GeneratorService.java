@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -78,12 +80,14 @@ public class GeneratorService {
     
     StringBuilder scriptBuilder = new StringBuilder();
     
+    Set<String> namePool = new HashSet<String>();
+    
     for (JMeterScriptReference ref : scripts) {
       
       if (ref.get().getProjectId() == null) continue;
       
       JMeterScript jScript = ref.get();
-      String scriptName = StringUtil.normalizeName(jScript.getName());
+      String scriptName = getAvailableName(StringUtil.normalizeName(jScript.getName()), namePool);
       int loops = jScript.getLoops();
       int numberThreads = jScript.getNumberThreads();
       int ramUp = jScript.getRamUp();
@@ -153,11 +157,14 @@ public class GeneratorService {
     sourceDir.mkdirs();
     
     loadKeywordPOM(outDir + "/" + jobId);
+
+    Set<String> pool = new HashSet<String>();
     
     for (SuiteReference suiteRef : suites) {
       
       Suite suite = suiteRef.get();
-      FileOutputStream os = new FileOutputStream(new File(sourceDir, StringUtil.normalizeName(suite.getName()) + ".java"));
+      String fileName = getAvailableName(StringUtil.normalizeName(suite.getName()), pool) + ".java";
+      FileOutputStream os = new FileOutputStream(new File(sourceDir, fileName));
       os.write(suite.transform().getBytes());
       os.flush();
       os.close();
@@ -248,5 +255,14 @@ public class GeneratorService {
     }
     is.close();
     out.close();
+  }
+  
+  private String getAvailableName(String name, Set<String> pool) {
+    if (!pool.contains(name)) {
+      pool.add(name);
+      return name;
+    }
+    name = name + pool.size();
+    return getAvailableName(name, pool);
   }
 }
