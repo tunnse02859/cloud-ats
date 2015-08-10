@@ -141,19 +141,39 @@ public class KeywordController extends Controller {
   }
   
   public Result report(String projectId,String jobId) throws Exception{                    
-    
-    PageList<Report> pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
-    
+
     ArrayNode array = Json.newObject().arrayNode();
-    while (pages.hasNext()) {
-       List<Report> list = pages.next();       
-       for (Report report : list) {
-         System.out.println(report.toString());
-         array.add(Json.parse(report.toString()));   
-         
-       }
+    PageList<Report> pages = null;
+    if(executorService.get(jobId).getRawDataOutput() != null) {
+      pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
+      while (pages.hasNext()) {
+        List<Report> list = pages.next();       
+        for (Report report : list) {
+          array.add(Json.parse(report.toString()));   
+          
+        }
+     }
     }
     return status(200, array);    
+  }
+  
+  public Result listReport(String projectId) throws Exception {
+    PageList<AbstractJob<?>> jobtList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    jobtList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    ArrayNode array = Json.newObject().arrayNode();
+    
+    while(jobtList.hasNext()) {
+      
+      for(AbstractJob<?> job: jobtList.next()) {
+        if(job.getRawDataOutput() != null) {
+          PageList<Report> pages = reportService.getList(job.getId(), Type.FUNCTIONAL, null);
+          Report report = pages.next().get(0);
+          array.add(Json.parse(report.toString()));
+        }
+      }
+    }
+
+    return ok(array);
   }
   
 }
