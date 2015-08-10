@@ -104,27 +104,29 @@ public class TestNgHandler extends DefaultHandler {
           isFirstMethod = false;
         }
         
-        tmpSuiteReport.setTotalTestCase(tmpSuiteReport.getTotalTestCase() + 1);
-        if ("PASS".equalsIgnoreCase(attributes.getValue("status"))) {
-
-          tmpSuiteReport.setTotalPass(tmpSuiteReport.getTotalPass() + 1);
-
-        } else if ("FAIL".equalsIgnoreCase(attributes.getValue("status"))) {
-          if (tmpSuiteReport.isTestResult()) {
-            tmpSuiteReport.setTestResult(false);
-          }
-          tmpSuiteReport.setTotalFail(tmpSuiteReport.getTotalFail() + 1);
-          tmpSuiteReport.setTestResult(false);
-        } else if ("SKIP".equalsIgnoreCase(attributes.getValue("status"))) {
-
-          tmpSuiteReport.setTotalSkip(tmpSuiteReport.getTotalSkip() + 1);
-
+        if ("tearDown".equalsIgnoreCase(attributes.getValue("name"))
+            ||"setUp".equalsIgnoreCase(attributes.getValue("name"))){
+          
         } else {
+          tmpSuiteReport.setTotalTestCase(tmpSuiteReport.getTotalTestCase() + 1);
+          if ("PASS".equalsIgnoreCase(attributes.getValue("status"))) {
 
+            tmpSuiteReport.setTotalPass(tmpSuiteReport.getTotalPass() + 1);
+
+          } else if ("FAIL".equalsIgnoreCase(attributes.getValue("status"))) {
+            if (tmpSuiteReport.isTestResult()) {
+              tmpSuiteReport.setTestResult(false);
+            }
+            tmpSuiteReport.setTotalFail(tmpSuiteReport.getTotalFail() + 1);
+            tmpSuiteReport.setTestResult(false);
+          } else if ("SKIP".equalsIgnoreCase(attributes.getValue("status"))) {
+
+            tmpSuiteReport.setTotalSkip(tmpSuiteReport.getTotalSkip() + 1);
+
+          }
         }
       }
     }
-
   }
 
   @Override
