@@ -39,7 +39,8 @@ public class TestNgHandler extends DefaultHandler {
   }
 
   String tmpValue;
-  boolean isInSuite = false;
+  boolean inclass = false;
+  boolean isFirstMethod =false;
   SuiteReport tmpSuiteReport;
 
   @Inject
@@ -73,33 +74,36 @@ public class TestNgHandler extends DefaultHandler {
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-
-    if ("suite".equalsIgnoreCase(qName)) {
-      isInSuite = true;
+        
+    if ("class".equalsIgnoreCase(qName)) {
+      inclass = true;
+      isFirstMethod = true;
+      
       tmpSuiteReport = new SuiteReport();
       tmpSuiteReport.setTestResult(true);
-      try {
-        tmpSuiteReport.setRunningTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(attributes.getValue("started-at")));
-      } catch (ParseException e) {
-        System.out.println(e.toString());
+      
+      String name = attributes.getValue("name");
+      if (name == null || name.isEmpty()) {
+        name = "testSuite";
       }
-    }
-
-    if ("class".equalsIgnoreCase(qName)) {
-      if (isInSuite) {
-        String name = attributes.getValue("name");
-        if (name == null || name.isEmpty()) {
-          name = "testSuite";
-        }
-        if (name.contains(".")) {
-          name = name.substring(name.lastIndexOf(".") + 1);
-        }
-        tmpSuiteReport.setName(name);
+      if (name.contains(".")) {
+        name = name.substring(name.lastIndexOf(".") + 1);
       }
+      tmpSuiteReport.setName(name);
+      
 
     }
     if ("test-method".equalsIgnoreCase(qName)) {
-      if (isInSuite) {
+      if (inclass) {
+        if(isFirstMethod){
+          try {
+            tmpSuiteReport.setRunningTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(attributes.getValue("started-at")));
+          } catch (ParseException e) {
+            System.out.println(e.toString());
+          }
+          isFirstMethod = false;
+        }
+        
         tmpSuiteReport.setTotalTestCase(tmpSuiteReport.getTotalTestCase() + 1);
         if ("PASS".equalsIgnoreCase(attributes.getValue("status"))) {
 
@@ -125,9 +129,9 @@ public class TestNgHandler extends DefaultHandler {
 
   @Override
   public void endElement(String uri, String localName, String qName) throws SAXException {
-    if ("suite".equalsIgnoreCase(qName)) {
+    if ("class".equalsIgnoreCase(qName)) {
       listSuiteReport.put(tmpSuiteReport.getName(), tmpSuiteReport);
-      isInSuite = false;
+      inclass = false;
     }
   }
 
