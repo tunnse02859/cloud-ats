@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ats.common.ssh.SSHClient;
@@ -267,7 +268,7 @@ public class TrackingJobActor extends UntypedActor {
       
       updateLog(job, jkJob);
       
-      Thread.sleep(15000L);
+      Thread.sleep(5000L);
       
       Event event  = eventFactory.create(job, "keyword-job-tracking");
       event.broadcast();
@@ -289,7 +290,10 @@ public class TrackingJobActor extends UntypedActor {
       
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
-      testVM = openstackService.deallocateFloatingIp(testVM);
+      vmachineService.update(testVM);
+      
+      //TODO:Need review it
+      // testVM = openstackService.deallocateFloatingIp(testVM);
       
       project.setStatus(KeywordProject.Status.READY);
       keywordService.update(project);
@@ -317,6 +321,7 @@ public class TrackingJobActor extends UntypedActor {
       testVM = openstackService.allocateFloatingIp(testVM);
       Thread.sleep(15 * 1000);
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
+      logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
     }
 
     String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
