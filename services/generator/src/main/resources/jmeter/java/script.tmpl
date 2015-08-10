@@ -9,6 +9,8 @@
  
  @@Test
   public void @scriptName () throws Exception {
+    
+    int count = 0;
 
     ListedHashTree root = new ListedHashTree();
     TestPlan testPlan = Utils.createTestPlan();
@@ -21,14 +23,14 @@
     threadGroupHashTree.add(Utils.createHeaderManager());
     threadGroupHashTree.add(Utils.createResultCollector("target/@scriptId@.jtl"));
     
-    output.put("target/@scriptId@.jtl", @numberThreads + 1);
-    
     DistributedRunner distributedRunner = new DistributedRunner();
     distributedRunner.setStdout(System.out);
     distributedRunner.setStdErr(System.err);
     
     SamplerBuilder samplerBuilder = new SamplerBuilder(threadGroupHashTree);
     @samplers
+    
+    output.put("target/@scriptId@.jtl", @loops * count + 1);
     
     SaveService.saveTree(root, new FileOutputStream("target/@scriptId@.jmx"));
     root.add(root.getArray()[0], new RemoteThreadsListenerTestElement());
