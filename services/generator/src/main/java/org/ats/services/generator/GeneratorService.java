@@ -120,7 +120,7 @@ public class GeneratorService {
         
         if ("null".equals(constantTimer)) constantTimer = "";
         
-        samplerBuilder.append(engine.render(samplerTemplate, samplerName, defaultTimeout, domain, port, protocol, path, method, params, assertionText, constantTimer));
+        samplerBuilder.append(engine.render(samplerTemplate, samplerName, defaultTimeout, domain, port, protocol, path, method, params, assertionText, constantTimer, numberThreads));
       }
       
       String samplers = samplerBuilder.toString();
