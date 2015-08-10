@@ -21,6 +21,8 @@
     threadGroupHashTree.add(Utils.createHeaderManager());
     threadGroupHashTree.add(Utils.createResultCollector("target/@scriptId@.jtl"));
     
+    output.put("target/@scriptId@.jtl", @numberThreads + 1);
+    
     DistributedRunner distributedRunner = new DistributedRunner();
     distributedRunner.setStdout(System.out);
     distributedRunner.setStdErr(System.err);
