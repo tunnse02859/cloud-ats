@@ -170,7 +170,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler loginPost = factory.createHttpPost("Login codeproject post", 
-        "https://www.codeproject.com/script/Membership/LogOn.aspx?rp=%2f%3floginkey%3dfalse",
+        "https://www.codeproject.com:443/script/Membership/LogOn.aspx?rp=%2f%3floginkey%3dfalse",
         "kakalot", 0,
         factory.createArgument("FormName", "MenuBarForm"),
         factory.createArgument("Email", "kakalot8x08@gmail.com"),

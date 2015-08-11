@@ -98,7 +98,7 @@ public class GeneratorService {
         String samplerName = jSampler.getName();
         String defaultTimeout = "120000";
         HttpURL url = new HttpURL(jSampler.getUrl());
-        String domain = url.getDomain();
+        String domain = url.getHost();
         int port = url.getPort();
         String protocol = url.getProtocol();
         String path = url.getFullPath();
