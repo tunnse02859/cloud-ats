@@ -183,20 +183,20 @@ public class ScriptController extends Controller {
     return ok(Json.parse(script.toString()));
   }
   
-  public Result get(String id) {
+  public Result get(String projectId, String id) {
     
     JMeterScript script = service.get(id);
     
     return status(200, Json.parse(script.toString()));
   }
   
-  public Result delete(String id) {
+  public Result delete(String projectId, String id) {
      service.delete(id);
      
      return status(202);
   }
   
-  public Result update() {
+  public Result update(String projectId) {
     
     JsonNode data = request().body().asJson();
     

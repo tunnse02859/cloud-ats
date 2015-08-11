@@ -85,9 +85,9 @@ GET		/api/v1/project/performance/reports/lastjob/:projectId				@controllers.Perf
 GET		/api/v1/project/performance/:projectId/scripts				@controllers.ScriptController.list(projectId)
 POST	/api/v1/project/performance/:projectId/upload				@controllers.ScriptController.createByFile(projectId)
 POST	/api/v1/project/performance/:projectId/script				@controllers.ScriptController.createBySamplers(projectId)
-GET		/api/v1/project/performance/script/:id						@controllers.ScriptController.get(id)
-DELETE	/api/v1/project/performance/script/:id						@controllers.ScriptController.delete(id)
-PUT		/api/v1/project/performance/script							@controllers.ScriptController.update()
+GET		/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptController.get(projectId, id)
+DELETE	/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptController.delete(projectId, id)
+PUT		/api/v1/project/performance/:projectId/script				@controllers.ScriptController.update(projectId)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
