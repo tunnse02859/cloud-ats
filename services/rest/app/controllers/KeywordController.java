@@ -78,13 +78,16 @@ public class KeywordController extends Controller {
         project.put("type", "keyword");
         project.put("totalSuites", suiteService.getSuites(project.getId()).count());
         project.put("totalCases", caseService.getCases(project.getId()).count());
-        PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
+        
+        BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
+        PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
         jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
         
         if (jobList.totalPage() > 0) {
           AbstractJob<?> lastJob = jobList.next().get(0);
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
           project.put("job_id", lastJob.getId());
+          project.put("log", lastJob.getLog());
           
           List<SuiteReference> suites = ((KeywordJob) lastJob).getSuites();
           if (suites.size() > 0) {
