@@ -35,6 +35,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -84,6 +85,13 @@ public class KeywordController extends Controller {
           AbstractJob<?> lastJob = jobList.next().get(0);
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
           project.put("job_id", lastJob.getId());
+          
+          List<SuiteReference> suites = ((KeywordJob) lastJob).getSuites();
+          if (suites.size() > 0) {
+            BasicDBList lastSuites = new BasicDBList();
+            for (SuiteReference suite : suites) lastSuites.add(suite.toJSon());
+            project.put("lastSuites", lastSuites);
+          }
         }
         array.add(Json.parse(project.toString()));
       }
