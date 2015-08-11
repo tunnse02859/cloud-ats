@@ -352,6 +352,7 @@ public class PerformanceController extends Controller {
       }
     }
     PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
+    pageJobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode arrayJob = Json.newObject().arrayNode();
     while (pageJobs.hasNext()) {
@@ -401,7 +402,11 @@ public class PerformanceController extends Controller {
     }
     
     PerformanceJob job = executorService.execute(project, scripts);
-    return status(200, Json.parse(job.toString()));
+    
+    ObjectNode node = (ObjectNode) Json.parse(job.toString());
+    node.put("created_date", formater.format(job.getCreatedDate()));
+    
+    return status(200, node);
   }
   
   public Result report(String projectId, String jobId) throws Exception {
