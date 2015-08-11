@@ -46,22 +46,47 @@ public class JMeterParser {
     
     String testName = ((Node) XPathUtil.read(document, "//THREADGROUP", XPathConstants.NODE)).getAttributes().getNamedItem("testname").getNodeValue();
 
-    String loopStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"LoopController.loops\"]", XPathConstants.NODE)).getTextContent();
-    int loops = (loopStr == null || loopStr.isEmpty()) ? 0 : Integer.parseInt(loopStr);
+    Object obj = XPathUtil.read(document, "//INTPROP[@name=\"LoopController.loops\"]", XPathConstants.NODE);
+    if (obj == null) obj = XPathUtil.read(document, "//STRINGPROP[@name=\"LoopController.loops\"]", XPathConstants.NODE);
     
-    String numberThreadsStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.num_threads\"]", XPathConstants.NODE)).getTextContent();
-    int numberThreads = (numberThreadsStr == null || numberThreadsStr.isEmpty()) ? 0 : Integer.parseInt(numberThreadsStr);
+    int loops = 0;
+    if (obj != null) {
+      String loopStr = ((Node) obj).getTextContent();
+      loops = (loopStr == null || loopStr.isEmpty()) ? 0 : Integer.parseInt(loopStr);
+    }
     
-    String ramUpStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.ramp_time\"]", XPathConstants.NODE)).getTextContent();
-    int ramUp = (ramUpStr == null || ramUpStr.isEmpty()) ? 0 : Integer.parseInt(ramUpStr);
+    obj = XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.num_threads\"]", XPathConstants.NODE);
+    if (obj == null) obj = XPathUtil.read(document, "//INTPROP[@name=\"ThreadGroup.num_threads\"]", XPathConstants.NODE);
     
-    String schedulerStr = ((Node) XPathUtil.read(document, "//BOOLPROP[@name=\"ThreadGroup.scheduler\"]", XPathConstants.NODE)).getTextContent();
-    boolean scheduler = (schedulerStr == null || schedulerStr.isEmpty()) ? false : Boolean.parseBoolean(schedulerStr);
+    int numberThreads = 1;
+    if (obj != null) {
+      String numberThreadsStr = ((Node) obj).getTextContent();
+      numberThreads = (numberThreadsStr == null || numberThreadsStr.isEmpty()) ? 0 : Integer.parseInt(numberThreadsStr);
+    }
     
-    String durationStr = ((Node) XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.duration\"]", XPathConstants.NODE)).getTextContent();
-    int duration = (durationStr == null || durationStr.isEmpty()) ? 0 : Integer.parseInt(durationStr);
+    obj = XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.ramp_time\"]", XPathConstants.NODE);
+    if (obj == null) obj = XPathUtil.read(document, "//INTPROP[@name=\"ThreadGroup.ramp_time\"]", XPathConstants.NODE);
     
-  
+    int ramUp = 5;
+    if (obj != null) {
+      String ramUpStr = ((Node) obj).getTextContent();
+      ramUp = (ramUpStr == null || ramUpStr.isEmpty()) ? 0 : Integer.parseInt(ramUpStr);
+    }
+    
+    boolean scheduler = false;
+    obj = XPathUtil.read(document, "//BOOLPROP[@name=\"ThreadGroup.scheduler\"]", XPathConstants.NODE);
+    if (obj != null) {
+      String schedulerStr = ((Node) obj).getTextContent();
+      scheduler = (schedulerStr == null || schedulerStr.isEmpty()) ? false : Boolean.parseBoolean(schedulerStr);
+    }
+    
+    int duration = 0;
+    obj = XPathUtil.read(document, "//STRINGPROP[@name=\"ThreadGroup.duration\"]", XPathConstants.NODE);
+    if (obj != null) {
+      String durationStr = ((Node) obj).getTextContent();
+      duration = (durationStr == null || durationStr.isEmpty()) ? 0 : Integer.parseInt(durationStr);
+    }
+    
     //Find samplers
     
     NodeList samplerNodeList = (NodeList) XPathUtil.read(document, "//HTTPSAMPLERPROXY", XPathConstants.NODESET);
@@ -74,7 +99,12 @@ public class JMeterParser {
       
       String domain = ((Node) XPathUtil.read(samplerNode, "STRINGPROP[@name=\"HTTPSampler.domain\"]", XPathConstants.NODE)).getTextContent();
       
-      String port = ((Node) XPathUtil.read(samplerNode, "STRINGPROP[@name=\"HTTPSampler.port\"]", XPathConstants.NODE)).getTextContent();
+      String port = "80";
+      obj = XPathUtil.read(samplerNode, "STRINGPROP[@name=\"HTTPSampler.port\"]", XPathConstants.NODE);
+      if (obj == null) {
+        obj = XPathUtil.read(samplerNode, "INTPROP[@name=\"HTTPSampler.port\"]", XPathConstants.NODE);
+      }
+      if (obj != null) port = ((Node) obj).getTextContent();
       
       String protocol = ((Node) XPathUtil.read(samplerNode, "STRINGPROP[@name=\"HTTPSampler.protocol\"]", XPathConstants.NODE)).getTextContent();
       

@@ -3,9 +3,11 @@
  */
 package org.ats.services.performance;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.ats.common.StringUtil;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -112,5 +114,19 @@ public class JMeterParserTestCase {
     Assert.assertEquals(Method.GET, signoutRequest.getMethod());
     Assert.assertNull( signoutRequest.getAssertionText());
     Assert.assertEquals(0, signoutRequest.getConstantTime());
+  }
+  
+  @Test
+  public void testParseFileUpload() throws Exception {
+    JMeterFactory factory = new JMeterFactory();
+    JMeterParser parse = factory.createJMeterParser(StringUtil.readStream(new FileInputStream("src/test/resources/test.jmx")), projectId);
+    JMeterScript script = parse.parse();
+    Assert.assertEquals(script.getNumberThreads(), 200);
+    Assert.assertEquals(script.getRamUp(), 5);
+    Assert.assertEquals(script.getLoops(), 1);
+    Assert.assertEquals(script.getSamplers().size(), 2);
+    
+    parse = factory.createJMeterParser(StringUtil.readStream(new FileInputStream("src/test/resources/old.jmx")), projectId);
+    parse.parse();
   }
 }
