@@ -5,13 +5,17 @@ package controllers;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
+import org.ats.service.report.function.SuiteReport;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -146,13 +150,20 @@ public class KeywordController extends Controller {
     PageList<Report> pages = null;
     if(executorService.get(jobId).getRawDataOutput() != null) {
       pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
+      List<Report> list = null;
       while (pages.hasNext()) {
-        List<Report> list = pages.next();       
-        for (Report report : list) {
-          array.add(Json.parse(report.toString()));   
-          
-        }
+        list = pages.next();       
      }
+      for(Report report: list) {
+        Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
+        while(iterator.hasNext()) {
+          SuiteReport suiteReport = iterator.next();
+          Date date = suiteReport.getRunningTime();
+          String parseDate = formater.format(date);
+          suiteReport.put("running_time", parseDate);
+        }
+        array.add(Json.parse(report.toString()));
+      }
     }
     return status(200, array);    
   }
@@ -161,7 +172,7 @@ public class KeywordController extends Controller {
     PageList<AbstractJob<?>> jobtList = executorService.query(new BasicDBObject("project_id", projectId), 1);
     jobtList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     ArrayNode array = Json.newObject().arrayNode();
-    
+    ObjectNode obj = Json.newObject();
     while(jobtList.hasNext()) {
       
       for(AbstractJob<?> job: jobtList.next()) {
@@ -170,10 +181,12 @@ public class KeywordController extends Controller {
           Report report = pages.next().get(0);
           array.add(Json.parse(report.toString()));
         }
+        obj.put("report", array);
+        obj.put("created_date", formater.format(job.getCreatedDate()));
       }
     }
 
-    return ok(array);
+    return ok(obj);
   }
   
 }
