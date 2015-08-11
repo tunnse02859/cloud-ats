@@ -42,10 +42,7 @@ GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(p
 POST    /api/v1/project/keyword/:projectId/run  @controllers.KeywordController.run(projectId)
 POST    /api/v1/project/keyword             @controllers.KeywordController.create()
 GET		/api/v1/project/keyword/:projectId/:job_id/report				@controllers.KeywordController.report(projectId,job_id)
-<<<<<<< HEAD
 GET		/api/v1/project/keyword/:projectId/listReport	@controllers.KeywordController.listReport(projectId)
-=======
->>>>>>> report for functional keyword
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
