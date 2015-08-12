@@ -13,6 +13,7 @@ import org.ats.services.organization.entity.User;
 
 import play.Logger;
 import play.libs.EventSource;
+import play.libs.F.Callback0;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -70,12 +71,26 @@ public class EventController extends Controller {
     return ok(new EventSource() {
       @Override
       public void onConnected() {
-        
-        final EventSource currentSocket = this;
-        
         List<EventSource> events = pool.get(token) == null ? new ArrayList<EventSource>() : pool.get(token);
-        events.add(currentSocket);
-        pool.put(token, events);
+        if (!events.contains(this)) {
+          
+          this.onDisconnected(new Callback0() {
+            @Override
+            public void invoke() throws Throwable {
+              List<EventSource> events = pool.get(token);
+              if (events == null) return;
+              events.remove(this);
+              Logger.info("Disconnect an event source for token " + token + ", total " + events.size());
+              pool.put(token, events);
+            }
+          });
+          
+          events.add(this);
+          Logger.info("Add an event source for token " + token + ", total  " + events.size());
+          pool.put(token, events);
+        } else {
+          Logger.info("Event is already");
+        }
       }
     });
   }
