@@ -180,21 +180,24 @@ public class KeywordController extends Controller {
   public Result listReport(String projectId) throws Exception {
     PageList<AbstractJob<?>> jobtList = executorService.query(new BasicDBObject("project_id", projectId), 1);
     jobtList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
     ArrayNode array = Json.newObject().arrayNode();
-    ObjectNode obj = Json.newObject();
     while(jobtList.hasNext()) {
       
       for(AbstractJob<?> job: jobtList.next()) {
         if(job.getRawDataOutput() != null) {
+          ObjectNode obj = Json.newObject();
+          
           PageList<Report> pages = reportService.getList(job.getId(), Type.FUNCTIONAL, null);
           Report report = pages.next().get(0);
-          array.add(Json.parse(report.toString()));
+          
+          obj.put("report", Json.parse(report.toString()));
+          obj.put("created_date", formater.format(job.getCreatedDate()));
+          array.add(obj);
         }
-        obj.put("report", array);
-        obj.put("created_date", formater.format(job.getCreatedDate()));
       }
     }
 
-    return ok(obj);
+    return ok(array);
   }
 }
