@@ -63,7 +63,9 @@ public class EventController extends Controller {
     for (EventSource event : events) {
       event.close();
     }
+    Logger.info("Disconnect an event source for token " + token + ", total " + events.size());
     pool.remove(token);
+
     return status(200);
   }
 
@@ -73,17 +75,6 @@ public class EventController extends Controller {
       public void onConnected() {
         List<EventSource> events = pool.get(token) == null ? new ArrayList<EventSource>() : pool.get(token);
         if (!events.contains(this)) {
-          
-          this.onDisconnected(new Callback0() {
-            @Override
-            public void invoke() throws Throwable {
-              List<EventSource> events = pool.get(token);
-              if (events == null) return;
-              events.remove(this);
-              Logger.info("Disconnect an event source for token " + token + ", total " + events.size());
-              pool.put(token, events);
-            }
-          });
           
           events.add(this);
           Logger.info("Add an event source for token " + token + ", total  " + events.size());
