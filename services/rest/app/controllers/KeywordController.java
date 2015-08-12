@@ -90,7 +90,7 @@ public class KeywordController extends Controller {
         if (jobList.totalPage() > 0) {
           AbstractJob<?> lastJob = jobList.next().get(0);
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
-          project.put("job_id", lastJob.getId());
+          project.put("lastJobId", lastJob.getId());
           project.put("log", lastJob.getLog());
           
           List<SuiteReference> suites = ((KeywordJob) lastJob).getSuites();

@@ -23,6 +23,7 @@ import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
+import org.ats.services.keyword.SuiteReference;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterArgument;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -94,7 +96,18 @@ public class PerformanceController extends Controller {
         PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString()));
         pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
         if (pages.count() > 0) {
-          project.put("lastRunning", formater.format(pages.next().get(0).getCreatedDate()));
+          
+          AbstractJob<?> lastJob = pages.next().get(0);
+          
+          project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
+          project.put("log", lastJob.getLog());
+          project.put("lastJobId", lastJob.getId());
+          List<JMeterScriptReference> scripts = ((PerformanceJob) lastJob).getScripts();
+          if (scripts.size() > 0) {
+            BasicDBList lastScripts = new BasicDBList();
+            for (JMeterScriptReference script : scripts) lastScripts.add(script.toJSon());
+            project.put("lastScripts", lastScripts);
+          }
         }
         array.add(Json.parse(project.toString()));
       }
