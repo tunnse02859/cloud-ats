@@ -13,7 +13,6 @@ import org.ats.services.organization.entity.User;
 
 import play.Logger;
 import play.libs.EventSource;
-import play.libs.F.Callback0;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;

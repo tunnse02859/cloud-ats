@@ -31,18 +31,14 @@ PUT		/api/v1/data/update					@controllers.DataDrivenController.update()
 
 #######################################################################################################
 
-#TODO: remove
-GET     /api/v1/keyword/getListFuncProject  @controllers.KeywordController.list()
-##
-
 # Keyword project controller 
 
-GET     /api/v1/project/keywords            @controllers.KeywordController.list()
-GET     /api/v1/project/keyword/:projectId  @controllers.KeywordController.get(projectId)
-POST    /api/v1/project/keyword/:projectId/run  @controllers.KeywordController.run(projectId)
-POST    /api/v1/project/keyword             @controllers.KeywordController.create()
-GET		/api/v1/project/keyword/:projectId/:job_id/report				@controllers.KeywordController.report(projectId,job_id)
-GET		/api/v1/project/keyword/:projectId/listReport	@controllers.KeywordController.listReport(projectId)
+GET     /api/v1/project/keywords                         @controllers.KeywordController.list()
+GET     /api/v1/project/keyword/:projectId               @controllers.KeywordController.get(projectId)
+POST    /api/v1/project/keyword/:projectId/run           @controllers.KeywordController.run(projectId)
+POST    /api/v1/project/keyword                          @controllers.KeywordController.create()
+GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordController.report(projectId,jobId)
+GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
 
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
