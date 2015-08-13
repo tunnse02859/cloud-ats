@@ -10,7 +10,10 @@ import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.datadriven.DataDriven;
 import org.ats.services.datadriven.DataDrivenFactory;
+import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.datadriven.DataDrivenService;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -54,6 +57,12 @@ public class DataDrivenController extends Controller {
   @Inject
   DataDrivenFactory dataDrivenFactory;
   
+  @Inject
+  ReferenceFactory<DataDrivenReference> dataRefFactory;
+  
+  @Inject
+  CaseService caseService;
+  
   public Result list(String tenant, String space) {
     BasicDBObject query = new BasicDBObject("tenant", new BasicDBObject("_id", tenant));
     query.append("space", "null".equals(space) ? null : new BasicDBObject("_id", space));
@@ -74,10 +83,16 @@ public class DataDrivenController extends Controller {
   public Result newData() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
+    String caseId = json.get("caseId").asText();
     JsonNode dataset = json.get("dataset");
+    System.out.println(dataset.toString());
+    Case caze = caseService.get(caseId);
     DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
     
     dataDrivenService.create(driven);
+    String drivenId = driven.getId();
+    caze.setDataDriven(dataRefFactory.create(drivenId));
+    caseService.update(caze);
     return ok(Json.parse(driven.toString()));
   }
   

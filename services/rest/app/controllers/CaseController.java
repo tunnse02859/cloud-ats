@@ -72,7 +72,7 @@ public class CaseController extends Controller {
   public Result update(String projectId) throws Exception {
     JsonNode node = request().body().asJson();
     BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
-    
+    System.out.println(node);
     Case caze = caseService.transform(obj);
     Case oldCase = caseService.get(caze.getId());
     
