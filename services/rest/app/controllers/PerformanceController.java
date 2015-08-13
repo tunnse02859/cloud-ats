@@ -38,6 +38,7 @@ import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
@@ -134,6 +135,7 @@ public class PerformanceController extends Controller {
     PageList<JMeterScript> pages = jmeterService.getJmeterScripts(projectId);
     ArrayNode arrayScript = Json.newObject().arrayNode();
     List<JMeterScript> list;
+    
     while (pages.hasNext()) {
       
       list = pages.next();
@@ -142,6 +144,7 @@ public class PerformanceController extends Controller {
         arrayScript.add(Json.parse(script.toString()));
       }
     }
+    
     PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
     pageJobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
@@ -152,9 +155,11 @@ public class PerformanceController extends Controller {
       for (AbstractJob<?> job : listJobs) {
         
         job.put("created_date", formater.format(job.getCreatedDate()));
+        job.put("creator", project.getCreator().getId());
         arrayJob.add(Json.parse(job.toString()));
       }
     }
+    
     PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
     jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
@@ -169,6 +174,50 @@ public class PerformanceController extends Controller {
     project.put("type", "performance");
     project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
     return ok(Json.parse(project.toString()));
+  }
+  
+  public Result update() {
+    
+    JsonNode data = request().body().asJson();
+    String id = data.get("id").asText();
+    String name = data.get("name").asText();
+    
+    PerformanceProject project = projectService.get(id);
+    
+    if (name.equals(project.getName())) {
+      return status(304);
+    }
+    
+    project.put("name", name);
+    projectService.update(project);
+
+    return status(202, id);
+  }
+  
+  public Result delete() {
+    
+    String id = request().body().asText();
+    
+    PerformanceProject project = projectService.get(id);
+    
+    if (project == null) {
+      return status(404);
+    }
+    
+    PageList<AbstractJob<?>> listJob = executorService.query(new BasicDBObject("project_id", id));
+    
+    while (listJob.hasNext()) {
+      List<AbstractJob<?>> list = listJob.next();
+      for (AbstractJob<?> job : list) {
+        reportService.deleteBy(new BasicDBObject("performane_job_id", job.getId()));
+      }
+    }
+    
+    executorService.deleteBy(new BasicDBObject("project_id", id));
+
+    projectService.delete(project);
+    
+    return status(200);
   }
   
   public Result run(String projectId) throws Exception {
@@ -200,7 +249,7 @@ public class PerformanceController extends Controller {
     return status(200, node);
   }
   
-  public Result report(String projectId, String jobId) throws Exception {
+  public Result report(String projectId, String jobId) {
     
     PerformanceJob job = (PerformanceJob) executorService.get(jobId);
     
@@ -208,15 +257,23 @@ public class PerformanceController extends Controller {
     
     for (JMeterScriptReference script : job.getScripts()) {
       ArrayNode array = Json.newObject().arrayNode();
-      PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, script.getId());
-      while (pages.hasNext()) {
-        List<Report> list = pages.next();
-        
-        for (Report report : list) {         
-          array.add(Json.parse(report.toString()));         
+      
+      try {
+        PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, script.getId());
+        while (pages.hasNext()) {
+          List<Report> list = pages.next();
+          
+          for (Report report : list) {         
+            array.add(Json.parse(report.toString()));         
+          }
         }
+        totals.add(array);
+      } catch (Exception e) {
+        
+        Logger.info("Can not read reports with this job");
+        
+        return status(404, jobId);
       }
-      totals.add(array);
     }
     
     return status(200, totals);
