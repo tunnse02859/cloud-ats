@@ -37,6 +37,8 @@ GET     /api/v1/project/keywords                         @controllers.KeywordCon
 GET     /api/v1/project/keyword/:projectId               @controllers.KeywordController.get(projectId)
 POST    /api/v1/project/keyword/:projectId/run           @controllers.KeywordController.run(projectId)
 POST    /api/v1/project/keyword                          @controllers.KeywordController.create()
+PUT		/api/v1/project/keyword							 @controllers.KeywordController.update()
+DELETE	/api/v1/project/keyword							 @controllers.KeywordController.delete()
 GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordController.report(projectId,jobId)
 GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
 
