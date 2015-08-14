@@ -33,6 +33,7 @@ import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.helper.form;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -156,25 +157,33 @@ public class KeywordController extends Controller {
   
   public Result report(String projectId,String jobId) throws Exception{                    
     ArrayNode array = Json.newObject().arrayNode();
+    Report report = null;
     PageList<Report> pages = null;
-    if(executorService.get(jobId).getRawDataOutput() != null) {
+    AbstractJob<?> job = executorService.get(jobId);
+    if(job.getRawDataOutput() != null) {
       pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
-      List<Report> list = null;
-      while (pages.hasNext()) {
-        list = pages.next();       
-     }
-      for(Report report: list) {
-        Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-        while(iterator.hasNext()) {
-          SuiteReport suiteReport = iterator.next();
-          Date date = suiteReport.getRunningTime();
-          String parseDate = formater.format(date);
-          suiteReport.put("running_time", parseDate);
-        }
-        array.add(Json.parse(report.toString()));
+      
+      if (pages.totalPage() <= 0) {
+        return status(404);
       }
+      
+      report = pages.next().get(0);
+      report.put("created_date", formater.format(job.getCreatedDate()));
+      Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
+      
+      while (iterator.hasNext()) {
+        SuiteReport suiteReport = iterator.next();
+        Date date = suiteReport.getRunningTime();
+        String parseDate = formater.format(date);
+        suiteReport.put("running_time", parseDate);
+        array.add(Json.parse(suiteReport.toString()));
+        
+      }
+      
+      report.put("suite_reports", array.toString());
+     
     }
-    return status(200, array);    
+    return status(200, Json.parse(report.toString()));  
   }
   
   public Result listReport(String projectId) throws Exception {
@@ -200,4 +209,5 @@ public class KeywordController extends Controller {
 
     return ok(array);
   }
+  
 }
