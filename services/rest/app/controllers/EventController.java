@@ -62,7 +62,6 @@ public class EventController extends Controller {
     for (EventSource event : events) {
       event.close();
     }
-    Logger.info("Disconnect an event source for token " + token + ", total " + events.size());
     pool.remove(token);
 
     return status(200);
@@ -76,7 +75,6 @@ public class EventController extends Controller {
         if (!events.contains(this)) {
           
           events.add(this);
-          Logger.info("Add an event source for token " + token + ", total  " + events.size());
           pool.put(token, events);
         } else {
           Logger.info("Event is already");

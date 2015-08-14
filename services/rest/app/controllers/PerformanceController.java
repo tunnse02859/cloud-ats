@@ -3,34 +3,21 @@
  */
 package controllers;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
-import org.ats.common.StringUtil;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
-import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
-import org.ats.services.keyword.KeywordProject;
-import org.ats.services.keyword.SuiteReference;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.performance.JMeterArgument;
-import org.ats.services.performance.JMeterFactory;
-import org.ats.services.performance.JMeterParser;
-import org.ats.services.performance.JMeterSampler;
-import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
@@ -41,8 +28,6 @@ import org.ats.services.performance.PerformanceProjectService;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
-import play.mvc.Http.MultipartFormData;
-import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import actions.CorsComposition;
 
@@ -60,9 +45,6 @@ import com.mongodb.BasicDBObject;
 @CorsComposition.Cors
 @Authenticated
 public class PerformanceController extends Controller {
-  
-  @Inject
-  private JMeterFactory jmeterFactory;
   
   @Inject
   private JMeterScriptService jmeterService;

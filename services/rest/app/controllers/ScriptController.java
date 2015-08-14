@@ -17,7 +17,6 @@ import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptService;
-import org.ats.services.performance.PerformanceProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -41,9 +40,6 @@ public class ScriptController extends Controller {
   
   @Inject
   private JMeterScriptService service;
-  
-  @Inject
-  private PerformanceProjectService projectService;
   
   @Inject
   private JMeterFactory jmeterFactory;
