@@ -55,7 +55,4 @@ public class NotAssertAlertPresent {
       return false;
     }
   }
-  
-  
-  
 }

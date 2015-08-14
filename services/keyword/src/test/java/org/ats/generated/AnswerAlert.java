@@ -59,7 +59,4 @@ public class AnswerAlert {
       return false;
     }
   }
-  
-  
-  
 }

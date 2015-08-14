@@ -55,7 +55,4 @@ public class AssertAlertPresentFail {
       return false;
     }
   }
-  
-  
-  
 }

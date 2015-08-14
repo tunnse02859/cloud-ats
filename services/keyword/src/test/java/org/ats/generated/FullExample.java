@@ -248,7 +248,4 @@ public class FullExample {
       return false;
     }
   }
-  
-  
-  
 }

@@ -59,7 +59,4 @@ public class SwitchToWindow {
       return false;
     }
   }
-  
-  
-  
 }

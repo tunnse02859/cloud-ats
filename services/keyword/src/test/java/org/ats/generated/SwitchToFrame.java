@@ -59,7 +59,4 @@ public class SwitchToFrame {
       return false;
     }
   }
-  
-  
-  
 }

@@ -57,7 +57,4 @@ public class DismissAlert {
       return false;
     }
   }
-  
-  
-  
 }

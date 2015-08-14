@@ -165,7 +165,6 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     caseService.create(caze);
     
     builder.addCases(caseRefFactory.create(caze.getId()));
-    builder.addDataDrivens(dataRef);
 
     Suite suite = builder.build();
     try {
