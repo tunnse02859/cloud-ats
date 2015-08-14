@@ -73,7 +73,4 @@ public class Jira {
       return false;
     }
   }
-  
-  
-  
 }

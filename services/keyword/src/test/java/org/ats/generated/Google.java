@@ -38,8 +38,18 @@ public class Google {
     wd.quit();
   }
   
-  
-  @Test (dataProvider = "userSource")
+  @DataProvider(name = "userSource12f97523")
+  public static Object[][] userSource12f97523() throws Exception {
+    ObjectMapper obj = new ObjectMapper();
+    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\",\"password\":\"a\"},	{\"username\":\"foo1\",\"password\":\"a1\"}]");
+
+    JsonNode[][] objData = new JsonNode[rootNode.size()][];
+    for(int i=0; i<rootNode.size(); i++) {
+      objData[i] = new JsonNode[]{ rootNode.get(i) };
+    }
+    return objData;
+}
+  @Test (dataProvider = "userSource12f97523")
   public void test(JsonNode data) throws Exception {
     String username = data.get("username").toString().split("\"")[1];
     String password = data.get("password").toString().split("\"")[1];
@@ -62,17 +72,4 @@ public class Google {
       return false;
     }
   }
-  
-  @DataProvider(name = "userSource")
-  public static Object[][] userSource() throws Exception {
-    ObjectMapper obj = new ObjectMapper();
-    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\",\"password\":\"a\"},	{\"username\":\"foo1\",\"password\":\"a1\"}]");
-
-    JsonNode[][] objData = new JsonNode[rootNode.size()][];
-    for(int i=0; i<rootNode.size(); i++) {
-      objData[i] = new JsonNode[]{ rootNode.get(i) };
-    }
-    return objData;
-}
-  
 }

@@ -123,8 +123,9 @@ public class Case extends AbstractTemplate {
       JsonNode data = rootNode.get(0);
       Iterator<Entry<String, JsonNode>> nodeIterator = data.fields();
       
+      sb.append(getDataDriven().get().transform(getId()));
       sb.append("\n");
-      sb.append("  @Test (dataProvider = \"").append(dataDriven.getName()).append("\")\n");
+      sb.append("  @Test (dataProvider = \"").append(StringUtil.normalizeName(dataDriven.getName())).append(getId().substring(0, 8)).append("\")\n");
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append("(JsonNode data) throws Exception {\n");
       
       while (nodeIterator.hasNext()) {

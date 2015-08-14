@@ -57,7 +57,4 @@ public class AcceptAlert {
       return false;
     }
   }
-  
-  
-  
 }

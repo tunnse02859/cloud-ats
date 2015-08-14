@@ -4,19 +4,15 @@
 package org.ats.services.keyword;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
-import org.ats.services.datadriven.DataDriven;
-import org.ats.services.datadriven.DataDrivenReference;
 import org.rythmengine.RythmEngine;
 
 import com.mongodb.BasicDBList;
@@ -32,8 +28,6 @@ public class Suite extends AbstractTemplate {
   
   private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
   
-  private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
-  
   Suite(String packageName, 
       String extraImports, 
       String suiteName, 
@@ -41,7 +35,6 @@ public class Suite extends AbstractTemplate {
       String initDriver, 
       int timeoutSeconds, 
       Map<String, CaseReference> cases , 
-      List<DataDrivenReference> dataDrivens, 
       DBObject raw,
       String projectId) {
     
@@ -60,9 +53,6 @@ public class Suite extends AbstractTemplate {
       list.add(caze.toJSon());
     }
     this.put("cases", list);
-    
-    this.dataDrivens = dataDrivens;
-    
     this.put("raw", raw);
     this.put("project_id", projectId);
   }
@@ -99,15 +89,11 @@ public class Suite extends AbstractTemplate {
   public String transform() throws IOException {
     String suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
     StringBuilder sbCase = new StringBuilder();
-    StringBuilder sbDataDriven = new StringBuilder();
     
     for (CaseReference caze : cases.values()) {
       sbCase.append(caze.get().transform());
     }
-    for(DataDrivenReference ref : dataDrivens) {
-      DataDriven data = ref.get();
-      sbDataDriven.append(data.transform());
-    }
+    
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
 
     return engine.render(suite, this.get("package_name"), 
@@ -116,8 +102,7 @@ public class Suite extends AbstractTemplate {
         this.get("driver_var"), 
         this.get("init_driver"), 
         this.get("timeout_seconds"), 
-        sbCase.toString(),
-        sbDataDriven.toString());
+        sbCase.toString());
   }
   
   public static class SuiteBuilder {
@@ -142,8 +127,6 @@ public class Suite extends AbstractTemplate {
     
     private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
     
-    private List<DataDrivenReference> dataDrivens = new ArrayList<DataDrivenReference>();
-
     private DBObject raw;
     
     private String projectId;
@@ -185,13 +168,6 @@ public class Suite extends AbstractTemplate {
       return this;
     }
     
-    public SuiteBuilder addDataDrivens(DataDrivenReference... refs) {
-      for(DataDrivenReference ref : refs) {
-        this.dataDrivens.add(ref);
-      }
-      return this;
-    }
-
     public SuiteBuilder raw(DBObject raw) {
       this.raw = raw;
       return this;
@@ -203,7 +179,7 @@ public class Suite extends AbstractTemplate {
     }
     
     public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, dataDrivens, raw, projectId);
+      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, raw, projectId);
     }
     
   }

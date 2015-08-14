@@ -44,9 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -303,7 +301,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     ObjectMapper mapper = new ObjectMapper();
     HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
     BasicDBObject obj = new BasicDBObject(map);
-    System.out.println(obj);
     CustomKeyword customKeyword = customService.transform(obj);
     Assert.assertEquals(new ObjectMapper().readTree(customKeyword.toString()).toString(), jsonSource);
   }

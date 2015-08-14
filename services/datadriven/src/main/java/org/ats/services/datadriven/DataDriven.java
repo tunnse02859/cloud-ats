@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
+import org.ats.common.StringUtil;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.entity.AbstractEntity;
 import org.ats.services.organization.entity.User;
@@ -94,11 +95,12 @@ public class DataDriven extends AbstractEntity<DataDriven> {
     return tenantRefFactory.create(((BasicDBObject)this.get("tenant")).getString("_id"));
   }
   
-  public String transform() throws IOException {
+  public String transform(String caseId) throws IOException {
+    String caseIdHash = caseId.substring(0, 8);
     StringBuilder sb = new StringBuilder();
 
-    sb.append("@DataProvider(name = \"").append(getName()).append("\")\n");
-    sb.append("  public static Object[][] ").append(getName()).append("() throws Exception {\n");
+    sb.append("@DataProvider(name = \"").append(StringUtil.normalizeName(getName())).append(caseIdHash).append("\")\n");
+    sb.append("  public static Object[][] ").append(StringUtil.normalizeName(getName())).append(caseIdHash).append("() throws Exception {\n");
     sb.append("    ObjectMapper obj = new ObjectMapper();\n");
     
     String data = getDataSource().replace("\n", "").replace("\r", "").replace("\"", "\\\"");
