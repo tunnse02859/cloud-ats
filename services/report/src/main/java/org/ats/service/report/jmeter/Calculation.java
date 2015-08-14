@@ -87,7 +87,7 @@ public class Calculation {
 
     // count false
     if (!httpSamplerObj.getSuccessFlag().equalsIgnoreCase("true")) {
-      summary.setErrorPercent(summary.failures / summary.samples);
+      summary.failures++;
     }
     // error pecent
     summary.setErrorPercent(summary.failures * 100.0 / summary.samples);
@@ -206,7 +206,7 @@ public class Calculation {
 
     // count false
     if (!httpSamplerObj.getSuccessFlag().equalsIgnoreCase("true")) {
-      summary.setErrorPercent(summary.failures / summary.samples);
+      summary.failures++;
     }
     // error pecent
     summary.setErrorPercent(summary.failures * 100.0 / summary.samples);
@@ -223,7 +223,7 @@ public class Calculation {
     //aserttion
     if(httpSamplerObj.getFailureMessage() !=null){
     summary.setNumberAssertion(summary.getNumberAssertion() + 1);
-    if (httpSamplerObj.getFailureMessage().isEmpty()) {
+    if (!httpSamplerObj.getFailureMessage().isEmpty()) {
       summary.setNumberFailuresAssertion(summary.getNumberFailuresAssertion() + 1);
     }
     summary.setPercentFailuresAssertion(summary.getNumberFailuresAssertion() * 100.0 / summary.getNumberAssertion());
