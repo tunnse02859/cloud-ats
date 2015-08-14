@@ -22,6 +22,7 @@ import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
+import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
@@ -70,6 +71,8 @@ public class KeywordController extends Controller {
   @Inject ExecutorService executorService;
   
   @Inject ReportService reportService;
+  
+  @Inject CustomKeywordService customKeywordService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -136,6 +139,51 @@ public class KeywordController extends Controller {
     KeywordProject project = keywordProjectFactory.create(context, name);
     keywordProjectService.create(project);
     return status(201, project.getId());
+  }
+  
+  public Result update() {
+    JsonNode data = request().body().asJson();
+    String id = data.get("id").asText();
+    String name = data.get("name").asText();
+    
+    KeywordProject project = keywordProjectService.get(id);
+    
+    if (name.equals(project.getString("name"))) {
+      return status(304);
+    }
+    
+    project.put("name", name);
+    keywordProjectService.update(project);
+
+    return status(202, id);
+  }
+  
+  public Result delete() {
+    
+    String id = request().body().asText();
+    
+    KeywordProject project = keywordProjectService.get(id);
+    if (project == null) {
+      return status(404);
+    }
+    
+    PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", id));
+    
+    List<AbstractJob<?>> list = null;
+    while (pages.hasNext()) {
+      list = pages.next();
+      for (AbstractJob<?> job : list) {
+        reportService.deleteBy(new BasicDBObject("functional_job_id", job.getId()));
+      }
+    }
+    
+    executorService.deleteBy(new BasicDBObject("project_id", id));
+    suiteService.deleteBy(new BasicDBObject("project_id", id));
+    caseService.deleteBy(new BasicDBObject("project_id", id));
+    customKeywordService.deleteBy(new BasicDBObject("project_id", id));
+    keywordProjectService.delete(project);
+    
+    return status(200);
   }
   
   public Result run(String projectId) throws Exception {
