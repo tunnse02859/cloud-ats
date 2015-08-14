@@ -6,6 +6,7 @@ package org.ats.services.keyword;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,10 +69,11 @@ public class CaseService extends AbstractMongoCRUD<Case>{
   public Case transform(DBObject source) {
     BasicDBObject dbObj = (BasicDBObject) source;
     ObjectMapper mapper = new ObjectMapper();
-
     DataDrivenReference driven = null;
     if (dbObj.get("data_driven") != null) {
-      driven = drivenRefFactory.create(((BasicDBObject)dbObj.get("data_driven")).getString("_id"));
+      HashMap<String, Object> map = (HashMap<String, Object>) dbObj.get("data_driven");
+      JSONObject json = new JSONObject(map);
+      driven = drivenRefFactory.create(json.getString("_id"));
     }
     
     Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven);

@@ -280,12 +280,21 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
   
   @Test
   public void testCaseJsonTranforms() throws Exception {
-    String jsonSource = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"The first new test case\",\"data_driven\":null,\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
+    String jsonSource_notData = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"The first new test case\",\"data_driven\":null,\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
+    String jsonSource_Data = "{\"_id\":\"45b8932b-c34b-42ff-a99c-c93718e1a908\",\"project_id\":\"146c61e6-71b1-4ee3-ba57-61a5c4cfab8f\",\"name\":\"nambv2\",\"data_driven\":{\"_id\":\"423e1668-d506-4a6e-8d74-689fee42b477\"},\"created_date\":{\"$date\":\"2015-08-12T14:00:12.140Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"${url}\",\"params\":[\"url\"]}]}";
     ObjectMapper mapper = new ObjectMapper();
-    HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
-    BasicDBObject obj = new BasicDBObject(map);
-    Case caze = caseService.transform(obj);
-    Assert.assertEquals(new ObjectMapper().readTree(caze.toString()).toString(), jsonSource);
+    
+    //Case hasn't datadriven
+    HashMap<String, Object> map_notData = mapper.readValue(jsonSource_notData, HashMap.class);
+    BasicDBObject obj_notData = new BasicDBObject(map_notData);
+    Case case_notData = caseService.transform(obj_notData);
+    Assert.assertEquals(new ObjectMapper().readTree(case_notData.toString()).toString(), jsonSource_notData);
+    
+    //Case has datadriven
+    HashMap<String, Object> map_data = mapper.readValue(jsonSource_Data, HashMap.class);
+    BasicDBObject obj_data = new BasicDBObject(map_data);
+    Case case_data = caseService.transform(obj_data);
+    Assert.assertEquals(new ObjectMapper().readTree(case_data.toString()).toString(), jsonSource_Data);
   }
   
   @Test
