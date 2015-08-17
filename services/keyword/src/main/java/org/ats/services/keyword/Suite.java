@@ -4,19 +4,21 @@
 package org.ats.services.keyword;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.rythmengine.RythmEngine;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -26,34 +28,24 @@ import com.mongodb.DBObject;
 @SuppressWarnings("serial")
 public class Suite extends AbstractTemplate {
   
-  private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
+  @Inject ReferenceFactory<CaseReference> caseRefFactory;
   
-  Suite(String packageName, 
-      String extraImports, 
-      String suiteName, 
-      String driverVar, 
-      String initDriver, 
-      int timeoutSeconds, 
-      Map<String, CaseReference> cases , 
-      DBObject raw,
-      String projectId) {
+  @Inject
+  Suite(@Assisted("projectId") String projectId, 
+      @Assisted("suiteName") String suiteName, 
+      @Assisted("initDriver") String initDriver, 
+      @Assisted("cases") List<CaseReference> cases) {
     
     this.put("_id", UUID.randomUUID().toString());
-    this.put("package_name", packageName);
-    this.put("extra_imports", extraImports);
     this.put("name", suiteName);
-    this.put("driver_var", driverVar);
     this.put("init_driver", initDriver);
-    this.put("timeout_seconds", timeoutSeconds);
     this.put("created_date", new Date());
     
-    this.cases = cases;
     BasicDBList list = new BasicDBList();
-    for (CaseReference caze : cases.values()) {
+    for (CaseReference caze : cases) {
       list.add(caze.toJSon());
     }
     this.put("cases", list);
-    this.put("raw", raw);
     this.put("project_id", projectId);
   }
   
@@ -73,114 +65,38 @@ public class Suite extends AbstractTemplate {
     return this.getDate("created_date");
   }
   
+  public List<CaseReference> getCases() {
+    BasicDBList list = (BasicDBList) this.get("cases");
+    List<CaseReference> cases = new ArrayList<CaseReference>();
+    for (Object obj : list) {
+      cases.add(caseRefFactory.create(((BasicDBObject) obj).getString("_id")));
+    }
+    return Collections.unmodifiableList(cases);
+  }
+  
   public void removeCase(CaseReference caseRef) {
-    this.cases.remove(caseRef.getId());
     BasicDBList list = new BasicDBList();
-    for (CaseReference caze : cases.values()) {
+    BasicDBList cases = (BasicDBList) this.get("cases");
+    for (Object obj : cases) {
+      BasicDBObject caze = (BasicDBObject) obj;
+      if (caze.getString("_id").equals(caseRef.getId())) continue;
       list.add(caze);
     }
     this.put("cases", list);
-  }
-
-  public Collection<CaseReference> getCases() {
-    return Collections.unmodifiableCollection(cases.values());
   }
   
   public String transform() throws IOException {
     String suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
     StringBuilder sbCase = new StringBuilder();
     
-    for (CaseReference caze : cases.values()) {
+    BasicDBList list = this.get("cases") != null ? (BasicDBList) this.get("cases") : new BasicDBList();
+    for (Object obj : list) {
+      CaseReference caze = caseRefFactory.create(((BasicDBObject) obj).getString("_id"));
       sbCase.append(caze.get().transform());
     }
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
 
-    return engine.render(suite, this.get("package_name"), 
-        this.get("extra_imports"), 
-        StringUtil.normalizeName((String) this.get("name")), 
-        this.get("driver_var"), 
-        this.get("init_driver"), 
-        this.get("timeout_seconds"), 
-        sbCase.toString());
-  }
-  
-  public static class SuiteBuilder {
-    
-    public static final String DEFAULT_DRIVER_VAR = "FirefoxDriver wd;";
-    
-    public static final String DEFAULT_INIT_DRIVER = "wd = new FirefoxDriver();";
-    
-    public static final int DEFAULT_TIMEOUT_SECONDS = 60;
-    
-    private String suiteName;
-    
-    private String packageName;
-    
-    private String extraImports;
-    
-    private String driverVar;
-    
-    private String initDriver;
-    
-    private int timeoutSeconds;
-    
-    private Map<String, CaseReference> cases = new HashMap<String, CaseReference>();
-    
-    private DBObject raw;
-    
-    private String projectId;
-    
-    public SuiteBuilder packageName(String name) {
-      this.packageName = name;
-      return this;
-    }
-    
-    public SuiteBuilder extraImports(String imports) {
-      this.extraImports = imports;
-      return this;
-    }
-    
-    public SuiteBuilder driverVar(String driverVar) {
-      this.driverVar = driverVar;
-      return this;
-    }
-    
-    public SuiteBuilder initDriver(String initDriver) {
-      this.initDriver = initDriver;
-      return this;
-    }
-    
-    public SuiteBuilder timeoutSeconds(int timeoutSeconds) {
-      this.timeoutSeconds = timeoutSeconds;
-      return this;
-    }
-    
-    public SuiteBuilder suiteName(String name) {
-      this.suiteName = name;
-      return this;
-    }
-    
-    public SuiteBuilder addCases(CaseReference...cases) {
-      for (CaseReference caze : cases) {
-        this.cases.put(caze.getId(), caze);
-      }
-      return this;
-    }
-    
-    public SuiteBuilder raw(DBObject raw) {
-      this.raw = raw;
-      return this;
-    }
-    
-    public SuiteBuilder projectId(String projectId) {
-      this.projectId = projectId;
-      return this;
-    }
-    
-    public Suite build() {
-      return new Suite(packageName, extraImports, suiteName, driverVar, initDriver, timeoutSeconds, cases, raw, projectId);
-    }
-    
+    return engine.render(suite, StringUtil.normalizeName((String) this.get("name")), this.getString("init_driver"), sbCase.toString());
   }
 }

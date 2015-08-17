@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import org.ats.common.PageList;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.keyword.Suite.SuiteBuilder;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.joda.time.format.DateTimeFormatter;
@@ -37,6 +36,9 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   private ReferenceFactory<CaseReference> caseRefFactory;
   
   @Inject
+  private SuiteFactory suiteFactory;
+  
+  @Inject
   SuiteService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -52,39 +54,27 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     return query(new BasicDBObject("project_id", projectId));
   }
   
+  @SuppressWarnings("rawtypes")
   @Override
   public Suite transform(DBObject source) {
     
     BasicDBObject obj = (BasicDBObject) source;
-    SuiteBuilder builder = new SuiteBuilder();
     
-    builder.packageName(obj.getString("package_name"))
-      .suiteName(obj.getString("name"))
-      .driverVar(obj.getString("driver_var"))
-      .initDriver(obj.getString("init_driver"))
-      .timeoutSeconds(obj.getInt("timeout_seconds"))
-      .raw((DBObject) obj.get("raw"))
-      .projectId(obj.getString("project_id"));
-    
-    if (obj.get("cases") == null) {
-      Suite suite = builder.build();
-      suite.put("_id", source.get("_id"));
-      suite.put("created_date", obj.getDate("created_date"));
-      return suite;
-    }
-    
-    ArrayList<Object> cases = (ArrayList<Object>)  obj.get("cases");
+    List<CaseReference> list = new ArrayList<CaseReference>();
+
+    ArrayList cases = (ArrayList)  obj.get("cases");
     for (Object foo : cases) {
       if (foo instanceof Map) {
         CaseReference caseRef = caseRefFactory.create((String)((Map)foo).get("_id"));
-        builder.addCases(caseRef);
+        list.add(caseRef);
       } else if (foo instanceof DBObject) {
         CaseReference caseRef = caseRefFactory.create(((BasicDBObject)foo).getString("_id"));
-        builder.addCases(caseRef);
+        list.add(caseRef);
       }
     }
     
-    Suite suite = builder.build();
+    Suite suite = suiteFactory.create(obj.getString("project_id"), obj.getString("name"), obj.getString("init_driver"), list);
+
     suite.put("_id", source.get("_id"));
     
     Object date = obj.get("created_date"); 

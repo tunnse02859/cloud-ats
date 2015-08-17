@@ -45,6 +45,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     return query(new BasicDBObject("project_id", projectId));
   }
   
+  @SuppressWarnings("rawtypes")
   @Override
   public JMeterScript transform(DBObject source) {
     BasicDBObject obj = (BasicDBObject) source;
@@ -58,7 +59,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     
     List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
     
-    ArrayList<Object> listSampler = (ArrayList<Object>) obj.get("samplers");
+    ArrayList listSampler = (ArrayList) obj.get("samplers");
       
     ObjectMapper mapper = new ObjectMapper();
     for (Object bar : listSampler) {

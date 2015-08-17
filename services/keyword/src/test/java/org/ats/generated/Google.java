@@ -6,7 +6,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +17,15 @@ import java.util.Date;
 import java.io.File;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.*;
 import static org.openqa.selenium.OutputType.*;
 
 public class Google {
 
-  FirefoxDriver wd;
+  private RemoteWebDriver wd;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -38,8 +39,8 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource12f97523")
-  public static Object[][] userSource12f97523() throws Exception {
+  @DataProvider(name = "userSource0dbcb692")
+  public static Object[][] userSource0dbcb692() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\",\"password\":\"a\"},	{\"username\":\"foo1\",\"password\":\"a1\"}]");
 
@@ -49,7 +50,7 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource12f97523")
+  @Test (dataProvider = "userSource0dbcb692")
   public void test(JsonNode data) throws Exception {
     String username = data.get("username").toString().split("\"")[1];
     String password = data.get("password").toString().split("\"")[1];
@@ -64,7 +65,7 @@ public class Google {
 
   }
 
-  public static boolean isAlertPresent(FirefoxDriver wd) {
+  public static boolean isAlertPresent(RemoteWebDriver wd) {
     try {
       wd.switchTo().alert();
       return true;

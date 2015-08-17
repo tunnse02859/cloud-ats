@@ -16,6 +16,7 @@ public class SetBuilder<T> {
 
   private Set<T> set = new HashSet<T>();
   
+  @SuppressWarnings("unchecked")
   public SetBuilder(T ...args) {
     set.addAll(Arrays.asList(args));
   }

@@ -4,7 +4,9 @@
 package org.ats.services.executor;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
@@ -31,7 +33,7 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.Suite.SuiteBuilder;
+import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.base.AuthenticationService;
@@ -79,6 +81,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   private KeywordProjectService keywordProjectService;
   private KeywordProjectFactory keywordProjectFactory;
   private SuiteService suiteService;
+  private SuiteFactory suiteFactory;
   private ReferenceFactory<SuiteReference> suiteRefFactory;
   private CaseFactory caseFactory;
   private CaseService caseService;
@@ -119,6 +122,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     this.keywordProjectFactory = injector.getInstance(KeywordProjectFactory.class);
     
     this.suiteService = injector.getInstance(SuiteService.class);
+    this.suiteFactory = injector.getInstance(SuiteFactory.class);
     this.suiteRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SuiteReference>>(){}));
     
     this.caseService = injector.getInstance(CaseService.class);
@@ -221,45 +225,29 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
-    
-    SuiteBuilder builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("FullExample")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(project.getId());
-    
     JsonNode stepsNode = rootNode.get("steps");
+    List<CaseReference> cases = new ArrayList<CaseReference>();
     Case caze = caseFactory.create(project.getId(), "test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
     caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
+    cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= builder.build();
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
-    
-    builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("AcceptAlert")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(project.getId());
-    
     stepsNode = rootNode.get("steps");
+    cases.clear();
     caze = caseFactory.create(project.getId(), "test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
     caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
-    
-    Suite acceptAlertSuite = builder.build();
+    cases.add(caseRefFactory.create(caze.getId()));
+
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);

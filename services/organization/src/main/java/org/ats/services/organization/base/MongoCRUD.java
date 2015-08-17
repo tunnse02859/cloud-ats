@@ -19,6 +19,7 @@ public interface MongoCRUD<T extends DBObject> {
 
   public void create(List<DBObject> list);
   
+  @SuppressWarnings("unchecked")
   public void create(T... obj);
   
   public void update(T obj);

@@ -19,7 +19,6 @@ import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.event.AbstractEventTestCase;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -51,8 +50,6 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
   
   private PerformanceProjectService service;
   
-  private ReferenceFactory<JMeterScriptReference> jmeterScriptRef;
-  
   private JMeterScriptService  jmeterService;
   
   private Tenant tenant;
@@ -72,7 +69,6 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     this.service = injector.getInstance(PerformanceProjectService.class);
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     this.context = this.injector.getInstance(OrganizationContext.class);
-    this.jmeterScriptRef = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<JMeterScriptReference>>(){}));
     this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -177,6 +173,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     Assert.assertEquals(performanceProject.getId(), jmeter.getProjectId());
   }
   
+  @SuppressWarnings("unchecked")
   @Test
   public void testScriptTransform() throws JsonParseException, JsonMappingException, IOException {
     String jsonSource = "{\"_id\":\"92eba01e-f1a1-4d6c-a5eb-586487e009af\",\"name\":\"Testsdgsdgsgsgsdg\",\"loops\":1,\"number_threads\":1,\"ram_up\":5,\"scheduler\":false,\"duration\":0,\"samplers\":[{\"method\":\"GET\",\"name\":\"dsgsdg\",\"url\":\"sdgsdg\",\"assertion_text\":\"sdgsdgdg\",\"constant_time\":0,\"arguments\":[{\"paramName\":\"sdgsd\",\"paramValue\":\"gsdgsdg\"}]}],\"project_id\":\"73e29bd5-29aa-4b06-ab03-0162c5f0ec25\"}";
