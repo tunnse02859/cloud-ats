@@ -118,13 +118,15 @@ public class DataDrivenController extends Controller {
     String id = json.get("id").asText();
     JsonNode dataset = json.get("dataset");
     DataDriven driven = dataDrivenService.get(id);
+    String name = json.get("name").asText();
     
-    if (dataset.toString().equals(driven.getDataSource())) {
+    if (dataset.toString().equals(driven.getDataSource()) && name.equals(driven.getName())) {
       return status(304);
     }
+    driven.put("name", name);
     driven.setDataSource(dataset.toString());
     dataDrivenService.update(driven);
     
-    return ok(Json.parse(driven.toString()));
+    return status(200, Json.parse(driven.toString()));
   }
 }
