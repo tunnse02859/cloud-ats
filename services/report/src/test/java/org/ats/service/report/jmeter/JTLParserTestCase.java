@@ -8,10 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
 import org.ats.service.ReportModule;
@@ -33,21 +29,14 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.executor.job.PerformanceJobFactory;
-import org.ats.services.iaas.openstack.OpenStackService;
-import org.ats.services.organization.base.AuthenticationService;
-import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.event.AbstractEventTestCase;
 import org.ats.services.performance.JMeterScriptReference;
-import org.ats.services.performance.JMeterScriptService;
-import org.ats.services.performance.PerformanceProjectFactory;
-import org.ats.services.performance.PerformanceProjectService;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -58,13 +47,8 @@ import com.mongodb.BasicDBObject;
  */
 public class JTLParserTestCase extends AbstractEventTestCase {
   
-  private PerformanceProjectService perfService;
-  private PerformanceProjectFactory perfFactory;
   private PerformanceJobFactory perfJobFactory;
-  private JMeterScriptService jmeterService;
-  private ReferenceFactory<JMeterScriptReference> jmeterScriptRef;
   private ExecutorService executorService;
-  private OpenStackService openstackService;
   private ReportService reportService;
   
   @BeforeClass
@@ -79,15 +63,8 @@ public class JTLParserTestCase extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
 
     // performance
-    this.perfFactory = injector.getInstance(PerformanceProjectFactory.class);
     this.perfJobFactory = injector.getInstance(PerformanceJobFactory.class);
-    this.perfService = injector.getInstance(PerformanceProjectService.class);
-    this.jmeterScriptRef = this.injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<JMeterScriptReference>>() {
-    }));
-    this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
-
     this.executorService = injector.getInstance(ExecutorService.class);
-    this.openstackService = injector.getInstance(OpenStackService.class);
     this.reportService = injector.getInstance(ReportService.class);
 
     // start event service

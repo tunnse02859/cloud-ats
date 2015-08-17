@@ -65,6 +65,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     return super.query(new BasicDBObject("project_id", projectId));
   }
   
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public Case transform(DBObject source) {
     BasicDBObject dbObj = (BasicDBObject) source;
@@ -89,7 +90,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
     }
     
     if (dbObj.get("steps") != null) {
-      ArrayList<Object> actions = (ArrayList<Object>) dbObj.get("steps");
+      ArrayList actions = (ArrayList) dbObj.get("steps");
       for (Object bar : actions) {
         try {
           if (bar instanceof Map) {
@@ -111,6 +112,7 @@ public class CaseService extends AbstractMongoCRUD<Case>{
   public void delete(Case obj) {
     if (obj == null) return;
     super.delete(obj);
+    
     CaseReference caseRef = caseRefFactory.create(obj.getId());
     PageList<Suite> list = suiteService.findIn("cases", caseRef);
     List<Suite> holder = new ArrayList<Suite>();

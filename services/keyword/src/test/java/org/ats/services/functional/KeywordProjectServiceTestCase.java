@@ -29,7 +29,7 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.Suite.SuiteBuilder;
+import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
@@ -65,6 +65,8 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
 
   private SuiteService suiteService;
   
+  private SuiteFactory suiteFactory;
+  
   private CaseFactory caseFactory;
   
   private CaseService caseService;
@@ -98,7 +100,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.funcFactory = injector.getInstance(KeywordProjectFactory.class);
     
     this.suiteService = injector.getInstance(SuiteService.class);
-    
+    this.suiteFactory = injector.getInstance(SuiteFactory.class);
     this.caseService = injector.getInstance(CaseService.class);
     this.caseFactory = injector.getInstance(CaseFactory.class);
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
@@ -194,15 +196,8 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
     
-    SuiteBuilder builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName("FullExample")
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(project.getId());
-    
     JsonNode stepsNode = rootNode.get("steps");
+    List<CaseReference> cases = new ArrayList<CaseReference>();
     
     Case caze = caseFactory.create(project.getId(), "test", null);
     
@@ -210,9 +205,14 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
       caze.addAction(json);
     }
     caseService.create(caze);
-    builder.addCases(caseRefFactory.create(caze.getId()));
-
-    Suite suite = builder.build();
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    //an other case
+    caze = caseFactory.create(project.getId(), "test2", null);
+    caseService.create(caze);
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    Suite suite = suiteFactory.create("fake", "FullExamle", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(suite);
     
     //test delete case in suite
@@ -225,7 +225,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertNull(caseService.get(caze.getId()));
     
     suite = suiteService.get(suite.getId());
-    Assert.assertEquals(suite.getCases().size(), 0);
+    Assert.assertEquals(suite.getCases().size(), 1);
   }
   
   @Test
@@ -276,6 +276,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertEquals(customKeyword.getActions().size(), 0);
   }
   
+  @SuppressWarnings("unchecked")
   @Test
   public void testCaseJsonTranforms() throws Exception {
     String jsonSource_notData = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"The first new test case\",\"data_driven\":null,\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
@@ -295,6 +296,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertEquals(new ObjectMapper().readTree(case_data.toString()).toString(), jsonSource_Data);
   }
   
+  @SuppressWarnings("unchecked")
   @Test
   public void testCustomKeywordJsonTranforms() throws Exception {
     String jsonSource = "{\"_id\":\"881214e9-860c-4f12-9d86-a2af4b04bb78\",\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\",\"name\":\"Update-Customkeyword\",\"created_date\":{\"$date\":\"2015-08-03T17:07:12.524Z\"},\"steps\":[{\"type\":\"get\",\"description\":\"Navigate to the given URL.\",\"url\":\"\",\"params\":[\"url\"]}]}";
@@ -305,9 +307,10 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertEquals(new ObjectMapper().readTree(customKeyword.toString()).toString(), jsonSource);
   }
   
+  @SuppressWarnings("unchecked")
   @Test
   public void testSuiteJsonTranforms() throws Exception {
-    String jsonSource = "{\"_id\":\"eaf35abe-1060-4fa0-9bd0-faa8f0d9dd1a\",\"package_name\":\"org.ats.generated\",\"extra_imports\":null,\"name\":\"1\",\"driver_var\":\"FirefoxDriver wd;\",\"init_driver\":\"wd = new FirefoxDriver();\",\"timeout_seconds\":60,\"created_date\":{\"$date\":\"2015-08-05T07:59:41.749Z\"},\"cases\":[{\"_id\":\"e783a5c8-13ce-41aa-9010-3f56a188199b\"}],\"raw\":null,\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\"}";
+    String jsonSource = "{\"_id\":\"eaf35abe-1060-4fa0-9bd0-faa8f0d9dd1a\",\"name\":\"1\",\"init_driver\":\"wd = new FirefoxDriver();\",\"created_date\":{\"$date\":\"2015-08-05T07:59:41.749Z\"},\"cases\":[{\"_id\":\"e783a5c8-13ce-41aa-9010-3f56a188199b\"}],\"project_id\":\"d756b8b1-f30d-439f-8491-43a7572b9b34\"}";
     ObjectMapper mapper = new ObjectMapper();
     HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
     BasicDBObject obj = new BasicDBObject(map);

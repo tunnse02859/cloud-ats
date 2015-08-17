@@ -50,6 +50,7 @@ public abstract class AbstractMongoCRUD<T extends DBObject> implements MongoCRUD
     return this.col.count();
   }
   
+  @SuppressWarnings("unchecked")
   public void create(T... obj) {
     this.col.insert(obj);
   }

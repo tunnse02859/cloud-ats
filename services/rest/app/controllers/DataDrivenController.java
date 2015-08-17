@@ -85,7 +85,7 @@ public class DataDrivenController extends Controller {
     String name = json.get("name").asText();
     String caseId = json.get("caseId").asText();
     JsonNode dataset = json.get("dataset");
-    System.out.println(dataset.toString());
+    
     Case caze = caseService.get(caseId);
     DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
     

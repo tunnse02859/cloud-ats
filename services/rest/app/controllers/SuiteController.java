@@ -3,10 +3,13 @@
  */
 package controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ats.common.PageList;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.Suite.SuiteBuilder;
+import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -32,6 +35,8 @@ public class SuiteController extends Controller {
   
   @Inject SuiteService suiteService;
   
+  @Inject SuiteFactory suiteFactory;
+  
   @Inject ReferenceFactory<CaseReference> caseRefFactory;
   
   public Result list(String projectId) {
@@ -54,19 +59,12 @@ public class SuiteController extends Controller {
     String suiteName = data.get("name").asText();
     JsonNode cases = data.get("cases");
     
-    SuiteBuilder builder = new SuiteBuilder();
-    builder.packageName("org.ats.generated")
-      .suiteName(suiteName)
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw(null).projectId(projectId);
-    
+    List<CaseReference> list = new ArrayList<CaseReference>();
     for (JsonNode testCase : cases) {
-      builder.addCases(caseRefFactory.create(testCase.get("_id").asText()));
+      list.add(caseRefFactory.create(testCase.get("_id").asText()));
     }
     
-    Suite suite = builder.build();
+    Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, list);
     suiteService.create(suite);
     
     return status(201, Json.parse(suite.toString()));

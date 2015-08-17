@@ -65,6 +65,7 @@ public class SSHClient {
           filesize=filesize*10L+(long)(buf[0]-'0');
         }
 
+        @SuppressWarnings("unused")
         String file=null;
         for(int i=0;;i++){
           in.read(buf, i, 1);

@@ -49,6 +49,7 @@ public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
     return query(new BasicDBObject("project_id", projectId));
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public CustomKeyword transform(DBObject source) {
     BasicDBObject dbObject = (BasicDBObject) source;
@@ -66,7 +67,7 @@ public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
     }
     
     if (dbObject.get("steps") != null) {
-      ArrayList<Object> actions = (ArrayList<Object>) dbObject.get("steps");
+      ArrayList actions = (ArrayList) dbObject.get("steps");
       for (Object bar : actions) {
         try {
           if (bar instanceof Map) {

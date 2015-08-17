@@ -6,6 +6,8 @@ package org.ats.services.functional;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
@@ -18,7 +20,8 @@ import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.CaseService;
-import org.ats.services.keyword.Suite.SuiteBuilder;
+import org.ats.services.keyword.Suite;
+import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.event.AbstractEventTestCase;
 import org.testng.Assert;
@@ -32,8 +35,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -51,6 +52,8 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
   /** .*/
   private CaseFactory caseFactory;
   
+  private SuiteFactory suiteFactory;
+  
   private CaseService caseService;
   
   private ReferenceFactory<CaseReference> caseRefFactory;
@@ -67,6 +70,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     
     this.caseService = injector.getInstance(CaseService.class);
     this.caseFactory = injector.getInstance(CaseFactory.class);
+    this.suiteFactory = injector.getInstance(SuiteFactory.class);
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.mongoService = injector.getInstance(MongoDBService.class);
@@ -140,30 +144,24 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
   
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
 
-    SuiteBuilder builder = new SuiteBuilder();
-    
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
     
-    builder.packageName("org.ats.generated")
-      .suiteName(testClass)
-      .driverVar(SuiteBuilder.DEFAULT_DRIVER_VAR)
-      .initDriver(SuiteBuilder.DEFAULT_INIT_DRIVER)
-      .timeoutSeconds(SuiteBuilder.DEFAULT_TIMEOUT_SECONDS)
-      .raw((DBObject)JSON.parse(rootNode.toString()));
-    
     JsonNode stepsNode = rootNode.get("steps");
 
+    List<CaseReference> cases = new ArrayList<CaseReference>();
     Case caze = caseFactory.create("fake", "test", null);
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
     caseService.create(caze);
     
-    builder.addCases(caseRefFactory.create(caze.getId()));
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = builder.build().transform();
+      String output = suite.transform();
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/" + testClass +".java"));
       writer.write(output);
       writer.close();

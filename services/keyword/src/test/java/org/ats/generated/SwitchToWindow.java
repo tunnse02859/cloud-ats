@@ -6,7 +6,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +17,15 @@ import java.util.Date;
 import java.io.File;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.*;
 import static org.openqa.selenium.OutputType.*;
 
 public class SwitchToWindow {
 
-  FirefoxDriver wd;
+  private RemoteWebDriver wd;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -51,7 +52,7 @@ public class SwitchToWindow {
 
   }
 
-  public static boolean isAlertPresent(FirefoxDriver wd) {
+  public static boolean isAlertPresent(RemoteWebDriver wd) {
     try {
       wd.switchTo().alert();
       return true;

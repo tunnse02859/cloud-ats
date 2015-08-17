@@ -196,7 +196,6 @@ public class ScriptController extends Controller {
     
     JsonNode data = request().body().asJson();
     
-    System.out.println(data.toString());
     BasicDBObject obj = Json.fromJson(data, BasicDBObject.class);
     
     JMeterScript script = service.transform(obj);
