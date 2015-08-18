@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.ats</groupId>
 		<artifactId>cloud</artifactId>
-		<version>1.0.0-Alpha-1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>cloud-jenkins</artifactId>

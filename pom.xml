@@ -3,13 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <jclouds.version>1.9.0</jclouds.version>
+		<jclouds.version>1.9.0</jclouds.version>
+		<cloudats.version>1.0.0</cloudats.version>
   </properties>
 
   <groupId>org.ats</groupId>
   <artifactId>cloud</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0-Alpha-1-SNAPSHOT</version>
+	<version>${cloudats.version}</version>
 
 
 	<dependencyManagement>
@@ -19,135 +20,81 @@
 			<dependency>
 				<groupId>org.ats</groupId>
 				<artifactId>cloud-common</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats</groupId>
 				<artifactId>cloud-jenkins</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>database</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>organization</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>organization</artifactId>
 				<type>test-jar</type>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>event</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>keyword</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>generator</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>executor</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>datadriven</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>performance</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>vmachine</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>report</artifactId>
-				<version>1.0.0-Alpha-1-SNAPSHOT</version>
+				<version>${cloudats.version}</version>
 			</dependency>
-			<!--
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-cloudstack</artifactId>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-cloudstack</artifactId>
-				<classifier>tests</classifier>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-user-mgt</artifactId>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-jenkins</artifactId>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-gitlab</artifactId>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-gitlab</artifactId>
-				<classifier>tests</classifier>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-			  <groupId>org.ats</groupId>
-				<artifactId>cloud-jmeter</artifactId>
-				<version>0.1-SNAPSHOT</version>
-			</dependency>
-			-->
-
-			<!--
-			<dependency>
-				<groupId>org.apache.jclouds</groupId>
-				<artifactId>jclouds-all</artifactId>
-				<version>1.7.2</version>
-			</dependency>
-			-->
 
 			<dependency>
 				<groupId>org.mongodb</groupId>
@@ -197,14 +144,6 @@
 				<version>1.0.1</version>
 			</dependency>
 
-			<!--
-			<dependency>
-				<groupId>org.apache.cloudstack</groupId>
-				<artifactId>cloud-api</artifactId>
-				<version>4.3.0</version>
-			</dependency>
-			-->
-
 			<!-- http client -->
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -224,35 +163,6 @@
 				<version>1.9.16</version>
 			</dependency>
 			<!-- end -->
-
-			<!-- Jenkins api
-			<dependency>
-				<groupId>org.jenkins-ci.main</groupId>
-				<artifactId>cli</artifactId>
-				<version>1.558</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jenkins-ci.main</groupId>
-				<artifactId>jenkins-core</artifactId>
-				<version>1.558</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jenkins-ci.plugins</groupId>
-				<artifactId>ssh-slaves</artifactId>
-				<version>1.6</version>
-			</dependency>
-			End Jenkins dependencies -->
-
-
-			<!-- GitLab 
-			<dependency>
-				<groupId>org.gitlab</groupId>
-				<artifactId>java-gitlab-api</artifactId>
-				<version>1.1.4</version>
-			</dependency>
-			-->
 
 			<dependency>
 				<groupId>com.google.inject</groupId>
@@ -364,13 +274,6 @@
 		<module>jenkins</module>
 		<module>services</module>
 	</modules>
-
-	<repositories>
-		<repository>
-			<id>jenkins-release</id>
-			<url>http://repo.jenkins-ci.org/releases/</url>
-		</repository>
-	</repositories>
 
 	<build>
 		<plugins>
