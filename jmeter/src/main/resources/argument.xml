@@ -1,7 +1,0 @@
-<elementProp name="@paramName" elementType="HTTPArgument">
-	<boolProp name="HTTPArgument.always_encode">true</boolProp>
-	<stringProp name="Argument.name">@paramName</stringProp>
-	<stringProp name="Argument.value">@paramValue</stringProp>
-	<stringProp name="Argument.metadata">=</stringProp>
-	<boolProp name="HTTPArgument.use_equals">true</boolProp>
-</elementProp>
