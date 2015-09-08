@@ -95,7 +95,7 @@ public class JenkinsSlave {
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(slaveTmpl.getBytes())));
     String line = null;
     while ((line = reader.readLine()) != null) {
-      String[] arrays = line.split("\t");
+      String[] arrays = line.split(" ");
       if (arrays.length == 2) {
         String name = arrays[0].trim();
         String value = arrays[1].trim();

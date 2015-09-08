@@ -207,6 +207,7 @@ public class OpenStackService implements IaaSServiceInterface {
    * @throws InitializeTenantException
    * @throws CreateVMException
    */
+  @Override
   public void initTenant(TenantReference tenantRef) throws InitializeTenantException, CreateVMException {
     addCredential(tenantRef.getId());
     org.ats.services.organization.entity.Tenant atsTenant = tenantRef.get();
@@ -617,6 +618,7 @@ public class OpenStackService implements IaaSServiceInterface {
     }
   }
   
+  @Override
   public VMachine allocateFloatingIp(VMachine vm) {
     if (vm.getPublicIp() != null) return vm;
     
@@ -632,6 +634,7 @@ public class OpenStackService implements IaaSServiceInterface {
     return vm;
   }
   
+  @Override
   public VMachine deallocateFloatingIp(VMachine vm) {
     
     if (vm.getPublicIp() == null) return vm;

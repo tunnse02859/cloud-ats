@@ -29,4 +29,8 @@ public interface IaaSServiceInterface {
   public VMachine rebuild(VMachine machine) throws RebuildVMException;
   
   public void destroy(VMachine machine) throws DestroyVMException;
+  
+  public VMachine allocateFloatingIp(VMachine vm);
+  
+  public VMachine deallocateFloatingIp(VMachine vm);
 }
