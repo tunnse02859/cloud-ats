@@ -3,13 +3,13 @@
  */
 package org.ats.jenkins;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +22,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.ats.common.MapBuilder;
+import org.ats.common.StringUtil;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.rythmengine.Rythm;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -38,24 +41,58 @@ public class JenkinsSlave {
   private String slaveAddress;
   
   /** .*/
+  private String credentialId;
+  
+  /** .*/
   private JenkinsMaster master;
   
   /** .*/
   private Map<String, String> environment;
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress) {
-    this(master, slaveAddress, null);
+  /** .*/
+  private String slaveTmpl, slaveJsonTmpl;
+  
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress) throws IOException {
+    this(master, slaveAddress, System.getProperty("jenkins.slave.credential"));
   }
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment) {
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, String credentialId) throws IOException {
+    this(master, slaveAddress, new HashMap<String, String>(), credentialId);
+  }
+  
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment) throws IOException {
+    this(master, slaveAddress, environment, System.getProperty("jenkins.slave.credential"));
+  }
+  
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment, String credentialId) throws IOException {
     this.slaveAddress = slaveAddress;
     this.master = master;
     this.environment = environment;
+    this.credentialId = credentialId;
+    
+    String slaveTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-template"));
+    this.slaveTmpl = Rythm.render(slaveTmpl, new MapBuilder<String, String>("credential", credentialId).build());
+    
+    String slaveJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-json-template"));
+    this.slaveJsonTmpl = Rythm.render(slaveJsonTmpl, new MapBuilder<String, String>("name", slaveAddress).append("credential", credentialId).build());
+  }
+  
+  public String getCredential() {
+    return credentialId;
+  }
+  
+  public String getSlaveTemplate() {
+    return slaveTmpl;
+  }
+  
+  public String getSlaveJsonTemplate() {
+    return slaveJsonTmpl;
   }
   
   private HttpEntity buildFormData() throws IOException {
     List<NameValuePair> list = new ArrayList<NameValuePair>();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-template")));
+    
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(slaveTmpl.getBytes())));
     String line = null;
     while ((line = reader.readLine()) != null) {
       String[] arrays = line.split("\t");
@@ -74,14 +111,7 @@ public class JenkinsSlave {
       }
     }
     
-    BufferedInputStream is = new BufferedInputStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-json-template"));
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    byte[] buff = new byte[1024];
-    for (int i = is.read(buff); i != -1; i = is.read(buff)) {
-      bos.write(buff, 0, i);
-    }
-    String json = new String(bos.toByteArray());
-    json = String.format(json, slaveAddress, slaveAddress);
+    String json = slaveJsonTmpl;
     
     if (environment != null) {
       JSONObject jsonObj = new JSONObject(json);
