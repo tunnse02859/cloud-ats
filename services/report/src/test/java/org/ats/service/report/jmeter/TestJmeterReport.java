@@ -13,7 +13,6 @@ import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
-import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
@@ -22,7 +21,9 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.executor.job.PerformanceJob;
-import org.ats.services.iaas.openstack.OpenStackService;
+import org.ats.services.iaas.IaaSService;
+import org.ats.services.iaas.IaaSServiceProvider;
+import org.ats.services.iaas.VMachineServiceModule;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
@@ -58,16 +59,29 @@ public class TestJmeterReport extends AbstractEventTestCase {
   private JMeterScriptService jmeterService;
 
   private ExecutorService executorService;
-  private OpenStackService openstackService;
+  
+  private IaaSService openstackService;
+  
+  private IaaSServiceProvider iaasProvider;
 
   private ReportService reportService;
 
   @BeforeClass
   public void init() throws Exception {
     System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
+    
+    VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
+    vmModule.setProperty("org.ats.cloud.iaas", "org.ats.services.iaas.OpenStackService");
 
-    this.injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new DataDrivenModule(),
-        new KeywordServiceModule(), new PerformanceServiceModule(), new GeneratorModule(), new VMachineServiceModule("src/test/resources/iaas.conf"),
+    this.injector = Guice.createInjector(
+        new DatabaseModule(), 
+        new EventModule(), 
+        new OrganizationServiceModule(), 
+        new DataDrivenModule(),
+        new KeywordServiceModule(), 
+        new PerformanceServiceModule(),
+        new GeneratorModule(), 
+        vmModule,
         new ExecutorModule(), new ReportModule());
 
     this.mongoService = injector.getInstance(MongoDBService.class);
@@ -84,7 +98,9 @@ public class TestJmeterReport extends AbstractEventTestCase {
     this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
 
     this.executorService = injector.getInstance(ExecutorService.class);
-    this.openstackService = injector.getInstance(OpenStackService.class);
+    
+    this.iaasProvider = injector.getInstance(IaaSServiceProvider.class);
+    this.openstackService = iaasProvider.get();
 
     // start event service
     this.eventService = injector.getInstance(EventService.class);

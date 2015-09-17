@@ -9,7 +9,7 @@ $class  hudson.slaves.RetentionStrategy$Always
 $class  hudson.slaves.SimpleScheduledRetentionStrategy
 $class  hudson.slaves.RetentionStrategy$Demand
 Submit	Save
-_.credentialsId	  965a0c50-868c-48b1-8f3e-b0179bf40666
+_.credentialsId	  @credential
 _.numExecutors	1
 _.port	22
 _.remoteFS	/home/cloudats

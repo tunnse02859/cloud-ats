@@ -21,7 +21,7 @@ import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.generator.GeneratorService;
-import org.ats.services.iaas.openstack.OpenStackService;
+import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.entity.reference.SpaceReference;
@@ -55,7 +55,7 @@ public class TrackingJobActor extends UntypedActor {
   
   @Inject VMachineService vmachineService;
   
-  @Inject OpenStackService openstackService;
+  @Inject IaaSServiceProvider iaasProvider;
   
   @Inject EventFactory eventFactory;
   
@@ -179,8 +179,8 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
     
     if (testVM == null) {
-      testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), false);
-      testVM = openstackService.deallocateFloatingIp(testVM);
+      testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), false);
+      testVM = iaasProvider.get().deallocateFloatingIp(testVM);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
     }
@@ -233,7 +233,7 @@ public class TrackingJobActor extends UntypedActor {
       VMachine vm = vmachineService.get(job.getTestVMachineId());
       if (vm != null) {
         vm.setStatus(VMachine.Status.Started);
-        if (vm.getPublicIp() != null) openstackService.deallocateFloatingIp(vm);
+        if (vm.getPublicIp() != null) iaasProvider.get().deallocateFloatingIp(vm);
         else vmachineService.update(vm);
       }
       
@@ -312,13 +312,13 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
 
     if (testVM == null) {
-      testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), true);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
     }
     
     if (testVM.getPublicIp() == null) {
-      testVM = openstackService.allocateFloatingIp(testVM);
+      testVM = iaasProvider.get().allocateFloatingIp(testVM);
       Thread.sleep(15 * 1000);
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
       logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");

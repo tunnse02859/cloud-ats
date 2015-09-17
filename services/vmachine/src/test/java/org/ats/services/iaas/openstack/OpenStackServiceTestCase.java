@@ -9,11 +9,13 @@ import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.services.OrganizationServiceModule;
-import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
+import org.ats.services.iaas.IaaSService;
+import org.ats.services.iaas.IaaSServiceProvider;
+import org.ats.services.iaas.VMachineServiceModule;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.event.AbstractEventTestCase;
@@ -34,19 +36,27 @@ import com.mongodb.BasicDBObject;
  */
 public class OpenStackServiceTestCase extends AbstractEventTestCase {
 
-  private OpenStackService openstackService;
+  private IaaSService openstackService;
+  
+  private IaaSServiceProvider iaasProvider;
   
   private VMachineService vmachineService;
   
   @BeforeClass
   public void init() throws Exception {
+    
+    VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
+    vmModule.setProperty("org.ats.cloud.iaas", "org.ats.services.iaas.OpenStackService");
+    
     this.injector = Guice.createInjector(
         new DatabaseModule(), 
         new EventModule(),
         new OrganizationServiceModule(),
-        new VMachineServiceModule("src/test/resources/iaas.conf"));
+        vmModule);
     
-    this.openstackService = injector.getInstance(OpenStackService.class);
+    this.iaasProvider = injector.getInstance(IaaSServiceProvider.class);
+    this.openstackService = iaasProvider.get();
+    
     this.vmachineService = injector.getInstance(VMachineService.class);
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -57,7 +67,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     this.eventService.start();
 
     initService();
-    this.openstackService.addCredential("admin", "admin",  "ADMIN_PASS");
+    openstackService.addCredential("admin", "admin",  "ADMIN_PASS");
     
     Tenant fsoft = tenantFactory.create("fsoft-testonly");
     tenantService.create(fsoft);

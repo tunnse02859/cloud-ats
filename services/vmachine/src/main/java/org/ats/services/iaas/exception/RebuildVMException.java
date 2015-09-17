@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.iaas;
+package org.ats.services.iaas.exception;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -9,9 +9,9 @@ package org.ats.services.iaas;
  * Jul 2, 2015
  */
 @SuppressWarnings("serial")
-public class StopVMException extends Exception {
+public class RebuildVMException extends Exception {
 
-  public StopVMException(String message) {
+  public RebuildVMException(String message) {
     super(message);
   }
 }

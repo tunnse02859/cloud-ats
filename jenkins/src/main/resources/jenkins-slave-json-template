@@ -1,12 +1,12 @@
 {
-  "name": "%s", 
+  "name": "@name", 
   "nodeDescription": "", 
   "numExecutors": "1", 
   "remoteFS": "/home/cloudats", 
   "labelString": "", 
   "mode": "NORMAL", 
   "": ["hudson.plugins.sshslaves.SSHLauncher", "hudson.slaves.RetentionStrategy$Always"], 
-  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "$class": "hudson.plugins.sshslaves.SSHLauncher", "host": "%s", "credentialsId": "965a0c50-868c-48b1-8f3e-b0179bf40666", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": "", "maxNumRetries": "", "retryWaitTime": ""}, 
+  "launcher": {"stapler-class": "hudson.plugins.sshslaves.SSHLauncher", "$class": "hudson.plugins.sshslaves.SSHLauncher", "host": "@name", "credentialsId": "@credential", "port": "22", "javaPath": "", "jvmOptions": "", "prefixStartSlaveCmd": "", "suffixStartSlaveCmd": "", "launchTimeoutSeconds": "", "maxNumRetries": "", "retryWaitTime": ""}, 
   "retentionStrategy": {"stapler-class": "hudson.slaves.RetentionStrategy$Always", "$class": "hudson.slaves.RetentionStrategy$Always"}, 
   "nodeProperties": {
     "stapler-class-bag": "true", 

@@ -8,17 +8,25 @@ import org.ats.services.KeywordServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
-import org.ats.services.VMachineServiceModule;
+import org.ats.services.iaas.IaaSService;
+import org.ats.services.iaas.IaaSServiceProvider;
+import org.ats.services.iaas.VMachineServiceModule;
+import org.ats.services.iaas.exception.CreateVMException;
+import org.ats.services.iaas.exception.InitializeTenantException;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
 import org.ats.services.organization.SpaceService;
+import org.ats.services.organization.TenantService;
 import org.ats.services.organization.acl.UnAuthenticatedException;
 import org.ats.services.organization.acl.UnAuthorizationException;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 
 import play.Application;
 import play.GlobalSettings;
@@ -59,6 +67,9 @@ public class Global extends GlobalSettings {
     String eventConf = Play.application().configuration().getString(EventModule.EVENT_CONF);
     String vmConf = Play.application().configuration().getString(VMachineServiceModule.VM_CONF);
     
+    String jenkinsCredential = Play.application().configuration().getString("jenkins.slave.credential");
+    System.setProperty("jenkins.slave.credential", jenkinsCredential);
+    
     try {
       injector = Guice.createInjector(
           new DatabaseModule(dbConf), 
@@ -77,6 +88,13 @@ public class Global extends GlobalSettings {
       eventService.setInjector(injector);
       eventService.addActor(EventTrackingActor.class, "server-bus");
       eventService.start();
+      
+      //hardcode to initialize fsoft tenant
+      TenantService tenantService = injector.getInstance(TenantService.class);
+      Tenant fsoft = tenantService.get("fsoft");
+      if (fsoft == null) {
+        initializeFsoftTenant(injector);
+      }
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -143,6 +161,19 @@ public class Global extends GlobalSettings {
   @Override
   public <T> T getControllerInstance(Class<T> aClass) throws Exception {
     return injector.getInstance(aClass);
+  }
+  
+  private void initializeFsoftTenant(Injector injector) throws InitializeTenantException, CreateVMException {
+    TenantService tenantService = injector.getInstance(TenantService.class);
+    TenantFactory tenantFactory = injector.getInstance(TenantFactory.class);
+    ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    
+    Tenant tenant = tenantFactory.create("fsoft");
+    tenantService.create(tenant);
+    
+    IaaSServiceProvider iaasProvider = injector.getInstance(IaaSServiceProvider.class);
+    IaaSService iaasService = iaasProvider.get();
+    iaasService.initTenant(tenantRefFactory.create(tenant.getId()));
   }
   
 }
