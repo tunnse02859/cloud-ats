@@ -155,33 +155,30 @@ public class JenkinsSlave {
     
     String body = HttpClientUtil.getContentBodyAsString(res);
     if (body.length() == 0) {
-      
       long start = System.currentTimeMillis();
-      
-      while(true) {
-        try {
-        //Wait 15s for next request
-          Thread.sleep(15 * 1000);
-          
-          body = HttpClientUtil.fetch(client, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
-          JSONObject json = new JSONObject(body);
-          boolean offline = json.getBoolean("offline");
-          System.out.println("Jenkins slave offline status is: " + offline);
-          
-          if (offline) {
-            if (System.currentTimeMillis() - start > timeout) return false;
-            else continue;
-          }
-          return true;
-        } catch (Exception e) {
-          e.printStackTrace();
-          if (System.currentTimeMillis() - start > timeout) return false;
-        }
-      }
+      return waitJenkinsSlaveJoinUntil(start, timeout, master.buildURL(new StringBuilder("computer/").append(this.slaveAddress).append("/api/json").toString()));
     }
     
     //
     return false;
+  }
+  
+  private boolean waitJenkinsSlaveJoinUntil(long startTime, long timeout, String fetchUrl) throws IOException, InterruptedException {
+    String body = HttpClientUtil.fetch(HttpClientFactory.getInstance(), fetchUrl);
+    JSONObject json = new JSONObject(body);
+    boolean offline = json.getBoolean("offline");
+    System.out.println("Jenkins slave offline status is: " + offline);
+    
+    if (offline) {
+      if (System.currentTimeMillis() - startTime > timeout) {
+        return false;
+      } else {
+        Thread.sleep(15 * 1000);
+        return waitJenkinsSlaveJoinUntil(startTime, timeout, fetchUrl);
+      }
+    }
+    
+    return !offline;
   }
   
   public boolean release() throws IOException {
