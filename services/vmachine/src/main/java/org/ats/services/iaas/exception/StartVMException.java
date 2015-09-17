@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.iaas;
+package org.ats.services.iaas.exception;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -9,9 +9,9 @@ package org.ats.services.iaas;
  * Jul 2, 2015
  */
 @SuppressWarnings("serial")
-public class DestroyVMException extends Exception {
+public class StartVMException extends Exception {
 
-  public DestroyVMException(String message) {
+  public StartVMException(String message) {
     super(message);
   }
 }

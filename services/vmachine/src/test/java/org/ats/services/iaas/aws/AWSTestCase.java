@@ -4,12 +4,14 @@
 package org.ats.services.iaas.aws;
 
 import org.ats.services.OrganizationServiceModule;
-import org.ats.services.VMachineServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
-import org.ats.services.iaas.CreateVMException;
+import org.ats.services.iaas.IaaSService;
+import org.ats.services.iaas.IaaSServiceProvider;
+import org.ats.services.iaas.VMachineServiceModule;
+import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.organization.event.AbstractEventTestCase;
@@ -31,7 +33,9 @@ public class AWSTestCase  extends AbstractEventTestCase {
   
   private VMachineService vmachineService;
   
-  private AWSService awsService;
+  private IaaSServiceProvider iaasProvider;
+  
+  private IaaSService awsService;
   
   @BeforeClass
   public void init() throws Exception {
@@ -39,6 +43,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
     System.setProperty("jenkins.slave.credential", "b7cf38a7-5b1c-412b-9280-07cad8c952bb");
     
     VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
+    vmModule.setProperty("org.ats.cloud.iaas", "org.ats.services.iaas.AWSService");
     vmModule.setProperty("org.ats.cloud.aws.secret", System.getProperty("aws.secret"));
     vmModule.setProperty("org.ats.cloud.aws.access", System.getProperty("aws.access"));
     
@@ -49,7 +54,9 @@ public class AWSTestCase  extends AbstractEventTestCase {
         vmModule);
     
     this.vmachineService = injector.getInstance(VMachineService.class);
-    this.awsService = injector.getInstance(AWSService.class);
+    this.iaasProvider = injector.getInstance(IaaSServiceProvider.class);
+    this.awsService = this.iaasProvider.get();
+    
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
 

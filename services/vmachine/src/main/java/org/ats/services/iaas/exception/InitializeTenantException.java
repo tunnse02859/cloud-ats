@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.iaas;
+package org.ats.services.iaas.exception;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>

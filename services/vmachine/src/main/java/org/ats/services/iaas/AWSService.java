@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.iaas.aws;
+package org.ats.services.iaas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,14 +15,13 @@ import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
-import org.ats.services.iaas.CreateVMException;
-import org.ats.services.iaas.DestroyTenantException;
-import org.ats.services.iaas.DestroyVMException;
-import org.ats.services.iaas.IaaSServiceInterface;
-import org.ats.services.iaas.InitializeTenantException;
-import org.ats.services.iaas.RebuildVMException;
-import org.ats.services.iaas.StartVMException;
-import org.ats.services.iaas.StopVMException;
+import org.ats.services.iaas.exception.CreateVMException;
+import org.ats.services.iaas.exception.DestroyTenantException;
+import org.ats.services.iaas.exception.DestroyVMException;
+import org.ats.services.iaas.exception.InitializeTenantException;
+import org.ats.services.iaas.exception.RebuildVMException;
+import org.ats.services.iaas.exception.StartVMException;
+import org.ats.services.iaas.exception.StopVMException;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.vmachine.VMachine;
@@ -58,7 +57,7 @@ import com.mongodb.BasicDBObject;
  * Sep 11, 2015
  */
 @Singleton
-public class AWSService implements IaaSServiceInterface {
+class AWSService implements IaaSService {
  
   @Inject
   private Logger logger;
@@ -211,6 +210,9 @@ public class AWSService implements IaaSServiceInterface {
     VMachine vm = null;
     logger.info("Requesting AWS to create new instance");
     RunInstancesResult runInstances = client.runInstances(runInstanceRequest);
+    
+    Thread.sleep(5000); //sleep 5s to request stable
+    
     for (Instance instance : runInstances.getReservation().getInstances()) {
       vm = vmachineFactory.create(instance.getInstanceId(), tenant, space, system, hasUI,  null, instance.getPrivateIpAddress(), Status.Started);
       
@@ -257,42 +259,47 @@ public class AWSService implements IaaSServiceInterface {
         throw ex;
       }
       
-      try {
-        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) throw new CreateVMException("Can not create jenkins slave for test vm");
-        logger.info("Created Jenkins slave by " + vm);
+      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
         
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
+        try {
+          if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+          logger.info("Created Jenkins slave by " + vm);
+          
+        } catch (Exception e) {
+          CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+          ex.setStackTrace(e.getStackTrace());
+          throw ex;
+        }
+        
+      //register Guacamole vnc
+        try {
+          String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+          Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+          ChannelExec channel = (ChannelExec) session.openChannel("exec");
+          channel.setCommand(command);
+          
+          OutputStream out = channel.getOutputStream();
+          channel.connect();
+          
+          out.write("#CloudATS\n".getBytes());
+          out.flush();
+          channel.disconnect();
+          session.disconnect();
+          logger.info("Registered guacamole node");
+        } catch (Exception e) {
+          CreateVMException ex = new CreateVMException("Can not register Guacamole node");
+          ex.setStackTrace(e.getStackTrace());
+          throw ex;
+        }
+        
+        vmachineService.create(vm);
+        logger.info("Created VM " + vm);
+        
+        return vm;
+      } else {
+        throw new CreateVMException("Connection to VM can not established");
       }
-      
-    //register Guacamole vnc
-      try {
-        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
-        Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
-        ChannelExec channel = (ChannelExec) session.openChannel("exec");
-        channel.setCommand(command);
-        
-        OutputStream out = channel.getOutputStream();
-        channel.connect();
-        
-        out.write("#CloudATS\n".getBytes());
-        out.flush();
-        channel.disconnect();
-        session.disconnect();
-        logger.info("Registered guacamole node");
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("Can not register Guacamole node");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
-      }
-      
-      vmachineService.create(vm);
-      logger.info("Created VM " + vm);
-      
-      return vm;
-      
     } else {
       if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
         logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
@@ -334,6 +341,14 @@ public class AWSService implements IaaSServiceInterface {
       waitJMeterServerRunning(vm);
     }
   }
-  
-  
+
+  @Override
+  public void addCredential(String tenant, String username, String password) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void addCredential(String tenant) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }

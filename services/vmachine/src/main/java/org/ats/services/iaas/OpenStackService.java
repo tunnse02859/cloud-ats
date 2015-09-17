@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ats.services.iaas.openstack;
+package org.ats.services.iaas;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,14 +15,13 @@ import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
 import org.ats.services.data.MongoDBService;
-import org.ats.services.iaas.CreateVMException;
-import org.ats.services.iaas.DestroyTenantException;
-import org.ats.services.iaas.DestroyVMException;
-import org.ats.services.iaas.IaaSServiceInterface;
-import org.ats.services.iaas.InitializeTenantException;
-import org.ats.services.iaas.RebuildVMException;
-import org.ats.services.iaas.StartVMException;
-import org.ats.services.iaas.StopVMException;
+import org.ats.services.iaas.exception.CreateVMException;
+import org.ats.services.iaas.exception.DestroyTenantException;
+import org.ats.services.iaas.exception.DestroyVMException;
+import org.ats.services.iaas.exception.InitializeTenantException;
+import org.ats.services.iaas.exception.RebuildVMException;
+import org.ats.services.iaas.exception.StartVMException;
+import org.ats.services.iaas.exception.StopVMException;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -90,7 +89,7 @@ import com.mongodb.DBCollection;
  * Jul 2, 2015
  */
 @Singleton
-public class OpenStackService implements IaaSServiceInterface {
+class OpenStackService implements IaaSService {
   
   private String keystoneURL, adminKeystoneEndpoint, keystoneProvider, neutronProvider, novaProvider, externalNetwork, defaultRole;
   
@@ -181,6 +180,7 @@ public class OpenStackService implements IaaSServiceInterface {
         .buildApi(NovaApi.class);
   }
   
+  @Override
   public void addCredential(String tenant, String username, String password) {
     String identity = tenant + ":" + username;
     BasicDBObject obj = new BasicDBObject("_id", tenant).append("identity", identity).append("password", password);
@@ -188,6 +188,7 @@ public class OpenStackService implements IaaSServiceInterface {
     this.col.insert(obj);
   }
   
+  @Override
   public void addCredential(String tenant) {
     String identity = tenant + ":" + tenant; 
     String password = tenant;

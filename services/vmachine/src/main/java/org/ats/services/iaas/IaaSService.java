@@ -3,6 +3,13 @@
  */
 package org.ats.services.iaas;
 
+import org.ats.services.iaas.exception.CreateVMException;
+import org.ats.services.iaas.exception.DestroyTenantException;
+import org.ats.services.iaas.exception.DestroyVMException;
+import org.ats.services.iaas.exception.InitializeTenantException;
+import org.ats.services.iaas.exception.RebuildVMException;
+import org.ats.services.iaas.exception.StartVMException;
+import org.ats.services.iaas.exception.StopVMException;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.vmachine.VMachine;
@@ -12,7 +19,7 @@ import org.ats.services.vmachine.VMachine;
  *
  * Jul 2, 2015
  */
-public interface IaaSServiceInterface {
+public interface IaaSService {
   
   public void initTenant(TenantReference tenant) throws InitializeTenantException, CreateVMException;
   
@@ -33,4 +40,8 @@ public interface IaaSServiceInterface {
   public VMachine allocateFloatingIp(VMachine vm);
   
   public VMachine deallocateFloatingIp(VMachine vm);
+  
+  public void addCredential(String tenant, String username, String password);
+  
+  public void addCredential(String tenant);
 }

@@ -1,15 +1,13 @@
 /**
  * 
  */
-package org.ats.services;
+package org.ats.services.iaas;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.ats.services.iaas.aws.AWSService;
-import org.ats.services.iaas.openstack.OpenStackService;
 import org.ats.services.vmachine.VMachineFactory;
 import org.ats.services.vmachine.VMachineService;
 
@@ -47,6 +45,7 @@ public class VMachineServiceModule extends AbstractModule {
     bind(VMachineService.class);
     bind(OpenStackService.class);
     bind(AWSService.class);
+    bind(IaaSService.class).toProvider(IaaSServiceProvider.class);
     
     install(new FactoryModuleBuilder().build(VMachineFactory.class));
   }
