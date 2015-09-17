@@ -105,7 +105,7 @@ public class JenkinsSlave {
     list.add(new BasicNameValuePair("_.host", slaveAddress));
     list.add(new BasicNameValuePair("name", slaveAddress));
     
-    if(environment != null) {
+    if(environment != null && !environment.isEmpty()) {
       for(Map.Entry<String, String> entry : environment.entrySet()) {
         list.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
       }
@@ -113,7 +113,7 @@ public class JenkinsSlave {
     
     String json = slaveJsonTmpl;
     
-    if (environment != null) {
+    if (environment != null && !environment.isEmpty()) {
       JSONObject jsonObj = new JSONObject(json);
       JSONArray env = new JSONArray();
       for(Map.Entry<String, String> entry : environment.entrySet()) {
