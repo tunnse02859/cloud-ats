@@ -169,11 +169,12 @@ public class Global extends GlobalSettings {
     ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     
     Tenant tenant = tenantFactory.create("fsoft");
-    tenantService.create(tenant);
     
     IaaSServiceProvider iaasProvider = injector.getInstance(IaaSServiceProvider.class);
     IaaSService iaasService = iaasProvider.get();
     iaasService.initTenant(tenantRefFactory.create(tenant.getId()));
+    
+    tenantService.create(tenant);
   }
   
 }
