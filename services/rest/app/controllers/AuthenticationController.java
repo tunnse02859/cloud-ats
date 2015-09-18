@@ -108,7 +108,8 @@ public class AuthenticationController extends Controller {
     String firstName = json.get("firstname").asText();
     String lastName = json.get("lastname").asText();
     User user = userFactory.create(email, firstName, lastName);
-    if (json.get("space").asText() != null && !("".equals(json.get("space").asText()))) {
+    
+    /*if (json.get("space").asText() != null && !("".equals(json.get("space").asText()))) {
       spaceName = json.get("space").asText();
       
       Space space = spaceFactory.create(spaceName);
@@ -117,7 +118,7 @@ public class AuthenticationController extends Controller {
       
       spaceService.create(space);
       user.joinSpace(spaceRef.create(space.getId()));
-    }
+    }*/
     
     user.setTenant(tenantRef.create(tenantId));
     user.setPassword(password);
