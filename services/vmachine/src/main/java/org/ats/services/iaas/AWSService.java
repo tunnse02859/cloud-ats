@@ -284,6 +284,14 @@ class AWSService implements IaaSService {
           
           out.write("#CloudATS\n".getBytes());
           out.flush();
+          
+          while(true) {
+            if (channel.isClosed()) {
+              logger.info("Register guacamole exit code: " + channel.getExitStatus());
+              break;
+            }
+          }
+          
           channel.disconnect();
           session.disconnect();
           logger.info("Registered guacamole node");
