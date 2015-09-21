@@ -188,7 +188,14 @@ public class KeywordController extends Controller {
   public Result run(String projectId) throws Exception {
     JsonNode data = request().body().asJson();
     List<SuiteReference> suites = new ArrayList<SuiteReference>(data.size());
+    
+    SuiteReference ref;
     for (JsonNode sel : data) {
+      ref = suiteRefFactory.create(sel.asText());
+      
+      if (suiteService.get(ref.getId()) == null) {
+        return status(400);
+      }
       suites.add(suiteRefFactory.create(sel.asText()));
     }
     

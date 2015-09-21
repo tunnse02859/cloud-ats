@@ -211,6 +211,10 @@ public class PerformanceController extends Controller {
     for (JsonNode json : data) {
       
       ref = jmeterReferenceFactory.create(json.asText());
+      
+      if (jmeterService.get(ref.getId()) == null) {
+        return status(400);
+      }
       scripts.add(ref);
     }
     
