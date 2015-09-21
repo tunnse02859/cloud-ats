@@ -32,10 +32,14 @@ import org.ats.services.vmachine.VMachineService;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
+import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.amazonaws.services.ec2.model.InstanceStatusDetails;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
@@ -229,8 +233,8 @@ class AWSService implements IaaSService {
     vm = waitUntilInstanceRunning(client, vm);
     if (system) {
       //Sleep 2m to Jenkins is ready
-      logger.info("Waiting 2 minutes to Jenkins is ready");
-      Thread.sleep(2 * 60 * 1000);
+      //logger.info("Waiting 2 minutes to Jenkins is ready");
+      //Thread.sleep(2 * 60 * 1000);
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(vm.getPublicIp(), "http", "jenkins", 8080);
       try {
@@ -333,8 +337,37 @@ class AWSService implements IaaSService {
       Thread.sleep(5000);
       return waitUntilInstanceRunning(client, vm);
     } else {
-      vm.setPublicIp(instance.getPublicIpAddress());
-      return vm;
+      boolean instanceStatus = false;
+      boolean systemStatus = false;
+      
+      DescribeInstanceStatusRequest statusRequest = new DescribeInstanceStatusRequest().withInstanceIds(vm.getId());
+      DescribeInstanceStatusResult statusResult = client.describeInstanceStatus(statusRequest);
+      
+      for (InstanceStatus status :  statusResult.getInstanceStatuses()) {
+        //Check system status
+        for (InstanceStatusDetails systemDetail : status.getSystemStatus().getDetails()) {
+          if (systemDetail.getName().equals("reachability") && systemDetail.getStatus().equals("passed")) {
+            systemStatus = true;
+            break;
+          }
+        }
+        
+        //Check instance status
+        for (InstanceStatusDetails instanceDetail : status.getInstanceStatus().getDetails()) {
+          if (instanceDetail.getName().equals("reachability") && instanceDetail.getStatus().equals("passed")) {
+            instanceStatus = true;
+            break;
+          }
+        }
+      }
+      
+      if (systemStatus && instanceStatus) {
+        vm.setPublicIp(instance.getPublicIpAddress());
+        return vm;
+      } else {
+        Thread.sleep(5000);
+        return waitUntilInstanceRunning(client, vm);
+      }
     }
   }
   
