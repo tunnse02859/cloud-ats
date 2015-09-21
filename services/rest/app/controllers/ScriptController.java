@@ -69,7 +69,6 @@ public class ScriptController extends Controller {
     if (listFiles.size() <= 0) {
       return badRequest();
     }
-    long i = service.getJmeterScripts(projectId).count();
      
     // create performance project model 
     FileInputStream fis;
@@ -80,7 +79,6 @@ public class ScriptController extends Controller {
     ArrayNode array = Json.newObject().arrayNode();
     // loop though files
     for (FilePart file : listFiles) {
-      i ++;
       try {
         // read each file and get file content
         fis = new FileInputStream(file.getFile());
@@ -89,8 +87,6 @@ public class ScriptController extends Controller {
         // create jmeter parser by file content and build jmeter script 
         parse = jmeterFactory.createJMeterParser(content, projectId);
         script = parse.parse();
-        
-        script.put("name", "script " + i);
         script.put("project_id", projectId);
         
         array.add(Json.parse(script.toString()));
