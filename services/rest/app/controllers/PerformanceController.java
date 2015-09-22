@@ -114,27 +114,29 @@ public class PerformanceController extends Controller {
     PerformanceProject project = projectService.get(projectId);
     if (project == null) return status(404);
     
-    PageList<JMeterScript> pages = jmeterService.getJmeterScripts(projectId);
-    ArrayNode arrayScript = Json.newObject().arrayNode();
-    List<JMeterScript> list;
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
+    jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
-    while (pages.hasNext()) {
-      
-      list = pages.next();
-      for (JMeterScript script : list) {
-        
-        arrayScript.add(Json.parse(script.toString()));
-      }
-    }
-    
-    PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
-    jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
-    
-    if (jobFirstList.count() > 0) {
-      AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
+    if (jobList.count() > 0) {
+      AbstractJob<?> lastRunningJob = jobList.next().get(0);
       project.put("last_running", formater.format(lastRunningJob.getCreatedDate()));
       project.put("lastScripts", lastRunningJob.get("scripts"));
       project.put("log", lastRunningJob.getLog());
+      ArrayNode arrayJob = Json.newObject().arrayNode();
+      while (jobList.hasNext()) {
+        List<AbstractJob<?>> listJobs = jobList.next();
+        ObjectNode object;
+        for (AbstractJob<?> job : listJobs) {
+          object = Json.newObject();
+          object.put("created_date", formater.format(job.getCreatedDate()));
+          object.put("creator", "Cloud-ATS");
+          object.put("scripts", ((PerformanceJob) job).getScripts().size());
+          object.put("status", job.getStatus().toString());
+          object.put("_id", job.getId());
+          arrayJob.add(object);
+        }
+      }
+      project.put("jobs", arrayJob.toString());
     }
     
     project.put("type", "performance");
@@ -253,66 +255,6 @@ public class PerformanceController extends Controller {
     
     Report report = reportService.get(id);
     return status(200, Json.parse(report.toString()));
-  }
-  
-  public Result getLastestRun(String projectId) throws Exception {
-    BasicDBObject query = new BasicDBObject("project_id", projectId)
-    .append("status", AbstractJob.Status.Completed.toString());
-    
-    PageList<AbstractJob<?>> jobFirstList = executorService.query(query, 1);
-    jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
-    
-    AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
-    
-    String jobId = lastRunningJob.getId();
-    
-    PerformanceJob job = (PerformanceJob) executorService.get(jobId);
-    
-    ArrayNode total = Json.newObject().arrayNode();
-    ObjectNode object = Json.newObject();
-    for (JMeterScriptReference scriptRef : job.getScripts()) {
-      
-      ArrayNode reports = Json.newObject().arrayNode();
-      PageList<Report> listReport = reportService.getList(jobId, Type.PERFORMANCE, scriptRef.getId());
-      
-      while (listReport.hasNext()) {
-        List<Report> list = listReport.next();
-        
-        for (Report report : list) {
-          
-          reports.add(Json.parse(report.toString()));
-        }
-      }
-      
-      total.add(reports);
-      
-    }
-    object.put("jobId", jobId);
-    object.put("total", total);
-    
-    return status(200, object);
-  }
-  
-  public Result listJob(String projectId) throws Exception {
-    PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
-    pageJobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
-    
-    ArrayNode arrayJob = Json.newObject().arrayNode();
-    while (pageJobs.hasNext()) {
-      List<AbstractJob<?>> listJobs = pageJobs.next();
-      ObjectNode object;
-      for (AbstractJob<?> job : listJobs) {
-        object = Json.newObject();
-        object.put("created_date", formater.format(job.getCreatedDate()));
-        object.put("creator", "Cloud-ATS");
-        object.put("scripts", ((PerformanceJob) job).getScripts().size());
-        object.put("status", job.getStatus().toString());
-        object.put("_id", job.getId());
-        arrayJob.add(object);
-      }
-    }
-
-    return ok(arrayJob);
   }
   
 }
