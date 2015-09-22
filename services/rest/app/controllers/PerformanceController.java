@@ -235,7 +235,12 @@ public class PerformanceController extends Controller {
         while (pages.hasNext()) {
           List<Report> list = pages.next();
           
-          for (Report report : list) {         
+          for (Report report : list) {
+            
+            if (report.getScriptId() != null) {
+              report.put("script_name", script.get().getName());
+            }
+            
             array.add(Json.parse(report.toString()));         
           }
         }
