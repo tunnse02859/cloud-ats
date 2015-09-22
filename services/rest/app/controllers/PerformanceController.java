@@ -127,28 +127,12 @@ public class PerformanceController extends Controller {
       }
     }
     
-    PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
-    pageJobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
-    
-    ArrayNode arrayJob = Json.newObject().arrayNode();
-    while (pageJobs.hasNext()) {
-      List<AbstractJob<?>> listJobs = pageJobs.next();
-      
-      for (AbstractJob<?> job : listJobs) {
-        
-        job.put("created_date", formater.format(job.getCreatedDate()));
-        job.put("creator", project.getCreator().getId());
-        arrayJob.add(Json.parse(job.toString()));
-      }
-    }
-    
     PageList<AbstractJob<?>> jobFirstList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);
     jobFirstList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     if (jobFirstList.count() > 0) {
       AbstractJob<?> lastRunningJob = jobFirstList.next().get(0);
       project.put("last_running", formater.format(lastRunningJob.getCreatedDate()));
-      project.put("jobs", arrayJob.toString());
       project.put("lastScripts", lastRunningJob.get("scripts"));
       project.put("log", lastRunningJob.getLog());
     }
@@ -307,6 +291,28 @@ public class PerformanceController extends Controller {
     object.put("total", total);
     
     return status(200, object);
+  }
+  
+  public Result listJob(String projectId) throws Exception {
+    PageList<AbstractJob<?>> pageJobs = executorService.query(new BasicDBObject("project_id", projectId));
+    pageJobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    ArrayNode arrayJob = Json.newObject().arrayNode();
+    while (pageJobs.hasNext()) {
+      List<AbstractJob<?>> listJobs = pageJobs.next();
+      ObjectNode object;
+      for (AbstractJob<?> job : listJobs) {
+        object = Json.newObject();
+        object.put("created_date", formater.format(job.getCreatedDate()));
+        object.put("creator", "Cloud-ATS");
+        object.put("scripts", ((PerformanceJob) job).getScripts().size());
+        object.put("status", job.getStatus().toString());
+        object.put("_id", job.getId());
+        arrayJob.add(object);
+      }
+    }
+
+    return ok(arrayJob);
   }
   
 }
