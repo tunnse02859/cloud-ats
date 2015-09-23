@@ -93,7 +93,7 @@ public class Global extends GlobalSettings {
       TenantService tenantService = injector.getInstance(TenantService.class);
       Tenant fsoft = tenantService.get("fsoft");
       if (fsoft == null) {
-        initializeFsoftTenant(injector);
+        initializeTenant(injector, "fsoft");
       }
       
     } catch (Exception e) {
@@ -163,12 +163,12 @@ public class Global extends GlobalSettings {
     return injector.getInstance(aClass);
   }
   
-  private void initializeFsoftTenant(Injector injector) throws InitializeTenantException, CreateVMException {
+  private void initializeTenant(Injector injector, String tenantId) throws InitializeTenantException, CreateVMException {
     TenantService tenantService = injector.getInstance(TenantService.class);
     TenantFactory tenantFactory = injector.getInstance(TenantFactory.class);
     ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
     
-    Tenant tenant = tenantFactory.create("fsoft");
+    Tenant tenant = tenantFactory.create(tenantId);
     
     IaaSServiceProvider iaasProvider = injector.getInstance(IaaSServiceProvider.class);
     IaaSService iaasService = iaasProvider.get();
