@@ -180,7 +180,9 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
     
     if (testVM == null) {
-      updateLog(job, "None VM available. Creating new VM (about 4-8 minitues).... ");
+      updateLog(job, "None VM available.");
+      updateLog(job, "Creating new VM (about 4-8 minitues).... ");
+      
       testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), false);
       testVM = iaasProvider.get().deallocateFloatingIp(testVM);
       //Sleep 15s after creating new vm to make sure system be stable
@@ -318,7 +320,9 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
 
     if (testVM == null) {
-      updateLog(job, "None VM available. Creating new VM (about 4-8 minitues).... ");
+      updateLog(job, "None VM available.");
+      updateLog(job, "Creating new VM (about 4-8 minitues).... ");
+      
       testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), true);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
@@ -367,12 +371,19 @@ public class TrackingJobActor extends UntypedActor {
   
   private void updateLog(AbstractJob<?> job, String log) {
     StringBuilder sb = new StringBuilder("[").append(new Date()).append("]").append("[INFO] ");
-    job.appendLog(sb.append(log).toString());
+    job.appendLog(sb.append(log).append("\n").toString());
     executorService.update(job);
   }
   
   private void updateLog(AbstractJob<?> job, JenkinsMavenJob jkJob) throws IOException {
     int start = job.getLog() == null ? 0 : job.getLog().length();
+    if (job.getLog() != null) {
+      int _index = job.getLog().indexOf("Submitted Jenkins job");
+      if (_index != -1) {
+        _index += "Submitted Jenkins job".length() - 1;
+        start -= _index;
+      }
+    }
     byte[] bytes = jkJob.getConsoleOutput(1, start); 
     byte[] next = new byte[bytes.length - start];
     System.arraycopy(bytes, start, next, 0, next.length);
