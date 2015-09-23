@@ -11,7 +11,6 @@ import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AuthenticationService;
-import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -23,13 +22,12 @@ import org.ats.services.organization.entity.reference.TenantReference;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
-
-import actions.*;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -137,12 +135,12 @@ public class AuthenticationController extends Controller {
     PageList<Tenant> list = tenantService.list();
     
     ArrayNode array = Json.newObject().arrayNode();
-    ObjectNode json = Json.newObject();
+    
     while (list.hasNext()) {
       List<Tenant> listUser = list.next();
       
       for (Tenant tenant : listUser) {
-        
+        ObjectNode json = Json.newObject();
         json.put("_id", tenant.getId());
         array.add(json);
       }
