@@ -223,7 +223,10 @@ class AWSService implements IaaSService {
       CreateTagsRequest createTagRequest = new CreateTagsRequest();
       createTagRequest.withResources(vm.getId()).withTags(
           new Tag("Name", serverName),
-          new Tag("Tenant", tenant.getId()));
+          new Tag("Tenant", tenant.getId()),
+          new Tag("Owner", "HaiNT21"),
+          new Tag("Project", "CloudATS"),
+          new Tag("Purpose", "CloudATS Demo"));
       
       logger.info("Creating tags for instance");
       client.createTags(createTagRequest);
