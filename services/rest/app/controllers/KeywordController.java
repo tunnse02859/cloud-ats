@@ -210,17 +210,16 @@ public class KeywordController extends Controller {
   
   public Result report(String projectId,String jobId) throws Exception{                    
     ArrayNode array = Json.newObject().arrayNode();
-    Report report = null;
-    PageList<Report> pages = null;
+    
     AbstractJob<?> job = executorService.get(jobId);
     if(job.getRawDataOutput() != null) {
-      pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
+      PageList<Report> pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
       
       if (pages.totalPage() <= 0) {
         return status(404);
       }
       
-      report = pages.next().get(0);
+      Report report = pages.next().get(0);
       report.put("created_date", formater.format(job.getCreatedDate()));
       Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
       
@@ -234,9 +233,11 @@ public class KeywordController extends Controller {
       }
       
       report.put("suite_reports", array.toString());
-     
+      
+      return status(200, Json.parse(report.toString()));
     }
-    return status(200, Json.parse(report.toString()));  
+    
+    return status(404);
   }
   
   public Result listReport(String projectId) throws Exception {

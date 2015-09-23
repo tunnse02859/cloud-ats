@@ -18,7 +18,6 @@ import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
-import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
