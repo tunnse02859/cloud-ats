@@ -6,6 +6,7 @@ package org.ats.services.executor.event;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -179,15 +180,19 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
     
     if (testVM == null) {
+      updateLog(job, "None VM available. Creating new VM (about 4-8 minitues).... ");
       testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), false);
       testVM = iaasProvider.get().deallocateFloatingIp(testVM);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
+      updateLog(job, "Created new VM " + testVM);
     }
 
+    updateLog(job, "Generating performance project");
     String path = generatorService.generatePerformance("/tmp", job.getId(), true, job.getScripts());
 //    String projectHash = project.getId().substring(0, 8);
 
+    updateLog(job, "Uploading to VM Test");
     SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
     
     Thread.sleep(3000);
@@ -202,6 +207,7 @@ public class TrackingJobActor extends UntypedActor {
         "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
     jenkinsJob.submit();
+    updateLog(job, "Submitted Jenkins job");
 
     testVM.setStatus(VMachine.Status.InProgress);
     vmachineService.update(testVM);
@@ -312,24 +318,30 @@ public class TrackingJobActor extends UntypedActor {
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
 
     if (testVM == null) {
+      updateLog(job, "None VM available. Creating new VM (about 4-8 minitues).... ");
       testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), true);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
+      updateLog(job, "Created new VM " + testVM);
     }
     
     if (testVM.getPublicIp() == null) {
+      updateLog(job, "The VM Test can not access. Creating new public ip to associate this vm...");
       testVM = iaasProvider.get().allocateFloatingIp(testVM);
       Thread.sleep(15 * 1000);
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
+      updateLog(job, "Connection to  " + testVM.getPublicIp() + " is established");
       logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
     }
 
+    updateLog(job, "Generating keyword project");
     String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
 
     SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
     
     Thread.sleep(3000);
     
+    updateLog(job, "Uploading to VM Test");
     SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
         "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
 
@@ -340,6 +352,7 @@ public class TrackingJobActor extends UntypedActor {
         testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
     jenkinsJob.submit();
+    updateLog(job, "Submitted Jenkins job");
 
     testVM.setStatus(VMachine.Status.InProgress);
     vmachineService.update(testVM);
@@ -350,6 +363,12 @@ public class TrackingJobActor extends UntypedActor {
     
     Event event  = eventFactory.create(job, "keyword-job-tracking");
     event.broadcast();
+  }
+  
+  private void updateLog(AbstractJob<?> job, String log) {
+    StringBuilder sb = new StringBuilder("[").append(new Date()).append("]").append("[INFO] ");
+    job.appendLog(sb.append(log).toString());
+    executorService.update(job);
   }
   
   private void updateLog(AbstractJob<?> job, JenkinsMavenJob jkJob) throws IOException {
