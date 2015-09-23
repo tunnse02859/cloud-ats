@@ -29,6 +29,7 @@ import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
 import play.libs.Json;
@@ -77,7 +78,8 @@ public class KeywordController extends Controller {
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   public Result list() {
-    PageList<KeywordProject> list = keywordProjectService.list();
+    Tenant currentTenant = context.getTenant();
+    PageList<KeywordProject> list = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     ArrayNode array = Json.newObject().arrayNode();
     
     while(list.hasNext()) {

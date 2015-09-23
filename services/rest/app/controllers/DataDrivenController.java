@@ -15,6 +15,7 @@ import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 
@@ -61,7 +62,8 @@ public class DataDrivenController extends Controller {
   
   public Result list() {
     
-    PageList<DataDriven> pages = dataDrivenService.list();
+    Tenant currentTenant = context.getTenant();
+    PageList<DataDriven> pages = dataDrivenService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     ArrayNode arrayData = Json.newObject().arrayNode();
     
     while (pages.hasNext()) {

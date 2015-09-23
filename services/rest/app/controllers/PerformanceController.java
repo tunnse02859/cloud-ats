@@ -17,6 +17,7 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
@@ -66,9 +67,9 @@ public class PerformanceController extends Controller {
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   public Result list() {
-    PageList<PerformanceProject> list = projectService.list();
+    Tenant currentTenant = context.getTenant();
+    PageList<PerformanceProject> list = projectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     ArrayNode array = Json.newObject().arrayNode();
-    
     
     while(list.hasNext()) {
       for (PerformanceProject project : list.next()) {
