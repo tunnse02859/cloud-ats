@@ -40,7 +40,7 @@ PUT		/api/v1/project/keyword							 @controllers.KeywordController.update()
 DELETE	/api/v1/project/keyword							 @controllers.KeywordController.delete()
 GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordController.report(projectId,jobId)
 GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
-
+GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
