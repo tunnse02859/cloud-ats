@@ -292,10 +292,15 @@ public class KeywordController extends Controller {
     
     lastJob.setStatus(AbstractJob.Status.Completed);
     executorService.update(lastJob);
-    
-    VMachine testVM = vmachineService.get(lastJob.getTestVMachineId());
-    testVM.setStatus(VMachine.Status.Started);
-    vmachineService.update(testVM);
+
+    if (lastJob.getTestVMachineId() != null) {
+      VMachine testVM = vmachineService.get(lastJob.getTestVMachineId());
+      
+      if (testVM.getStatus() == VMachine.Status.InProgress) {
+        testVM.setStatus(VMachine.Status.Started);
+        vmachineService.update(testVM);
+      }
+    } 
     
     project.setStatus(KeywordProject.Status.READY);
     keywordProjectService.update(project);
