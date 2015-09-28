@@ -28,6 +28,11 @@
 			<groupId>org.ats.services</groupId>
 			<artifactId>keyword</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>keyword-upload</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ats.services</groupId>

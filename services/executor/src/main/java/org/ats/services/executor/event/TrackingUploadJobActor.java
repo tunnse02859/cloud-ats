@@ -21,7 +21,7 @@ import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.executor.job.KeywordUploadJob;
 import org.ats.services.generator.GeneratorService;
-import org.ats.services.iaas.openstack.OpenStackService;
+import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.PerformanceProjectService;
@@ -51,7 +51,7 @@ public class TrackingUploadJobActor extends UntypedActor {
   
   @Inject VMachineService vmachineService;
   
-  @Inject OpenStackService openstackService;
+  @Inject IaaSServiceProvider iaasProvider;
   
   @Inject EventFactory eventFactory;
   
@@ -89,7 +89,7 @@ public class TrackingUploadJobActor extends UntypedActor {
       VMachine vm = vmachineService.get(job.getTestVMachineId());
       if (vm != null) {
         vm.setStatus(VMachine.Status.Started);
-        if (vm.getPublicIp() != null) openstackService.deallocateFloatingIp(vm);
+        if (vm.getPublicIp() != null) iaasProvider.get().deallocateFloatingIp(vm);
         else vmachineService.update(vm);
       }
       
@@ -134,7 +134,7 @@ private void doTrackingKeywordUploadJob(KeywordUploadJob job, KeywordUploadProje
       //Download result
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "/home/cloudats/projects/" + project.getNameProjectUpload() + "/target/surefire-reports/testng-results.xml",  bos);
+          "/home/cloudats/projects/" + job.getId() + "/target/surefire-reports/testng-results.xml",  bos);
       
       if (bos.size() > 0)
         job.put("report", new String(bos.toByteArray()));
@@ -166,30 +166,30 @@ private void doTrackingKeywordUploadJob(KeywordUploadJob job, KeywordUploadProje
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
     if (testVM == null) {
-      testVM = openstackService.createTestVM(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), true);
       //Sleep 15s after creating new vm to make sure system be stable
       Thread.sleep(15 * 1000);
     }
     
     if (testVM.getPublicIp() == null) {
-      testVM = openstackService.allocateFloatingIp(testVM);
+      testVM = iaasProvider.get().allocateFloatingIp(testVM);
       Thread.sleep(15 * 1000);
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
       logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
     }
-    String fileName = project.getNameProjectUpload();
     //String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
     byte [] bFile = project.getRawData();
+    String fileName = job.getId();
     String path = "/tmp/"+fileName+".zip";
     FileOutputStream fileOut = new FileOutputStream(path);
     fileOut.write(bFile);
     fileOut.close();
-    
-    SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", fileName + ".zip", new File(path));
+
+    SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects/"+fileName, fileName + ".zip", new File(path));
     
     Thread.sleep(3000);
     SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  fileName + ".zip", null, null);
+        "cd /home/cloudats/projects/"+fileName+" && unzip " +  fileName + ".zip", null, null);
     StringBuilder goalsBuilder = new StringBuilder("clean test");
 
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
