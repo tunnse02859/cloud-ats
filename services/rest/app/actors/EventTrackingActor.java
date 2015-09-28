@@ -6,11 +6,14 @@ package actors;
 import org.ats.services.event.Event;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
+import org.ats.services.executor.job.KeywordUploadJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.upload.KeywordUploadProject;
+import org.ats.services.upload.KeywordUploadProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
 
@@ -30,6 +33,8 @@ public class EventTrackingActor extends UntypedActor {
   @Inject EventController eventController;
 
   @Inject KeywordProjectService keywordService;
+  
+  @Inject KeywordUploadProjectService keywordUploadService;
   
   @Inject PerformanceProjectService perfService;
   
@@ -66,6 +71,24 @@ public class EventTrackingActor extends UntypedActor {
           if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
           PerformanceProject project = perfService.get(job.getProjectId());
+          job.put("project_status", project.getStatus().toString());
+          eventController.send(project.getCreator().get(), job);
+          
+        } else if ("upload-job-tracking".equals(event.getName())) {
+          KeywordUploadJob job = (KeywordUploadJob) event.getSource();
+          
+          if (job.getStatus() == AbstractJob.Status.Queued) return;
+          
+          KeywordUploadProject project = keywordUploadService.get(job.getProjectId(),"raw");
+          
+          if (job.getStatus() == AbstractJob.Status.Running) {
+            VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+            VMachine testVM = vmachineService.get(job.getTestVMachineId());
+            StringBuilder sb = new StringBuilder("http://").append(jenkinsVM.getPublicIp())
+                .append(":8081/guacamole/#/client/c/vnc_node_").append(testVM.getPrivateIp());
+            job.put("watch_url", sb.toString());
+          }
+          
           job.put("project_status", project.getStatus().toString());
           eventController.send(project.getCreator().get(), job);
           
