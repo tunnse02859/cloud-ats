@@ -58,12 +58,24 @@ public class JenkinsMaster {
   
   public boolean isReady(long timeout) throws IOException, InterruptedException {
     long start = System.currentTimeMillis();
-    while (true) {
-      Thread.sleep(3000);
-      if (this.isReady()) return true;
-      if ((System.currentTimeMillis() - start) < timeout) continue;
-      return false;
+    boolean ready = isReady();
+    if (!ready) return waitJenkinsMasterReadyUntil(start, timeout);
+    return ready;
+  }
+  
+  private boolean waitJenkinsMasterReadyUntil(long startTime, long timeout) throws IOException, InterruptedException {
+    boolean ready = isReady();
+    System.out.println("Jenkins master ready status is: " + ready);
+    if (!ready) {
+      
+      if (System.currentTimeMillis() - startTime > timeout) {
+        return false;
+      }
+      
+      Thread.sleep(15 * 1000);
+      return waitJenkinsMasterReadyUntil(startTime, timeout);
     }
+    return ready;
   }
   
   public List<String> listSlaves() throws IOException {

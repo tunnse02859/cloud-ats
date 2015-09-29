@@ -36,7 +36,7 @@ public class VMachine extends AbstractEntity<VMachine> {
       @Assisted("isSystem") boolean isSystem, 
       @Assisted("hasUI") boolean hasUI,
       @Assisted("public_ip") @Nullable String publicIp,
-      @Assisted("private_ip") String privateIp,
+      @Assisted("private_ip") @Nullable String privateIp,
       @Assisted("status") @Nullable Status status) {
     
     this.put("_id", id);
@@ -67,6 +67,10 @@ public class VMachine extends AbstractEntity<VMachine> {
   
   public String getPublicIp() {
     return this.getString("public_ip");
+  }
+  
+  public void setPrivateIp(String privateIp) {
+    this.put("private_ip", privateIp);
   }
   
   public String getPrivateIp() {

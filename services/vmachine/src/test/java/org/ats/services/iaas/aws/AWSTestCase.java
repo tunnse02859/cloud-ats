@@ -84,7 +84,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
   }
   
-  //@Test
+  @Test
   public void testInit() {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     VMachine vm = vmachineService.getSystemVM(tenantRef, null);
@@ -93,7 +93,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
     Assert.assertNotNull(vm.getPublicIp());
   }
   
-  //@Test
+  @Test
   public void testCreateNonUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     VMachine vm = awsService.createTestVM(tenantRef, null, false);
@@ -102,7 +102,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
     Assert.assertNotNull(vm.getPublicIp());
   }
   
-  //@Test
+  @Test
   public void testCreateUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     VMachine vm = awsService.createTestVM(tenantRef, null, true);
@@ -111,7 +111,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
     Assert.assertNotNull(vm.getPublicIp());
   }
   
-  //@Test
+  @Test
   public void testCreateNonUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     VMachine vm = awsService.createTestVMAsync(tenantRef, null, false);
