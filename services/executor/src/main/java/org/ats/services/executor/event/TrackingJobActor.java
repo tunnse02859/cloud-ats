@@ -380,7 +380,7 @@ public class TrackingJobActor extends UntypedActor {
     if (job.getLog() != null) {
       int _index = job.getLog().indexOf("Submitted Jenkins job");
       if (_index != -1) {
-        _index += "Submitted Jenkins job".length() - 1;
+        _index += "Submitted Jenkins job\n".length();
         start -= _index;
       }
     }

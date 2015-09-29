@@ -753,4 +753,34 @@ class OpenStackService implements IaaSService {
       waitJMeterServerRunning(vm);
     }
   }
+
+  @Override
+  public VMachine createSystemVMAsync(TenantReference tenant, SpaceReference space) throws CreateVMException {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
+
+  @Override
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
+
+  @Override
+  public boolean isVMReady(VMachine vm) {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
+
+  @Override
+  public VMachine initSystemVM(VMachine vm) throws CreateVMException {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
+
+  @Override
+  public VMachine initTestVmUI(VMachine vm) throws Exception {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
+
+  @Override
+  public VMachine initTestVMNonUI(VMachine vm) throws Exception {
+    throw new UnsupportedOperationException("Not yet supported");
+  }
 }

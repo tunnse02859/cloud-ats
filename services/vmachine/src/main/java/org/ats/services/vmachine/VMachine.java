@@ -92,6 +92,6 @@ public class VMachine extends AbstractEntity<VMachine> {
   }
   
   public static enum Status {
-    Started, InProgress, Stopped, Error
+    Started, InProgress, Stopped, Error, Initializing
   }
 }
