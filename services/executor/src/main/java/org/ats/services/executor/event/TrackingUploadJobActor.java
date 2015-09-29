@@ -177,7 +177,6 @@ private void doTrackingKeywordUploadJob(KeywordUploadJob job, KeywordUploadProje
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
       logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
     }
-    //String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
     byte [] bFile = project.getRawData();
     String fileName = job.getId();
     String path = "/tmp/"+fileName+".zip";

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.ats.common.MapBuilder;
@@ -74,7 +75,12 @@ public class KeywordUploadController extends Controller {
       return status(404);
 
     project.put("type", "keyword");
-
+    KeywordUploadProject upload = keywordUploadService.get(projectId, "raw");
+    boolean rawExist = false;
+    if(upload.getRawData() != null) {
+      rawExist = true;
+    }
+    project.put("raw_exist", rawExist);
     PageList<AbstractJob<?>> jobList = executorUploadService.query(new BasicDBObject(
         "project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
@@ -139,9 +145,9 @@ public class KeywordUploadController extends Controller {
       }
       
       report.put("suite_reports", array.toString());
-     
+      return status(200, Json.parse(report.toString()));
     }
-    return status(200, Json.parse(report.toString()));  
+    return status(404);  
   }
   
   public Result listReport(String projectId) throws Exception {
@@ -211,7 +217,6 @@ public class KeywordUploadController extends Controller {
   
   public Result run(String projectId) throws Exception {
     KeywordUploadProject project = keywordUploadService.get(projectId,"raw");
-    System.out.println(project);
     if (project == null) return status(404);
     
     if (project.getStatus() == KeywordUploadProject.Status.RUNNING) return status(204);
@@ -239,10 +244,10 @@ public class KeywordUploadController extends Controller {
       
       //delete file pom.xml if it's exist before unzip
       File folderExist = new File("/tmp/" + projectId.substring(0, 8));
-      File[] listOfFilesExist = folderExist.listFiles();
-      for (File item : listOfFilesExist) {
-        if (item.isFile()) {
-          if("pom.xml".equals(item.getName())) {
+      if(folderExist.exists()) {
+        File[] listOfFilesExist = folderExist.listFiles();
+        for (File item : listOfFilesExist) {
+          if (item.isFile() && "pom.xml".equals(item.getName())) {
             item.delete();
           }
         }
@@ -276,12 +281,13 @@ public class KeywordUploadController extends Controller {
           entry = zipIn.getNextEntry();
         }
         zipIn.close();
+        
+        //Check format of file upload
         File folder = new File("/tmp/" + projectId.substring(0, 8));
         File[] listOfFiles = folder.listFiles();
-
+        
         for (File item : listOfFiles) {
           if (item.isFile()) {
-            System.out.println(item.getName());
             if("pom.xml".equals(item.getName())) {
               formatProject = true;
             }
@@ -302,7 +308,7 @@ public class KeywordUploadController extends Controller {
         keywordUploadService.update(project);
         
       } catch (Exception ex) {
-        ex.printStackTrace();
+        return status(404);
       }
       // end unzip file
       return status(201);
