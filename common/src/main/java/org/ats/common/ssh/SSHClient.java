@@ -290,22 +290,33 @@ public class SSHClient {
    * @param port the port
    * @param timeout the timeout seconds
    * @return connect established
-   * @throws IOException
    * @throws InterruptedException 
    */
-  public static boolean checkEstablished(final String host, final int port, int timeout) throws IOException, InterruptedException {
+  public static boolean checkEstablished(String host, int port, int timeout) throws InterruptedException {
     long start = System.currentTimeMillis();
-    while(true) {
-      try {
-        Socket socket = new Socket(host, port);
-        socket.close();
-        return true;
-      } catch(Exception e) {
-        System.out.println(e.getMessage());
-        if((System.currentTimeMillis() - start) > timeout * 1000)
-          return false;
+    return waitConnectionEstablishedUntil(host, port, timeout * 1000, start);
+  }
+  
+  private static boolean waitConnectionEstablishedUntil(String host, int port, long timeout, long startTime) throws InterruptedException {
+    boolean connected = checkEstablised(host, port);
+    if (!connected) {
+      if (System.currentTimeMillis() - startTime > timeout) return false;
+      else {
+        Thread.sleep(5000);
+        return waitConnectionEstablishedUntil(host, port, timeout, startTime);
       }
-      Thread.sleep(60 * 1000);
+    }
+    return connected;
+  }
+  
+  private static boolean checkEstablised(String host, int port) {
+    try {
+      Socket socket = new Socket(host, port);
+      socket.close();
+      return true;
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return false;
     }
   }
 

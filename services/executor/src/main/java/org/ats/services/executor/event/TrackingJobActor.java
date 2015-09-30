@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ats.common.ssh.SSHClient;
@@ -84,6 +83,7 @@ public class TrackingJobActor extends UntypedActor {
       switch (job.getStatus()) {
       case Queued:
         doExecutePerformanceJob(job, project);
+        break;
       case Running:
         doTrackingPerformanceJob(job, project);
         break;
@@ -177,49 +177,64 @@ public class TrackingJobActor extends UntypedActor {
   private void doExecutePerformanceJob(PerformanceJob job, PerformanceProject project) throws Exception {
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
-    VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false);
+    VMachine testVM = job.getTestVMachineId() == null ? 
+        vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false) : vmachineService.get(job.getTestVMachineId());
     
     if (testVM == null) {
       updateLog(job, "None VM available.");
       updateLog(job, "Creating new VM (about 4-8 minitues).... ");
       
-      testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), false);
-      testVM = iaasProvider.get().deallocateFloatingIp(testVM);
-      //Sleep 15s after creating new vm to make sure system be stable
-      Thread.sleep(15 * 1000);
+      //We will create new test vm async
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), false);
       updateLog(job, "Created new VM " + testVM);
+      
+      job.setVMachineId(testVM.getId());
+      executorService.update(job);
+      
+      //And broadcast that the job has served a vm
+      Event event  = eventFactory.create(job, "performance-job-tracking");
+      event.broadcast();
+      return;
     }
-
-    updateLog(job, "Generating performance project");
-    String path = generatorService.generatePerformance("/tmp", job.getId(), true, job.getScripts());
-//    String projectHash = project.getId().substring(0, 8);
-
-    updateLog(job, "Uploading to VM Test");
-    SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
     
-    Thread.sleep(3000);
-    
-    SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
+    if (testVM.getStatus() == VMachine.Status.Initializing) {
+      Thread.sleep(5000);
+      updateLog(job, "Waiting Test VM intializing...");
+      Event event  = eventFactory.create(job, "performance-job-tracking");
+      event.broadcast();
+      return;
+    } else if (testVM.getStatus() == VMachine.Status.Started) {
+     
+      updateLog(job, "Generating performance project");
+      String path = generatorService.generatePerformance("/tmp", job.getId(), true, job.getScripts());
 
-    StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
+      updateLog(job, "Uploading to VM Test");
+      SSHClient.sendFile(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
+      
+      Thread.sleep(3000);
+      
+      SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
 
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
-    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-        "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+      StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
 
-    jenkinsJob.submit();
-    updateLog(job, "Submitted Jenkins job");
+      JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
+          "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
-    testVM.setStatus(VMachine.Status.InProgress);
-    vmachineService.update(testVM);
-    
-    job.setStatus(Status.Running);
-    job.setVMachineId(testVM.getId());
-    executorService.update(job);
-    
-    Event event  = eventFactory.create(job, "performance-job-tracking");
-    event.broadcast();
+      jenkinsJob.submit();
+      updateLog(job, "Submitted Jenkins job");
+
+      testVM.setStatus(VMachine.Status.InProgress);
+      vmachineService.update(testVM);
+      
+      job.setStatus(Status.Running);
+      job.setVMachineId(testVM.getId());
+      executorService.update(job);
+      
+      Event event  = eventFactory.create(job, "performance-job-tracking");
+      event.broadcast();
+    }
   }
 
   private void processKeywordJob(KeywordJob job) throws Exception {
@@ -228,6 +243,7 @@ public class TrackingJobActor extends UntypedActor {
       switch (job.getStatus()) {
       case Queued:
         doExecuteKeywordJob(job, project);
+        break;
       case Running:
         doTrackingKeywordJob(job, project);
         break;
@@ -317,56 +333,63 @@ public class TrackingJobActor extends UntypedActor {
   private void doExecuteKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
 
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
-    VMachine testVM = vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true);
+    VMachine testVM = job.getTestVMachineId() == null ? 
+        vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true) : vmachineService.get(job.getTestVMachineId());
 
     if (testVM == null) {
       updateLog(job, "None VM available.");
       updateLog(job, "Creating new VM (about 4-8 minitues).... ");
       
-      testVM = iaasProvider.get().createTestVM(project.getTenant(), project.getSpace(), true);
-      //Sleep 15s after creating new vm to make sure system be stable
-      Thread.sleep(15 * 1000);
+      //We will create new test vm async
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
       updateLog(job, "Created new VM " + testVM);
+      
+      job.setVMachineId(testVM.getId());
+      executorService.update(job);
+      
+      //And broadcast that the job has served a vm
+      Event event  = eventFactory.create(job, "keyword-job-tracking");
+      event.broadcast();
+      return;
     }
     
-    if (testVM.getPublicIp() == null) {
-      updateLog(job, "The VM Test can not access. Creating new public ip to associate this vm...");
-      testVM = iaasProvider.get().allocateFloatingIp(testVM);
-      Thread.sleep(15 * 1000);
-      SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
-      updateLog(job, "Connection to  " + testVM.getPublicIp() + " is established");
-      logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
+    if (testVM.getStatus() == VMachine.Status.Initializing) {
+      Thread.sleep(5000);
+      updateLog(job, "Waiting Test VM intializing...");
+      Event event  = eventFactory.create(job, "keyword-job-tracking");
+      event.broadcast();
+      return;
+    } else if (testVM.getStatus() == VMachine.Status.Started) {
+      updateLog(job, "Generating keyword project");
+      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
+
+      SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
+      
+      Thread.sleep(3000);
+      
+      updateLog(job, "Uploading to VM Test");
+      SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
+
+      StringBuilder goalsBuilder = new StringBuilder("clean test");
+
+      JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
+          testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+
+      jenkinsJob.submit();
+      updateLog(job, "Submitted Jenkins job");
+
+      testVM.setStatus(VMachine.Status.InProgress);
+      vmachineService.update(testVM);
+
+      job.setStatus(Status.Running);
+      job.setVMachineId(testVM.getId());
+      executorService.update(job);
+      
+      Event event  = eventFactory.create(job, "keyword-job-tracking");
+      event.broadcast();
     }
-
-    updateLog(job, "Generating keyword project");
-    String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites());
-
-    SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
-    
-    Thread.sleep(3000);
-    
-    updateLog(job, "Uploading to VM Test");
-    SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-        "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
-
-    StringBuilder goalsBuilder = new StringBuilder("clean test");
-
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
-    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-        testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
-
-    jenkinsJob.submit();
-    updateLog(job, "Submitted Jenkins job");
-
-    testVM.setStatus(VMachine.Status.InProgress);
-    vmachineService.update(testVM);
-
-    job.setStatus(Status.Running);
-    job.setVMachineId(testVM.getId());
-    executorService.update(job);
-    
-    Event event  = eventFactory.create(job, "keyword-job-tracking");
-    event.broadcast();
   }
   
   private void updateLog(AbstractJob<?> job, String log) {

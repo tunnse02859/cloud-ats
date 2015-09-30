@@ -500,8 +500,11 @@ class OpenStackService implements IaaSService {
     
     logger.info("Requesting OpenStack to create new instance");
     ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
+    
     VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, null, null, Status.Initializing);
     vmachineService.create(vm);
+    logger.info("Created VM " + vm);
+    
     return vm;
   }
   
