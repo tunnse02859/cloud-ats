@@ -156,7 +156,6 @@ public class JenkinsMavenJob {
       post.setEntity(this.buildFormData());
       res = client.execute(post, httpContext);
       body = HttpClientUtil.getContentBodyAsString(res);
-      System.out.println(body);
       if (body.length() == 0) {
         return build();
       }
@@ -179,11 +178,9 @@ public class JenkinsMavenJob {
       CloseableHttpClient client = HttpClientFactory.getInstance();
       String url = master.buildURL("job/" + encodeURIComponent(this.name) + "/api/json");
       String body = HttpClientUtil.fetch(client, url);
-      System.out.println(body);
       JSONObject json = new JSONObject(body);
       int currentbuildNumber = json.getInt("nextBuildNumber")-1;
       HttpContext httpContext = new BasicHttpContext();
-     // String status = getStatus(currentbuildNumber);
       url = master.buildURL("job/" + encodeURIComponent(this.name) + "/"+currentbuildNumber+"/stop" );
       HttpPost post = new HttpPost(url);
       HttpResponse res = client.execute(post,httpContext);

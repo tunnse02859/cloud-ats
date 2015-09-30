@@ -7,9 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.services.executor.job.AbstractJob;
+import org.ats.services.keyword.KeywordProject;
+import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
+import org.ats.services.performance.PerformanceProject;
+import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.vmachine.VMachine;
+import org.ats.services.vmachine.VMachineService;
 
 import play.Logger;
 import play.libs.EventSource;
@@ -32,7 +40,26 @@ public class EventController extends Controller {
   
   @Inject AuthenticationService<User> authenService;
   
-  public void send(User user, AbstractJob<?> job) {
+  @Inject VMachineService vmachineService;
+  
+  @Inject PerformanceProjectService performanceService;
+  
+  @Inject KeywordProjectService keywordService;
+  
+  
+  public void send(User user, AbstractJob<?> job) throws Exception {
+    VMachine jenkinsVM;
+    
+    if (AbstractJob.Type.Performance == job.getType()) {
+      PerformanceProject project = performanceService.get(job.getProjectId());
+      jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    } else {
+      KeywordProject project = keywordService.get(job.getProjectId());
+      jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    }
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), null , null, null);
     
     //Send for everyone
     if (user == null) {
@@ -51,6 +78,13 @@ public class EventController extends Controller {
     if (events == null) return ;
     
     for (EventSource event : events) {
+      boolean isBuilding;
+      try {
+        isBuilding = jenkinsJob.isBuilding(1);
+      } catch (Exception e) {
+        isBuilding = false;
+      }
+      job.put("isBuilding", isBuilding);
       event.send(EventSource.Event.event(Json.parse(job.toString())));
     }
   }
