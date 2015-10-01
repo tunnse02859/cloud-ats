@@ -15,6 +15,8 @@ import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
+import org.ats.services.event.Event;
+import org.ats.services.event.EventFactory;
 import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.iaas.exception.DestroyTenantException;
 import org.ats.services.iaas.exception.DestroyVMException;
@@ -71,6 +73,9 @@ class AWSService implements IaaSService {
   
   @Inject
   private VMachineFactory vmachineFactory;
+  
+  @Inject 
+  private EventFactory eventFactory;
   
   private String systemImage;
   
@@ -152,12 +157,32 @@ class AWSService implements IaaSService {
       throw ex;
     }
   }
+  
+  @Override
+  public VMachine createSystemVMAsync(TenantReference tenant, SpaceReference space) throws CreateVMException {
+    return createSystemVM(tenant, space);
+  }
 
   @Override
   public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
     String imageId = hasUI ? uiImage : nonUIImage;
     try {
       return createVM(imageId, InstanceType.T2Small, false, hasUI, tenant, space);
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException(e.getMessage());
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+  }
+  
+  @Override
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+    String imageId = hasUI ? uiImage : nonUIImage;
+    try {
+      VMachine vm = createVMAsync(imageId, InstanceType.T2Small, false, hasUI, tenant, space);
+      Event event = eventFactory.create(vm, "initialize-vm");
+      event.broadcast();
+      return vm;
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException(e.getMessage());
       ex.setStackTrace(e.getStackTrace());
@@ -197,8 +222,7 @@ class AWSService implements IaaSService {
     return vm;
   }
   
-  private VMachine createVM(String imageId, InstanceType instanceType, boolean system, boolean hasUI,TenantReference tenant, SpaceReference space) throws InterruptedException, CreateVMException, IOException, JSchException {
-    
+  private VMachine createVMAsync(String imageId, InstanceType instanceType, boolean system, boolean hasUI,TenantReference tenant, SpaceReference space) throws CreateVMException, InterruptedException {
     StringBuilder sb = new StringBuilder(tenant.getId()).append(system ? "-system" : "").append(hasUI ? "-ui-" : "-nonui-");
     sb.append(space == null ? "public" : space.getId());
     String serverName = sb.toString();
@@ -218,7 +242,7 @@ class AWSService implements IaaSService {
     Thread.sleep(5000); //sleep 5s to request stable
     
     for (Instance instance : runInstances.getReservation().getInstances()) {
-      vm = vmachineFactory.create(instance.getInstanceId(), tenant, space, system, hasUI,  null, instance.getPrivateIpAddress(), Status.Started);
+      vm = vmachineFactory.create(instance.getInstanceId(), tenant, space, system, hasUI,  null, instance.getPrivateIpAddress(), Status.Initializing);
       
       CreateTagsRequest createTagRequest = new CreateTagsRequest();
       createTagRequest.withResources(vm.getId()).withTags(
@@ -232,114 +256,170 @@ class AWSService implements IaaSService {
       client.createTags(createTagRequest);
     }
     
-    logger.info("Waiting for instance's state is running");
-    vm = waitUntilInstanceRunning(client, vm);
-    if (system) {
-      //Sleep 2m to Jenkins is ready
-      //logger.info("Waiting 2 minutes to Jenkins is ready");
-      //Thread.sleep(2 * 60 * 1000);
-
-      JenkinsMaster jenkinsMaster = new JenkinsMaster(vm.getPublicIp(), "http", "jenkins", 8080);
-      try {
-        jenkinsMaster.isReady(5 * 60 * 1000);
-        logger.info("Jenkins service is ready");
-        
-        vmachineService.create(vm);
-        logger.info("Created VM " + vm);
-        return vm;
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
-      }
-    } else if (hasUI) {
-      VMachine systemVM = vmachineService.getSystemVM(tenant, space);
-      if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
+    if (vm == null) throw new CreateVMException("Can not create AWS EC2 Instance");
+    
+    vmachineService.create(vm);
+    logger.info("Created VM " + vm);
+    
+    return vm;
+  }
+  
+  @Override
+  public VMachine initSystemVM(VMachine vm) throws CreateVMException {
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(vm.getPublicIp(), "http", "jenkins", 8080);
+    try {
+      jenkinsMaster.isReady(5 * 60 * 1000);
+      logger.info("Jenkins service is ready");
       
-      JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
+      logger.info("Updated VM " + vm);
       
-      try {
-        jenkinsMaster.isReady(5 * 60 * 1000);
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
-      }
-      
-      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
-        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
-        
-        try {
-          if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
-          logger.info("Created Jenkins slave by " + vm);
-          
-        } catch (Exception e) {
-          CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-          ex.setStackTrace(e.getStackTrace());
-          throw ex;
-        }
-        
-      //register Guacamole vnc
-        try {
-          String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
-          Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
-          ChannelExec channel = (ChannelExec) session.openChannel("exec");
-          channel.setCommand(command);
-          
-          OutputStream out = channel.getOutputStream();
-          channel.connect();
-          
-          out.write("#CloudATS\n".getBytes());
-          out.flush();
-          
-          while(true) {
-            if (channel.isClosed()) {
-              logger.info("Register guacamole exit code: " + channel.getExitStatus());
-              break;
-            }
-          }
-          
-          channel.disconnect();
-          session.disconnect();
-          logger.info("Registered guacamole node");
-        } catch (Exception e) {
-          CreateVMException ex = new CreateVMException("Can not register Guacamole node");
-          ex.setStackTrace(e.getStackTrace());
-          throw ex;
-        }
-        
-        vmachineService.create(vm);
-        logger.info("Created VM " + vm);
-        
-        return vm;
-      } else {
-        throw new CreateVMException("Connection to VM can not established");
-      }
-    } else {
-      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
-        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
-
-        waitJMeterServerRunning(vm);
-        logger.info("JMeter service is ready");
-        
-        vmachineService.create(vm);
-        logger.info("Created VM " + vm);
-        
-        return vm;
-      } else {
-        throw new CreateVMException("Connection to VM can not established");
-      }
+      return vm;
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
     }
   }
   
-  private VMachine waitUntilInstanceRunning(AmazonEC2Client client, VMachine vm) throws InterruptedException {
+  @Override
+  public VMachine initTestVmUI(VMachine vm) throws Exception {
+    VMachine systemVM = vmachineService.getSystemVM(vm.getTenant(), vm.getSpace());
+    if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    
+    try {
+      jenkinsMaster.isReady(5 * 60 * 1000);
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    
+    if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+      logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+      
+      try {
+        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+        logger.info("Created Jenkins slave by " + vm);
+        
+      } catch (Exception e) {
+        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+        ex.setStackTrace(e.getStackTrace());
+        throw ex;
+      }
+      
+    //register Guacamole vnc
+      try {
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+        Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(command);
+        
+        OutputStream out = channel.getOutputStream();
+        channel.connect();
+        
+        out.write("#CloudATS\n".getBytes());
+        out.flush();
+        
+        while(true) {
+          if (channel.isClosed()) {
+            logger.info("Register guacamole exit code: " + channel.getExitStatus());
+            break;
+          }
+        }
+        
+        channel.disconnect();
+        session.disconnect();
+        logger.info("Registered guacamole node");
+      } catch (Exception e) {
+        CreateVMException ex = new CreateVMException("Can not register Guacamole node");
+        ex.setStackTrace(e.getStackTrace());
+        throw ex;
+      }
+      
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
+      logger.info("Updated VM " + vm);
+      
+      return vm;
+    } else {
+      throw new CreateVMException("Connection to VM can not established");
+    }
+  }
+  
+  @Override
+  public VMachine initTestVMNonUI(VMachine vm) throws Exception {
+    if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+      logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+
+      waitJMeterServerRunning(vm);
+      logger.info("JMeter service is ready");
+      
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
+      logger.info("Updated VM " + vm);
+      
+      return vm;
+    } else {
+      throw new CreateVMException("Connection to VM can not established");
+    }
+  }
+  
+  private VMachine createVM(String imageId, InstanceType instanceType, boolean system, boolean hasUI,TenantReference tenant, SpaceReference space) throws Exception {
+    
+    VMachine vm = createVMAsync(imageId, instanceType, system, hasUI, tenant, space);
+    
+    logger.info("Waiting for instance's state is running");
+    vm = waitUntilInstanceRunning(vm);
+
+    if (system) {
+      return initSystemVM(vm);
+    } else if (hasUI) {
+      return initTestVmUI(vm);
+    } else {
+      return initTestVMNonUI(vm);
+    }
+  }
+  
+  private VMachine waitUntilInstanceRunning(VMachine vm) throws InterruptedException {
+    while (!isVMReady(vm)) {
+      Thread.sleep(5000);
+    }
+    vm = vmachineService.get(vm.getId());
+    return vm;
+  }
+  
+  private void waitJMeterServerRunning(VMachine vm) throws JSchException, IOException, InterruptedException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Channel channel = SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", "service jmeter-2.13 status", null, null);
+    SSHClient.write(bos, channel);
+    String status = new String(bos.toByteArray());
+    logger.info("JMeter Server is " + status);
+    if (!"Running".equals(status.trim())) {
+      Thread.sleep(5000);
+      waitJMeterServerRunning(vm);
+    }
+  }
+
+  @Override
+  public void addCredential(String tenant, String username, String password) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void addCredential(String tenant) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public boolean isVMReady(VMachine vm) {
     DescribeInstancesRequest request = new DescribeInstancesRequest().withInstanceIds(vm.getId());
     DescribeInstancesResult result = client.describeInstances(request);
     Instance instance = result.getReservations().get(0).getInstances().get(0);
-    if (instance.getState().getCode() != 16) {
-      Thread.sleep(5000);
-      return waitUntilInstanceRunning(client, vm);
-    } else {
+    if (instance.getState().getCode() == 16) {
       boolean instanceStatus = false;
       boolean systemStatus = false;
       
@@ -366,33 +446,11 @@ class AWSService implements IaaSService {
       
       if (systemStatus && instanceStatus) {
         vm.setPublicIp(instance.getPublicIpAddress());
-        return vm;
-      } else {
-        Thread.sleep(5000);
-        return waitUntilInstanceRunning(client, vm);
+        vmachineService.update(vm);
+        logger.info("Update public ip for VM " + vm);
+        return true;
       }
     }
-  }
-  
-  private void waitJMeterServerRunning(VMachine vm) throws JSchException, IOException, InterruptedException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    Channel channel = SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", "service jmeter-2.13 status", null, null);
-    SSHClient.write(bos, channel);
-    String status = new String(bos.toByteArray());
-    logger.info("JMeter Server is " + status);
-    if (!"Running".equals(status.trim())) {
-      Thread.sleep(5000);
-      waitJMeterServerRunning(vm);
-    }
-  }
-
-  @Override
-  public void addCredential(String tenant, String username, String password) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public void addCredential(String tenant) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return false;
   }
 }

@@ -15,6 +15,8 @@ import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsSlave;
 import org.ats.services.data.MongoDBService;
+import org.ats.services.event.Event;
+import org.ats.services.event.EventFactory;
 import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.iaas.exception.DestroyTenantException;
 import org.ats.services.iaas.exception.DestroyVMException;
@@ -106,6 +108,9 @@ class OpenStackService implements IaaSService {
   @Inject
   private VMachineFactory vmachineFactory;
   
+  @Inject 
+  private EventFactory eventFactory;
+  
   @Inject
   private Logger logger;
   
@@ -137,49 +142,6 @@ class OpenStackService implements IaaSService {
     this.col = mongo.getDatabase().getCollection("openstack-identity");
   }
   
-  KeystoneApi createKeystoneAPI(String tenant) {
-    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
-    
-    BasicDBObject credential = getCredential(tenant);
-    String identity= credential.getString("identity");
-    String password = credential.getString("password");
-    
-    return ContextBuilder
-        .newBuilder(keystoneProvider)
-        .credentials(identity, password)
-        .endpoint(adminKeystoneEndpoint).modules(modules).buildApi(KeystoneApi.class);
-  }
-  
-  NeutronApi createNeutronAPI(String tenant) {
-    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
-    
-    BasicDBObject credential = getCredential(tenant);
-    String identity= credential.getString("identity");
-    String password = credential.getString("password");
-    
-    return ContextBuilder
-        .newBuilder(neutronProvider)
-        .credentials(identity, password)
-        .endpoint(keystoneURL)
-        .modules(modules)
-        .buildApi(NeutronApi.class);
-  }
-  
-  NovaApi createNovaApi(String tenant) {
-    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
-    
-    BasicDBObject credential = getCredential(tenant);
-    String identity= credential.getString("identity");
-    String password = credential.getString("password");
-    
-    return ContextBuilder
-        .newBuilder(novaProvider)
-        .credentials(identity, password)
-        .endpoint(keystoneURL)
-        .modules(modules)
-        .buildApi(NovaApi.class);
-  }
-  
   @Override
   public void addCredential(String tenant, String username, String password) {
     String identity = tenant + ":" + username;
@@ -197,16 +159,8 @@ class OpenStackService implements IaaSService {
     this.col.insert(obj);
   }
   
-  private BasicDBObject getCredential(String tenant) {
-    return (BasicDBObject) this.col.findOne(new BasicDBObject("_id", tenant));
-  }
-  
   /** 
    * Initialize OpenStack system for new tenant
-   * 
-   * @param tenantRef
-   * @throws InitializeTenantException
-   * @throws CreateVMException
    */
   @Override
   public void initTenant(TenantReference tenantRef) throws InitializeTenantException, CreateVMException {
@@ -456,178 +410,6 @@ class OpenStackService implements IaaSService {
   }
 
   @Override
-  public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
-    String flavorId = getFlavorIdByName(tenant, "m1.small");
-    String imageId = getImageIdByName(tenant, systemImage);
-    return createVM(imageId, flavorId, true, false, tenant, space);
-  }
-
-  @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
-    String flavorId = getFlavorIdByName(tenant, "m1.small");
-    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
-    VMachine vm =  createVM(imageId, flavorId, false, hasUI, tenant, space);
-    
-    if (!hasUI) return vm;
-    
-    //vm ui test should join jenkins master as slave
-    VMachine systemVM = vmachineService.getSystemVM(tenant, space);
-    if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
-    
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
-    
-    try {
-      jenkinsMaster.isReady(5 * 60 * 1000);
-    } catch (Exception e) {
-      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
-      ex.setStackTrace(e.getStackTrace());
-      throw ex;
-    }
-    
-    try {
-      if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join()) throw new CreateVMException("Can not create jenkins slave for test vm");
-    } catch (Exception e) {
-      CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-      ex.setStackTrace(e.getStackTrace());
-      throw ex;
-    }
-    
-    //register Guacamole vnc
-    try {
-      String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
-      Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
-      ChannelExec channel = (ChannelExec) session.openChannel("exec");
-      channel.setCommand(command);
-      
-      OutputStream out = channel.getOutputStream();
-      channel.connect();
-      
-      out.write("#CloudATS\n".getBytes());
-      out.flush();
-      
-      while(true) {
-        if (channel.isClosed()) {
-          logger.info("Register guacamole exit code: " + channel.getExitStatus());
-          break;
-        }
-      }
-      
-      channel.disconnect();
-      session.disconnect();
-    } catch (Exception e) {
-      CreateVMException ex = new CreateVMException("Can not register Guacamole node");
-      ex.setStackTrace(e.getStackTrace());
-      throw ex;
-    }
-    return vm;
-  }
-  
-  private FloatingIP getFloatingIPAvailable(TenantReference tenant) {
-    NeutronApi neutronApi = createNeutronAPI(tenant.getId());
-    NovaApi novaApi = createNovaApi(tenant.getId());
-    
-    String region = novaApi.getConfiguredRegions().iterator().next();
-    
-    FloatingIPApi floatingIpApi = neutronApi.getFloatingIPApi(region).get();
-    
-    for (FloatingIP sel : floatingIpApi.list().concat()) {
-      if (sel.getFixedIpAddress() == null) {
-        return sel;
-      }
-    }
-    
-    NetworkApi networkApi = neutronApi.getNetworkApi(region);
-
-    String externalNetworkId = null;
-    for (Network sel : networkApi.list().concat()) {
-      if (externalNetwork.equals(sel.getName())) {
-        externalNetworkId = sel.getId();
-        break;
-      }
-    }
-    
-    return floatingIpApi.create(CreateFloatingIP.createBuilder(externalNetworkId).build());
-  }
-
-  private String getFlavorIdByName(TenantReference tenantRef, String flavorName) {
-    NovaApi novaApi = createNovaApi(tenantRef.getId());
-    FlavorApi flavorApi = novaApi.getFlavorApi(novaApi.getConfiguredRegions().iterator().next());
-    for (Resource resource : flavorApi.list().concat()) {
-      if (flavorName.equals(resource.getName())) return resource.getId();
-    }
-    return null;
-  }
-  
-  private String getImageIdByName(TenantReference tenantRef, String imageName) {
-    NovaApi novaApi = createNovaApi(tenantRef.getId());
-    ImageApi imageApi = novaApi.getImageApi(novaApi.getConfiguredRegions().iterator().next());
-    for (Resource resource : imageApi.list().concat()) {
-      if (imageName.equals(resource.getName())) return resource.getId();
-    }
-    return null;
-  }
-  
-  private VMachine createVM(
-      String imageId, 
-      String flavorId, 
-      boolean system, 
-      boolean hasUI, 
-      TenantReference tenant, 
-      SpaceReference space) throws CreateVMException {
-    
-    NovaApi novaApi = createNovaApi(tenant.getId());
-    String region = novaApi.getConfiguredRegions().iterator().next();
-    ServerApi serverApi = novaApi.getServerApi(region);
-    
-    StringBuilder sb = new StringBuilder(tenant.getId()).append(system ? "-system" : "").append(hasUI ? "-ui-" : "-nonui-");
-    sb.append(space == null ? "public" : space.getId());
-    String serverName = sb.toString();
-    sb.setLength(0);
-
-    sb.append("#cloud-config").append("\n");
-    if (hasUI || system) {
-      sb.append("hostname: ").append(serverName).append("\n");
-      sb.append("fqdn: ").append(serverName).append(".cloud-ats.org").append("\n");
-      sb.append("manage_etc_hosts: true").append("\n");
-    }
-    
-    ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
-    Server server = null;
-    do {
-      server = serverApi.get(serverCreated.getId());
-    }
-    while (!server.getStatus().equals(Server.Status.ACTIVE));
-    
-    Address address = server.getAddresses().entries().iterator().next().getValue();
-    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, 
-        null, address.getAddr(), Status.Started);
-
-    //create floating ip for vm
-    vm = allocateFloatingIp(vm);
-    
-    try {
-      
-      Thread.sleep(60 * 1000); //sleep 1m to connection established
-      
-      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
-        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
-        
-        if (!hasUI && !system) waitJMeterServerRunning(vm);
-        
-        vmachineService.create(vm);
-        return vm;
-        
-      } else {
-        throw new CreateVMException("Cannot connect to vm");
-      }
-    } catch (Exception e) {
-      CreateVMException ex = new CreateVMException("Cannot connect to vm");
-      ex.setStackTrace(e.getStackTrace());
-      throw ex;
-    }
-  }
-  
-  @Override
   public VMachine allocateFloatingIp(VMachine vm) {
     if (vm.getPublicIp() != null) return vm;
     
@@ -666,6 +448,346 @@ class OpenStackService implements IaaSService {
     vmachineService.update(vm);
     logger.log(Level.INFO, "Deallocated floating ip on test vm " + vm.getPrivateIp());
     return vm;
+  }
+  
+  @Override
+  public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
+    String flavorId = getFlavorIdByName(tenant, "m1.small");
+    String imageId = getImageIdByName(tenant, systemImage);
+    return createVM(imageId, flavorId, true, false, tenant, space);
+  }
+  
+  @Override
+  public VMachine createSystemVMAsync(TenantReference tenant, SpaceReference space) throws CreateVMException {
+    return createSystemVM(tenant, space);
+  }
+
+  @Override
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+    String flavorId = getFlavorIdByName(tenant, "m1.small");
+    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
+    return createVM(imageId, flavorId, false, hasUI, tenant, space);
+  }
+  
+  @Override
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+
+    String flavorId = getFlavorIdByName(tenant, "m1.small");
+    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
+    VMachine vm = createVMAsync(imageId, flavorId, false, hasUI, tenant, space);
+    
+    Event event = eventFactory.create(vm, "initialize-vm");
+    event.broadcast();
+    return vm;
+  }
+  
+  private VMachine createVMAsync(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
+    NovaApi novaApi = createNovaApi(tenant.getId());
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    ServerApi serverApi = novaApi.getServerApi(region);
+    
+    StringBuilder sb = new StringBuilder(tenant.getId()).append(system ? "-system" : "").append(hasUI ? "-ui-" : "-nonui-");
+    sb.append(space == null ? "public" : space.getId());
+    String serverName = sb.toString();
+    sb.setLength(0);
+
+    sb.append("#cloud-config").append("\n");
+    if (hasUI || system) {
+      sb.append("hostname: ").append(serverName).append("\n");
+      sb.append("fqdn: ").append(serverName).append(".cloud-ats.org").append("\n");
+      sb.append("manage_etc_hosts: true").append("\n");
+    }
+    
+    logger.info("Requesting OpenStack to create new instance");
+    ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
+    
+    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, null, null, Status.Initializing);
+    vmachineService.create(vm);
+    logger.info("Created VM " + vm);
+    
+    return vm;
+  }
+  
+  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
+
+    VMachine vm = createVMAsync(imageId, flavorId, system, hasUI, tenant, space);
+    
+   vm = waitUntilInstanceRunning(vm);
+   
+   try {
+     if (system) {
+       return initSystemVM(vm);
+     } else if (hasUI) {
+       return initTestVmUI(vm);
+     } else {
+       return initTestVMNonUI(vm);
+     }
+   } catch (Exception e) {
+     CreateVMException ex = new CreateVMException("Can not initialize vm " + vm);
+     ex.setStackTrace(e.getStackTrace());
+     throw ex;
+   }
+  }
+  
+  @Override
+  public boolean isVMReady(VMachine vm) {
+    NovaApi novaApi = createNovaApi(vm.getTenant().getId());
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    ServerApi serverApi = novaApi.getServerApi(region);
+    Server server = serverApi.get(vm.getId());
+    
+    if( server.getStatus().equals(Server.Status.ACTIVE)) {
+      Address address = server.getAddresses().entries().iterator().next().getValue();
+      vm.setPrivateIp(address.getAddr());
+      vmachineService.update(vm);
+      return true;
+    }
+    
+    return false;
+  }
+
+  @Override
+  public VMachine initSystemVM(VMachine vm) throws CreateVMException {
+    //create floating ip for vm
+    vm = allocateFloatingIp(vm);
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(vm.getPublicIp(), "http", "jenkins", 8080);
+    try {
+      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+        
+        jenkinsMaster.isReady(5 * 60 * 1000);
+        logger.info("Jenkins service is ready");
+
+        vm.setStatus(VMachine.Status.Started);
+        vmachineService.update(vm);
+        logger.info("Updated VM " + vm);
+
+        return vm;
+      } else {
+        throw new CreateVMException("Connection to VM can not established");
+      }
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+  }
+
+  @Override
+  public VMachine initTestVmUI(VMachine vm) throws Exception {
+    //create floating ip for vm
+    vm = allocateFloatingIp(vm);
+    
+    VMachine systemVM = vmachineService.getSystemVM(vm.getTenant(), vm.getSpace());
+    if (systemVM == null) throw new CreateVMException("Can not create test vm without system vm in space " + vm.getSpace());
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    
+    try {
+      jenkinsMaster.isReady(5 * 60 * 1000);
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("The jenkins vm test can not start properly");
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    }
+    
+    if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+      logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+      
+      try {
+        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+        logger.info("Created Jenkins slave by " + vm);
+        
+      } catch (Exception e) {
+        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+        ex.setStackTrace(e.getStackTrace());
+        throw ex;
+      }
+      
+    //register Guacamole vnc
+      try {
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+        Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(command);
+        
+        OutputStream out = channel.getOutputStream();
+        channel.connect();
+        
+        out.write("#CloudATS\n".getBytes());
+        out.flush();
+        
+        while(true) {
+          if (channel.isClosed()) {
+            logger.info("Register guacamole exit code: " + channel.getExitStatus());
+            break;
+          }
+        }
+        
+        channel.disconnect();
+        session.disconnect();
+        logger.info("Registered guacamole node");
+      } catch (Exception e) {
+        CreateVMException ex = new CreateVMException("Can not register Guacamole node");
+        ex.setStackTrace(e.getStackTrace());
+        throw ex;
+      }
+      
+      vm.setStatus(VMachine.Status.Started);
+      vmachineService.update(vm);
+      logger.info("Updated VM " + vm);
+      
+      return vm;
+    } else {
+      throw new CreateVMException("Connection to VM can not established");
+    }
+  }
+
+  @Override
+  public VMachine initTestVMNonUI(VMachine vm) throws CreateVMException {
+    //create floating ip for vm
+    vm = allocateFloatingIp(vm);
+    try {
+      if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+
+        waitJMeterServerRunning(vm);
+        logger.info("JMeter service is ready");
+        
+        vm = deallocateFloatingIp(vm);
+        
+        vm.setStatus(VMachine.Status.Started);
+        vmachineService.update(vm);
+        logger.info("Updated VM " + vm);
+        
+        return vm;
+      } else {
+        throw new CreateVMException("Connection to VM can not established");
+      }
+    } catch (Exception e) {
+      CreateVMException ex = new CreateVMException("Can not init test vm non ui " + vm);
+      ex.setStackTrace(e.getStackTrace());
+      throw ex;
+    } finally {
+      vm = deallocateFloatingIp(vm);
+    }
+  }
+  
+  private VMachine waitUntilInstanceRunning(VMachine vm) {
+    try {
+      while (!isVMReady(vm)) {
+        Thread.sleep(5000);
+      }
+      //update vm model
+      vm = vmachineService.get(vm.getId());
+      return vm;
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  private KeystoneApi createKeystoneAPI(String tenant) {
+    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
+    
+    BasicDBObject credential = getCredential(tenant);
+    String identity= credential.getString("identity");
+    String password = credential.getString("password");
+    
+    return ContextBuilder
+        .newBuilder(keystoneProvider)
+        .credentials(identity, password)
+        .endpoint(adminKeystoneEndpoint).modules(modules).buildApi(KeystoneApi.class);
+  }
+  
+  private NeutronApi createNeutronAPI(String tenant) {
+    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
+    
+    BasicDBObject credential = getCredential(tenant);
+    String identity= credential.getString("identity");
+    String password = credential.getString("password");
+    
+    return ContextBuilder
+        .newBuilder(neutronProvider)
+        .credentials(identity, password)
+        .endpoint(keystoneURL)
+        .modules(modules)
+        .buildApi(NeutronApi.class);
+  }
+  
+  private NovaApi createNovaApi(String tenant) {
+    Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
+    
+    BasicDBObject credential = getCredential(tenant);
+    String identity= credential.getString("identity");
+    String password = credential.getString("password");
+    
+    return ContextBuilder
+        .newBuilder(novaProvider)
+        .credentials(identity, password)
+        .endpoint(keystoneURL)
+        .modules(modules)
+        .buildApi(NovaApi.class);
+  }
+  
+  private BasicDBObject getCredential(String tenant) {
+    return (BasicDBObject) this.col.findOne(new BasicDBObject("_id", tenant));
+  }
+  
+  private void waitJMeterServerRunning(VMachine vm) throws JSchException, IOException, InterruptedException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Channel channel = SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", "service jmeter-2.13 status", null, null);
+    SSHClient.write(bos, channel);
+    String status = new String(bos.toByteArray());
+    logger.info("JMeter Server is " + status);
+    if (!"Running".equals(status.trim())) {
+      Thread.sleep(5000);
+      waitJMeterServerRunning(vm);
+    }
+  }
+  
+  private String getFlavorIdByName(TenantReference tenantRef, String flavorName) {
+    NovaApi novaApi = createNovaApi(tenantRef.getId());
+    FlavorApi flavorApi = novaApi.getFlavorApi(novaApi.getConfiguredRegions().iterator().next());
+    for (Resource resource : flavorApi.list().concat()) {
+      if (flavorName.equals(resource.getName())) return resource.getId();
+    }
+    return null;
+  }
+  
+  private String getImageIdByName(TenantReference tenantRef, String imageName) {
+    NovaApi novaApi = createNovaApi(tenantRef.getId());
+    ImageApi imageApi = novaApi.getImageApi(novaApi.getConfiguredRegions().iterator().next());
+    for (Resource resource : imageApi.list().concat()) {
+      if (imageName.equals(resource.getName())) return resource.getId();
+    }
+    return null;
+  }
+  
+  private FloatingIP getFloatingIPAvailable(TenantReference tenant) {
+    NeutronApi neutronApi = createNeutronAPI(tenant.getId());
+    NovaApi novaApi = createNovaApi(tenant.getId());
+    
+    String region = novaApi.getConfiguredRegions().iterator().next();
+    
+    FloatingIPApi floatingIpApi = neutronApi.getFloatingIPApi(region).get();
+    
+    for (FloatingIP sel : floatingIpApi.list().concat()) {
+      if (sel.getFixedIpAddress() == null) {
+        return sel;
+      }
+    }
+    
+    NetworkApi networkApi = neutronApi.getNetworkApi(region);
+
+    String externalNetworkId = null;
+    for (Network sel : networkApi.list().concat()) {
+      if (externalNetwork.equals(sel.getName())) {
+        externalNetworkId = sel.getId();
+        break;
+      }
+    }
+    
+    return floatingIpApi.create(CreateFloatingIP.createBuilder(externalNetworkId).build());
   }
   
   private void updateDefaultSecurityGroup(TenantReference tenantRef) {
@@ -739,18 +861,6 @@ class OpenStackService implements IaaSService {
       createBuilder.portRangeMin(8081);
       createBuilder.portRangeMax(8081);
       securityGroupApi.create(createBuilder.build());
-    }
-  }
-  
-  private void waitJMeterServerRunning(VMachine vm) throws JSchException, IOException, InterruptedException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    Channel channel = SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", "service jmeter-2.13 status", null, null);
-    SSHClient.write(bos, channel);
-    String status = new String(bos.toByteArray());
-    logger.info("JMeter Server is " + status);
-    if (!"Running".equals(status.trim())) {
-      Thread.sleep(5000);
-      waitJMeterServerRunning(vm);
     }
   }
 }

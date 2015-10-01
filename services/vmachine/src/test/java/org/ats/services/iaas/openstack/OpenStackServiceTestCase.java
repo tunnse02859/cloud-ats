@@ -3,9 +3,6 @@
  */
 package org.ats.services.iaas.openstack;
 
-import java.util.List;
-
-import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.services.OrganizationServiceModule;
@@ -27,7 +24,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.inject.Guice;
-import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -44,6 +40,9 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
   
   @BeforeClass
   public void init() throws Exception {
+    
+    System.setProperty("jenkins.slave.credential", "965a0c50-868c-48b1-8f3e-b0179bf40666");
+    System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     
     VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
     vmModule.setProperty("org.ats.cloud.iaas", "org.ats.services.iaas.OpenStackService");
@@ -95,11 +94,6 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     Assert.assertNotNull(fsoft.get("network_id"));
     Assert.assertNotNull(fsoft.get("subnet_id"));
     Assert.assertNotNull(fsoft.get("router_id"));
-    
-    PageList<VMachine> list = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
-    Assert.assertEquals(list.totalPage(), 1);
-    List<VMachine> page = list.getPage(1);
-    Assert.assertEquals(page.size(), 1);
   }
   
   @Test
@@ -125,14 +119,8 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testRunJenkinsJob() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    PageList<VMachine> list = vmachineService.query(new BasicDBObject("tenant", tenantRef.toJSon()));
     
-    Assert.assertEquals(list.totalPage(), 1);
-    List<VMachine> page = list.getPage(1);
-    Assert.assertEquals(page.size(), 1);
-    
-    VMachine jenkins = page.get(0);
-    Assert.assertTrue(jenkins.isSystem());
+    VMachine jenkins = vmachineService.getSystemVM(tenantRef, null);
     
     VMachine vm = openstackService.createTestVM(tenantRef, null, true);
     openstackService.deallocateFloatingIp(vm);
@@ -159,6 +147,39 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
         if (output.indexOf("TestNG652Configurator") != -1) break; 
       }
     }
-
+  }
+  
+  @Test
+  public void testCreateNonUIAsync() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, false);
+    Assert.assertNotNull(vm);
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
+    while (isVMNotStarted(vm.getId())) {
+      Thread.sleep(5000);
+    }
+    Assert.assertTrue(vm.getPrivateIp().startsWith("192.168.1"));
+    Assert.assertNull(vm.getPublicIp());
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
+  }
+  
+  @Test
+  public void testCreateUIAsync() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, true);
+    Assert.assertNotNull(vm);
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
+    while (isVMNotStarted(vm.getId())) {
+      Thread.sleep(5000);
+    }
+    Assert.assertTrue(vm.getPrivateIp().startsWith("192.168.1"));
+    Assert.assertNotNull(vm.getPublicIp());
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
+  }
+  
+  private boolean isVMNotStarted(String vmId) throws InterruptedException {
+    VMachine vm = vmachineService.get(vmId);
+    if (vm.getStatus() == VMachine.Status.Started) return false;
+    return true;
   }
 }

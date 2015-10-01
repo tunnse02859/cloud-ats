@@ -41,6 +41,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
   public void init() throws Exception {
     
     System.setProperty("jenkins.slave.credential", "b7cf38a7-5b1c-412b-9280-07cad8c952bb");
+    System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     
     VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
     vmModule.setProperty("org.ats.cloud.iaas", "org.ats.services.iaas.AWSService");
@@ -108,5 +109,39 @@ public class AWSTestCase  extends AbstractEventTestCase {
     Assert.assertNotNull(vm);
     Assert.assertTrue(vm.getPrivateIp().startsWith("10.10.13"));
     Assert.assertNotNull(vm.getPublicIp());
+  }
+  
+  @Test
+  public void testCreateNonUIAsync() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    VMachine vm = awsService.createTestVMAsync(tenantRef, null, false);
+    Assert.assertNotNull(vm);
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
+    while (isVMNotStarted(vm.getId())) {
+      Thread.sleep(5000);
+    }
+    Assert.assertTrue(vm.getPrivateIp().startsWith("10.10.13"));
+    Assert.assertNotNull(vm.getPublicIp());
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
+  }
+  
+  @Test
+  public void testCreateUIAsync() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    VMachine vm = awsService.createTestVMAsync(tenantRef, null, true);
+    Assert.assertNotNull(vm);
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
+    while (isVMNotStarted(vm.getId())) {
+      Thread.sleep(5000);
+    }
+    Assert.assertTrue(vm.getPrivateIp().startsWith("10.10.13"));
+    Assert.assertNotNull(vm.getPublicIp());
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
+  }
+  
+  private boolean isVMNotStarted(String vmId) throws InterruptedException {
+    VMachine vm = vmachineService.get(vmId);
+    if (vm.getStatus() == VMachine.Status.Started) return false;
+    return true;
   }
 }

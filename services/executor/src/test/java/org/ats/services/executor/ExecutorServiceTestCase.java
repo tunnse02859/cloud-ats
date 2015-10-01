@@ -96,6 +96,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   @BeforeClass
   public void init() throws Exception {
+    System.setProperty("jenkins.slave.credential", "965a0c50-868c-48b1-8f3e-b0179bf40666");
     System.setProperty(EventModule.EVENT_CONF, "src/test/resources/event.conf");
     
     VMachineServiceModule vmModule = new VMachineServiceModule("src/test/resources/iaas.conf");
@@ -138,6 +139,8 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     this.iaasProvider = injector.getInstance(IaaSServiceProvider.class);
     this.openstackService = iaasProvider.get();
+    
+    this.executorService = injector.getInstance(ExecutorService.class);
    
     //start event service
     this.eventService = injector.getInstance(EventService.class);
