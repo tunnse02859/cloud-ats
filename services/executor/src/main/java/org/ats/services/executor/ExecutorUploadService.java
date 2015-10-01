@@ -74,6 +74,7 @@ public class ExecutorUploadService extends AbstractMongoCRUD<AbstractJob<?>> {
     keywordJob.put("created_date", createdDate);
     keywordJob.put("report", source.get("report"));
     keywordJob.put("log", source.get("log"));
+    keywordJob.put("result", source.get("result"));
 
     return keywordJob;
   }

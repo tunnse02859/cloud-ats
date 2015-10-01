@@ -62,6 +62,10 @@ public abstract class AbstractJob<T extends AbstractJob<T>> extends BasicDBObjec
     return this.getString("log");
   }
   
+  public String getResult() {
+   return this.getString("result"); 
+  }
+  
   public abstract Map<String, String> getRawDataOutput();
   
   public abstract Type getType();

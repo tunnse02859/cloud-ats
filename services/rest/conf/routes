@@ -51,8 +51,9 @@ GET     /api/v1/uploadProject/keywords                   @controllers.KeywordUpl
 GET		/api/v1/uploadProject/keyword/:projectId/run			 @controllers.KeywordUploadController.run(projectId)
 PUT		/api/v1/uploadProject/keyword							 @controllers.KeywordUploadController.update()
 DELETE	/api/v1/uploadProject/keyword							 @controllers.KeywordUploadController.delete()
-GET		/api/v1/uploadProject/keyword/:projectId/report/:jobId @controllers.KeywordUploadController.report(projectId,jobId)
-GET		/api/v1/uploadProject/keyword/:projectId/reports	     @controllers.KeywordUploadController.listReport(projectId)
+GET		/api/v1/uploadProject/keyword/:projectId/reports			@controllers.KeywordUploadController.listReport(projectId)
+GET		/api/v1/uploadProject/keyword/:projectId/report/:jobId		@controllers.KeywordUploadController.report(projectId,jobId)
+GET		/api/v1/uploadProject/keyword/:projectId/download/:jobId	@controllers.KeywordUploadController.download(projectId,jobId)
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)

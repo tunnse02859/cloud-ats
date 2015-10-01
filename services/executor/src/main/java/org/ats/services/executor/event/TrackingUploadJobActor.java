@@ -136,8 +136,10 @@ private void doTrackingKeywordUploadJob(KeywordUploadJob job, KeywordUploadProje
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
           "/home/cloudats/projects/" + job.getId() + "/target/surefire-reports/testng-results.xml",  bos);
       
-      if (bos.size() > 0)
+      if (bos.size() > 0) {
         job.put("report", new String(bos.toByteArray()));
+        job.put("result", jkJob.getStatus(1));
+      }
       //End download result
 
       job.setStatus(AbstractJob.Status.Completed);
