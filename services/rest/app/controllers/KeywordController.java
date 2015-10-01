@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +12,8 @@ import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
@@ -31,6 +34,8 @@ import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.vmachine.VMachine;
+import org.ats.services.vmachine.VMachineService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -74,6 +79,8 @@ public class KeywordController extends Controller {
   @Inject ReportService reportService;
   
   @Inject CustomKeywordService customKeywordService;
+  
+  @Inject VMachineService vmachineService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -266,4 +273,40 @@ public class KeywordController extends Controller {
     return ok(array);
   }
   
+  public Result stopProject(String projectId) throws IOException {
+    
+    KeywordProject project = keywordProjectService.get(projectId);
+    
+    if (project == null) return status(404);
+    
+    VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    AbstractJob<?> lastJob = jobList.next().get(0);
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, lastJob.getId(), 
+     null , null, null);
+    
+    lastJob.setStatus(AbstractJob.Status.Completed);
+    executorService.update(lastJob);
+
+    if (lastJob.getTestVMachineId() != null) {
+      VMachine testVM = vmachineService.get(lastJob.getTestVMachineId());
+      
+      if (testVM.getStatus() == VMachine.Status.InProgress) {
+        testVM.setStatus(VMachine.Status.Started);
+        vmachineService.update(testVM);
+      }
+    } 
+    
+    project.setStatus(KeywordProject.Status.READY);
+    keywordProjectService.update(project);
+    
+    jenkinsJob.stop();
+    
+    return status(200);
+  }
 }
