@@ -103,7 +103,6 @@ public class KeywordController extends Controller {
           AbstractJob<?> lastJob = jobList.next().get(0);
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
           project.put("lastJobId", lastJob.getId());
-          project.put("log", lastJob.getLog());
           
           List<SuiteReference> suites = ((KeywordJob) lastJob).getSuites();
           if (suites.size() > 0) {
@@ -116,6 +115,20 @@ public class KeywordController extends Controller {
       }
     }
     return ok(array);
+  }
+  
+  public Result viewLog(String projectId) {
+    BasicDBObject query = new BasicDBObject("project_id", projectId).append("status", AbstractJob.Status.Completed.toString());
+    PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
+    jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    String log = "";
+    if (jobList.totalPage() > 0) {
+      AbstractJob<?> lastJob = jobList.next().get(0);
+      log = lastJob.getLog();
+    }
+    
+    return status(200, log);
   }
   
   public Result get(String projectId) {
@@ -133,7 +146,7 @@ public class KeywordController extends Controller {
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
       project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
-      project.put("log", lastJob.getLog());
+      project.put("log", true);
       project.put("lastSuites", lastJob.get("suites"));
       project.put("lastJobId", lastJob.getId());
     }
