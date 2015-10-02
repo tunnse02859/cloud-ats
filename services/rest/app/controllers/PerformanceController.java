@@ -89,7 +89,6 @@ public class PerformanceController extends Controller {
           AbstractJob<?> lastJob = pages.next().get(0);
           
           project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
-          project.put("log", lastJob.getLog());
           project.put("lastJobId", lastJob.getId());
           List<JMeterScriptReference> scripts = ((PerformanceJob) lastJob).getScripts();
           if (scripts.size() > 0) {
@@ -103,6 +102,21 @@ public class PerformanceController extends Controller {
     }
     
     return ok(array);
+  }
+  
+  public Result viewLog(String projectId) {
+    
+    PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", projectId).append("status", AbstractJob.Status.Completed.toString()));
+    pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+   
+    String log = "";
+    if (pages.count() > 0) {
+      
+      AbstractJob<?> lastJob = pages.next().get(0);
+      log = lastJob.getLog();
+    }
+    
+    return status(200, log);
   }
   
   public Result create() {
@@ -127,7 +141,7 @@ public class PerformanceController extends Controller {
       AbstractJob<?> lastRunningJob = jobList.next().get(0);
       project.put("last_running", formater.format(lastRunningJob.getCreatedDate()));
       project.put("lastScripts", lastRunningJob.get("scripts"));
-      project.put("log", lastRunningJob.getLog());
+      project.put("log", true);
      
     }
     

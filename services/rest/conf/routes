@@ -41,6 +41,7 @@ DELETE	/api/v1/project/keyword							 @controllers.KeywordController.delete()
 GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordController.report(projectId,jobId)
 GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
 GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
+GET		/api/v1/project/keyword/:projectId/logs			 @controllers.KeywordController.viewLog(projectId)	
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
@@ -79,6 +80,7 @@ POST	/api/v1/project/performance/run/:projectId							@controllers.PerformanceCo
 GET		/api/v1/project/performance/reports/:projectId/:jobId	    		@controllers.PerformanceController.report(projectId, jobId)
 GET		/api/v1/project/performance/report/sampler/:id						@controllers.PerformanceController.getReport(id)
 GET		/api/v1/project/performance/stop/:projectId							@controllers.PerformanceController.stopProject(projectId)
+GET		/api/v1/project/performance/logs/:projectId							@controllers.PerformanceController.viewLog(projectId)
 # Script controller
 
 GET		/api/v1/project/performance/:projectId/scripts				@controllers.ScriptController.list(projectId)
