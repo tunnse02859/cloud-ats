@@ -106,7 +106,7 @@ public class PerformanceController extends Controller {
   
   public Result viewLog(String projectId) {
     
-    PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", projectId).append("status", AbstractJob.Status.Completed.toString()));
+    PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", projectId));
     pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
    
     String log = "";

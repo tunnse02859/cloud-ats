@@ -118,7 +118,7 @@ public class KeywordController extends Controller {
   }
   
   public Result viewLog(String projectId) {
-    BasicDBObject query = new BasicDBObject("project_id", projectId).append("status", AbstractJob.Status.Completed.toString());
+    BasicDBObject query = new BasicDBObject("project_id", projectId);
     PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
