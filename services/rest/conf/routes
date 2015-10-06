@@ -90,5 +90,8 @@ GET		/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptCont
 DELETE	/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptController.delete(projectId, id)
 PUT		/api/v1/project/performance/:projectId/script				@controllers.ScriptController.update(projectId)
 
+# Dashboard controller
+GET		/api/v1/dashboard/summary									@controllers.DashboardController.summary()
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
