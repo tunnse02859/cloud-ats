@@ -4,6 +4,7 @@
 package actors;
 
 import org.ats.services.event.Event;
+import org.ats.services.executor.ExecutorUploadService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.KeywordUploadJob;
@@ -40,6 +41,8 @@ public class EventTrackingActor extends UntypedActor {
   
   @Inject VMachineService vmachineService;
   
+  @Inject ExecutorUploadService executorUploadService;
+  
   @Override
   public void onReceive(Object obj) throws Exception {
     if (obj instanceof Event) {
@@ -75,7 +78,9 @@ public class EventTrackingActor extends UntypedActor {
           eventController.send(project.getCreator().get(), job);
           
         } else if ("upload-job-tracking".equals(event.getName())) {
-          KeywordUploadJob job = (KeywordUploadJob) event.getSource();
+          KeywordUploadJob jobTemp = (KeywordUploadJob) event.getSource();
+          
+          KeywordUploadJob job = (KeywordUploadJob) executorUploadService.get(jobTemp.getId());
           
           if (job.getStatus() == AbstractJob.Status.Queued) return;
           

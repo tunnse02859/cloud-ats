@@ -76,6 +76,7 @@ public class TrackingUploadJobActor extends UntypedActor {
       switch (job.getStatus()) {
       case Queued:
         doExecuteKeywordUploadJob(job, project);
+        break;
       case Running:
         doTrackingKeywordUploadJob(job, project);
         break;
@@ -132,12 +133,16 @@ private void doTrackingKeywordUploadJob(KeywordUploadJob job, KeywordUploadProje
       updateLog(job, jkJob);
       
       //Download result
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "/home/cloudats/projects/" + job.getId() + "/target/surefire-reports/testng-results.xml",  bos);
       
-      if (bos.size() > 0) {
-        job.put("report", new String(bos.toByteArray()));
+      //Zip report
+      SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf target.tar.gz -C target .", null, null);
+      ByteArrayOutputStream bosReport = new ByteArrayOutputStream();
+      SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "/home/cloudats/projects/" + job.getId() + "/target.tar.gz",  bosReport);
+      
+      if (bosReport.size() > 0) {
+        job.put("raw_report", bosReport.toByteArray());
         job.put("result", jkJob.getStatus(1));
       }
       //End download result

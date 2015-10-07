@@ -7,12 +7,14 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -176,6 +178,8 @@ public class KeywordUploadController extends Controller {
     ObjectNode obj = Json.newObject();
     String result = "";
     obj.put("created_date", formater.format(job.getCreatedDate()));
+    if(job.getLog() == null)
+      return status(404);
     obj.put("log", job.getLog());
     obj.put("jobId", job.getId());
     if((job.getResult() != null) && ("SUCCESS".equals(job.getResult()))) {
@@ -196,7 +200,7 @@ public class KeywordUploadController extends Controller {
     String result = "";
     while (jobList.hasNext()) {
       for (AbstractJob<?> job : jobList.next()) {
-        if (job.getLog() != null) {
+        if (AbstractJob.Status.Completed.equals(job.getStatus())) {
           ObjectNode obj = Json.newObject();
           obj.put("created_date", formater.format(job.getCreatedDate()));
           obj.put("log", job.getLog());
@@ -216,66 +220,33 @@ public class KeywordUploadController extends Controller {
   }
 
   public Result download(String projectId, String jobId) {
-    AbstractJob<?> job = executorUploadService.get(jobId);
-    BufferedWriter writer = null;
-    String path = "/tmp/"+jobId;
-    String log = job.getLog();
-    String report = job.getRawDataOutput() != null ? job.getRawDataOutput()
-        .get("report") : null;
-    byte[] buffer = new byte[BUFFER_SIZE];
-    int bytes_read;
+    AbstractJob<?> absJob = executorUploadService.get(jobId,"raw_report");
+    String path = "/tmp/"+projectId.substring(0, 8)+"/result-"+jobId;
     File folder = new File(path);
-    if (!folder.exists()) {
+    if(!folder.exists()) {
       folder.mkdir();
     }
-    try {
-      writer = new BufferedWriter(new FileWriter(path + "/" + "report.xml"));
-      if (report != null) {
-        writer.write(report);
-      }
-      writer.close();
-      writer = new BufferedWriter(new FileWriter(path + "/" + "log.txt"));
-      if (log != null) {
-        writer.write(log);
-      }
-      writer.close();
-
-      // compress file
-      File fromDir = new File(path);
-      List<String> filesListInDir = new ArrayList<String>();
-      File[] files = fromDir.listFiles();
-
-      for (File file : files) {
-        if (file.isFile())
-          filesListInDir.add(file.getAbsolutePath());
-      }
-
-      ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream(path + ".zip"));
-      for (String filePath : filesListInDir) {
-        ZipEntry ze = new ZipEntry(filePath.substring(fromDir.getAbsolutePath()
-            .length() + 1, filePath.length()));
-        outDir.putNextEntry(ze);
-        FileInputStream fis = new FileInputStream(filePath);
-        while ((bytes_read = fis.read(buffer)) > 0) {
-          outDir.write(buffer, 0, bytes_read);
-        }
-        outDir.closeEntry();
-        fis.close();
-      }
-      outDir.close();
-
-      // end compress file
-
-    } catch (IOException e) {
-      e.printStackTrace();
+    KeywordUploadJob job = (KeywordUploadJob) absJob;
+    if(job.getRawData() == null)
       return status(404);
+    byte[] report = job.getRawData();
+    FileOutputStream fileOut;
+    try {
+      fileOut = new FileOutputStream(path+".tar.gz");
+      fileOut.write(report);
+      fileOut.close();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+     catch (IOException e) {
+      e.printStackTrace();
     }
     
-    String fileName = jobId+".zip";
     response().setContentType("application/x-download");
+    response().setHeader("Content-Encoding", "gzip");
     response().setHeader("Content-disposition",
-        "attachment; filename=report-"+fileName);
-    return ok(new File(path + ".zip"));
+        "attachment; filename=report.tar.gz");
+    return ok(new File(path + ".tar.gz"));
   }
 
   public Result upload(String projectId) {
@@ -284,10 +255,11 @@ public class KeywordUploadController extends Controller {
     if (typeFile != null) {
       boolean formatProject = false;
       File file = typeFile.getFile();
+      
       FileInputStream fileInputStream = null;
       byte[] bFile = new byte[(int) file.length()];
 
-      // delete file pom.xml if it's exist before unzip
+      // delete file pom.xml if it's exist before uncompress
       File folderExist = new File("/tmp/" + projectId.substring(0, 8));
       if (folderExist.exists()) {
         File[] listOfFilesExist = folderExist.listFiles();
@@ -298,7 +270,7 @@ public class KeywordUploadController extends Controller {
         }
       }
 
-      // unzip file
+      // start uncompress file zip
       String destDirectory = "/tmp/" + projectId.substring(0, 8);
       try {
         File destDir = new File(destDirectory);
@@ -356,7 +328,7 @@ public class KeywordUploadController extends Controller {
       } catch (Exception ex) {
         return status(404);
       }
-      // end unzip file
+      // end uncompress file
       return status(201);
     } else {
       return badRequest();

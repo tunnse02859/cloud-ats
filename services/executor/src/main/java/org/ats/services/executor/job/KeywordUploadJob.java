@@ -41,5 +41,9 @@ public class KeywordUploadJob extends AbstractJob<KeywordUploadJob>{
   public Type getType() {
     return Type.Keyword;
   }
+
+  public byte[] getRawData() {
+    return this.get("raw_report") != null ? (byte[])this.get("raw_report") : null;
+  }
   
 }
