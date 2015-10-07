@@ -211,24 +211,15 @@ public class DashboardController extends Controller {
   }
   
   
-  private void sort(List<ObjectNode> source, final String asertionText, boolean desc) {
+  private void sort(List<ObjectNode> source, final String asertionText, final boolean desc) {
     
-    if (desc) {
-      Collections.sort(source, new Comparator<ObjectNode>() {
-        @Override
-        public int compare(ObjectNode o1, ObjectNode o2) {
-          return (int) (o2.get(asertionText).asDouble() - o1.get(asertionText).asDouble());
-        }
-      });
-    } else {
-      Collections.sort(source, new Comparator<ObjectNode>() {
-        @Override
-        public int compare(ObjectNode o1, ObjectNode o2) {
-          return (int) (o1.get(asertionText).asDouble() - o2.get(asertionText).asDouble());
-        }
-      });
-    }
-    
+    Collections.sort(source,  new Comparator<ObjectNode>() {
+
+      @Override
+      public int compare(ObjectNode o1, ObjectNode o2) {
+        return desc ? (int) (o2.get(asertionText).asDouble() - o1.get(asertionText).asDouble()) : (int) (o1.get(asertionText).asDouble() - o2.get(asertionText).asDouble());
+      }
+    });
   }
   
   private List<ObjectNode> insert (List<ObjectNode> source, ObjectNode insertion, final String asertionText, boolean desc, int numberOfElement) {
