@@ -4,20 +4,14 @@
 package controllers;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -126,7 +120,7 @@ public class KeywordUploadController extends Controller {
     String id = data.get("id").asText();
     String name = data.get("name").asText();
 
-    KeywordUploadProject project = keywordUploadService.get(id);
+    KeywordUploadProject project = keywordUploadService.get(id,"raw");
 
     if (name.equals(project.getString("name"))) {
       return status(304);
