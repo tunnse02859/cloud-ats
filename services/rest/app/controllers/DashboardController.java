@@ -3,7 +3,10 @@
  */
 package controllers;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.ats.common.MapBuilder;
@@ -55,14 +58,14 @@ public class DashboardController extends Controller {
   
   @Inject ReportService reportService;
   
-  
   public Result summary() throws Exception {
     
     Tenant currentTenant = context.getTenant();
     
+    // get list recent finished keyword project
     PageList<KeywordProject> listKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     ArrayNode arrayRecentKeywordProject = Json.newObject().arrayNode();
-    // get list recent finished keyword project
+    
     while(listKeywordProjects.hasNext()) {
       for (KeywordProject project : listKeywordProjects.next()) {
         ObjectNode object = null;
@@ -107,58 +110,24 @@ public class DashboardController extends Controller {
       }
     }
     
-    // get all projects with percent pass and percent fail
-    PageList<KeywordProject> listSortedKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
-    ArrayNode arraySortedKeywordProject = Json.newObject().arrayNode();
+    // get all projects passed by desc order
+    PageList<KeywordProject> listSortedByDescKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
+    LinkedList<ObjectNode> topKeywordListPass = new LinkedList<ObjectNode>();
+    getProjects(listSortedByDescKeywordProjects, topKeywordListPass, "percentPass", true, 5);
     
-    while (listSortedKeywordProjects.hasNext()) {
-      
-      for (KeywordProject project : listSortedKeywordProjects.next()) {
-        BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
-        PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
-        jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
-        
-        ObjectNode object;
-        if (jobList.totalPage() > 0) {
-          AbstractJob<?> lastJob = jobList.next().get(0);
-          
-          if (lastJob.getRawDataOutput() != null) {
-            PageList<Report> pages = reportService.getList(lastJob.getId(), Type.FUNCTIONAL, null);
-            if (pages.totalPage() > 0) {
-              
-              object = Json.newObject();
-              
-              Report report = pages.next().get(0);
-              object.put("_id", project.getId());
-              object.put("name", project.getString("name"));
-              Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-              int totalPass = 0;
-              int totalFail = 0;
-              int totalCases = 0;
-              while (iterator.hasNext()) {
-                SuiteReport suiteReport = iterator.next();
-                totalPass += suiteReport.getTotalPass();
-                totalFail += suiteReport.getTotalFail();
-                totalCases += suiteReport.getTotalTestCase();
-              }
-              
-              float percentPass = (totalPass * 100.0f) / totalCases;
-              float percentFail = (totalFail * 100.0f) /totalCases; 
-              
-              object.put("percentPass", percentPass);
-              object.put("percentFail", percentFail);
-              object.put("totalCases", totalCases);
-              arraySortedKeywordProject.add(object);
-            }
-          }
-        }
-      }
-    }
+    // get all projects pass by asc order
+    PageList<KeywordProject> listSortedByAscKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
+    LinkedList<ObjectNode> topKeywordListFail = new LinkedList<ObjectNode>();
+    getProjects(listSortedByAscKeywordProjects, topKeywordListFail, "percentPass", false, 5);
+    
+    // get all projects by number of test case
+    PageList<KeywordProject> listSortedByTestCaseKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
+    LinkedList<ObjectNode> topBiggestKeyword = new LinkedList<ObjectNode>();
+    getProjects(listSortedByTestCaseKeywordProjects, topBiggestKeyword, "totalCases", true, 5);
+    
     // get top error performance projects
-    
     PageList<PerformanceProject> listPers = performanceProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
-    ArrayNode arrayPersProject = Json.newObject().arrayNode();
-    
+    LinkedList<ObjectNode> topErrorPerformanceProjects = new LinkedList<ObjectNode>();
     while (listPers.hasNext()) {
       for (PerformanceProject project : listPers.next()) {
         BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
@@ -207,18 +176,127 @@ public class DashboardController extends Controller {
               object.put("samples", numberOfSamples);
               object.put("error_percent", errorPercentCoverage);
               object.put("users", numberOfUser);
-              arrayPersProject.add(object);
+              insert(topErrorPerformanceProjects, object, "error_percent", true, 10);
             }
           }
         }
       }
     }
     
+    ArrayNode arraySortedByDescKeywordProject = Json.newObject().arrayNode();
+    for (ObjectNode obj : topKeywordListPass) {
+      arraySortedByDescKeywordProject.add(obj);
+    }
+    ArrayNode arraySortedByAscKeywordProject = Json.newObject().arrayNode();
+    for (ObjectNode obj : topKeywordListFail) {
+      arraySortedByAscKeywordProject.add(obj);
+    }
+    ArrayNode arraySortedByTestCaseKeywordProject = Json.newObject().arrayNode();
+    for (ObjectNode obj : topBiggestKeyword) {
+      arraySortedByTestCaseKeywordProject.add(obj);
+    }
+    ArrayNode arrayPersProject = Json.newObject().arrayNode();
+    for (ObjectNode obj : topErrorPerformanceProjects) {
+      arrayPersProject.add(obj);
+    }
+    
     ObjectNode object = Json.newObject();
     object.put("recentProjects", arrayRecentKeywordProject.toString());
-    object.put("percentsProjects", arraySortedKeywordProject.toString());
+    object.put("topKeywordPass", arraySortedByDescKeywordProject.toString());
+    object.put("topKeywordFail", arraySortedByAscKeywordProject.toString());
+    object.put("topBiggestProject", arraySortedByTestCaseKeywordProject.toString());
     object.put("persProjects", arrayPersProject.toString());
     
     return ok(object);
   }
+  
+  
+  private void sort(List<ObjectNode> source, final String asertionText, boolean desc) {
+    
+    if (desc) {
+      Collections.sort(source, new Comparator<ObjectNode>() {
+        @Override
+        public int compare(ObjectNode o1, ObjectNode o2) {
+          return (int) (o2.get(asertionText).asDouble() - o1.get(asertionText).asDouble());
+        }
+      });
+    } else {
+      Collections.sort(source, new Comparator<ObjectNode>() {
+        @Override
+        public int compare(ObjectNode o1, ObjectNode o2) {
+          return (int) (o1.get(asertionText).asDouble() - o2.get(asertionText).asDouble());
+        }
+      });
+    }
+    
+  }
+  
+  private List<ObjectNode> insert (List<ObjectNode> source, ObjectNode insertion, final String asertionText, boolean desc, int numberOfElement) {
+    if (source.size() == 0) {
+      source.add(insertion);
+      return source;
+      
+    } else if (source.size() < numberOfElement) {
+      source.add(insertion);
+      sort(source, asertionText, desc);
+      return source;
+      
+    } else if (source.size() == numberOfElement) {
+      source.add(insertion);
+      sort(source, asertionText, desc);
+      source.remove(numberOfElement);
+      return source;
+      
+    } else {
+      throw new IllegalStateException("The list has more than "+numberOfElement+" items");
+    }
+  }
+  
+  private List<ObjectNode> getProjects(PageList<KeywordProject> list, List<ObjectNode> objectList, final String assertionText, boolean desc, int numberOfElement) throws Exception {
+    while (list.hasNext()) {
+      for (KeywordProject project : list.next()) {
+        BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
+        PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
+        jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+          
+        ObjectNode object;
+        if (jobList.totalPage() > 0) {
+          AbstractJob<?> lastJob = jobList.next().get(0);
+            
+          if (lastJob.getRawDataOutput() != null) {
+            PageList<Report> pages = reportService.getList(lastJob.getId(), Type.FUNCTIONAL, null);
+            if (pages.totalPage() > 0) {
+                
+              object = Json.newObject();
+                
+              Report report = pages.next().get(0);
+              object.put("_id", project.getId());
+              object.put("name", project.getString("name"));
+              Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
+              int totalPass = 0;
+              int totalFail = 0;
+              int totalCases = 0;
+              while (iterator.hasNext()) {
+                SuiteReport suiteReport = iterator.next();
+                totalPass += suiteReport.getTotalPass();
+                totalFail += suiteReport.getTotalFail();
+                totalCases += suiteReport.getTotalTestCase();
+              }
+                
+              double percentPass = (totalPass * 100.0) / totalCases;
+              double percentFail = (totalFail * 100.0) /totalCases; 
+                
+              object.put("percentPass", percentPass);
+              object.put("percentFail", percentFail);
+              object.put("totalCases", totalCases);
+  
+              insert(objectList, object, assertionText, desc, numberOfElement);
+            }
+          }
+        }
+      }
+    }
+    return objectList;
+  }
+  
 }
