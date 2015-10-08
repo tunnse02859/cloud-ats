@@ -3,6 +3,8 @@
  */
 package actors;
 
+import java.text.SimpleDateFormat;
+
 import org.ats.services.event.Event;
 import org.ats.services.executor.ExecutorUploadService;
 import org.ats.services.executor.job.AbstractJob;
@@ -43,6 +45,8 @@ public class EventTrackingActor extends UntypedActor {
   
   @Inject ExecutorUploadService executorUploadService;
   
+  private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+  
   @Override
   public void onReceive(Object obj) throws Exception {
     if (obj instanceof Event) {
@@ -75,6 +79,7 @@ public class EventTrackingActor extends UntypedActor {
           
           PerformanceProject project = perfService.get(job.getProjectId());
           job.put("project_status", project.getStatus().toString());
+          job.put("runningTime", formater.format(job.getCreatedDate()));
           eventController.send(project.getCreator().get(), job);
           
         } else if ("upload-job-tracking".equals(event.getName())) {
