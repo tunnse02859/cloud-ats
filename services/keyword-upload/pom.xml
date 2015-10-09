@@ -9,7 +9,7 @@
 		<version>1.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>executor</artifactId>
+	<artifactId>keyword-upload</artifactId>
   <packaging>jar</packaging>
 
 	<dependencies>
@@ -26,37 +26,17 @@
 
 		<dependency>
 			<groupId>org.ats.services</groupId>
-			<artifactId>keyword</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.ats.services</groupId>
-			<artifactId>keyword-upload</artifactId>
+			<artifactId>database</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ats.services</groupId>
-			<artifactId>performance</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ats.services</groupId>
-			<artifactId>generator</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ats.services</groupId>
-			<artifactId>vmachine</artifactId>
+			<artifactId>datadriven</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.ats.services</groupId>
 			<artifactId>organization</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
 		</dependency>
 
 		<dependency>
@@ -67,11 +47,51 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ats.services</groupId>
+			<artifactId>event</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.inject.extensions</groupId>
+			<artifactId>guice-assistedinject</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.typesafe.akka</groupId>
+			<artifactId>akka-actor_2.11</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.rythmengine</groupId>
+			<artifactId>rythm-engine</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

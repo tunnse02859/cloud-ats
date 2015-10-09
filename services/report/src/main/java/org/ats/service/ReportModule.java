@@ -11,7 +11,8 @@ public class ReportModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(ReportService.class);    
+    bind(ReportService.class);
+    
     install(new FactoryModuleBuilder().build(ReportJmeterFactory.class));
     install(new FactoryModuleBuilder().build(ReportTestNgFactory.class));
   }

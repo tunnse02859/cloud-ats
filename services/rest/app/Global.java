@@ -5,6 +5,7 @@ import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
+import org.ats.services.KeywordUploadServiceModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
@@ -81,6 +82,7 @@ public class Global extends GlobalSettings {
           new VMachineServiceModule(vmConf),
           new ExecutorModule(),
           new KeywordServiceModule(),
+          new KeywordUploadServiceModule(),
           new ReportModule());
 
       //start event service

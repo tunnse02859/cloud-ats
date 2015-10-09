@@ -42,6 +42,18 @@ GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordContro
 GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
 GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
 GET		/api/v1/project/keyword/:projectId/logs			 @controllers.KeywordController.viewLog(projectId)	
+
+# Keyword upload project controller
+POST	/api/v1/uploadProject/keyword					 @controllers.KeywordUploadController.create()
+GET		/api/v1/uploadProject/keyword/:projectId		 @controllers.KeywordUploadController.get(projectId)
+POST	/api/v1/uploadProject/keyword/:projectId/upload	 @controllers.KeywordUploadController.upload(projectId)
+GET     /api/v1/uploadProject/keywords                   @controllers.KeywordUploadController.list()
+GET		/api/v1/uploadProject/keyword/:projectId/run			 @controllers.KeywordUploadController.run(projectId)
+PUT		/api/v1/uploadProject/keyword							 @controllers.KeywordUploadController.update()
+DELETE	/api/v1/uploadProject/keyword							 @controllers.KeywordUploadController.delete()
+GET		/api/v1/uploadProject/keyword/:projectId/reports			@controllers.KeywordUploadController.listReport(projectId)
+GET		/api/v1/uploadProject/keyword/:projectId/report/:jobId		@controllers.KeywordUploadController.report(projectId,jobId)
+GET		/api/v1/uploadProject/keyword/:projectId/download/:jobId	@controllers.KeywordUploadController.download(projectId,jobId)
 # Case controller
 GET     /api/v1/project/keyword/:projectId/reference/cases  @controllers.CaseController.references(projectId)
 GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.list(projectId)
@@ -55,7 +67,6 @@ GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController
 POST    /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.create(projectId)
 PUT     /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.update(projectId)
 DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteController.delete(projectId, suiteId)
-
 # Custom keyword controller
 
 GET     /api/v1/project/keyword/:projectId/customs  @controllers.CustomKeywordController.list(projectId)

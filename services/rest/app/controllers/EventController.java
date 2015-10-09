@@ -10,12 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.services.executor.job.AbstractJob;
+import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.upload.KeywordUploadProject;
+import org.ats.services.upload.KeywordUploadProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
 
@@ -46,6 +49,7 @@ public class EventController extends Controller {
   
   @Inject KeywordProjectService keywordService;
   
+  @Inject KeywordUploadProjectService uploadProjectService;
   
   public void send(User user, AbstractJob<?> job) throws Exception {
     VMachine jenkinsVM;
@@ -54,8 +58,14 @@ public class EventController extends Controller {
       PerformanceProject project = performanceService.get(job.getProjectId());
       jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     } else {
-      KeywordProject project = keywordService.get(job.getProjectId());
-      jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+      if (job instanceof KeywordJob) {
+        KeywordProject project = keywordService.get(job.getProjectId());
+        jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+      } else {
+        KeywordUploadProject project = uploadProjectService.get(job.getProjectId());
+        jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+      }
+      
     }
     
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
