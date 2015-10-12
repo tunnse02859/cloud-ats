@@ -3,6 +3,8 @@
  */
 package controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -58,6 +60,8 @@ public class DashboardController extends Controller {
   
   @Inject ReportService reportService;
   
+  private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+  
   public Result summary() throws Exception {
     
     Tenant currentTenant = context.getTenant();
@@ -65,6 +69,8 @@ public class DashboardController extends Controller {
     // get list recent finished keyword project
     PageList<KeywordProject> listKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     ArrayNode arrayRecentKeywordProject = Json.newObject().arrayNode();
+    
+    List<ObjectNode> listRecentProject = new LinkedList<ObjectNode>();
     
     while(listKeywordProjects.hasNext()) {
       for (KeywordProject project : listKeywordProjects.next()) {
@@ -94,18 +100,16 @@ public class DashboardController extends Controller {
                 totalFail += suiteReport.getTotalFail();
                 totalSkip += suiteReport.getTotalSkip();
               }
-              
+              object.put("created_date", formater.format(lastJob.getCreatedDate()));
               object.put("P", totalPass);
               object.put("F", totalFail);
               object.put("S", totalSkip);
               object.put("_id", project.getId());
-              arrayRecentKeywordProject.add(object);
+              
+              insert(listRecentProject, object, "created_date", true, 10, true);
               
             }
           }
-        }
-        if (arrayRecentKeywordProject.size() == 10) {
-          break;
         }
       }
     }
@@ -176,7 +180,7 @@ public class DashboardController extends Controller {
               object.put("samples", numberOfSamples);
               object.put("error_percent", errorPercentCoverage);
               object.put("users", numberOfUser);
-              insert(topErrorPerformanceProjects, object, "error_percent", true, 10);
+              insert(topErrorPerformanceProjects, object, "error_percent", true, 10, false);
             }
           }
         }
@@ -200,6 +204,10 @@ public class DashboardController extends Controller {
       arrayPersProject.add(obj);
     }
     
+    for (ObjectNode obj : listRecentProject) {
+      arrayRecentKeywordProject.add(obj);
+    }
+    
     ObjectNode object = Json.newObject();
     object.put("recentProjects", arrayRecentKeywordProject.toString());
     object.put("topKeywordPass", arraySortedByDescKeywordProject.toString());
@@ -210,31 +218,56 @@ public class DashboardController extends Controller {
     return ok(object);
   }
   
-  
-  private void sort(List<ObjectNode> source, final String asertionText, final boolean desc) {
+  private void sortByDate (List<ObjectNode> source, final String asertionText, final boolean desc, boolean sortByDate) {
     
-    Collections.sort(source,  new Comparator<ObjectNode>() {
+    if (!sortByDate) {
+      Collections.sort(source,  new Comparator<ObjectNode>() {
 
-      @Override
-      public int compare(ObjectNode o1, ObjectNode o2) {
-        return desc ? (int) (o2.get(asertionText).asDouble() - o1.get(asertionText).asDouble()) : (int) (o1.get(asertionText).asDouble() - o2.get(asertionText).asDouble());
-      }
-    });
+        @Override
+        public int compare(ObjectNode o1, ObjectNode o2) {
+          return desc ? (int) (o2.get(asertionText).asDouble() - o1.get(asertionText).asDouble()) : (int) (o1.get(asertionText).asDouble() - o2.get(asertionText).asDouble());
+        }
+      });
+    } else {
+      Collections.sort(source, new Comparator<ObjectNode>() {
+  
+        @Override
+        public int compare(ObjectNode o1, ObjectNode o2) {
+          
+          try {
+            long t2 = formater.parse(o2.get(asertionText).asText()).getTime();
+            long t1 = formater.parse(o1.get(asertionText).asText()).getTime();
+            
+            return desc ? (int) (t2 -t1) : (int) (t1 - t2);
+          } catch (ParseException e) {
+            e.printStackTrace();
+          }
+          return 0;
+        }
+        
+      });
+    }
   }
   
-  private List<ObjectNode> insert (List<ObjectNode> source, ObjectNode insertion, final String asertionText, boolean desc, int numberOfElement) {
+  private void sort(List<ObjectNode> source, final String asertionText, final boolean desc) {
+    sortByDate(source, asertionText, desc, false);
+  }
+  
+  private List<ObjectNode> insert (List<ObjectNode> source, ObjectNode insertion, final String asertionText, boolean desc, int numberOfElement, boolean insertByDate) {
     if (source.size() == 0) {
       source.add(insertion);
       return source;
       
     } else if (source.size() < numberOfElement) {
       source.add(insertion);
-      sort(source, asertionText, desc);
+      if (!insertByDate) sort(source, asertionText, desc);
+      else sortByDate(source, asertionText, desc, true);
       return source;
       
     } else if (source.size() == numberOfElement) {
       source.add(insertion);
-      sort(source, asertionText, desc);
+      if (!insertByDate) sort(source, asertionText, desc);
+      else sortByDate(source, asertionText, desc, true);
       source.remove(numberOfElement);
       return source;
       
@@ -281,7 +314,7 @@ public class DashboardController extends Controller {
               object.put("percentFail", percentFail);
               object.put("totalCases", totalCases);
   
-              insert(objectList, object, assertionText, desc, numberOfElement);
+              insert(objectList, object, assertionText, desc, numberOfElement, false);
             }
           }
         }
