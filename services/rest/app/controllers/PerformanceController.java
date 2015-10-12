@@ -145,7 +145,7 @@ public class PerformanceController extends Controller {
      
     }
     
-    PageList<AbstractJob<?>> jobsList = executorService.query(new BasicDBObject("project_id", project.getId()), 10);
+    PageList<AbstractJob<?>> jobsList = executorService.query(new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString()), 10);
     
     jobsList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     if (jobsList.totalPage() > 0) {
