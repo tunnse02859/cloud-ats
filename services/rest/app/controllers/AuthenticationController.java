@@ -19,6 +19,7 @@ import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -67,7 +68,7 @@ public class AuthenticationController extends Controller {
     
     String email = request().getQueryString("email");
     
-    System.out.println("check account in controller");
+    Logger.info("Check account in controller");
     if (userService.get(email) != null) {
       return ok("false");
     }
@@ -97,7 +98,9 @@ public class AuthenticationController extends Controller {
     JsonNode json = request().body().asJson();
     
     String email = json.get("email").asText();
-    
+    if (userService.get(email) != null) {
+      return status(401);
+    }
     String password = json.get("password").asText();
     JsonNode tenant = json.get("tenant");
     String tenantId = tenant.get("_id").asText();

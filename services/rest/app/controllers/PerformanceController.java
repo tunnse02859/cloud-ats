@@ -148,6 +148,7 @@ public class PerformanceController extends Controller {
     PageList<AbstractJob<?>> jobsList = executorService.query(new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString()), 10);
     
     jobsList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    int totalJob = 0;
     if (jobsList.totalPage() > 0) {
       ArrayNode arrayJob = Json.newObject().arrayNode();
       while (jobsList.hasNext()) {
@@ -163,8 +164,10 @@ public class PerformanceController extends Controller {
           arrayJob.add(object);
         }
       }
+      totalJob = arrayJob.size();
       project.put("jobs", arrayJob.toString());
     }
+    project.put("totalJob", totalJob);
     project.put("type", "performance");
     project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
     return ok(Json.parse(project.toString()));
