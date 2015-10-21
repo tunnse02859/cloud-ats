@@ -69,6 +69,7 @@ public class Global extends GlobalSettings {
     String vmConf = Play.application().configuration().getString(VMachineServiceModule.VM_CONF);
     
     String jenkinsCredential = Play.application().configuration().getString("jenkins.slave.credential");
+    System.out.println("Using jenkins credential: " + jenkinsCredential);
     System.setProperty("jenkins.slave.credential", jenkinsCredential);
     
     try {

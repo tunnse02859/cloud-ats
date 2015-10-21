@@ -151,6 +151,8 @@ public class JenkinsSlave {
     HttpPost post = new HttpPost(master.buildURL("computer/doCreateItem"));
     post.setEntity(this.buildFormData());
     
+    System.out.println("Jenkins slave " + slaveAddress + " is joining and using credential " + credentialId);
+    
     HttpResponse res = client.execute(post, httpContext);
     
     String body = HttpClientUtil.getContentBodyAsString(res);
