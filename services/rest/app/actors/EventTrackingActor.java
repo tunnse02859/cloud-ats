@@ -56,7 +56,7 @@ public class EventTrackingActor extends UntypedActor {
           
           KeywordJob job = (KeywordJob) event.getSource();
           
-          if (job.getStatus() == AbstractJob.Status.Queued) return;
+          //if (job.getStatus() == AbstractJob.Status.Queued) return;
           
           KeywordProject project = keywordService.get(job.getProjectId());
           
@@ -75,7 +75,7 @@ public class EventTrackingActor extends UntypedActor {
           
           PerformanceJob job = (PerformanceJob) event.getSource();
           
-          if (job.getStatus() ==  AbstractJob.Status.Queued) return;
+          //if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
           PerformanceProject project = perfService.get(job.getProjectId());
           job.put("project_status", project.getStatus().toString());
