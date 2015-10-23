@@ -41,7 +41,7 @@ public class FullExample {
   
   
   @Test
-  public void test() throws Exception {
+  public void test38f2a480() throws Exception {
     wd.get("http://saucelabs.com/test/guinea-pig/");
 
     wd.findElement(By.linkText("i am a link")).click();

@@ -39,10 +39,10 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource0dbcb692")
-  public static Object[][] userSource0dbcb692() throws Exception {
+  @DataProvider(name = "userSource77f9ab66")
+  public static Object[][] userSource77f9ab66() throws Exception {
     ObjectMapper obj = new ObjectMapper();
-    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\",\"password\":\"a\"},	{\"username\":\"foo1\",\"password\":\"a1\"}]");
+    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
     JsonNode[][] objData = new JsonNode[rootNode.size()][];
     for(int i=0; i<rootNode.size(); i++) {
@@ -50,14 +50,13 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource0dbcb692")
-  public void test(JsonNode data) throws Exception {
+  @Test (dataProvider = "userSource77f9ab66")
+  public void test77f9ab66(JsonNode data) throws Exception {
     String username = data.get("username").toString().split("\"")[1];
-    String password = data.get("password").toString().split("\"")[1];
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).click();
-    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys("username: \" + username + \" / password : \" + password + \"");
+    wd.findElement(By.xpath(".//input[@id='lst-ib']")).sendKeys(username);
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).submit();
 

@@ -23,7 +23,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.*;
 import static org.openqa.selenium.OutputType.*;
 
-public class Jira {
+public class SwitchToWindowWithOptions {
 
   private RemoteWebDriver wd;
 
@@ -41,29 +41,27 @@ public class Jira {
   
   
   @Test
-  public void teste92490f3() throws Exception {
-    wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
+  public void test545bccfd() throws Exception {
+    System.out.println("[INFO] Perform get url \"http://seleniumbuilder.github.io/se-builder/test/window.html\"");
+    wd.get("http://seleniumbuilder.github.io/se-builder/test/window.html");
 
-    wd = (FirefoxDriver) wd.switchTo().frame("gadget-0");
+    System.out.println("[INFO] Waiting 5(s) for next step");
+try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
+    System.out.println("[INFO] Perform pause wait time \"1000\"s");
+    try { Thread.sleep(1000l); } catch (Exception e) { throw new RuntimeException(e); }
 
-    wd.findElement(By.xpath(".//*[@id='login-form-username']")).click();
-    wd.findElement(By.xpath(".//*[@id='login-form-username']")).sendKeys("trinhtv3");
+    System.out.println("[INFO] Waiting 5(s) for next step");
+try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
+    System.out.println("[INFO] Perform switchToWindow name \"win2\"");
+    wd = (FirefoxDriver) wd.switchTo().window("win2");
 
-    wd.findElement(By.xpath(".//*[@id='login-form-password']")).click();
-    wd.findElement(By.xpath(".//*[@id='login-form-password']")).sendKeys("DamMai@65");
+    System.out.println("[INFO] Waiting 5(s) for next step");
+try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
+    System.out.println("[INFO] Perform assertTitle title \"Spawned window\"");
+    assertEquals(wd.getTitle(), "Spawned window");
 
-    if (!wd.findElement(By.xpath(".//*[@id='login-form-remember-me']")).isSelected()) {
-      wd.findElement(By.xpath(".//*[@id='login-form-remember-me']")).click();
-    }
-
-    wd.findElement(By.xpath(".//*[@id='login']")).submit();
-
-    try { Thread.sleep(2000l); } catch (Exception e) { throw new RuntimeException(e); }
-
-    wd.get("https://insight.fsoft.com.vn/jira");
-
-    assertTrue(wd.findElement(By.tagName("html")).getText().contains("Assigned to Me"));
-
+    System.out.println("[INFO] Waiting 5(s) for next step");
+try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
   }
 
   public static boolean isAlertPresent(RemoteWebDriver wd) {

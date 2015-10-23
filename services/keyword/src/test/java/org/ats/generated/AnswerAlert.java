@@ -41,7 +41,7 @@ public class AnswerAlert {
   
   
   @Test
-  public void test() throws Exception {
+  public void test411f56f8() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/prompt.html");
 
     wd.switchTo().alert().sendKeys("yes");

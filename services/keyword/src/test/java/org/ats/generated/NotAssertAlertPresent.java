@@ -41,7 +41,7 @@ public class NotAssertAlertPresent {
   
   
   @Test
-  public void test() throws Exception {
+  public void test77c2e789() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/empty.html");
 
     assertFalse(isAlertPresent(wd));

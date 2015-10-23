@@ -121,7 +121,7 @@ public class Case extends AbstractTemplate {
     ObjectMapper mapper = new ObjectMapper(); 
     JsonNode nodePause = mapper.readTree("{\"type\":\"pause\",\"waitTime\":\""+valueDelayTransform+"\"}");
     AbstractAction actionPause = actionFactory.createAction(nodePause);
-    delayTime = " Waiting delayTime "+"\\\""+valueDelayTransform+"\\\"s";
+    delayTime = "[INFO] Waiting "+ valueDelay + "(s) for next step";
     
     if(isUseDataProvider) {
       
@@ -400,7 +400,6 @@ public class Case extends AbstractTemplate {
           value = " value "+"\\\""+temp+"\\\"";
         }
         
-        sb.append("    System.out.println(\"\\n\");\n");
         sb.append("    System.out.println(\"[INFO] Perform ");
         sb.append(type);
         sb.append(locator);
@@ -433,7 +432,6 @@ public class Case extends AbstractTemplate {
         sb.append(actionPause.transform());
       }
     }
-    sb.append("    System.out.println(\"\\n\");\n");
     sb.append("  }");
     return sb.toString();
   }

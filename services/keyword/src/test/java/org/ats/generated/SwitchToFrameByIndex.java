@@ -41,7 +41,7 @@ public class SwitchToFrameByIndex {
   
   
   @Test
-  public void test() throws Exception {
+  public void test18165378() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/frames.html");
 
     wd = (FirefoxDriver) wd.switchTo().frame(1);
