@@ -67,7 +67,7 @@ public class KeywordUploadController extends Controller {
     if (project == null)
       return status(404);
 
-    project.put("type", "keyword");
+    project.put("type", "Selenium Upload");
     KeywordUploadProject upload = keywordUploadService.get(projectId, "raw");
     boolean rawExist = false;
     if (upload.getRawData() != null) {
@@ -242,6 +242,14 @@ public class KeywordUploadController extends Controller {
         "attachment; filename=report.tar.gz");
     return ok(new File(path + ".tar.gz"));
   }
+  
+  private void deleteFolder(File folder) {
+    for (File item : folder.listFiles()) {
+      if (item.isDirectory()) deleteFolder(item);
+      else item.delete();
+    }
+    folder.delete();
+  }
 
   public Result upload(String projectId) {
     MultipartFormData body = request().body().asMultipartFormData();
@@ -255,14 +263,7 @@ public class KeywordUploadController extends Controller {
 
       // delete file pom.xml if it's exist before uncompress
       File folderExist = new File("/tmp/" + projectId.substring(0, 8));
-      if (folderExist.exists()) {
-        File[] listOfFilesExist = folderExist.listFiles();
-        for (File item : listOfFilesExist) {
-          if (item.isFile() && "pom.xml".equals(item.getName())) {
-            item.delete();
-          }
-        }
-      }
+      deleteFolder(folderExist);
 
       // start uncompress file zip
       String destDirectory = "/tmp/" + projectId.substring(0, 8);
@@ -276,10 +277,14 @@ public class KeywordUploadController extends Controller {
         while (entry != null) {
           String filePath = destDirectory + "/" + entry.getName();
           if (!entry.isDirectory()) {
-            BufferedOutputStream bos = new BufferedOutputStream(
-                new FileOutputStream(filePath));
+
+            File fileEntry = new File(filePath);
+            fileEntry.getParentFile().mkdirs();
+            
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileEntry));
             byte[] bytesIn = new byte[BUFFER_SIZE];
             int read = 0;
+            
             while ((read = zipIn.read(bytesIn)) != -1) {
               bos.write(bytesIn, 0, read);
             }
@@ -320,6 +325,7 @@ public class KeywordUploadController extends Controller {
         keywordUploadService.update(project);
 
       } catch (Exception ex) {
+        ex.printStackTrace();
         return status(404);
       }
       // end uncompress file
