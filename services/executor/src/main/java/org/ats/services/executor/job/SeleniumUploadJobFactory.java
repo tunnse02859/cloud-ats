@@ -14,8 +14,8 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Sep 18, 2015
  */
-public interface KeywordUploadJobFactory {
-  public KeywordUploadJob create(
+public interface SeleniumUploadJobFactory {
+  public SeleniumUploadJob create(
       @Assisted("id") String id, 
       @Assisted("projectId") String projectId,
       @Nullable @Assisted("vmachineId") String vmachineId, 

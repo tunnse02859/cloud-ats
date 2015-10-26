@@ -6,17 +6,16 @@ package actors;
 import java.text.SimpleDateFormat;
 
 import org.ats.services.event.Event;
-import org.ats.services.executor.ExecutorUploadService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
-import org.ats.services.executor.job.KeywordUploadJob;
+import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
-import org.ats.services.upload.KeywordUploadProject;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
 
@@ -37,13 +36,11 @@ public class EventTrackingActor extends UntypedActor {
 
   @Inject KeywordProjectService keywordService;
   
-  @Inject KeywordUploadProjectService keywordUploadService;
+  @Inject SeleniumUploadProjectService seleniumUploadService;
   
   @Inject PerformanceProjectService perfService;
   
   @Inject VMachineService vmachineService;
-  
-  @Inject ExecutorUploadService executorUploadService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -83,13 +80,12 @@ public class EventTrackingActor extends UntypedActor {
           eventController.send(project.getCreator().get(), job);
           
         } else if ("upload-job-tracking".equals(event.getName())) {
-          KeywordUploadJob jobTemp = (KeywordUploadJob) event.getSource();
+          SeleniumUploadJob job = (SeleniumUploadJob) event.getSource();
           
-          KeywordUploadJob job = (KeywordUploadJob) executorUploadService.get(jobTemp.getId());
+          //Cleanup blod data in this job
+          job.put("raw_report", null);
           
-          if (job.getStatus() == AbstractJob.Status.Queued) return;
-          
-          KeywordUploadProject project = keywordUploadService.get(job.getProjectId(),"raw");
+          SeleniumUploadProject project = seleniumUploadService.get(job.getProjectId(),"raw");
           
           if (job.getStatus() == AbstractJob.Status.Running) {
             VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
@@ -109,6 +105,4 @@ public class EventTrackingActor extends UntypedActor {
       }
     }
   }
-
-
 }

@@ -17,8 +17,8 @@ import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
-import org.ats.services.upload.KeywordUploadProject;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
 
@@ -49,7 +49,7 @@ public class EventController extends Controller {
   
   @Inject KeywordProjectService keywordService;
   
-  @Inject KeywordUploadProjectService uploadProjectService;
+  @Inject SeleniumUploadProjectService uploadProjectService;
   
   public void send(User user, AbstractJob<?> job) throws Exception {
     VMachine jenkinsVM;
@@ -62,7 +62,7 @@ public class EventController extends Controller {
         KeywordProject project = keywordService.get(job.getProjectId());
         jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
       } else {
-        KeywordUploadProject project = uploadProjectService.get(job.getProjectId());
+        SeleniumUploadProject project = uploadProjectService.get(job.getProjectId());
         jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
       }
       
@@ -95,7 +95,12 @@ public class EventController extends Controller {
         isBuilding = false;
       }
       job.put("isBuilding", isBuilding);
-      event.send(EventSource.Event.event(Json.parse(job.toString())));
+      try {
+        event.send(EventSource.Event.event(Json.parse(job.toString())));
+      } catch (Exception e) {
+        e.printStackTrace();
+        System.out.println(job);
+      }
     }
   }
   

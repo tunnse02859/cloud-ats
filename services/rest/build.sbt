@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
 	"org.ats.services" % "generator" % "1.1-SNAPSHOT",
 	"org.ats.services" % "executor" % "1.1-SNAPSHOT",
 	"org.ats.services" % "report" % "1.1-SNAPSHOT",
-	"org.ats.services" % "keyword-upload" % "1.1-SNAPSHOT",
+	"org.ats.services" % "selenium-upload" % "1.1-SNAPSHOT",
 	"com.amazonaws" % "aws-java-sdk-ec2" % "1.10.15"
 )
 

@@ -24,7 +24,7 @@ import org.ats.services.event.EventService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.AbstractJob.Status;
 import org.ats.services.executor.job.KeywordJob;
-import org.ats.services.executor.job.KeywordUploadJob;
+import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
@@ -53,9 +53,9 @@ import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
-import org.ats.services.upload.KeywordUploadProject;
-import org.ats.services.upload.KeywordUploadProjectFactory;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectFactory;
+import org.ats.services.upload.SeleniumUploadProjectService;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -96,10 +96,8 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   private ExecutorService executorService;
   
-  private KeywordUploadProjectService uploadProjectService;
-  private KeywordUploadProjectFactory uploadProjectFactory;
-  
-  private ExecutorUploadService executorUploadService;
+  private SeleniumUploadProjectService uploadProjectService;
+  private SeleniumUploadProjectFactory uploadProjectFactory;
   
   private IaaSService openstackService;
   
@@ -150,8 +148,8 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     //keyword upload project
-    this.uploadProjectService = injector.getInstance(KeywordUploadProjectService.class);
-    this.uploadProjectFactory = injector.getInstance(KeywordUploadProjectFactory.class);
+    this.uploadProjectService = injector.getInstance(SeleniumUploadProjectService.class);
+    this.uploadProjectFactory = injector.getInstance(SeleniumUploadProjectFactory.class);
     
     this.iaasProvider = injector.getInstance(IaaSServiceProvider.class);
     this.openstackService = iaasProvider.get();
@@ -299,7 +297,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   @Test
   public void testExecutorKeywordUpload() throws Exception {
-    KeywordUploadProject uploadProject = uploadProjectFactory.create(context, "Upload Project");
+    SeleniumUploadProject uploadProject = uploadProjectFactory.create(context, "Upload Project");
     
     FileInputStream fis = null;
     File uploadFile = new File("/executor/src/test/resources/TestGithubUpload.zip");
@@ -312,14 +310,14 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     uploadProject.setRawData(bFile);
     uploadProjectService.update(uploadProject);
     
-    KeywordUploadJob uploadJob = executorUploadService.execute(uploadProject);
+    SeleniumUploadJob uploadJob = executorService.execute(uploadProject);
     Assert.assertEquals(uploadJob.getStatus(), AbstractJob.Status.Queued);
     Assert.assertNotNull(uploadJob.getTestVMachineId());
     
-    uploadJob = (KeywordUploadJob) waitUntilUploadJobFinish(uploadJob);
+    uploadJob = (SeleniumUploadJob) waitUntilUploadJobFinish(uploadJob);
     
     uploadProject = uploadProjectService.get(uploadProject.getId());
-    uploadJob = (KeywordUploadJob) executorUploadService.get(uploadJob.getId());
+    uploadJob = (SeleniumUploadJob) executorService.get(uploadJob.getId());
     Assert.assertEquals(uploadJob.getStatus(), AbstractJob.Status.Completed);
     Assert.assertNotNull(uploadJob.getRawData());
     Assert.assertEquals(uploadProject.getStatus(), KeywordProject.Status.READY);
@@ -336,7 +334,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   private AbstractJob<?> waitUntilUploadJobFinish(AbstractJob<?> uploadJob) throws InterruptedException {
     while (uploadJob.getStatus() != Status.Completed) {
-      uploadJob = executorUploadService.get(uploadJob.getId());
+      uploadJob = executorService.get(uploadJob.getId());
       Thread.sleep(3000);
     }
     return uploadJob;

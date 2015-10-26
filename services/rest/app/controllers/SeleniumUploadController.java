@@ -16,13 +16,13 @@ import java.util.zip.ZipInputStream;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
-import org.ats.services.executor.ExecutorUploadService;
+import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
-import org.ats.services.executor.job.KeywordUploadJob;
+import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.organization.acl.Authenticated;
-import org.ats.services.upload.KeywordUploadProject;
-import org.ats.services.upload.KeywordUploadProjectFactory;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectFactory;
+import org.ats.services.upload.SeleniumUploadProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -43,38 +43,38 @@ import com.mongodb.BasicDBObject;
  */
 @CorsComposition.Cors
 @Authenticated
-public class KeywordUploadController extends Controller {
+public class SeleniumUploadController extends Controller {
 
   @Inject
-  private KeywordUploadProjectFactory projectFactory;
+  private SeleniumUploadProjectFactory projectFactory;
 
   @Inject
   private OrganizationContext context;
 
   @Inject
-  private KeywordUploadProjectService keywordUploadService;
+  private SeleniumUploadProjectService seleniumUploadService;
 
   @Inject
-  private ExecutorUploadService executorUploadService;
+  private ExecutorService executorService;
 
   private static final int BUFFER_SIZE = 4096;
 
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
   public Result get(String projectId) {
-    KeywordUploadProject project = keywordUploadService.get(projectId);
+    SeleniumUploadProject project = seleniumUploadService.get(projectId);
 
     if (project == null)
       return status(404);
 
     project.put("type", "Selenium Upload");
-    KeywordUploadProject upload = keywordUploadService.get(projectId, "raw");
+    SeleniumUploadProject upload = seleniumUploadService.get(projectId, "raw");
     boolean rawExist = false;
     if (upload.getRawData() != null) {
       rawExist = true;
     }
     project.put("raw_exist", rawExist);
-    PageList<AbstractJob<?>> jobList = executorUploadService.query(
+    PageList<AbstractJob<?>> jobList = executorService.query(
         new BasicDBObject("project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
         .build());
@@ -89,16 +89,16 @@ public class KeywordUploadController extends Controller {
   }
 
   public Result list() {
-    PageList<KeywordUploadProject> list = keywordUploadService.list();
+    PageList<SeleniumUploadProject> list = seleniumUploadService.list();
     ArrayNode array = Json.newObject().arrayNode();
     while (list.hasNext()) {
-      for (KeywordUploadProject project : list.next()) {
+      for (SeleniumUploadProject project : list.next()) {
         project.put("type", "keyword");
         project.put("upload_project", true);
 
         BasicDBObject query = new BasicDBObject("project_id", project.getId())
             .append("status", AbstractJob.Status.Completed.toString());
-        PageList<AbstractJob<?>> jobList = executorUploadService
+        PageList<AbstractJob<?>> jobList = executorService
             .query(query, 1);
         jobList.setSortable(new MapBuilder<String, Boolean>("created_date",
             false).build());
@@ -120,14 +120,14 @@ public class KeywordUploadController extends Controller {
     String id = data.get("id").asText();
     String name = data.get("name").asText();
 
-    KeywordUploadProject project = keywordUploadService.get(id,"raw");
+    SeleniumUploadProject project = seleniumUploadService.get(id,"raw");
 
     if (name.equals(project.getString("name"))) {
       return status(304);
     }
 
     project.put("name", name);
-    keywordUploadService.update(project);
+    seleniumUploadService.update(project);
 
     return status(202, id);
   }
@@ -136,39 +136,39 @@ public class KeywordUploadController extends Controller {
 
     String id = request().body().asText();
 
-    KeywordUploadProject project = keywordUploadService.get(id);
+    SeleniumUploadProject project = seleniumUploadService.get(id);
     if (project == null) {
       return status(404);
     }
 
-    executorUploadService.deleteBy(new BasicDBObject("project_id", id));
-    keywordUploadService.delete(project);
+    executorService.deleteBy(new BasicDBObject("project_id", id));
+    seleniumUploadService.delete(project);
 
     return status(200);
   }
 
   public Result run(String projectId) throws Exception {
-    KeywordUploadProject project = keywordUploadService.get(projectId, "raw");
+    SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
     if (project == null)
       return status(404);
 
-    if (project.getStatus() == KeywordUploadProject.Status.RUNNING)
+    if (project.getStatus() == SeleniumUploadProject.Status.RUNNING)
       return status(204);
 
-    KeywordUploadJob job = executorUploadService.execute(project);
+    SeleniumUploadJob job = executorService.execute(project);
     return status(201, Json.parse(job.toString()));
   }
 
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
-    KeywordUploadProject project = projectFactory.create(context, name);
-    keywordUploadService.create(project);
+    SeleniumUploadProject project = projectFactory.create(context, name);
+    seleniumUploadService.create(project);
     return status(201, project.getId());
   }
 
   public Result report(String projectId, String jobId) {
-    AbstractJob<?> job = executorUploadService.get(jobId);
+    AbstractJob<?> job = executorService.get(jobId);
     ObjectNode obj = Json.newObject();
     String result = "";
     obj.put("created_date", formater.format(job.getCreatedDate()));
@@ -186,7 +186,7 @@ public class KeywordUploadController extends Controller {
   }
 
   public Result listReport(String projectId) {
-    PageList<AbstractJob<?>> jobList = executorUploadService.query(
+    PageList<AbstractJob<?>> jobList = executorService.query(
         new BasicDBObject("project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
         .build());
@@ -214,13 +214,13 @@ public class KeywordUploadController extends Controller {
   }
 
   public Result download(String projectId, String jobId) {
-    AbstractJob<?> absJob = executorUploadService.get(jobId,"raw_report");
+    AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
     String path = "/tmp/"+projectId.substring(0, 8)+"/result-"+jobId;
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
     }
-    KeywordUploadJob job = (KeywordUploadJob) absJob;
+    SeleniumUploadJob job = (SeleniumUploadJob) absJob;
     if(job.getRawData() == null)
       return status(404);
     byte[] report = job.getRawData();
@@ -262,20 +262,18 @@ public class KeywordUploadController extends Controller {
       byte[] bFile = new byte[(int) file.length()];
 
       // delete file pom.xml if it's exist before uncompress
-      File folderExist = new File("/tmp/" + projectId.substring(0, 8));
-      deleteFolder(folderExist);
+      String destDirectoryPath = "/tmp/" + projectId.substring(0, 8);
+      File tempFolder = new File(destDirectoryPath);
+      if (tempFolder.exists()) deleteFolder(tempFolder);
+      
+      tempFolder.mkdir();
 
       // start uncompress file zip
-      String destDirectory = "/tmp/" + projectId.substring(0, 8);
       try {
-        File destDir = new File(destDirectory);
-        if (!destDir.exists()) {
-          destDir.mkdir();
-        }
         ZipInputStream zipIn = new ZipInputStream(new FileInputStream(file));
         ZipEntry entry = zipIn.getNextEntry();
         while (entry != null) {
-          String filePath = destDirectory + "/" + entry.getName();
+          String filePath = destDirectoryPath + "/" + entry.getName();
           if (!entry.isDirectory()) {
 
             File fileEntry = new File(filePath);
@@ -317,12 +315,12 @@ public class KeywordUploadController extends Controller {
         fileInputStream.read(bFile);
         fileInputStream.close();
 
-        KeywordUploadProject project = keywordUploadService.get(projectId);
+        SeleniumUploadProject project = seleniumUploadService.get(projectId);
         if (project.getRawData() != null) {
           project.setRawData(null);
         }
         project.setRawData(bFile);
-        keywordUploadService.update(project);
+        seleniumUploadService.update(project);
 
       } catch (Exception ex) {
         ex.printStackTrace();

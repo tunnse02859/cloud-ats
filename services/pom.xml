@@ -24,7 +24,7 @@
 		<module>executor</module>
 		<module>vmachine</module>
 		<module>report</module>
-		<module>keyword-upload</module>
+		<module>selenium-upload</module>
   </modules>
 
 </project>

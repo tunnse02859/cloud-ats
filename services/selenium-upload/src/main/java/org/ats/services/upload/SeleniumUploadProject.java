@@ -6,7 +6,6 @@ package org.ats.services.upload;
 import java.util.Date;
 import java.util.UUID;
 
-import org.ats.common.MapBuilder;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.entity.AbstractEntity;
 import org.ats.services.organization.entity.User;
@@ -25,7 +24,7 @@ import com.mongodb.BasicDBObject;
  * Sep 17, 2015
  */
 @SuppressWarnings("serial")
-public class KeywordUploadProject extends AbstractEntity<KeywordUploadProject>{
+public class SeleniumUploadProject extends AbstractEntity<SeleniumUploadProject>{
   
   private ReferenceFactory<TenantReference> tenantRefFactory;
   private ReferenceFactory<UserReference> userRefFactory;
@@ -39,7 +38,7 @@ public class KeywordUploadProject extends AbstractEntity<KeywordUploadProject>{
   /**
    * 
    */
-  public KeywordUploadProject(ReferenceFactory<TenantReference> tenantRefFactory,
+  public SeleniumUploadProject(ReferenceFactory<TenantReference> tenantRefFactory,
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       @Assisted("context") OrganizationContext context,

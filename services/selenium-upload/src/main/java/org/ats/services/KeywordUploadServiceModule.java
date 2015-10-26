@@ -3,8 +3,8 @@
  */
 package org.ats.services;
 
-import org.ats.services.upload.KeywordUploadProjectFactory;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProjectFactory;
+import org.ats.services.upload.SeleniumUploadProjectService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -18,9 +18,9 @@ public class KeywordUploadServiceModule extends AbstractModule{
 
   @Override
   protected void configure() {
-    bind(KeywordUploadProjectService.class);
+    bind(SeleniumUploadProjectService.class);
     
-    install(new FactoryModuleBuilder().build(KeywordUploadProjectFactory.class));
+    install(new FactoryModuleBuilder().build(SeleniumUploadProjectFactory.class));
   }
 
 }

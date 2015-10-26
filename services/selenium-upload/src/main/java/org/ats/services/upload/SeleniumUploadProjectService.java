@@ -11,7 +11,7 @@ import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
-import org.ats.services.upload.KeywordUploadProject.Status;
+import org.ats.services.upload.SeleniumUploadProject.Status;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,12 +24,12 @@ import com.mongodb.DBObject;
  * Sep 17, 2015
  */
 @Singleton
-public class KeywordUploadProjectService extends AbstractMongoCRUD<KeywordUploadProject>{
+public class SeleniumUploadProjectService extends AbstractMongoCRUD<SeleniumUploadProject>{
   
-  private final String COL_NAME = "keyword-upload-project";
+  private final String COL_NAME = "selenium-upload-project";
   
   @Inject
-  private KeywordUploadProjectFactory factory;
+  private SeleniumUploadProjectFactory factory;
   
   @Inject
   private OrganizationContext context;
@@ -47,7 +47,7 @@ public class KeywordUploadProjectService extends AbstractMongoCRUD<KeywordUpload
   /**
    * 
    */
-  public KeywordUploadProjectService(MongoDBService mongo, Logger logger) {
+  public SeleniumUploadProjectService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     
@@ -59,7 +59,7 @@ public class KeywordUploadProjectService extends AbstractMongoCRUD<KeywordUpload
   }
 
   @Override
-  public KeywordUploadProject transform(DBObject source) {
+  public SeleniumUploadProject transform(DBObject source) {
     //rebuild context
     if (context.getTenant() == null) {
       BasicDBObject tenantSource = (BasicDBObject) source.get("tenant");
@@ -74,7 +74,7 @@ public class KeywordUploadProjectService extends AbstractMongoCRUD<KeywordUpload
       context.setSpace(spaceService.get(spaceSource.getString("_id")));
     }
     
-    KeywordUploadProject project = factory.create(context, (String) source.get("name"));
+    SeleniumUploadProject project = factory.create(context, (String) source.get("name"));
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

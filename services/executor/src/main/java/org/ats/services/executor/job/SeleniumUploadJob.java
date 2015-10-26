@@ -18,10 +18,10 @@ import com.google.inject.assistedinject.Assisted;
  * Sep 18, 2015
  */
 @SuppressWarnings("serial")
-public class KeywordUploadJob extends AbstractJob<KeywordUploadJob>{
+public class SeleniumUploadJob extends AbstractJob<SeleniumUploadJob>{
 
   @Inject
-  public KeywordUploadJob(
+  public SeleniumUploadJob(
       @Assisted("id") String id, 
       @Assisted("projectId") String projectId,
       @Nullable @Assisted("vmachineId") String vmachineId, 
@@ -29,7 +29,7 @@ public class KeywordUploadJob extends AbstractJob<KeywordUploadJob>{
     
     super(id, projectId, vmachineId);
     setStatus(status);
-    this.put("type", Type.Keyword.toString());
+    this.put("type", Type.SeleniumUpload.toString());
   }
 
   @Override
@@ -39,7 +39,7 @@ public class KeywordUploadJob extends AbstractJob<KeywordUploadJob>{
 
   @Override
   public Type getType() {
-    return Type.Keyword;
+    return Type.SeleniumUpload;
   }
 
   public byte[] getRawData() {

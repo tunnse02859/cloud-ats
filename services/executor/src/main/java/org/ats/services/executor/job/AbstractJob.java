@@ -75,6 +75,6 @@ public abstract class AbstractJob<T extends AbstractJob<T>> extends BasicDBObjec
   }
   
   public static enum Type {
-    Performance, Keyword
+    Performance, Keyword, SeleniumUpload
   }
 }

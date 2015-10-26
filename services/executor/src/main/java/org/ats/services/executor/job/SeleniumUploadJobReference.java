@@ -14,17 +14,17 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Sep 18, 2015
  */
-public class KeywordUploadJobReference extends Reference<KeywordUploadJob>{
+public class SeleniumUploadJobReference extends Reference<SeleniumUploadJob>{
   
   @Inject ExecutorService service;
   
   @Inject
-  KeywordUploadJobReference(@Assisted("id") String id) {
+  SeleniumUploadJobReference(@Assisted("id") String id) {
     super(id);
   }
 
   @Override
-  public KeywordUploadJob get() {
-    return (KeywordUploadJob) service.get(id);
+  public SeleniumUploadJob get() {
+    return (SeleniumUploadJob) service.get(id);
   }
 }

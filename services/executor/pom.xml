@@ -31,7 +31,7 @@
 		
 		<dependency>
 			<groupId>org.ats.services</groupId>
-			<artifactId>keyword-upload</artifactId>
+			<artifactId>selenium-upload</artifactId>
 		</dependency>
 
 		<dependency>

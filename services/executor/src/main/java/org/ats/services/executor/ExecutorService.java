@@ -18,6 +18,8 @@ import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.KeywordJobFactory;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.executor.job.PerformanceJobFactory;
+import org.ats.services.executor.job.SeleniumUploadJob;
+import org.ats.services.executor.job.SeleniumUploadJobFactory;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.SuiteReference;
@@ -26,6 +28,8 @@ import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,6 +56,12 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
   
   @Inject
   private PerformanceJobFactory perfFactory;
+  
+  @Inject
+  private SeleniumUploadProjectService keywordUploadService;
+  
+  @Inject
+  private SeleniumUploadJobFactory keywordUploadFactory;
 
   @Inject
   private ReferenceFactory<JMeterScriptReference> jmeterRefFactory;
@@ -93,6 +103,19 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     create(job);
 
     Event event = eventFactory.create(job, "keyword-job-tracking");
+    event.broadcast();
+    return job;
+  }
+  
+  public SeleniumUploadJob execute(SeleniumUploadProject project) throws Exception {
+    project.setStatus(SeleniumUploadProject.Status.RUNNING);
+    keywordUploadService.update(project);
+    
+    String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
+    SeleniumUploadJob job = keywordUploadFactory.create(projectHash, project.getId(), null, Status.Queued);
+    create(job);
+
+    Event event = eventFactory.create(job, "upload-job-tracking");
     event.broadcast();
     return job;
   }
@@ -139,6 +162,16 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
       perfJob.put("log", source.get("log"));
 
       return perfJob;
+      
+    case SeleniumUpload:
+      SeleniumUploadJob seleniumJob = keywordUploadFactory.create(projectHash, projectId, vmachineId, status);
+      seleniumJob.put("_id", id);
+      seleniumJob.put("created_date", createdDate);
+      seleniumJob.put("report", source.get("report"));
+      seleniumJob.put("log", source.get("log"));
+      seleniumJob.put("result", source.get("result"));
+
+      return seleniumJob;
 
     default:
       throw new IllegalArgumentException();

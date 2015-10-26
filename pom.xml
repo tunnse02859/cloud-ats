@@ -92,7 +92,7 @@
 			
 			<dependency>
 				<groupId>org.ats.services</groupId>
-				<artifactId>keyword-upload</artifactId>
+				<artifactId>selenium-upload</artifactId>
 				<version>${cloudats.version}</version>
 			</dependency>
 
@@ -285,7 +285,7 @@
 		<module>common</module>
 		<module>jenkins</module>
 		<module>services</module>
-  </modules>
+	</modules>
 
 	<build>
 		<plugins>

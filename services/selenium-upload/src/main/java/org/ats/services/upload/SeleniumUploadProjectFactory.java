@@ -12,6 +12,6 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Sep 17, 2015
  */
-public interface KeywordUploadProjectFactory {
-  public KeywordUploadProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name);
+public interface SeleniumUploadProjectFactory {
+  public SeleniumUploadProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name);
 }

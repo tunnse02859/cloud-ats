@@ -16,9 +16,9 @@ import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.event.AbstractEventTestCase;
-import org.ats.services.upload.KeywordUploadProject;
-import org.ats.services.upload.KeywordUploadProjectFactory;
-import org.ats.services.upload.KeywordUploadProjectService;
+import org.ats.services.upload.SeleniumUploadProject;
+import org.ats.services.upload.SeleniumUploadProjectFactory;
+import org.ats.services.upload.SeleniumUploadProjectService;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -35,7 +35,7 @@ import com.google.inject.TypeLiteral;
  *
  * Oct 7, 2015
  */
-public class KeywordUploadProjectServiceTestCase extends AbstractEventTestCase{
+public class SeleniumUploadProjectServiceTestCase extends AbstractEventTestCase{
   
   private AuthenticationService<User> authService;
   
@@ -47,9 +47,9 @@ public class KeywordUploadProjectServiceTestCase extends AbstractEventTestCase{
 
   private User user;
   
-  private KeywordUploadProjectService funcService;
+  private SeleniumUploadProjectService funcService;
   
-  private KeywordUploadProjectFactory funcFactory;
+  private SeleniumUploadProjectFactory funcFactory;
   
   @BeforeClass
   public void init() throws Exception {
@@ -60,8 +60,8 @@ public class KeywordUploadProjectServiceTestCase extends AbstractEventTestCase{
         new DataDrivenModule(),
         new KeywordUploadServiceModule());
     
-    this.funcService = injector.getInstance(KeywordUploadProjectService.class);
-    this.funcFactory = injector.getInstance(KeywordUploadProjectFactory.class);
+    this.funcService = injector.getInstance(SeleniumUploadProjectService.class);
+    this.funcFactory = injector.getInstance(SeleniumUploadProjectFactory.class);
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     this.context = this.injector.getInstance(OrganizationContext.class);
@@ -107,7 +107,7 @@ public class KeywordUploadProjectServiceTestCase extends AbstractEventTestCase{
   
   @Test
   public void testCRUD() throws Exception {
-    KeywordUploadProject project = null;
+    SeleniumUploadProject project = null;
 
     try {
       project = funcFactory.create(context, "Upload project");
