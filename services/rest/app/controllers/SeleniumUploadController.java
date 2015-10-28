@@ -15,6 +15,11 @@ import java.util.zip.ZipInputStream;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.jenkins.JenkinsMaster;
+import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.service.report.Report;
+import org.ats.service.report.ReportService;
+import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -23,6 +28,8 @@ import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectFactory;
 import org.ats.services.upload.SeleniumUploadProjectService;
+import org.ats.services.vmachine.VMachine;
+import org.ats.services.vmachine.VMachineService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -56,7 +63,11 @@ public class SeleniumUploadController extends Controller {
 
   @Inject
   private ExecutorService executorService;
-
+  
+  @Inject VMachineService vmachineService;
+  
+  @Inject ReportService reportService;
+  
   private static final int BUFFER_SIZE = 4096;
 
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -167,13 +178,14 @@ public class SeleniumUploadController extends Controller {
     return status(201, project.getId());
   }
 
-  public Result report(String projectId, String jobId) {
+  public Result report(String projectId, String jobId) throws Exception {
     AbstractJob<?> job = executorService.get(jobId);
     ObjectNode obj = Json.newObject();
     String result = "";
     obj.put("created_date", formater.format(job.getCreatedDate()));
-    if(job.getLog() == null)
+    if(job.getLog() == null || job.getResult() == null || (job.getResult()!= null && job.getResult().equalsIgnoreCase("Aborted")))
       return status(404);
+    
     obj.put("log", job.getLog());
     obj.put("jobId", job.getId());
     if((job.getResult() != null) && ("SUCCESS".equals(job.getResult()))) {
@@ -194,7 +206,7 @@ public class SeleniumUploadController extends Controller {
     String result = "";
     while (jobList.hasNext()) {
       for (AbstractJob<?> job : jobList.next()) {
-        if (AbstractJob.Status.Completed.equals(job.getStatus())) {
+        if (AbstractJob.Status.Completed.equals(job.getStatus()) && !job.getResult().equalsIgnoreCase("Aborted")) {
           ObjectNode obj = Json.newObject();
           obj.put("created_date", formater.format(job.getCreatedDate()));
           obj.put("log", job.getLog());
@@ -205,6 +217,7 @@ public class SeleniumUploadController extends Controller {
             result = "Fail";
           }
           obj.put("result", result);
+          
           array.add(obj);
         }
       }
@@ -332,4 +345,40 @@ public class SeleniumUploadController extends Controller {
       return badRequest();
     }
   }
+  
+  public Result stop(String projectId) throws IOException {
+    
+    SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
+    if (project == null) return status(404);
+    
+    VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    AbstractJob<?> lastJob = jobList.next().get(0);
+    
+    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
+    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, lastJob.getId(), 
+     null , null, null);
+    
+    lastJob.setStatus(AbstractJob.Status.Completed);
+    executorService.update(lastJob);
+
+    if (lastJob.getTestVMachineId() != null) {
+      VMachine testVM = vmachineService.get(lastJob.getTestVMachineId());
+      
+      if (testVM.getStatus() == VMachine.Status.InProgress) {
+        testVM.setStatus(VMachine.Status.Started);
+        vmachineService.update(testVM);
+      }
+    } 
+    
+    project.setStatus(SeleniumUploadProject.Status.READY);
+    seleniumUploadService.update(project);
+    jenkinsJob.stop();
+    
+    return status(200);
+  }
+  
 }
