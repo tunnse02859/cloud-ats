@@ -28,8 +28,16 @@ public class StringUtil {
   public static String normalizeName(String name) {
     char[] chars = name.toCharArray();
     StringBuilder sb = new StringBuilder();
-    for (char ch : chars) {
-      if (Character.isJavaIdentifierStart(ch)) sb.append(ch);
+    int i = 0;
+    
+    for(i = 0; i < chars.length; i++) {
+      if(Character.isJavaIdentifierStart(chars[i])) {
+        sb.append(chars[i]);
+        break;
+      }
+    }
+    for(int j = i+1; j < chars.length; j++) {
+      if (Character.isJavaIdentifierPart(chars[j])) sb.append(chars[j]);
     }
     return sb.toString();
   }
