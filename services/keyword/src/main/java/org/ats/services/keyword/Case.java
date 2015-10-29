@@ -210,7 +210,7 @@ public class Case extends AbstractTemplate {
         }
         
         if (json.get("waitTime") != null) {
-          waitTime = " wait time "+"\\\""+json.get("waitTime").asLong()+"\\\"s";
+          waitTime = " wait time "+"\\\""+json.get("waitTime").asLong()+"\\\"ms";
         }
         
         if (json.get("url") != null) {

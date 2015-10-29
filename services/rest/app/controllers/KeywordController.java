@@ -29,6 +29,7 @@ import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
@@ -215,15 +216,36 @@ public class KeywordController extends Controller {
   
   public Result run(String projectId) throws Exception {
     JsonNode data = request().body().asJson();
-    List<SuiteReference> suites = new ArrayList<SuiteReference>(data.size());
+    JsonNode jsonSuites = data.get("suites");
+    JsonNode jsonOptions = data.get("options");
+    
+    List<SuiteReference> suites = new ArrayList<SuiteReference>(jsonSuites.size());
     
     SuiteReference ref;
-    for (JsonNode sel : data) {
+    for (JsonNode sel : jsonSuites) {
       ref = suiteRefFactory.create(sel.asText());
       
       if (suiteService.get(ref.getId()) == null) {
         return status(400);
       }
+      
+      String browser = jsonOptions.get("browser").asText();
+      String version = jsonOptions.get("version") != null ? jsonOptions.get("version").asText() : null;
+      
+      StringBuilder initDriver = new StringBuilder();
+      if ("firefox".equals(browser)) {
+        initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"/home/cloudats/firefox-store/").append(version).append("/firefox\");\n");
+        initDriver.append("wd = new FirefoxDriver();");
+      } else if ("chrome".equals(browser)) {
+        initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"/home/cloudats/chromedriver\");\n wd = new ChromeDriver();");
+      }
+      
+      if (initDriver.length() > 0) {
+        Suite suite = ref.get();
+        suite.put("init_driver", initDriver.toString());
+        suiteService.update(suite);
+      }
+      
       suites.add(suiteRefFactory.create(sel.asText()));
     }
     
