@@ -59,6 +59,15 @@ public class SuiteController extends Controller {
     String suiteName = data.get("name").asText();
     JsonNode cases = data.get("cases");
     
+    PageList<Suite> listSuites = suiteService.getSuites(projectId);
+    while(listSuites.hasNext()) {
+      for(Suite suite : listSuites.next()) {
+        if (suiteName.equals(suite.getName())) {
+          return status(304);
+        }
+      }
+    }
+    
     List<CaseReference> list = new ArrayList<CaseReference>();
     for (JsonNode testCase : cases) {
       list.add(caseRefFactory.create(testCase.get("_id").asText()));
@@ -77,6 +86,15 @@ public class SuiteController extends Controller {
     Suite suite = suiteService.transform(obj);
     Suite oldSuite = suiteService.get(suite.getId());
     
+    PageList<Suite> listSuites = suiteService.getSuites(projectId);
+    while(listSuites.hasNext()) {
+      for(Suite suiteElement : listSuites.next()) {
+        String oldSuiteName = suiteElement.getName();
+        if (oldSuiteName.equals(suite.getName())) {
+          return status(304);
+        }
+      }
+    }
 
     if (!projectId.equals(suite.getProjectId()) 
         || !suite.getId().equals(oldSuite.getId())
