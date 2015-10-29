@@ -86,21 +86,24 @@ public class SuiteController extends Controller {
     Suite suite = suiteService.transform(obj);
     Suite oldSuite = suiteService.get(suite.getId());
     
-    PageList<Suite> listSuites = suiteService.getSuites(projectId);
-    while(listSuites.hasNext()) {
-      for(Suite suiteElement : listSuites.next()) {
-        String oldSuiteName = suiteElement.getName();
-        if (oldSuiteName.equals(suite.getName())) {
-          return status(304);
-        }
-      }
-    }
-
     if (!projectId.equals(suite.getProjectId()) 
         || !suite.getId().equals(oldSuite.getId())
         || oldSuite == null) return status(400);
     
     if (suite.equals(oldSuite)) return status(204);
+    
+    if (!suite.getName().equals(oldSuite.getName())) {
+      
+      PageList<Suite> listSuites = suiteService.getSuites(projectId);
+      while(listSuites.hasNext()) {
+        for(Suite suiteElement : listSuites.next()) {
+          String oldSuiteName = suiteElement.getName();
+          if (oldSuiteName.equals(suite.getName())) {
+            return status(304);
+          }
+        }
+      }
+    }
     
     suiteService.update(suite);
     
