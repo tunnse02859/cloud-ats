@@ -49,6 +49,7 @@ GET		/api/v1/project/selenium/:projectId		     @controllers.SeleniumUploadContro
 POST	/api/v1/project/selenium/:projectId/upload	 @controllers.SeleniumUploadController.upload(projectId)
 GET     /api/v1/project/seleniums                    @controllers.SeleniumUploadController.list()
 GET		/api/v1/project/selenium/:projectId/run			    @controllers.SeleniumUploadController.run(projectId)
+GET		/api/v1/project/selenium/:projectId/stop			@controllers.SeleniumUploadController.stop(projectId)
 PUT		/api/v1/project/selenium							@controllers.SeleniumUploadController.update()
 DELETE	/api/v1/project/selenium							@controllers.SeleniumUploadController.delete()
 GET		/api/v1/project/selenium/:projectId/reports			@controllers.SeleniumUploadController.listReport(projectId)
