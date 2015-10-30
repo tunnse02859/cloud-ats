@@ -229,7 +229,7 @@ public class KeywordController extends Controller {
         return status(400);
       }
       
-      String browser = jsonOptions.get("browser").asText();
+      String browser = jsonOptions.get("browser") != null ? jsonOptions.get("browser").asText() : null;
       String version = jsonOptions.get("version") != null ? jsonOptions.get("version").asText() : null;
       
       StringBuilder initDriver = new StringBuilder();
