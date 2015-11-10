@@ -192,7 +192,7 @@ public class TrackingJobActor extends UntypedActor {
     
     if (testVM == null) {
       updateLog(job, "None VM available.");
-      updateLog(job, "Creating new VM (about 4-8 minitues).... ");
+      updateLog(job, "Creating new VM (about 4-8 minutes).... ");
       
       //We will create new test vm async
       testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), false);
@@ -348,7 +348,7 @@ public class TrackingJobActor extends UntypedActor {
 
     if (testVM == null) {
       updateLog(job, "None VM available.");
-      updateLog(job, "Creating new VM (about 4-8 minitues).... ");
+      updateLog(job, "Creating new VM (about 4-8 minutes).... ");
       
       //We will create new test vm async
       testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
