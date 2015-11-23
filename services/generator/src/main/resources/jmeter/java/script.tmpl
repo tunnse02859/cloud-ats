@@ -10,7 +10,8 @@
  @@Test
   public void @scriptName () throws Exception {
     
-    int count = 0;
+   JMeterUtils.setProperty("log_file", "target/@scriptId@.log");
+   JMeterUtils.initLogging();
 
     ListedHashTree root = new ListedHashTree();
     TestPlan testPlan = Utils.createTestPlan();
@@ -30,8 +31,6 @@
     SamplerBuilder samplerBuilder = new SamplerBuilder(threadGroupHashTree);
     @samplers
     
-    output.put("target/@scriptId@.jtl", @loops * count + 1);
-    
     SaveService.saveTree(root, new FileOutputStream("target/@scriptId@.jmx"));
     root.add(root.getArray()[0], new RemoteThreadsListenerTestElement());
     root.add(root.getArray()[0], new ListenToTest());
@@ -39,5 +38,5 @@
     distributedRunner.init(hostList, root);
     distributedRunner.start();
     
-    this.shutdown();
+    this.shutdown("target/@scriptId@.log");
   }

@@ -9,9 +9,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.jmeter.engine.DistributedRunner;
 import org.apache.jmeter.save.SaveService;
@@ -28,13 +26,10 @@ public class JMeterRunner {
 
   private List<String> hostList = new ArrayList<String>();
   
-  private Map<String, Integer> output = new HashMap<String, Integer>();
-  
   @@BeforeClass
   public void setup() {
     JMeterUtils.loadJMeterProperties("src/test/resources/jmeter/bin/jmeter.properties");
     JMeterUtils.setJMeterHome("src/test/resources/jmeter");
-    JMeterUtils.initLogging();
     
     String hosts = System.getProperty("jmeter.hosts");
     if (hosts == null || hosts.isEmpty()) throw new IllegalArgumentException("Need at least an host to run jmeter");
@@ -47,25 +42,21 @@ public class JMeterRunner {
 
   @scripts
   
-  private void shutdown() throws Exception {
-    while (true) {
-      int finish = 0;
-      for (Map.Entry<String, Integer> entry : output.entrySet()) {
-        if (countLine(entry.getKey()) == entry.getValue()) finish++;
+  private void shutdown(String logFile) throws Exception {
+    while(true) {
+      File file = new File(logFile);
+      if (!file.exists()) continue;
+      BufferedReader reader = new BufferedReader(new FileReader(file));
+      String line = null;
+      while ((line = reader.readLine()) != null) {
+        if (line.indexOf("Shutdown Test Thread") != -1) {
+          reader.close();
+          return;
+        }
       }
-      if (finish == output.size()) return;
+      reader.close();
       Thread.sleep(5000);
     }
   }
   
-  private int countLine(String path) throws IOException {
-    File file = new File(path);
-    if (!file.exists()) return 0;
-    
-    BufferedReader reader = new BufferedReader(new FileReader(file));
-    int lines = 0;
-    while (reader.readLine() != null) lines++;
-    reader.close();
-    return lines;
-  }
 }

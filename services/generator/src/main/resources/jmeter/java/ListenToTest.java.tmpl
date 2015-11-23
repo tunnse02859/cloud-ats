@@ -7,12 +7,11 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.jmeter.engine.ClientJMeterEngine;
 import org.apache.jmeter.samplers.Remoteable;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
-import org.apache.jorphan.util.JOrphanUtils;
+import org.apache.log.Logger;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -37,7 +36,6 @@ public class ListenToTest implements TestStateListener, Runnable, Remoteable {
     long now = System.currentTimeMillis();
     System.out.println("Tidying up ...    @ "+new Date(now)+" ("+now+")");
     System.out.println("... end of run");
-    checkForRemainingThreads();
   }
 
   @Override
@@ -61,32 +59,9 @@ public class ListenToTest implements TestStateListener, Runnable, Remoteable {
       TimeUnit.SECONDS.sleep(5);
     } catch (InterruptedException ignored) {
     }
-    ClientJMeterEngine.tidyRMI(LoggingManager.getLoggerForClass());
+    
     System.out.println("... end of run");
-    checkForRemainingThreads();
-  }
-
-  private void checkForRemainingThreads() {
-    final int REMAIN_THREAD_PAUSE = JMeterUtils.getPropDefault("jmeter.exit.check.pause", 2000); 
-
-    if (REMAIN_THREAD_PAUSE > 0) {
-      Thread daemon = new Thread(){
-        @Override
-        public void run(){
-          try {
-            TimeUnit.MILLISECONDS.sleep(REMAIN_THREAD_PAUSE);
-          } catch (InterruptedException ignored) {
-          }
-          System.out.println("The JVM should have exitted but did not.");
-          System.out.println("The following non-daemon threads are still running (DestroyJavaVM is OK):");
-          JOrphanUtils.displayThreads(false);
-        }
-
-      };
-      daemon.setDaemon(true);
-      daemon.start();
-    } else if(REMAIN_THREAD_PAUSE<=0) {
-      System.out.println("jmeter.exit.check.pause is <= 0, JMeter won't check for unterminated non-daemon threads");
-    }
+    Logger logger = LoggingManager.getLoggerForClass();
+    logger.info("Shutdown Test Thread");
   }
 }
