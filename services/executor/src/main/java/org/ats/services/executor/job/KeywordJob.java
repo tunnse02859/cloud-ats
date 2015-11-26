@@ -48,6 +48,10 @@ public class KeywordJob extends AbstractJob<KeywordJob> {
   public Map<String, String> getRawDataOutput() {
     return this.getString("report") != null ? new MapBuilder<String, String>("report", this.getString("report")).build() : null;
   }
+  
+  public byte[] getRawData() {
+    return this.get("raw_report") != null ? (byte[])this.get("raw_report") : null;
+  }
 
   @Override
   public Type getType() {
