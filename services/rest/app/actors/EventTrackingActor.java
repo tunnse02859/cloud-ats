@@ -72,9 +72,12 @@ public class EventTrackingActor extends UntypedActor {
           
           PerformanceJob job = (PerformanceJob) event.getSource();
           
+          //Cleanup blod data in this job
+          job.put("raw_report", null);
+          
           //if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
-          PerformanceProject project = perfService.get(job.getProjectId());
+          PerformanceProject project = perfService.get(job.getProjectId(),"raw");
           job.put("project_status", project.getStatus().toString());
           job.put("runningTime", formater.format(job.getCreatedDate()));
           eventController.send(project.getCreator().get(), job);
