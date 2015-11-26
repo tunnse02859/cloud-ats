@@ -36,7 +36,6 @@ public class JMeterScript extends BasicDBObject {
     this.put("ram_up", ramUp);
     this.put("scheduler", scheduler);
     this.put("duration", duration);
-    
     this.samplers.addAll(samplers);
     
     BasicDBList list = new BasicDBList();
@@ -108,7 +107,15 @@ public class JMeterScript extends BasicDBObject {
     this.put("duration", duration);
     
   }
-
+  
+  public void setNumberEngines(int engines) {
+    this.put("number_engines", engines);
+  }
+  
+  public int getNumberEngines() {
+    return this.get("number_engines") != null ? this.getInt("number_engines") : 1;
+  }
+  
   public List<JMeterSampler> getSamplers() {
     return Collections.unmodifiableList(samplers);
   }

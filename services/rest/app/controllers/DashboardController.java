@@ -166,6 +166,7 @@ public class DashboardController extends Controller {
                 object.put("ram_up", script.get().getRamUp());
                 object.put("loops", script.get().getLoops());
                 object.put("duration", script.get().getDuration());
+                object.put("number_engines", script.get().getNumberEngines());
                 
               }
             } catch (Exception e) {

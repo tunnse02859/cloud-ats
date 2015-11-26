@@ -3,20 +3,103 @@
  */
 package org.ats.services.performance;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ats.services.OrganizationServiceModule;
+import org.ats.services.PerformanceServiceModule;
+import org.ats.services.data.DatabaseModule;
+import org.ats.services.data.MongoDBService;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
+import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
+import org.ats.services.organization.event.AbstractEventTestCase;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author NamBV2
  *
  * Jun 17, 2015
  */
-public class JMeterScriptTestCase {
+public class JMeterScriptTestCase extends AbstractEventTestCase {
+  
+private AuthenticationService<User> authService;
+  
+  private PerformanceProjectFactory factory;
+  
+  private PerformanceProjectService service;
+  
+  private JMeterScriptService  jmeterService;
+  
+  private Tenant tenant;
 
+  private Space space;
+
+  private User user;
+  
+  @BeforeClass
+  public void init() throws Exception {
+    this.injector = Guice.createInjector(
+        new DatabaseModule(),
+        new EventModule(),
+        new PerformanceServiceModule(),
+        new OrganizationServiceModule());
+    this.factory = injector.getInstance(PerformanceProjectFactory.class);
+    this.service = injector.getInstance(PerformanceProjectService.class);
+    this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
+    this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
+    this.mongoService = injector.getInstance(MongoDBService.class);
+    this.mongoService.dropDatabase();
+    
+    //start event service
+    this.eventService = injector.getInstance(EventService.class);
+    this.eventService.setInjector(injector);
+    this.eventService.start();
+    
+    initService();
+  }
+  
+  @AfterClass
+  public void shutdown() throws Exception {
+    this.mongoService.dropDatabase();
+  }
+
+  @BeforeMethod
+  public void setup() throws Exception {
+    this.tenant = tenantFactory.create("Fsoft");
+    this.tenantService.create(this.tenant);
+
+    this.space = spaceFactory.create("FSU1.BU11");
+    this.space.setTenant(tenantRefFactory.create(this.tenant.getId()));
+    this.spaceService.create(this.space);
+
+    this.user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
+    this.user.setTenant(tenantRefFactory.create(this.tenant.getId()));
+    this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
+    this.user.setPassword("12345");
+    this.userService.create(this.user);
+  }
+  
+  @AfterMethod
+  public void tearDown() {
+    this.authService.logOut();
+    this.mongoService.dropDatabase();
+  }
+  
   @Test
   public void testCRUD() throws Exception {
     
@@ -48,5 +131,31 @@ public class JMeterScriptTestCase {
         "http://localhost:8080/signup", null, 0L, arguments);
     jmeter.addSampler(newSampler);
     Assert.assertEquals(jmeter.getSamplers().size(), 5);
+  }
+  
+  @Test
+  public void testMixin() throws UnsupportedEncodingException {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    PerformanceProject performanceProject = factory.create("Test Performance");
+    service.create(performanceProject);
+    
+    JMeterFactory factory = new JMeterFactory();
+    JMeterSampler loginPost = factory.createHttpPost("Login", "http://localhost:9000/signin", null, 0,
+        factory.createArgument("email", "root@system.com"),
+        factory.createArgument("password", "admin"));
+    
+    JMeterScript jmeter = factory.createJmeterScript(
+        "Test Name",
+        1, 100, 5, false, 0,performanceProject.getId(), 
+        loginPost);
+    jmeter.setNumberEngines(4);
+    jmeterService.create(jmeter);
+    //get by mixins function
+    
+    JMeterScript newScript = jmeterService.get(jmeter.getId(), "number_engines");
+    Assert.assertEquals(newScript.getNumberEngines(), 4);
+    
   }
 }

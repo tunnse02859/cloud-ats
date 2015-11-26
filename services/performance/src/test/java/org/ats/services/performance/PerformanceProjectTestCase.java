@@ -157,11 +157,12 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
         "Test Name",
         1, 100, 5, false, 0,performanceProject.getId(), 
         loginPost);
+    jmeter.setNumberEngines(4);
     JMeterScript newJMeter = factory.createJmeterScript(
         "New Script",
         1, 100, 5, false, 0, performanceProject.getId(), 
         loginPost);
-    
+    newJMeter.setNumberEngines(5);
     jmeterService.create(jmeter, newJMeter);
     
     PageList<JMeterScript> pages = jmeterService.getJmeterScripts(performanceProject.getId());
