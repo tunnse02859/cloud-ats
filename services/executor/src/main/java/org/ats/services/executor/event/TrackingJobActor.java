@@ -159,8 +159,10 @@ public class TrackingJobActor extends UntypedActor {
         SSHClient.getFile(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
             "/home/cloudats/projects/" + job.getId() + "/target/" + ref.getId() + ".jtl",  bos);
         
-        if (bos.size() > 0)
+        if (bos.size() > 0) {
           list.add(new BasicDBObject("_id", ref.getId()).append("content", new String(bos.toByteArray())));
+          job.put("raw_report", bos.toByteArray());
+        }
       }
       job.put("report", list);
       //End download result

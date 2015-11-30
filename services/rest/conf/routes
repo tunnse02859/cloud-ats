@@ -93,6 +93,7 @@ GET		/api/v1/project/performance/reports/:projectId/:jobId	    		@controllers.Pe
 GET		/api/v1/project/performance/report/sampler/:id						@controllers.PerformanceController.getReport(id)
 GET		/api/v1/project/performance/stop/:projectId							@controllers.PerformanceController.stopProject(projectId)
 GET		/api/v1/project/performance/logs/:projectId							@controllers.PerformanceController.viewLog(projectId)
+GET		/api/v1/project/performance/:projectId/download/:jobId				@controllers.PerformanceController.download(projectId,jobId)
 # Script controller
 
 GET		/api/v1/project/performance/:projectId/scripts				@controllers.ScriptController.list(projectId)
