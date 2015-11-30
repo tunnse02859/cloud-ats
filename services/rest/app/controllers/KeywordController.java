@@ -356,7 +356,7 @@ public class KeywordController extends Controller {
   
   public Result download(String projectId, String jobId) {
     AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
-    String path = "C:/Users/nambv2/Desktop/"+projectId.substring(0, 8);
+    String path = "/tmp/"+projectId.substring(0, 8);
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
@@ -367,7 +367,7 @@ public class KeywordController extends Controller {
     byte[] report = job.getRawData();
     FileOutputStream fileOut;
     try {
-      fileOut = new FileOutputStream(path+"/result-"+jobId+".tar.gz");
+      fileOut = new FileOutputStream(path+"/resource-"+jobId+".tar.gz");
       fileOut.write(report);
       fileOut.close();
     } catch (FileNotFoundException e) {
@@ -380,7 +380,7 @@ public class KeywordController extends Controller {
     response().setContentType("application/x-download");
     response().setHeader("Content-Encoding", "gzip");
     response().setHeader("Content-disposition",
-        "attachment; filename=report.tar.gz");
-    return ok(new File(path+"/result-"+jobId+".tar.gz"));
+        "attachment; filename=resource.tar.gz");
+    return ok(new File(path+"/resource-"+jobId+".tar.gz"));
   }
 }

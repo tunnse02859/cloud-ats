@@ -314,10 +314,10 @@ public class TrackingJobActor extends UntypedActor {
       
       //Zip report
       SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf target.tar.gz -C target .", null, null);
+          "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src", null, null);
       ByteArrayOutputStream bosTarget = new ByteArrayOutputStream();
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "/home/cloudats/projects/" + job.getId() + "/target.tar.gz",  bosTarget);
+          "/home/cloudats/projects/" + job.getId() + "/resource.tar.gz",  bosTarget);
       
       //Download result
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
