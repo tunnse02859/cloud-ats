@@ -178,10 +178,12 @@ public class Case extends AbstractTemplate {
         String value = "";
         String temp = "";
         String waitTime = "";
+        String locationType = "";
         JsonNode locatorNode = null;
         
         if (json.get("locator") != null) {
           locatorNode = json.get("locator");
+          locationType = locatorNode.get("type").toString().split("\"")[1];
           temp = locatorNode.get("value").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
           if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
@@ -192,7 +194,7 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          locator = " at " +"\\\"" +temp+"\\\"";
+          locator = " by \\\""+locationType+"\\\" at \\\"" +temp+"\\\"";
         }
         
         if (json.get("text") != null) {
@@ -229,6 +231,7 @@ public class Case extends AbstractTemplate {
         
         if (json.get("targetLocator") != null) {
           locatorNode = json.get("targetLocator");
+          locationType = json.get("type").toString().split("\"")[1];
           temp = locatorNode.get("value").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
           if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
@@ -239,7 +242,7 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          targetLocator = " to targetLocator "+ "\\\""+temp+"\\\"";
+          targetLocator = " to targetLocator by \\\""+locationType+"\\\" \\\""+temp+"\\\"";
         }
         
         if (json.get("variable") != null) {
