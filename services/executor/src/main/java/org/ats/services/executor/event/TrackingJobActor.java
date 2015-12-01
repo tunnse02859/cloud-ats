@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -189,6 +190,10 @@ public class TrackingJobActor extends UntypedActor {
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     VMachine testVM = job.getTestVMachineId() == null ? 
         vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false) : vmachineService.get(job.getTestVMachineId());
+    
+    List<JMeterScriptReference> listScriptRef = job.getScripts();
+    
+    
     
     if (testVM == null) {
       updateLog(job, "None VM available.");
