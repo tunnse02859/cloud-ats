@@ -53,7 +53,7 @@ public class ScriptController extends Controller {
       list = pages.next();
       
       for (JMeterScript script : list) {
-        array.add(Json.parse(script.toString()));
+        array.add(Json.parse(service.get(script.getId(), "number_engines").toString()));
       }
     }
     
