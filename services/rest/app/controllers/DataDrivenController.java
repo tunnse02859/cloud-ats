@@ -3,6 +3,13 @@
  */
 package controllers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.ats.common.PageList;
@@ -21,6 +28,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http.MultipartFormData;
 import play.mvc.Result;
 import actions.CorsComposition;
 
@@ -81,7 +89,6 @@ public class DataDrivenController extends Controller {
     String name = json.get("name").asText();
     String caseId = json.get("caseId").asText();
     JsonNode dataset = json.get("dataset");
-    
     DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
     dataDrivenService.create(driven);
     
@@ -140,6 +147,89 @@ public class DataDrivenController extends Controller {
     dataDrivenService.update(driven);
     
     return status(200, Json.parse(driven.toString()));
+  }
+  
+  public Result upload(String projectId,String caseId) {
+    
+    //Get file csv upload
+    MultipartFormData body = request().body().asMultipartFormData();
+    MultipartFormData.FilePart typeFile = body.getFile("file");
+    DataDriven dataDriven = null ;
+    if(typeFile != null) {
+      File file = typeFile.getFile();
+      BufferedReader br = null;
+      String fullName = typeFile.getFilename();
+      int lengthName = fullName.split("\\.").length;
+      String fileName = typeFile.getFilename().split("\\.")[lengthName-2];
+    
+      //Get params of data driven
+      MultipartFormData bodyParams = request().body().asMultipartFormData();
+      JsonNode paramsNode = Json.parse(bodyParams.asFormUrlEncoded().get("params")[0]);
+      List<String> listParams;
+      listParams = new ArrayList<String>();
+      Iterator<JsonNode> iterator = paramsNode.iterator();
+      String line = "";
+      
+      while(iterator.hasNext()) {
+        JsonNode element = iterator.next();
+        String param = element.get("param").toString().split("\"")[1];
+        listParams.add(param);
+      }
+      
+      try {
+        br = new BufferedReader(new FileReader(file));
+        int count = listParams.size();
+        int numberOfLine = -1;
+        ObjectNode obj = null;
+        ArrayNode dataset = Json.newObject().arrayNode();
+        while((line = br.readLine()) != null) {
+          String contentLine [] = line.split(",");
+          
+          numberOfLine ++;
+          //Except the first line which contain name of params
+          if(numberOfLine == 0) continue;
+          
+          obj = Json.newObject();
+          for(int i = 0; i < count; i++) {
+            String key = listParams.get(i);
+            String value = contentLine[i];
+            obj.put(key, value);
+          }
+          dataset.add(obj);
+        }
+        dataDriven = dataDrivenFactory.create(fileName, dataset.toString());
+        dataDrivenService.create(dataDriven);
+        
+        if ("null".equals(caseId)) {
+          return status(200, Json.parse(dataDriven.toString()));
+        }
+        
+        String drivenId = dataDriven.getId();
+        Case caze = caseService.get(caseId);
+        
+        if(caze.getDataDriven() != null) {
+          caze.setDataDriven(null);
+        }
+        
+        caze.setDataDriven(dataRefFactory.create(drivenId));
+        caseService.update(caze);
+        
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      } finally {
+        if (br != null) {
+          try {
+            br.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+      
+    }
+    return ok(Json.parse(dataDriven.toString()));
   }
   
 }
