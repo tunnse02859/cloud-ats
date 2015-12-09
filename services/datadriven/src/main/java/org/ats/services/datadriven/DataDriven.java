@@ -102,8 +102,8 @@ public class DataDriven extends AbstractEntity<DataDriven> {
     sb.append("@DataProvider(name = \"").append(StringUtil.normalizeName(getName())).append(caseIdHash).append("\")\n");
     sb.append("  public static Object[][] ").append(StringUtil.normalizeName(getName())).append(caseIdHash).append("() throws Exception {\n");
     sb.append("    ObjectMapper obj = new ObjectMapper();\n");
-    
-    String data = getDataSource().replace("\n", "").replace("\r", "").replace("\"", "\\\"");
+
+    String data = getDataSource().replace("\n", "").replace("\r", "").replace("\\", "\\\\").replace("\"", "\\\"");
     
     sb.append("    JsonNode rootNode = obj.readTree(\"").append(data).append("\");\n\n");
     sb.append("    JsonNode[][] objData = new JsonNode[rootNode.size()][];\n");

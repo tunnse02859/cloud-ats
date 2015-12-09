@@ -28,6 +28,7 @@ POST    /api/v1/data                    @controllers.DataDrivenController.create
 GET		/api/v1/data/:id		        @controllers.DataDrivenController.get(id)
 PUT     /api/v1/data                    @controllers.DataDrivenController.update()
 DELETE	/api/v1/data			    @controllers.DataDrivenController.delete()
+POST	/api/v1/data/:projectId/upload/:caseId	@controllers.DataDrivenController.upload(projectId,caseId)
 #######################################################################################################
 
 # Keyword project controller 
