@@ -27,6 +27,7 @@ import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
+import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProjectService;
 import org.rythmengine.RythmEngine;
 
@@ -46,6 +47,8 @@ public class GeneratorService {
   
   @Inject
   PerformanceProjectService perService;
+  
+  @Inject JMeterScriptService jmeterService;
   
   /**
    * 
@@ -86,11 +89,12 @@ public class GeneratorService {
       
       if (ref.get().getProjectId() == null) continue;
       
-      JMeterScript jScript = ref.get();
+      JMeterScript jScript = jmeterService.get(ref.getId(), "number_engines");
       String scriptName = getAvailableName(StringUtil.normalizeName(jScript.getName()), namePool);
       int loops = jScript.getLoops();
       int numberThreads = jScript.getNumberThreads();
       int ramUp = jScript.getRamUp();
+      int numberEngines = jScript.getNumberEngines();
       
       StringBuilder samplerBuilder = new StringBuilder();
       
@@ -128,7 +132,7 @@ public class GeneratorService {
       }
       
       String samplers = samplerBuilder.toString();
-      scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp, samplers));
+      scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, numberEngines, ramUp, samplers));
     }
     
     Map<String, String> params = new HashMap<String, String>();

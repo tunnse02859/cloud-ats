@@ -209,14 +209,14 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
         "LoginCodeProject",
         1, 20, 5, false, 0, project.getId(), 
         loginPost);
-    
+    loginScript.setNumberEngines(1);
     jmeterService.create(loginScript);
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
         "GoToArticle", 
         1, 20, 5, false, 0, project.getId(), 
         gotoArticle, google);
-    
+    gotoArticleScript.setNumberEngines(2);
     jmeterService.create(gotoArticleScript);
     
     perfService.create(project);

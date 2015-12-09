@@ -186,10 +186,12 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
         "Login",
         1, 20, 5, false, 0, project.getId(), 
         loginPost);
+    loginScript.setNumberEngines(2);
     jmeterService.create(loginScript);
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
         "GotoArticle", 1, 20, 5, false, 0, project.getId(), gotoArticle);
+    gotoArticleScript.setNumberEngines(1);
     jmeterService.create(gotoArticleScript);
     
     perfService.create(project);

@@ -53,7 +53,7 @@ public class ScriptController extends Controller {
       list = pages.next();
       
       for (JMeterScript script : list) {
-        array.add(Json.parse(script.toString()));
+        array.add(Json.parse(service.get(script.getId(), "number_engines").toString()));
       }
     }
     
@@ -110,6 +110,9 @@ public class ScriptController extends Controller {
     int ramup = data.get("ram_up").asInt();
     int duration = data.get("duration").asInt();
     int users = data.get("number_threads").asInt();
+    int number_engines = data.get("number_engines").asInt();
+    
+    
     
     JsonNode nodeSamplers = data.get("samplers");
     String scriptName = data.get("name").asText();
@@ -169,6 +172,7 @@ public class ScriptController extends Controller {
       
     }
     JMeterScript script = jmeterFactory.createJmeterScript(scriptName, loops, users, ramup, false, duration, projectId, arraySamplers);
+    script.setNumberEngines(number_engines);
     
     service.create(script);
     
@@ -177,7 +181,7 @@ public class ScriptController extends Controller {
   
   public Result get(String projectId, String id) {
     
-    JMeterScript script = service.get(id);
+    JMeterScript script = service.get(id, "number_engines");
     
     return status(200, Json.parse(script.toString()));
   }
@@ -195,8 +199,9 @@ public class ScriptController extends Controller {
     BasicDBObject obj = Json.fromJson(data, BasicDBObject.class);
     
     JMeterScript script = service.transform(obj);
+    script.setNumberEngines(data.get("number_engines").asInt());
     
-    JMeterScript oldScript = service.get(script.getId());
+    JMeterScript oldScript = service.get(script.getId(), "number_engines");
     
     if (!script.getId().equals(oldScript.getId()) || oldScript == null) {
       return status(400);

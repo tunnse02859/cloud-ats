@@ -24,20 +24,11 @@ import org.testng.annotations.Test;
 
 public class JMeterRunner {
 
-  private List<String> hostList = new ArrayList<String>();
   
   @@BeforeClass
   public void setup() {
     JMeterUtils.loadJMeterProperties("src/test/resources/jmeter/bin/jmeter.properties");
     JMeterUtils.setJMeterHome("src/test/resources/jmeter");
-    
-    String hosts = System.getProperty("jmeter.hosts");
-    if (hosts == null || hosts.isEmpty()) throw new IllegalArgumentException("Need at least an host to run jmeter");
-    
-    String[] args = hosts.split(",");
-    for (String arg : args) {
-      hostList.add(arg.trim());
-    }
   }
 
   @scripts

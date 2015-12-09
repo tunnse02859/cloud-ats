@@ -8,10 +8,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
@@ -27,14 +29,17 @@ import org.ats.services.generator.GeneratorService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.JMeterScriptReference;
+import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectService;
 import org.ats.services.vmachine.VMachine;
+import org.ats.services.vmachine.VMachineReference;
 import org.ats.services.vmachine.VMachineService;
 
 import akka.actor.UntypedActor;
@@ -67,6 +72,10 @@ public class TrackingJobActor extends UntypedActor {
   @Inject EventFactory eventFactory;
   
   @Inject Logger logger;
+  
+  @Inject ReferenceFactory<VMachineReference> vmRefFactory;
+  
+  @Inject JMeterScriptService jmeterService;
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -171,9 +180,15 @@ public class TrackingJobActor extends UntypedActor {
       executorService.update(job);
 
       //Reset test vm status and release floating ip
-      VMachine testVM = vmachineService.get(job.getTestVMachineId());
-      testVM.setStatus(VMachine.Status.Started);
-      vmachineService.update(testVM);
+    //  VMachine testVM = vmachineService.get(job.getTestVMachineId());
+      List<VMachineReference> pages = job.getVMs();
+      for (VMachineReference ref : pages) {
+        VMachine testVM = ref.get();
+        testVM.setStatus(VMachine.Status.Started);
+        vmachineService.update(testVM);
+      }
+      //testVM.setStatus(VMachine.Status.Started);
+      //vmachineService.update(testVM);
       
       project.setStatus(PerformanceProject.Status.READY);
       perfService.update(project);
@@ -189,34 +204,55 @@ public class TrackingJobActor extends UntypedActor {
   private void doExecutePerformanceJob(PerformanceJob job, PerformanceProject project) throws Exception {
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
-    VMachine testVM = job.getTestVMachineId() == null ? 
-        vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), false) : vmachineService.get(job.getTestVMachineId());
+    PageList<VMachine> listVM = vmachineService.query(new BasicDBObject("system", false).append("ui", false));
     
-    if (testVM == null) {
-      updateLog(job, "None VM available.");
-      updateLog(job, "Creating new VM (about 4-8 minutes).... ");
+    int totalEngines = 0;
+    
+    for (JMeterScriptReference ref : job.getScripts()) {
       
-      //We will create new test vm async
-      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), false);
-      updateLog(job, "Created new VM " + testVM);
+      int numberEngine = jmeterService.get(ref.getId(), "number_engines").getNumberEngines();
+
+      totalEngines = Math.max(totalEngines, numberEngine);
+    }
+    
+    if (listVM.count() < totalEngines) {
+      Thread.sleep(5000);
+      updateLog(job, "Lack "+(totalEngines - listVM.count())+" VM to run test");
+      updateLog(job, "Creating new VMs (about 4-8 minutes for one VM) ...");
+
+      // create new test VM
+      for (int i = 0; i < totalEngines - listVM.count(); i ++) {
+        
+        VMachine testVM = iaasProvider.get().createTestVMAsync(project.getTenant(),  project.getSpace(),  false);
+        updateLog(job, "Created new VM "+ testVM);
+        
+        job.addVMachine(vmRefFactory.create(testVM.getId()));
+        executorService.update(job);
+        
+      }
       
-      job.setVMachineId(testVM.getId());
-      executorService.update(job);
-      
-      //And broadcast that the job has served a vm
-      Event event  = eventFactory.create(job, "performance-job-tracking");
+      Event event = eventFactory.create(job, "performance-job-tracking");
       event.broadcast();
       return;
     }
     
-    if (testVM.getStatus() == VMachine.Status.Initializing) {
-      Thread.sleep(5000);
-      updateLog(job, "Waiting Test VM intializing...");
-      Event event  = eventFactory.create(job, "performance-job-tracking");
-      event.broadcast();
-      return;
-    } else if (testVM.getStatus() == VMachine.Status.Started) {
-     
+    PageList<VMachine> listVMStarted = vmachineService.query(new BasicDBObject("system", false).append("ui", false).append("status", VMachine.Status.Started.toString()));
+    
+    if (listVM.count() == totalEngines && listVM.count() != listVMStarted.count() ) {
+      while (listVM.hasNext()) {
+        List<VMachine> page = listVM.next();
+        
+        for (VMachine vm : page) {
+          if (vm.getStatus() == VMachine.Status.Initializing) {
+            Thread.sleep(5000);
+            updateLog(job, "Waiting Test VM " + vm.getPrivateIp() + " intializing ...");
+          }
+        }
+        Event event  = eventFactory.create(job, "performance-job-tracking");
+        event.broadcast();
+        return;
+      }
+    } else {
       updateLog(job, "Generating performance project");
       String path = generatorService.generatePerformance("/tmp", job.getId(), true, job.getScripts());
 
@@ -227,9 +263,37 @@ public class TrackingJobActor extends UntypedActor {
       
       SSHClient.execCommand(jenkinsVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
           "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
-
-      StringBuilder goalsBuilder = new StringBuilder("clean test ").append(" -Djmeter.hosts=").append(testVM.getPrivateIp());
-
+      
+      //get list of VM (max = 10 VM)
+      List<VMachine> listVMs = null;
+      while (listVM.hasNext()) {
+        listVMs = listVM.next();
+      } 
+      
+      List<JMeterScriptReference> listScript = job.getScripts();
+      StringBuilder goalsBuilder = new StringBuilder("clean test ");
+      for (JMeterScriptReference ref : listScript) {
+        
+        goalsBuilder.append("-Djmeter.").append(ref.getId()).append("=");
+        int engines = jmeterService.get(ref.getId(), "number_engines").getNumberEngines();
+        
+        int count = 0;
+        for (int j = 0; j < engines; j ++) {
+          
+          goalsBuilder.append(listVMs.get(j).getPrivateIp());
+          job.addVMachine(vmRefFactory.create(listVMs.get(j).getId()));
+          listVMs.get(j).setStatus(VMachine.Status.InProgress);
+          vmachineService.update(listVMs.get(j));
+          
+          count ++;
+          
+          if (count < engines) {
+            goalsBuilder.append(",");
+          }
+        }
+        goalsBuilder.append(" ");
+      }
+      
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
           "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
@@ -237,16 +301,14 @@ public class TrackingJobActor extends UntypedActor {
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
 
-      testVM.setStatus(VMachine.Status.InProgress);
-      vmachineService.update(testVM);
-      
       job.setStatus(Status.Running);
-      job.setVMachineId(testVM.getId());
+      
+      }
+    
       executorService.update(job);
       
       Event event  = eventFactory.create(job, "performance-job-tracking");
       event.broadcast();
-    }
   }
 
   private void processKeywordJob(KeywordJob job) throws Exception {

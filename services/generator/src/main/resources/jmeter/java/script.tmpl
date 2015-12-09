@@ -3,15 +3,26 @@
   String scriptName,
   int loops,
   int numberThreads,
+  int numberEngines,
   int ramUp,
   String samplers
 }
  
- @@Test
+ 	@@Test
   public void @scriptName () throws Exception {
+   	
+   	List<String> hostList = new ArrayList<String>();
+   	String hosts = System.getProperty("jmeter.@scriptId");
     
-   JMeterUtils.setProperty("log_file", "target/@scriptId@.log");
-   JMeterUtils.initLogging();
+    if (hosts == null || hosts.isEmpty()) throw new IllegalArgumentException("Need at least an host to run jmeter");
+    
+    String[] args = hosts.split(",");
+    for (String arg : args) {
+      hostList.add(arg.trim());
+   	}
+   
+   	JMeterUtils.setProperty("log_file", "target/@scriptId@.log");
+   	JMeterUtils.initLogging();
 
     ListedHashTree root = new ListedHashTree();
     TestPlan testPlan = Utils.createTestPlan();

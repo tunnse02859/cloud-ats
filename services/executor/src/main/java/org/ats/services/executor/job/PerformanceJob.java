@@ -4,6 +4,7 @@
 package org.ats.services.executor.job;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.annotation.Nullable;
 
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScriptReference;
+import org.ats.services.vmachine.VMachineReference;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -29,6 +31,9 @@ public class PerformanceJob extends AbstractJob<PerformanceJob> {
   
   @Inject
   private ReferenceFactory<JMeterScriptReference> jmeterRefFactory;
+  
+  @Inject
+  private ReferenceFactory<VMachineReference> vmachineRefFactory;
   
   @Inject
   PerformanceJob(@Assisted("id") String id, 
@@ -59,7 +64,8 @@ public class PerformanceJob extends AbstractJob<PerformanceJob> {
     }
     return scripts;
   }
-
+  
+  
   @Override
   public Map<String, String> getRawDataOutput() {
     BasicDBList list = (BasicDBList) this.get("report");
@@ -79,5 +85,28 @@ public class PerformanceJob extends AbstractJob<PerformanceJob> {
   public Type getType() {
     return Type.Performance;
   }
-
+  
+  public void addVMachine(VMachineReference... machines) {
+    Object obj = this.get("vms");
+    BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    for (VMachineReference vm : machines) {
+      list.add(vm.toJSon());
+    }
+    this.put("vms", list);
+  }
+  
+  public List<VMachineReference> getVMs() {
+    Object obj = this.get("vms");
+    if (obj == null) return Collections.emptyList();
+    
+    List<VMachineReference> vms = new ArrayList<VMachineReference>();
+    BasicDBList list = (BasicDBList) obj;
+    
+    for (int i = 0; i < list.size(); i++) {
+      vms.add(vmachineRefFactory.create(((BasicDBObject) list.get(i)).getString("_id")));
+    }
+    
+    return Collections.unmodifiableList(vms);
+  }
+  
 }
