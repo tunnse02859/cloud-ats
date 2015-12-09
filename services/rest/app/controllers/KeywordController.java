@@ -3,6 +3,9 @@
  */
 package controllers;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -349,5 +352,35 @@ public class KeywordController extends Controller {
     jenkinsJob.stop();
     
     return status(200);
+  }
+  
+  public Result download(String projectId, String jobId) {
+    AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
+    String path = "/tmp/"+projectId.substring(0, 8);
+    File folder = new File(path);
+    if(!folder.exists()) {
+      folder.mkdir();
+    }
+    KeywordJob job = (KeywordJob) absJob;
+    if(job.getRawData() == null)
+      return status(404);
+    byte[] report = job.getRawData();
+    FileOutputStream fileOut;
+    try {
+      fileOut = new FileOutputStream(path+"/resource-"+jobId+".tar.gz");
+      fileOut.write(report);
+      fileOut.close();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+     catch (IOException e) {
+      e.printStackTrace();
+    }
+    
+    response().setContentType("application/x-download");
+    response().setHeader("Content-Encoding", "gzip");
+    response().setHeader("Content-disposition",
+        "attachment; filename=resource.tar.gz");
+    return ok(new File(path+"/resource-"+jobId+".tar.gz"));
   }
 }
