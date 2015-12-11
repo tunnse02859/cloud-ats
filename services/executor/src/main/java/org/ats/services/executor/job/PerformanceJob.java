@@ -77,10 +77,6 @@ public class PerformanceJob extends AbstractJob<PerformanceJob> {
     return reports;
   }
   
-  public byte[] getRawData() {
-    return this.get("raw_report") != null ? (byte[])this.get("raw_report") : null;
-  }
-
   @Override
   public Type getType() {
     return Type.Performance;

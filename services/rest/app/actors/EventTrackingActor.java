@@ -77,7 +77,7 @@ public class EventTrackingActor extends UntypedActor {
           
           //if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
-          PerformanceProject project = perfService.get(job.getProjectId(),"raw");
+          PerformanceProject project = perfService.get(job.getProjectId());
           job.put("project_status", project.getStatus().toString());
           job.put("runningTime", formater.format(job.getCreatedDate()));
           eventController.send(project.getCreator().get(), job);
