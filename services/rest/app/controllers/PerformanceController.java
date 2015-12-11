@@ -4,12 +4,19 @@
 package controllers;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -332,22 +339,42 @@ public Result stopProject(String projectId) throws IOException {
   }
 
   public Result download(String projectId, String jobId) {
-    AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
-    String path = "/tmp/"+projectId.substring(0, 8);
+    AbstractJob<?> absJob = executorService.get(jobId);
+    String path = "/tmp/"+jobId+"/jtl-file";
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
     }
     
-    PerformanceJob job = (PerformanceJob) absJob;
-    if(job.getRawData() == null)
-      return status(404);
-    byte[] report = job.getRawData();
     FileOutputStream fileOut;
     try {
-      fileOut = new FileOutputStream(path+"/report-"+jobId.substring(0,8)+".jtl");
-      fileOut.write(report);
-      fileOut.close();
+      PerformanceJob job = (PerformanceJob) absJob;
+      
+      if(job.getRawDataOutput() == null || job.getScripts() == null)
+        return status(404);
+      
+      List<JMeterScriptReference> listScripts = job.getScripts();
+      
+      for(JMeterScriptReference script : listScripts) {
+        String scriptId = script.getId();
+        File jtlFile = new File(path+"/"+scriptId.substring(0, 8)+".jtl");
+        if(!jtlFile.exists()) {
+          jtlFile.createNewFile();
+        }
+        Iterator<Map.Entry<String, String>> iterator = job.getRawDataOutput().entrySet().iterator();
+        while (iterator.hasNext()) {
+          Map.Entry<String, String> entry = iterator.next();
+          if (entry.getKey().equals(scriptId)) {
+            byte[] content = entry.getValue().getBytes();
+            fileOut = new FileOutputStream(jtlFile);
+            fileOut.write(content);
+            fileOut.close();
+            break;
+          }
+        }
+      }
+      compress("jtl-file", path,  path+ ".zip");
+      
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
@@ -356,9 +383,38 @@ public Result stopProject(String projectId) throws IOException {
     }
     
     response().setContentType("application/x-download");
-    response().setHeader("Content-Encoding", "jtl");
+    response().setHeader("Content-Encoding", "x-zip");
     response().setHeader("Content-disposition",
-        "attachment; filename=report.jtl");
-    return ok(new File(path+"/report-"+jobId.substring(0,8)+".jtl"));
+        "attachment; filename=jtl-file.zip");
+    return ok(new File(path+".zip"));
+  }
+  
+  private void compress(String projectId, String from, String to) throws IOException {
+    File fromDir = new File(from);
+    ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream(to));
+    write(projectId, fromDir, outDir);
+    outDir.close();
+  }
+  
+  private void write(String projectId, File file, ZipOutputStream outDir) throws IOException {
+    byte[] buffer = new byte[4096]; // Create a buffer for copying
+    int bytes_read;
+    
+    for (String entry : file.list()) {
+      File f = new File(file, entry);
+      if (f.isDirectory()) {
+        write(projectId, f, outDir);
+        continue;
+      }
+      FileInputStream fis = new FileInputStream(f);
+      
+      String path = f.getPath().substring(f.getPath().indexOf(projectId));
+      ZipEntry zip = new ZipEntry(path);
+      outDir.putNextEntry(zip);
+      while ((bytes_read = fis.read(buffer)) != -1) {
+        outDir.write(buffer, 0, bytes_read);
+      }
+      fis.close();
+    }
   }
 }

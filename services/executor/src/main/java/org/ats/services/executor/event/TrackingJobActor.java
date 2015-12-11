@@ -170,7 +170,6 @@ public class TrackingJobActor extends UntypedActor {
         
         if (bos.size() > 0) {
           list.add(new BasicDBObject("_id", ref.getId()).append("content", new String(bos.toByteArray())));
-          job.put("raw_report", bos.toByteArray());
         }
       }
       job.put("report", list);
