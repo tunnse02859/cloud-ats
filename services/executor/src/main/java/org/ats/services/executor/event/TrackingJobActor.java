@@ -391,7 +391,7 @@ public class TrackingJobActor extends UntypedActor {
         job.put("report", new String(bos.toByteArray()));
       
       if (bosTarget.size() > 0) 
-        job.put("raw_report", bosTarget.toByteArray());
+        job.put("raw_data", bosTarget.toByteArray());
       //End download result
 
       job.setStatus(AbstractJob.Status.Completed);
