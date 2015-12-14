@@ -50,7 +50,7 @@ public class KeywordJob extends AbstractJob<KeywordJob> {
   }
   
   public byte[] getRawData() {
-    return this.get("raw_report") != null ? (byte[])this.get("raw_report") : null;
+    return this.get("raw_data") != null ? (byte[])this.get("raw_data") : null;
   }
 
   @Override

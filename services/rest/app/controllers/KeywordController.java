@@ -355,7 +355,7 @@ public class KeywordController extends Controller {
   }
   
   public Result download(String projectId, String jobId) {
-    AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
+    AbstractJob<?> absJob = executorService.get(jobId,"raw_data");
     String path = "/tmp/"+projectId.substring(0, 8);
     File folder = new File(path);
     if(!folder.exists()) {

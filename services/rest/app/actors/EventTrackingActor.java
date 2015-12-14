@@ -53,6 +53,9 @@ public class EventTrackingActor extends UntypedActor {
           
           KeywordJob job = (KeywordJob) event.getSource();
           
+          //Cleanup blod data in this job
+          job.put("raw_data", null);
+          
           //if (job.getStatus() == AbstractJob.Status.Queued) return;
           
           KeywordProject project = keywordService.get(job.getProjectId());
@@ -71,9 +74,6 @@ public class EventTrackingActor extends UntypedActor {
         } else if ("performance-job-tracking".equals(event.getName())) {
           
           PerformanceJob job = (PerformanceJob) event.getSource();
-          
-          //Cleanup blod data in this job
-          job.put("raw_report", null);
           
           //if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
