@@ -165,7 +165,9 @@ public class GeneratorService {
     File sourceDir = new File(outDir + "/" + jobId  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    loadKeywordPOM(outDir + "/" + jobId);
+    String versionSelenium = suites.get(0).get().getVersionSelenium();
+    
+    loadKeywordPOM(outDir + "/" + jobId, versionSelenium);
 
     Set<String> pool = new HashSet<String>();
     
@@ -192,8 +194,18 @@ public class GeneratorService {
   }
   
   private void loadKeywordPOM(String outDir) throws IOException {
-    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
-    write(is, new FileOutputStream(new File(outDir, "pom.xml")));
+    /*InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
+    write(is, new FileOutputStream(new File(outDir, "pom.xml")));*/
+    loadKeywordPOM(outDir,"2.48.2");
+  }
+  
+  private void loadKeywordPOM(String outDir, String versionSelenium) throws IOException {
+    String pom = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml.tmpl"));
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    FileOutputStream os = new FileOutputStream(new File(outDir, "pom.xml"));
+    os.write(engine.render(pom, versionSelenium).getBytes());
+    os.flush();
+    os.close();
   }
   
   private void loadJMeterPOM(String outDir) throws IOException {
