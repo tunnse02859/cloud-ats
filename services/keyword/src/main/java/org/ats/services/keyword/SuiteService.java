@@ -61,6 +61,8 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     BasicDBObject obj = (BasicDBObject) source;
     
     List<CaseReference> list = new ArrayList<CaseReference>();
+    
+    String versionSelenium = "";
 
     ArrayList cases = (ArrayList)  obj.get("cases");
     for (Object foo : cases) {
@@ -73,7 +75,9 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
       }
     }
     
-    Suite suite = suiteFactory.create(obj.getString("project_id"), obj.getString("name"), obj.getString("init_driver"), list);
+    versionSelenium = obj.getString("version_selenium") != null ? obj.getString("version_selenium") : SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM;
+    
+    Suite suite = suiteFactory.create(obj.getString("project_id"), obj.getString("name"), obj.getString("init_driver"), versionSelenium, list);
 
     suite.put("_id", source.get("_id"));
     
