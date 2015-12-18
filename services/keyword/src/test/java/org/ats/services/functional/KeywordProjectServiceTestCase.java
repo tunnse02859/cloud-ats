@@ -212,7 +212,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", "FullExamle", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "FullExamle", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
     suiteService.create(suite);
     
     //test delete case in suite

@@ -164,7 +164,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", "Google", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "Google", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
     
     try {
       String output = suite.transform();
@@ -209,7 +209,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
     
     try {
       String output = suite.transform(false,3);
