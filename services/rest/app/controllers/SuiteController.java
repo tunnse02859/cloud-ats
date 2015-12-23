@@ -57,6 +57,7 @@ public class SuiteController extends Controller {
     JsonNode data = request().body().asJson();
     
     String suiteName = data.get("name").asText();
+    boolean sequenceMode = data.get("sequence_mode").asBoolean();
     JsonNode cases = data.get("cases");
     
     PageList<Suite> listSuites = suiteService.getSuites(projectId);
@@ -75,6 +76,8 @@ public class SuiteController extends Controller {
     
     Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, list);
     suiteService.create(suite);
+    suite.setMode(sequenceMode);
+    suiteService.update(suite);
     
     return status(201, Json.parse(suite.toString()));
   }
@@ -82,10 +85,8 @@ public class SuiteController extends Controller {
   public Result update(String projectId) throws Exception {
     JsonNode node = request().body().asJson();
     BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
-
     Suite suite = suiteService.transform(obj);
     Suite oldSuite = suiteService.get(suite.getId());
-    
     if (!projectId.equals(suite.getProjectId()) 
         || !suite.getId().equals(oldSuite.getId())
         || oldSuite == null) return status(400);
