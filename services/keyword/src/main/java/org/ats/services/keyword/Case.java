@@ -109,10 +109,10 @@ public class Case extends AbstractTemplate {
   }
    
   public String transform() throws IOException {
-    return transform(false,0);
+    return transform(false,0,false,0);
   }
   
-  public String transform(boolean showAction, int valueDelay) throws IOException {
+  public String transform(boolean showAction, int valueDelay, boolean sequenceMode, int order) throws IOException {
     StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;
     int valueDelayTransform = valueDelay*1000;
@@ -136,7 +136,11 @@ public class Case extends AbstractTemplate {
       
       sb.append(getDataDriven().get().transform(getId()));
       sb.append("\n");
-      sb.append("  @Test (dataProvider = \"").append(StringUtil.normalizeName(dataDriven.getName())).append(getId().substring(0, 8)).append("\")\n");
+      if(sequenceMode) {
+        sb.append("  @Test (dataProvider = \"").append(StringUtil.normalizeName(dataDriven.getName())).append(getId().substring(0, 8)).append("\", priority = ").append(order).append(")\n");
+      } else {
+        sb.append("  @Test (dataProvider = \"").append(StringUtil.normalizeName(dataDriven.getName())).append(getId().substring(0, 8)).append("\")\n");
+      }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("(JsonNode data) throws Exception {\n");
       
       while (nodeIterator.hasNext()) {
@@ -150,7 +154,11 @@ public class Case extends AbstractTemplate {
       
     } else {
       sb.append("\n");
-      sb.append("  @Test\n");
+      if(sequenceMode) {
+        sb.append("  @Test(priority = ").append(order).append(")\n");
+      } else {
+        sb.append("  @Test\n");
+      }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("() throws Exception {\n");
     }
     

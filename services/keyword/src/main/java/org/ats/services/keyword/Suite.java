@@ -85,22 +85,38 @@ public class Suite extends AbstractTemplate {
     this.put("cases", list);
   }
   
-  public String transform() throws IOException {
-    return transform(false, 0);
+  public void setMode(boolean mode) {
+    this.put("sequence_mode",mode);
   }
   
-  public String transform(boolean showAction, int valueDelay) throws IOException {
-    String suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
+  public boolean getMode() {
+    return this.getString("sequence_mode") != null ? this.getBoolean("sequence_mode") : false;
+  }
+  
+  public String transform() throws IOException {
+    return transform(false, 0,false);
+  }
+  
+  public String transform(boolean showAction, int valueDelay,boolean sequenceMode) throws IOException {
+    String suite = "";
+    if(sequenceMode) {
+      suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.with.priority.java.tmpl"));
+    } else {
+      suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.java.tmpl"));
+    }
     StringBuilder sbCase = new StringBuilder();
+    int order = 0;
     
     BasicDBList list = this.get("cases") != null ? (BasicDBList) this.get("cases") : new BasicDBList();
     for (Object obj : list) {
+      order ++;
       CaseReference caze = caseRefFactory.create(((BasicDBObject) obj).getString("_id"));
-      sbCase.append(caze.get().transform(showAction,valueDelay));
+      sbCase.append(caze.get().transform(showAction,valueDelay,sequenceMode,order));
     }
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
 
     return engine.render(suite, StringUtil.normalizeName((String) this.get("name")), this.getString("init_driver"), sbCase.toString());
   }
+  
 }
