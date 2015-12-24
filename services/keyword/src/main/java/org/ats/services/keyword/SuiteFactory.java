@@ -18,6 +18,6 @@ public interface SuiteFactory {
   
   public Suite create(@Assisted("projectId") String projectId, 
       @Assisted("suiteName") String suiteName, 
-      @Assisted("initDriver") String initDriver, 
+      @Assisted("initDriver") String initDriver,
       @Assisted("cases") List<CaseReference> cases);
 }

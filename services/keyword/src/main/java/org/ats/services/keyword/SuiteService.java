@@ -61,7 +61,7 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     BasicDBObject obj = (BasicDBObject) source;
     
     List<CaseReference> list = new ArrayList<CaseReference>();
-
+    
     ArrayList cases = (ArrayList)  obj.get("cases");
     for (Object foo : cases) {
       if (foo instanceof Map) {

@@ -33,7 +33,7 @@ public class Suite extends AbstractTemplate {
   @Inject
   Suite(@Assisted("projectId") String projectId, 
       @Assisted("suiteName") String suiteName, 
-      @Assisted("initDriver") String initDriver, 
+      @Assisted("initDriver") String initDriver,
       @Assisted("cases") List<CaseReference> cases) {
     
     this.put("_id", UUID.randomUUID().toString());

@@ -20,6 +20,7 @@ import java.util.zip.ZipOutputStream;
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
 import org.ats.common.http.HttpURL;
+import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
@@ -161,11 +162,11 @@ public class GeneratorService {
    * @throws IOException
    */
   
-  public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites, boolean showAction, int valueDelay) throws IOException{
+  public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites, boolean showAction, int valueDelay, String versionSelenium) throws IOException{
     File sourceDir = new File(outDir + "/" + jobId  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
-    loadKeywordPOM(outDir + "/" + jobId);
+    loadKeywordPOM(outDir + "/" + jobId, versionSelenium);
 
     Set<String> pool = new HashSet<String>();
     
@@ -188,12 +189,22 @@ public class GeneratorService {
   }
   
   public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites) throws IOException {
-    return generateKeyword(outDir,jobId,compress,suites,false,0);
+    return generateKeyword(outDir,jobId,compress,suites,false,0,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
   }
   
   private void loadKeywordPOM(String outDir) throws IOException {
-    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
-    write(is, new FileOutputStream(new File(outDir, "pom.xml")));
+    /*InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
+    write(is, new FileOutputStream(new File(outDir, "pom.xml")));*/
+    loadKeywordPOM(outDir,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
+  }
+  
+  private void loadKeywordPOM(String outDir, String versionSelenium) throws IOException {
+    String pom = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml.tmpl"));
+    RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+    FileOutputStream os = new FileOutputStream(new File(outDir, "pom.xml"));
+    os.write(engine.render(pom, versionSelenium).getBytes());
+    os.flush();
+    os.close();
   }
   
   private void loadJMeterPOM(String outDir) throws IOException {
