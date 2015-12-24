@@ -446,7 +446,7 @@ public class TrackingJobActor extends UntypedActor {
       return;
     } else if (testVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getShowAction(), project.getValueDelay());
+      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
 
       SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
       

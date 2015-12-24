@@ -33,7 +33,6 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
-import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
@@ -224,7 +223,7 @@ public class KeywordController extends Controller {
     JsonNode jsonOptions = data.get("options");
     
     List<SuiteReference> suites = new ArrayList<SuiteReference>(jsonSuites.size());
-    
+    String versionSelenium = jsonOptions.get("versionSelenium") != null ? jsonOptions.get("versionSelenium").asText() : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
     SuiteReference ref;
     for (JsonNode sel : jsonSuites) {
       ref = suiteRefFactory.create(sel.asText());
@@ -235,7 +234,6 @@ public class KeywordController extends Controller {
       
       String browser = jsonOptions.get("browser") != null ? jsonOptions.get("browser").asText() : null;
       String version = jsonOptions.get("version") != null ? jsonOptions.get("version").asText() : null;
-      String versionSelenium = jsonOptions.get("versionSelenium") != null ? jsonOptions.get("versionSelenium").asText() : SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM;
       
       StringBuilder initDriver = new StringBuilder();
       if ("firefox".equals(browser)) {
@@ -248,7 +246,6 @@ public class KeywordController extends Controller {
       if (initDriver.length() > 0) {
         Suite suite = ref.get();
         suite.put("init_driver", initDriver.toString());
-        suite.setVersionSelenium(versionSelenium);
         suiteService.update(suite);
       }
       
@@ -257,6 +254,9 @@ public class KeywordController extends Controller {
     
     KeywordProject project = keywordProjectService.get(projectId,"show_action","value_delay");
     if (project == null) return status(404);
+    
+    project.setVersionSelenium(versionSelenium);
+    keywordProjectService.update(project);
     
     if (project.getStatus() == KeywordProject.Status.RUNNING) return status(204);
     

@@ -96,6 +96,14 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
     return tenantRefFactory.create(((BasicDBObject)this.get("tenant")).getString("_id"));
   }
   
+  public void setVersionSelenium(String version) {
+    this.put("version_selenium", version);
+  }
+  
+  public String getVersionSelenium() {
+    return this.get("version_selenium") != null ? this.getString("version_selenium") : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
+  }
+  
   public void setShowAction(boolean status) {
     this.put("show_action", status);
   }
