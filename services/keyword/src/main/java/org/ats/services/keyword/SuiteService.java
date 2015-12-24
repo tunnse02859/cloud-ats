@@ -61,7 +61,7 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
     BasicDBObject obj = (BasicDBObject) source;
     
     List<CaseReference> list = new ArrayList<CaseReference>();
-
+    
     ArrayList cases = (ArrayList)  obj.get("cases");
     for (Object foo : cases) {
       if (foo instanceof Map) {
@@ -77,6 +77,8 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
 
     suite.put("_id", source.get("_id"));
     
+    suite.setMode(source.get("sequence_mode") != null ? (boolean) source.get("sequence_mode") : false);
+      
     Object date = obj.get("created_date"); 
     if (date instanceof Date) {
       suite.put("created_date", date);

@@ -212,8 +212,124 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(false,3);
+      String output = suite.transform(false,3,false);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleWithOptions.java"));
+      writer.write(output);
+      writer.close();
+      
+      System.out.println(output);
+    } catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+  }
+  
+  @Test
+  public void testDataDrivenMultiCasesWithPriority() throws Exception {
+    ObjectMapper m = new ObjectMapper();
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    
+    Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
+    Assert.assertEquals(data.getSpace().getId(), this.space.getId());
+    
+    drivenService.create(data);
+    
+    DataDrivenReference dataRef = drivenRefFactory.create(data.getId());
+    
+    //Case1
+    JsonNode rootNode = m.readTree(new File("src/test/resources/google.json"));
+    
+    JsonNode stepsNode = rootNode.get("steps");
+    
+    List<CaseReference> cases = new ArrayList<CaseReference>();
+    
+    Case caze = caseFactory.create("fake", "test", dataRef);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    //Case2
+    JsonNode rootNode2 = m.readTree(new File("src/test/resources/jira.json"));
+    
+    JsonNode stepsNode2 = rootNode2.get("steps");
+    
+    Case caze2 = caseFactory.create("fake", "test2", null);
+    for (JsonNode json : stepsNode2) {
+      caze2.addAction(json);
+    }
+    caseService.create(caze2);
+    cases.add(caseRefFactory.create(caze2.getId()));
+    
+    Suite suite = suiteFactory.create("fake", "GoogleMultiCasesWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    
+    try {
+      String output = suite.transform(false,3,true);
+      FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleMultiCasesWithPriovity.java"));
+      writer.write(output);
+      writer.close();
+      
+      System.out.println(output);
+    } catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+  }
+  
+  @Test
+  public void testDataDrivenWithPriority() throws Exception {
+    ObjectMapper m = new ObjectMapper();
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    
+    Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
+    Assert.assertEquals(data.getSpace().getId(), this.space.getId());
+    
+    drivenService.create(data);
+    
+    DataDrivenReference dataRef = drivenRefFactory.create(data.getId());
+    
+    //Case1
+    JsonNode rootNode = m.readTree(new File("src/test/resources/google.json"));
+    
+    JsonNode stepsNode = rootNode.get("steps");
+    
+    List<CaseReference> cases = new ArrayList<CaseReference>();
+    
+    Case caze = caseFactory.create("fake", "test", dataRef);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    //Case2
+    JsonNode rootNode2 = m.readTree(new File("src/test/resources/google.json"));
+    
+    JsonNode stepsNode2 = rootNode2.get("steps");
+    
+    Case caze2 = caseFactory.create("fake", "test2", dataRef);
+    for (JsonNode json : stepsNode2) {
+      caze2.addAction(json);
+    }
+    caseService.create(caze2);
+    cases.add(caseRefFactory.create(caze2.getId()));
+    
+    Suite suite = suiteFactory.create("fake", "GoogleWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    
+    try {
+      String output = suite.transform(false,3,true);
+      FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleWithPriovity.java"));
       writer.write(output);
       writer.close();
       

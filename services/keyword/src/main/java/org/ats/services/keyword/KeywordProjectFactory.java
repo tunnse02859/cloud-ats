@@ -13,7 +13,9 @@ import com.google.inject.assistedinject.Assisted;
  * May 5, 2015
  */
 public interface KeywordProjectFactory {
-
+  
+  public static final String DEFAULT_INIT_VERSION_SELENIUM = "2.48.2";
+  
   public KeywordProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name);
   
 }

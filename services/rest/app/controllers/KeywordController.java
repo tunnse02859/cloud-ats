@@ -223,7 +223,7 @@ public class KeywordController extends Controller {
     JsonNode jsonOptions = data.get("options");
     
     List<SuiteReference> suites = new ArrayList<SuiteReference>(jsonSuites.size());
-    
+    String versionSelenium = jsonOptions.get("versionSelenium") != null ? jsonOptions.get("versionSelenium").asText() : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
     SuiteReference ref;
     for (JsonNode sel : jsonSuites) {
       ref = suiteRefFactory.create(sel.asText());
@@ -254,6 +254,9 @@ public class KeywordController extends Controller {
     
     KeywordProject project = keywordProjectService.get(projectId,"show_action","value_delay");
     if (project == null) return status(404);
+    
+    project.setVersionSelenium(versionSelenium);
+    keywordProjectService.update(project);
     
     if (project.getStatus() == KeywordProject.Status.RUNNING) return status(204);
     
