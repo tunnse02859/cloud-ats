@@ -312,7 +312,7 @@ public class TrackingJobActor extends UntypedActor {
 
   private void processKeywordJob(KeywordJob job) throws Exception {
     try {
-      KeywordProject project = keywordService.get(job.getProjectId(),"show_action","value_delay");
+      KeywordProject project = keywordService.get(job.getProjectId(),"show_action","value_delay","version_selenium");
       switch (job.getStatus()) {
       case Queued:
         doExecuteKeywordJob(job, project);
