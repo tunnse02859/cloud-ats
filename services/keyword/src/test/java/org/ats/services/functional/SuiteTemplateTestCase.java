@@ -157,6 +157,10 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     testBaseWithMoreOptions("FullExampleWithOptions", "full_example.json");
   }
   
+  @Test
+  public void testFullExampleWithPriority() throws Exception {
+    testBaseWithPriority("FullExampleWithPriority","full_example.json","jira.json");
+  }
   
   private void testBase(String testClass, String jsonFile) throws JsonProcessingException, IOException {
 
@@ -189,6 +193,51 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     }
   }
   
+  private void testBaseWithPriority(String testClass, String jsonFile, String jsonFile2) throws JsonProcessingException, IOException {
+
+    ObjectMapper m = new ObjectMapper();
+    JsonNode rootNode = m.readTree(new File("src/test/resources/" + jsonFile));
+    
+    JsonNode stepsNode = rootNode.get("steps");
+
+    List<CaseReference> cases = new ArrayList<CaseReference>();
+    
+    //case1
+    Case caze = caseFactory.create("fake", "test", null);
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    caseService.create(caze);
+    
+    cases.add(caseRefFactory.create(caze.getId()));
+    
+    //case2
+    JsonNode rootNode2 = m.readTree(new File("src/test/resources/" + jsonFile2));
+    
+    JsonNode stepsNode2 = rootNode2.get("steps");
+    Case caze2 = caseFactory.create("fake", "test2", null);
+    for (JsonNode json : stepsNode2) {
+      caze2.addAction(json);
+    }
+    caseService.create(caze2);
+    
+    cases.add(caseRefFactory.create(caze2.getId()));
+    
+    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    
+    try {
+      String output = suite.transform(false,0,true);
+      FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/" + testClass +".java"));
+      writer.write(output);
+      writer.close();
+      
+      System.out.println(output);
+    } catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+  }
+  
   private void testBaseWithMoreOptions(String testClass, String jsonFile) throws JsonProcessingException, IOException {
 
     ObjectMapper m = new ObjectMapper();
@@ -208,7 +257,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(true,5);
+      String output = suite.transform(true,5,true);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/" + testClass +".java"));
       writer.write(output);
       writer.close();
