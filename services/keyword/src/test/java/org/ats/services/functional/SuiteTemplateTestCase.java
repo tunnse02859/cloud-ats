@@ -174,7 +174,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
       String output = suite.transform();
@@ -205,7 +205,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
       String output = suite.transform(true,5);

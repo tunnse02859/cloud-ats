@@ -73,7 +73,7 @@ public class SuiteController extends Controller {
       list.add(caseRefFactory.create(testCase.get("_id").asText()));
     }
     
-    Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, list);
+    Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, list);
     suiteService.create(suite);
     
     return status(201, Json.parse(suite.toString()));

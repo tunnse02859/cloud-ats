@@ -34,13 +34,11 @@ public class Suite extends AbstractTemplate {
   Suite(@Assisted("projectId") String projectId, 
       @Assisted("suiteName") String suiteName, 
       @Assisted("initDriver") String initDriver,
-      @Assisted("versionSelenium") String versionSelenium,
       @Assisted("cases") List<CaseReference> cases) {
     
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", suiteName);
     this.put("init_driver", initDriver);
-    this.put("version_selenium", versionSelenium);
     this.put("created_date", new Date());
     
     BasicDBList list = new BasicDBList();
@@ -65,14 +63,6 @@ public class Suite extends AbstractTemplate {
   
   public Date getCreatedDate() {
     return this.getDate("created_date");
-  }
-  
-  public void setVersionSelenium(String version) {
-    this.put("version_selenium", version);
-  }
-  
-  public String getVersionSelenium() {
-    return this.getString("version_selenium");
   }
   
   public List<CaseReference> getCases() {

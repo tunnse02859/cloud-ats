@@ -15,11 +15,9 @@ import com.google.inject.assistedinject.Assisted;
 public interface SuiteFactory {
   
   public static final String DEFAULT_INIT_DRIVER = "wd = new FirefoxDriver();";
-  public static final String DEFAULT_INIT_VERSION_SELENIUM = "2.48.2";
   
   public Suite create(@Assisted("projectId") String projectId, 
       @Assisted("suiteName") String suiteName, 
       @Assisted("initDriver") String initDriver,
-      @Assisted("versionSelenium") String versionSelenium,
       @Assisted("cases") List<CaseReference> cases);
 }
