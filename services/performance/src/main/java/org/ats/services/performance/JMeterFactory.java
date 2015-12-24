@@ -41,6 +41,10 @@ public class JMeterFactory {
     return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, projectId, list);
   }
   
+  public JMeterScript createRawJmeterScript(String projectId, String name, String rawContent) {
+    return new JMeterScript(projectId, name, rawContent);
+  }
+  
   public String createArguments(JMeterArgument... arguments) throws IOException {
     String template = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("arguments.xml"));
     StringBuilder sb = new StringBuilder();

@@ -12,7 +12,6 @@ import org.ats.common.StringUtil;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterFactory;
-import org.ats.services.performance.JMeterParser;
 import org.ats.services.performance.JMeterSampler;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
@@ -21,7 +20,6 @@ import org.ats.services.performance.JMeterScriptService;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.MultipartFormData;
-import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import actions.CorsComposition;
 
@@ -53,7 +51,7 @@ public class ScriptController extends Controller {
       list = pages.next();
       
       for (JMeterScript script : list) {
-        array.add(Json.parse(service.get(script.getId(), "number_engines").toString()));
+        array.add(Json.parse(service.get(script.getId(), "number_engines", "number_threads").toString()));
       }
     }
     
@@ -63,42 +61,25 @@ public class ScriptController extends Controller {
   public Result createByFile(String projectId) {
     
     MultipartFormData body = request().body().asMultipartFormData();
-    List<FilePart> listFiles = body.getFiles();
+    MultipartFormData.FilePart file = body.getFile("file");
+    String name = body.asFormUrlEncoded().get("name")[0];
     
     // return badRequest if file amount is lower 1
-    if (listFiles.size() <= 0) {
+    if (file == null) {
       return badRequest();
     }
      
-    // create performance project model 
-    FileInputStream fis;
-    String content;
-    JMeterParser parse;
-    JMeterScript script;
-    
-    ArrayNode array = Json.newObject().arrayNode();
-    // loop though files
-    for (FilePart file : listFiles) {
       try {
-        // read each file and get file content
-        fis = new FileInputStream(file.getFile());
-        content = StringUtil.readStream(fis);
-        
-        // create jmeter parser by file content and build jmeter script 
-        parse = jmeterFactory.createJMeterParser(content, projectId);
-        script = parse.parse();
-        script.put("project_id", projectId);
-        
-        array.add(Json.parse(script.toString()));
-        // save jmeter script into database
+        JMeterScript script = jmeterFactory.createRawJmeterScript(projectId, name, StringUtil.readStream(new FileInputStream(file.getFile())));
+        script.setNumberThreads(100);
+        script.setNumberEngines(1);
+        script.setRamUp(5);
+        script.setLoops(1);
         service.create(script);
-        
+        return ok(Json.parse(script.toString()));
       } catch(Exception e) {
          throw new RuntimeException();
       }
-    }
-    
-    return ok(array);
   }
   
   public Result createBySamplers(String projectId) {
@@ -181,7 +162,8 @@ public class ScriptController extends Controller {
   
   public Result get(String projectId, String id) {
     
-    JMeterScript script = service.get(id, "number_engines");
+    JMeterScript script = service.get(id, "number_threads", "number_engines", "ram_up", "loops");
+    if (script == null) return notFound();
     
     return status(200, Json.parse(script.toString()));
   }
@@ -200,8 +182,11 @@ public class ScriptController extends Controller {
     
     JMeterScript script = service.transform(obj);
     script.setNumberEngines(data.get("number_engines").asInt());
+    script.setNumberThreads(data.get("number_threads").asInt());
+    script.setRamUp(data.get("ram_up").asInt());
+    script.setLoops(data.get("loops").asInt());
     
-    JMeterScript oldScript = service.get(script.getId(), "number_engines");
+    JMeterScript oldScript = service.get(script.getId(), "number_threads", "number_engines", "ram_up", "loops");
     
     if (!script.getId().equals(oldScript.getId()) || oldScript == null) {
       return status(400);

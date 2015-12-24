@@ -28,6 +28,18 @@ public class JMeterScript extends BasicDBObject {
   /** .*/
   private List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
 
+  /**
+   * The constructor for raw jmeter script upload
+   * @param project_id the project id
+   */
+  JMeterScript(String project_id, String name, String raw_content) {
+    this.put("_id", UUID.randomUUID().toString());
+    this.put("project_id", project_id);
+    this.put("name", name);
+    this.put("raw", true);
+    this.put("raw_content", raw_content);
+  }
+
   JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String project_id, List<JMeterSampler>  samplers) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", testName);
@@ -45,6 +57,11 @@ public class JMeterScript extends BasicDBObject {
     
     this.put("samplers", list);
     this.put("project_id", project_id);
+    this.put("raw", false);
+  }
+
+  public boolean isRaw() {
+    return this.getBoolean("raw");
   }
   
   public String getId() {

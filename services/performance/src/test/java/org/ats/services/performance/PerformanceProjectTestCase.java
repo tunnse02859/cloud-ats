@@ -3,11 +3,13 @@
  */
 package org.ats.services.performance;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.common.StringUtil;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
@@ -140,6 +142,27 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
   }
   
   @Test
+  public void testScriptUpload() throws Exception {
+    String jmeterContent = StringUtil.readStream(new FileInputStream("src/test/resources/test.jmx"));
+    
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    
+    PerformanceProject performanceProject = factory.create("Test Performance");
+    service.create(performanceProject);
+    
+    JMeterFactory factory = new JMeterFactory();
+    JMeterScript script = factory.createRawJmeterScript(performanceProject.getId(), "Test Script", jmeterContent);
+    
+    jmeterService.create(script);
+    PageList<JMeterScript> pages = jmeterService.getJmeterScripts(performanceProject.getId());
+    
+    Assert.assertEquals(1, pages.count());
+    JMeterScript otherScript = jmeterService.get(script.getId());
+    Assert.assertEquals(otherScript, script);
+  }
+  
+  @Test
   public void testScript() throws Exception {
     
     this.authService.logIn("haint@cloud-ats.net", "12345");
@@ -177,12 +200,11 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
   @SuppressWarnings("unchecked")
   @Test
   public void testScriptTransform() throws JsonParseException, JsonMappingException, IOException {
-    String jsonSource = "{\"_id\":\"92eba01e-f1a1-4d6c-a5eb-586487e009af\",\"name\":\"Testsdgsdgsgsgsdg\",\"loops\":1,\"number_threads\":1,\"ram_up\":5,\"scheduler\":false,\"duration\":0,\"samplers\":[{\"method\":\"GET\",\"name\":\"dsgsdg\",\"url\":\"sdgsdg\",\"assertion_text\":\"sdgsdgdg\",\"constant_time\":0,\"arguments\":[{\"paramName\":\"sdgsd\",\"paramValue\":\"gsdgsdg\"}]}],\"project_id\":\"73e29bd5-29aa-4b06-ab03-0162c5f0ec25\"}";
+    String jsonSource = "{\"_id\":\"92eba01e-f1a1-4d6c-a5eb-586487e009af\",\"name\":\"Testsdgsdgsgsgsdg\",\"loops\":1,\"number_threads\":1,\"ram_up\":5,\"scheduler\":false,\"duration\":0,\"samplers\":[{\"method\":\"GET\",\"name\":\"dsgsdg\",\"url\":\"sdgsdg\",\"assertion_text\":\"sdgsdgdg\",\"constant_time\":0,\"arguments\":[{\"paramName\":\"sdgsd\",\"paramValue\":\"gsdgsdg\"}]}],\"project_id\":\"73e29bd5-29aa-4b06-ab03-0162c5f0ec25\",\"raw\":false}";
     ObjectMapper mapper = new ObjectMapper();
     HashMap<String, Object> map = mapper.readValue(jsonSource, HashMap.class);
     BasicDBObject obj = new BasicDBObject(map);
     JMeterScript script = jmeterService.transform(obj);
     Assert.assertEquals(new ObjectMapper().readTree(script.toString()).toString(), jsonSource);
-    
   }
 }

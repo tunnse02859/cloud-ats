@@ -163,8 +163,7 @@ public class DataDrivenController extends Controller {
       String fileName = typeFile.getFilename().split("\\.")[lengthName-2];
     
       //Get params of data driven
-      MultipartFormData bodyParams = request().body().asMultipartFormData();
-      JsonNode paramsNode = Json.parse(bodyParams.asFormUrlEncoded().get("params")[0]);
+      JsonNode paramsNode = Json.parse(body.asFormUrlEncoded().get("params")[0]);
       List<String> listParams;
       listParams = new ArrayList<String>();
       Iterator<JsonNode> iterator = paramsNode.iterator();
@@ -227,10 +226,8 @@ public class DataDrivenController extends Controller {
           }
         }
       }
-      
     }
     return ok(Json.parse(dataDriven.toString()));
   }
-  
 }
 

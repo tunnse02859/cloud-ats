@@ -49,6 +49,13 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
   @Override
   public JMeterScript transform(DBObject source) {
     BasicDBObject obj = (BasicDBObject) source;
+    
+    if (source.get("raw") != null && obj.getBoolean("raw")) {
+      JMeterScript script = new JMeterScript(obj.getString("project_id"), obj.getString("name"), obj.getString("raw_content"));
+      script.put("_id", obj.getString("_id"));
+      return script;
+    }
+    
     String name = obj.getString("name");
     int loops = obj.getInt("loops");
     int number_threads = obj.getInt("number_threads");
