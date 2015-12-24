@@ -228,7 +228,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, "2.45.0", cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -242,15 +242,17 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(acceptAlertSuite);
     
+    project.setVersionSelenium("2.47.1");
     keywordProjectService.create(project);
     
     Assert.assertEquals(
         generetorService.generateKeyword("target/fk",  project.getId().substring(0, 8), true, Arrays.<SuiteReference>asList(
             suiteRefFactory.create(fullExampleSuite.getId()), 
-            suiteRefFactory.create(acceptAlertSuite.getId()))), 
+            suiteRefFactory.create(acceptAlertSuite.getId())),
+            true,2,project.getVersionSelenium()), 
         "target/fk/" + project.getId().substring(0, 8) + ".zip");
     
     Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/FullExample.java").exists());
@@ -275,7 +277,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -289,7 +291,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);
@@ -311,6 +313,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     project.setShowAction(true);
     project.setValueDelay(3);
+    project.setVersionSelenium("2.45.0");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
@@ -324,7 +327,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExampleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExampleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -338,7 +341,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlertWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlertWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);
@@ -347,7 +350,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
         generetorService.generateKeyword("target/fk",  project.getId().substring(0, 8), true, Arrays.<SuiteReference>asList(
             suiteRefFactory.create(fullExampleSuite.getId()), 
             suiteRefFactory.create(acceptAlertSuite.getId())),
-            project.getShowAction(), project.getValueDelay()), 
+            project.getShowAction(), project.getValueDelay(),project.getVersionSelenium()), 
         "target/fk/" + project.getId().substring(0, 8) + ".zip");
     
     Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/FullExampleWithOptions.java").exists());
@@ -372,7 +375,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     String initGoogleDriver = "System.setProperty(\"webdriver.chrome.driver\", \"/home/haint/chromedriver\");\n wd = new ChromeDriver();";
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", initGoogleDriver, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM,cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", initGoogleDriver,cases);
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -389,7 +392,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     String initFireFoxDriverWithVersion = "System.setProperty(\"webdriver.firefox.bin\", \"/home/haint/data/firefox-41.0.2/firefox\");\n" +
     "wd = new FirefoxDriver();";
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", initFireFoxDriverWithVersion, SuiteFactory.DEFAULT_INIT_VERSION_SELENIUM,  cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", initFireFoxDriverWithVersion,  cases);
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);

@@ -195,7 +195,7 @@ public class GeneratorService {
   private void loadKeywordPOM(String outDir) throws IOException {
     /*InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
     write(is, new FileOutputStream(new File(outDir, "pom.xml")));*/
-    loadKeywordPOM(outDir,"2.48.2");
+    loadKeywordPOM(outDir,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
   }
   
   private void loadKeywordPOM(String outDir, String versionSelenium) throws IOException {
