@@ -1,0 +1,100 @@
+ @args() {
+  String scriptId,
+  String scriptName,
+  int loops,
+  int numberThreads,
+  int ramUp
+}
+ 
+ 	@@Test
+  public void @scriptName () throws Exception {
+   	
+   	List<String> hostList = new ArrayList<String>();
+   	String hosts = System.getProperty("jmeter.@scriptId");
+    
+    if (hosts == null || hosts.isEmpty()) throw new IllegalArgumentException("Need at least an host to run jmeter");
+    
+    String[] args = hosts.split(",");
+    for (String arg : args) {
+      hostList.add(arg.trim());
+   	}
+   
+   	JMeterUtils.setProperty("log_file", "target/@scriptId@.log");
+   	JMeterUtils.initLogging();
+
+   	File f = new File("src/test/resources/@scriptId@.jmx");
+    FileServer.getFileServer().setBaseForScript(f);
+    HashTree tree = SaveService.loadTree(f);
+    
+    @@SuppressWarnings("deprecation") // Deliberate use of deprecated ctor
+    JMeterTreeModel treeModel = new JMeterTreeModel(new Object());// Create non-GUI version to avoid headless problems
+    JMeterTreeNode root = (JMeterTreeNode) treeModel.getRoot();
+    treeModel.addSubTree(tree, root);
+    
+    // Hack to resolve ModuleControllers in non GUI mode
+    SearchByClass<ReplaceableController> replaceableControllers = new SearchByClass<ReplaceableController>(ReplaceableController.class);
+    tree.traverse(replaceableControllers);
+    Collection<ReplaceableController> replaceableControllersRes = replaceableControllers.getSearchResults();
+    for (Iterator<ReplaceableController> iter = replaceableControllersRes.iterator(); iter.hasNext();) {
+        ReplaceableController replaceableController = iter.next();
+        replaceableController.resolveReplacementSubTree(root);
+    }
+    
+    LoopController loopController = new LoopController();
+    loopController.setLoops(@loops);
+    
+    SearchByClass<ThreadGroup>  collector = new SearchByClass<ThreadGroup>(ThreadGroup.class);
+    tree.traverse(collector);
+    Collection<ThreadGroup> threadGroups = collector.getSearchResults();
+    for (ThreadGroup threadGroup : threadGroups) {
+      threadGroup.setNumThreads(@numberThreads);
+      threadGroup.setRampUp(@ramUp);
+      threadGroup.setSamplerController(loopController);
+    }
+    
+    // Remove the disabled items
+    // For GUI runs this is done in Start.java
+    JMeter.convertSubTree(tree);
+    
+    Summariser summer = null;
+    String summariserName = JMeterUtils.getPropDefault("summariser.name", "summary");//$NON-NLS-1$
+    if (summariserName.length() > 0) {
+      summer = new Summariser(summariserName);
+    }
+
+    SampleSaveConfiguration conf = new SampleSaveConfiguration(true);        
+    conf.setResponseData(false);
+    conf.setResponseHeaders(false);
+    conf.setRequestHeaders(false);
+    conf.setSamplerData(false);
+    conf.setUrl(false);
+    conf.setFileName(false);
+    conf.setFieldNames(true);
+    conf.setHostname(false);
+    conf.setAsXml(false);
+   	
+    ResultCollector resultCollector = new ResultCollector(summer);        
+    resultCollector.setProperty(TestElement.TEST_CLASS, ResultCollector.class.getName());
+    resultCollector.setProperty(TestElement.GUI_CLASS, ViewResultsFullVisualizer.class.getName());      
+    resultCollector.setSaveConfig(conf);
+    resultCollector.setFilename("target/@scriptId@.jtl");
+    resultCollector.setEnabled(true);
+    resultCollector.setName("View Results Tree");
+    
+    tree.add(tree.getArray()[0], resultCollector);
+    
+    // Used for remote notification of threads start/stop,see BUG 54152
+    // Summariser uses this feature to compute correctly number of threads 
+    // when NON GUI mode is used
+    tree.add(tree.getArray()[0], new RemoteThreadsListenerTestElement());
+    tree.add(tree.getArray()[0], new ListenToTest());
+    
+    DistributedRunner distributedRunner = new DistributedRunner();
+    distributedRunner.setStdout(System.out);
+    distributedRunner.setStdErr(System.err);
+    
+    distributedRunner.init(hostList, tree);
+    distributedRunner.start();
+    
+    this.shutdown("target/@scriptId@.log");
+  }

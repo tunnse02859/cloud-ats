@@ -3,6 +3,7 @@
  */
 package org.ats.services.generator;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -77,6 +78,9 @@ public class GeneratorService {
     String scriptTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/script.tmpl"));
     
+    String scriptRawTemplate = StringUtil.readStream(
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/script.raw.tmpl"));
+    
     String samplerTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/sampler.tmpl"));
 
@@ -90,12 +94,11 @@ public class GeneratorService {
       
       if (ref.get().getProjectId() == null) continue;
       
-      JMeterScript jScript = jmeterService.get(ref.getId(), "number_engines");
+      JMeterScript jScript = jmeterService.get(ref.getId(), "number_threads", "ram_up", "loops");
       String scriptName = getAvailableName(StringUtil.normalizeName(jScript.getName()), namePool);
       int loops = jScript.getLoops();
       int numberThreads = jScript.getNumberThreads();
       int ramUp = jScript.getRamUp();
-      int numberEngines = jScript.getNumberEngines();
       
       StringBuilder samplerBuilder = new StringBuilder();
       
@@ -133,7 +136,14 @@ public class GeneratorService {
       }
       
       String samplers = samplerBuilder.toString();
-      scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, numberEngines, ramUp, samplers));
+      
+      if (jScript.isRaw()) {
+        write(new ByteArrayInputStream(jScript.getString("raw_content").getBytes()), 
+            new FileOutputStream(new File(outDir + "/" + jobId  + "/src/test/resources", jScript.getId() + ".jmx")));
+        scriptBuilder.append(engine.render(scriptRawTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp));
+      } else {
+        scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp, samplers));
+      }
     }
     
     Map<String, String> params = new HashMap<String, String>();
@@ -190,12 +200,6 @@ public class GeneratorService {
   
   public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites) throws IOException {
     return generateKeyword(outDir,jobId,compress,suites,false,0,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
-  }
-  
-  private void loadKeywordPOM(String outDir) throws IOException {
-    /*InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("keyword/pom.xml");
-    write(is, new FileOutputStream(new File(outDir, "pom.xml")));*/
-    loadKeywordPOM(outDir,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
   }
   
   private void loadKeywordPOM(String outDir, String versionSelenium) throws IOException {

@@ -4,12 +4,14 @@
 package org.ats.services.generator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.ats.common.PageList;
+import org.ats.common.StringUtil;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
@@ -193,6 +195,15 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
         "GotoArticle", 1, 20, 5, false, 0, project.getId(), gotoArticle);
     gotoArticleScript.setNumberEngines(1);
     jmeterService.create(gotoArticleScript);
+    
+    JMeterScript rawScript = factory.createRawJmeterScript(project.getId(), "rawUpload",
+        StringUtil.readStream(new FileInputStream("src/test/resources/multiple_thread_group.jmx")));
+    
+    rawScript.setNumberEngines(1);
+    rawScript.setNumberThreads(10);
+    rawScript.setRamUp(10);
+    rawScript.setLoops(2);
+    jmeterService.create(rawScript);
     
     perfService.create(project);
     
