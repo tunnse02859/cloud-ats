@@ -53,6 +53,10 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
     if (source.get("raw") != null && obj.getBoolean("raw")) {
       JMeterScript script = new JMeterScript(obj.getString("project_id"), obj.getString("name"), obj.getString("raw_content"));
       script.put("_id", obj.getString("_id"));
+      script.setLoops(obj.getInt("loops"));
+      script.setNumberThreads(obj.getInt("number_threads"));
+      script.setRamUp(obj.getInt("ram_up"));
+      script.setNumberEngines(obj.getInt("number_engines"));
       return script;
     }
     
@@ -105,7 +109,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
       }
     }
     JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, projectId, samplers);
-   
+    script.setNumberEngines(obj.getInt("number_engines"));
     script.put("_id", source.get("_id"));
     return script;
   }
