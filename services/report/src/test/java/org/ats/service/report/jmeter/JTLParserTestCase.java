@@ -18,6 +18,7 @@ import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
+import org.ats.services.KeywordUploadServiceModule;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -57,7 +58,7 @@ public class JTLParserTestCase extends AbstractEventTestCase {
 
     this.injector = Guice.createInjector(new DatabaseModule(), new EventModule(), new OrganizationServiceModule(), new DataDrivenModule(),
         new KeywordServiceModule(), new PerformanceServiceModule(), new GeneratorModule(), new VMachineServiceModule("src/test/resources/iaas.conf"),
-        new ExecutorModule(), new ReportModule());
+        new ExecutorModule(), new KeywordUploadServiceModule(), new ReportModule());
 
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -106,6 +107,23 @@ public class JTLParserTestCase extends AbstractEventTestCase {
         Assert.assertEquals(round(summary.getKbPerSecond(), 2), 224.78);
         Assert.assertEquals(round(summary.getAverageBytes(), 1), round(37363.0, 1));
       }
+    }
+  }
+  
+  @Test
+  public void testParse2() {
+    try {
+      String projectId = UUID.randomUUID().toString();
+      String projectHash = projectId.substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
+      PerformanceJob job = perfJobFactory.create(projectHash, projectId, Collections.<JMeterScriptReference>emptyList(), "fake", AbstractJob.Status.Completed);
+      String content = StringUtil.readStream(new FileInputStream("src/test/resources/vietjet.jtl"));
+      BasicDBList list = new BasicDBList();
+      list.add(new BasicDBObject("_id", "fake").append("content", content));
+      job.put("report", list);
+      executorService.create(job);
+      reportService.getList(projectHash, Type.PERFORMANCE, "fake");
+    } catch (Exception e) {
+      Assert.fail();
     }
   }
   

@@ -1,10 +1,13 @@
 package org.ats.service.report.jmeter;
 
+import java.io.StringReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.ats.service.report.Report;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 
 
@@ -127,7 +130,10 @@ public class Calculation {
 
   }
   
-  public static Map<String,String> calculateCsvLine(Map<Integer, String> headMap,String[] values) throws Exception{
+  public static Map<String,String> calculateCsvLine(Map<Integer, String> headMap, String line) throws Exception{
+    CSVReader csvReader = new CSVReader(new StringReader(line));
+    String[] values =csvReader.readNext();
+    csvReader.close();
     
     if (values == null) {
       throw new Exception("CLOUD_ATS_ERROR_EMPTY_VALUE");
@@ -138,8 +144,6 @@ public class Calculation {
       dataHashMap.put(headMap.get(i), values[i]);
     }
     return dataHashMap;
-    
-    
   }
   
   

@@ -1,0 +1,51 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,grpThreads,allThreads,Latency,Encoding,SampleCount,ErrorCount,Connect
+1452073163825,592,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-1,text,true,,7431,2,2,492,utf-8,1,0,392
+1452073163823,592,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-1,,true,,7431,2,2,492,ISO-8859-1,1,0,392
+1452073164452,201,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-1,text,true,,7431,2,2,99,utf-8,1,0,0
+1452073164326,587,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-2,text,true,,7431,3,3,487,utf-8,1,0,389
+1452073164324,587,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-2,,true,,7431,3,3,487,ISO-8859-1,1,0,389
+1452073164913,200,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-2,text,true,,7431,3,3,99,utf-8,1,0,0
+1452073164826,590,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-3,text,true,,7431,4,4,489,utf-8,1,0,391
+1452073164824,590,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-3,,true,,7431,4,4,489,ISO-8859-1,1,0,391
+1452073165416,199,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-3,text,true,,7431,4,4,99,utf-8,1,0,0
+1452073165329,592,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-4,text,true,,7431,5,5,489,utf-8,1,0,390
+1452073165327,592,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-4,,true,,7431,5,5,489,ISO-8859-1,1,0,390
+1452073165922,199,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-4,text,true,,7431,5,5,99,utf-8,1,0,0
+1452073164653,1572,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-1,text,true,,28842,5,5,106,utf-8,1,0,0
+1452073164452,1773,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-1,,true,,36273,5,5,205,ISO-8859-1,1,0,0
+1452073165830,588,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-5,text,true,,7431,5,5,486,utf-8,1,0,388
+1452073165827,588,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-5,,true,,7431,5,5,486,ISO-8859-1,1,0,388
+1452073165113,1358,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-2,text,true,,28842,5,5,101,utf-8,1,0,0
+1452073164913,1558,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-2,,true,,36273,5,5,200,ISO-8859-1,1,0,0
+1452073166418,198,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-5,text,true,,7431,4,4,98,utf-8,1,0,0
+1452073166331,582,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-6,text,true,,7431,5,5,483,utf-8,1,0,385
+1452073166328,582,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-6,,true,,7431,5,5,483,ISO-8859-1,1,0,385
+1452073166914,197,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-6,text,true,,7431,5,5,98,utf-8,1,0,0
+1452073165615,1506,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-3,text,true,,28842,5,5,101,utf-8,1,0,0
+1452073165416,1705,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-3,,true,,36273,5,5,200,ISO-8859-1,1,0,0
+1452073166831,584,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-7,text,true,,7431,5,5,484,utf-8,1,0,386
+1452073166829,584,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-7,,true,,7431,5,5,484,ISO-8859-1,1,0,386
+1452073166121,1489,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-4,text,true,,28842,5,5,101,utf-8,1,0,0
+1452073165922,1688,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-4,,true,,36273,5,5,200,ISO-8859-1,1,0,0
+1452073167415,198,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-7,text,true,,7431,4,4,99,utf-8,1,0,0
+1452073167333,584,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-8,text,true,,7431,5,5,484,utf-8,1,0,387
+1452073167331,584,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-8,,true,,7431,5,5,484,ISO-8859-1,1,0,387
+1452073166616,1385,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-5,text,true,,28842,5,5,100,utf-8,1,0,0
+1452073166418,1583,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-5,,true,,36273,5,5,198,ISO-8859-1,1,0,0
+1452073167918,199,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-8,text,true,,7431,4,4,98,utf-8,1,0,0
+1452073167112,1251,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-6,text,true,,28842,5,5,100,utf-8,1,0,0
+1452073166913,1448,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-6,,true,,36273,5,5,198,ISO-8859-1,1,0,0
+1452073167833,593,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-9,text,true,,7431,4,4,492,utf-8,1,0,389
+1452073167830,593,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-9,,true,,7431,4,4,492,ISO-8859-1,1,0,389
+1452073168426,199,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-9,text,true,,7431,4,4,99,utf-8,1,0,0
+1452073167613,1246,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-7,text,true,,28842,4,4,100,utf-8,1,0,0
+1452073167415,1444,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-7,,true,,36273,4,4,199,ISO-8859-1,1,0,0
+1452073168334,597,22 /userprofilelogin.aspx,200,OK,VietJet Thread Group 1-10,text,true,,7431,3,3,490,utf-8,1,0,391
+1452073168332,597,VietJet Login,200,"Number of samples in transaction : 1, number of failing samples : 0",VietJet Thread Group 1-10,,true,,7431,3,3,490,ISO-8859-1,1,0,391
+1452073168932,199,92 /userprofilemenu.aspx?lang=en&st=ae&sesid=,200,OK,VietJet Thread Group 1-10,text,true,,7431,3,3,99,utf-8,1,0,0
+1452073168117,1490,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-8,text,true,,28842,3,3,100,utf-8,1,0,0
+1452073167918,1689,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-8,,true,,36273,3,3,198,ISO-8859-1,1,0,0
+1452073168626,1301,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-9,text,true,,28842,2,2,100,utf-8,1,0,0
+1452073168426,1500,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-9,,true,,36273,2,2,199,ISO-8859-1,1,0,0
+1452073169132,1383,93 /viewflights.aspx,200,OK,VietJet Thread Group 1-10,text,true,,28842,1,1,101,utf-8,1,0,0
+1452073168932,1582,Book a Flight,200,"Number of samples in transaction : 2, number of failing samples : 0",VietJet Thread Group 1-10,,true,,36273,1,1,200,ISO-8859-1,1,0,0

@@ -103,7 +103,7 @@ public class JtlHandler extends DefaultHandler {
               columnNameHashMap = Calculation.calculateIndexOfHashMap(values);
               isFirstLine = false;
             } else {
-              valueHashMap = Calculation.calculateCsvLine(columnNameHashMap, values);
+              valueHashMap = Calculation.calculateCsvLine(columnNameHashMap, line);
               startParsingLine(valueHashMap);
               
             }
@@ -132,7 +132,7 @@ public class JtlHandler extends DefaultHandler {
               columnNameHashMap = Calculation.calculateIndexOfHashMap(values);
               isFirstLine = false;
             } else {
-              valueHashMap = Calculation.calculateCsvLine(columnNameHashMap, values);
+              valueHashMap = Calculation.calculateCsvLine(columnNameHashMap, line);
               startParsingLine(valueHashMap);
             }
           }
