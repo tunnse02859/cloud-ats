@@ -31,6 +31,8 @@ public class Space extends AbstractEntity<Space> {
   public static final Reference<Space> ANY = new Reference<Space>("*") {
     @Override
     public Space get() { return null; }
+    @Override
+    public Space get(String... mixins) { return null; }
   };
   
   /** .*/

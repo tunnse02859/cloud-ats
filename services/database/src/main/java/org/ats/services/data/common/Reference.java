@@ -21,6 +21,8 @@ public abstract class Reference<T extends DBObject> {
   
   public abstract T get();
   
+  public abstract T get(String... mixins);
+  
   public String getId() {
     return this.id;
   }

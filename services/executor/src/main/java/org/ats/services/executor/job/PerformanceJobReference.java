@@ -28,4 +28,8 @@ public class PerformanceJobReference extends Reference<PerformanceJob> {
     return (PerformanceJob) service.get(id);
   }
 
+  @Override
+  public PerformanceJob get(String... mixins) {
+    return (PerformanceJob) service.get(id, mixins);
+  }
 }

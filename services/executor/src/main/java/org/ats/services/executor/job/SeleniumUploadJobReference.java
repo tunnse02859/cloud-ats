@@ -27,4 +27,9 @@ public class SeleniumUploadJobReference extends Reference<SeleniumUploadJob>{
   public SeleniumUploadJob get() {
     return (SeleniumUploadJob) service.get(id);
   }
+
+  @Override
+  public SeleniumUploadJob get(String... mixins) {
+    return (SeleniumUploadJob) service.get(id, mixins);
+  }
 }

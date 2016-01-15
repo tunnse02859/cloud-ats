@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Mar 13, 2015
  */
-public class VMachineReference extends Reference<VMachine>{
+public class VMachineReference extends Reference<VMachine> {
 
   /** .*/
   private VMachineService service;
@@ -31,4 +31,8 @@ public class VMachineReference extends Reference<VMachine>{
     return service.get(id);
   }
 
+  @Override
+  public VMachine get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

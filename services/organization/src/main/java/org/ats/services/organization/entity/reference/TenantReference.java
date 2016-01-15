@@ -30,4 +30,9 @@ public class TenantReference extends Reference<Tenant> {
   public Tenant get() {
     return service.get(id);
   }
+
+  @Override
+  public Tenant get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

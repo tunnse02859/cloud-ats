@@ -31,4 +31,9 @@ public class RoleReference extends Reference<Role> {
     return service.get(id);
   }
 
+  @Override
+  public Role get(String... mixins) {
+    return service.get(id, mixins);
+  }
+
 }

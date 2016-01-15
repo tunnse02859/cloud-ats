@@ -28,4 +28,8 @@ public class CaseReference extends Reference<Case> {
     return service.get(id);
   }
 
+  @Override
+  public Case get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

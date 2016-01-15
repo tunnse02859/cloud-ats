@@ -30,4 +30,9 @@ public class UserReference extends Reference<User> {
   public User get() {
     return service.get(id);
   }
+
+  @Override
+  public User get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

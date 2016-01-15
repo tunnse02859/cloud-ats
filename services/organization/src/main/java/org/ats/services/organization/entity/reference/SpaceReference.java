@@ -31,4 +31,8 @@ public class SpaceReference extends Reference<Space> {
     return service.get(id);
   }
 
+  @Override
+  public Space get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

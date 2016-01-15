@@ -28,4 +28,9 @@ public class SuiteReference extends Reference<Suite> {
     return service.get(id);
   }
 
+  @Override
+  public Suite get(String... mixins) {
+    return service.get(id, mixins);
+  }
+
 }

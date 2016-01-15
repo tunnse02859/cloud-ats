@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.Assisted;
  *
  * Mar 13, 2015
  */
-public class FeatureReference extends Reference<Feature>{
+public class FeatureReference extends Reference<Feature> {
 
   /** .*/
   private FeatureService service;
@@ -31,4 +31,8 @@ public class FeatureReference extends Reference<Feature>{
     return service.get(id);
   }
 
+  @Override
+  public Feature get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

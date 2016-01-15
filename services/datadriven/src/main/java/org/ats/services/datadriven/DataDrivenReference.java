@@ -28,4 +28,9 @@ public class DataDrivenReference extends Reference<DataDriven> {
     return service.get(id);
   }
 
+  @Override
+  public DataDriven get(String... mixins) {
+    return service.get(id, mixins);
+  }
+
 }

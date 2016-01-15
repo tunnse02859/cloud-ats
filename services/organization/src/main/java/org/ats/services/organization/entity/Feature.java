@@ -26,6 +26,8 @@ public class Feature extends AbstractEntity<Feature> {
   public static final Reference<Feature> ANY = new Reference<Feature>("*") {
     @Override
     public Feature get() { return null; }
+    @Override
+    public Feature get(String... mixins) { return null; }
   };
 
   @Inject

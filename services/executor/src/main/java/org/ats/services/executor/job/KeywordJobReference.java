@@ -28,4 +28,9 @@ public class KeywordJobReference extends Reference<KeywordJob> {
     return (KeywordJob) service.get(id);
   }
 
+  @Override
+  public KeywordJob get(String... mixins) {
+    return (KeywordJob) service.get(id, mixins);
+  }
+
 }

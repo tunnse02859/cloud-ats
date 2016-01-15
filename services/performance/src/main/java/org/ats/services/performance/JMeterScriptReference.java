@@ -28,4 +28,8 @@ public class JMeterScriptReference extends Reference<JMeterScript> {
     return service.get(id);
   }
 
+  @Override
+  public JMeterScript get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }

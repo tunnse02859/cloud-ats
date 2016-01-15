@@ -26,4 +26,9 @@ public class CustomKeywordReference extends Reference<CustomKeyword>{
   public CustomKeyword get() {
     return service.get("id");
   }
+
+  @Override
+  public CustomKeyword get(String... mixins) {
+    return service.get(id, mixins);
+  }
 }
