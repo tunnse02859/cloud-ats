@@ -109,7 +109,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
       }
     }
     JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, projectId, samplers);
-    script.setNumberEngines(obj.getInt("number_engines"));
+    script.setNumberEngines(obj.get("number_engines") != null ? obj.getInt("number_engines") : 1);
     script.put("_id", source.get("_id"));
     return script;
   }
