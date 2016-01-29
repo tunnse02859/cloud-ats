@@ -163,13 +163,16 @@ public class PerformanceController extends Controller {
         List<AbstractJob<?>> listJobs = jobsList.next();
         ObjectNode object;
         for (AbstractJob<?> job : listJobs) {
-          object = Json.newObject();
-          object.put("created_date", formater.format(job.getCreatedDate()));
-          object.put("creator", "Cloud-ATS");
-          object.put("scripts", ((PerformanceJob) job).getScripts().size());
-          object.put("status", job.getStatus().toString());
-          object.put("_id", job.getId());
-          arrayJob.add(object);
+          
+          if (job.get("report") != null && !job.getRawDataOutput().isEmpty()) {
+            object = Json.newObject();
+            object.put("created_date", formater.format(job.getCreatedDate()));
+            object.put("creator", "Cloud-ATS");
+            object.put("scripts", ((PerformanceJob) job).getScripts().size());
+            object.put("status", job.getStatus().toString());
+            object.put("_id", job.getId());
+            arrayJob.add(object);
+          }
         }
       }
       totalJob = arrayJob.size();
@@ -275,7 +278,7 @@ public class PerformanceController extends Controller {
           for (Report report : list) {
             
             if (report.getScriptId() != null) {
-              report.put("script_name", script.get().getName());
+              report.put("script_name", script.get() != null ? script.get().getName() : report.getScriptId());
             }
             
             array.add(Json.parse(report.toString()));         
@@ -284,6 +287,7 @@ public class PerformanceController extends Controller {
         totals.add(array);
       } catch (Exception e) {
         
+        e.printStackTrace();
         Logger.info("Can not read reports with this job");
         
         return status(404, jobId);
