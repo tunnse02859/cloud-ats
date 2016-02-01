@@ -25,6 +25,7 @@
 		<module>vmachine</module>
 		<module>report</module>
 		<module>selenium-upload</module>
+		<module>blob</module>
   </modules>
 
 </project>

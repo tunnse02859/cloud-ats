@@ -27,7 +27,7 @@ public class JMeterScript extends BasicDBObject {
   
   /** .*/
   private List<JMeterSampler> samplers = new ArrayList<JMeterSampler>();
-
+  
   /**
    * The constructor for raw jmeter script upload
    * @param project_id the project id
@@ -131,6 +131,48 @@ public class JMeterScript extends BasicDBObject {
   
   public int getNumberEngines() {
     return this.get("number_engines") != null ? this.getInt("number_engines") : 1;
+  }
+  
+  public List<CSV> getCSVFiles() {
+    
+    Object obj = this.get("csv_files");
+    if (obj == null) return Collections.emptyList();
+    
+    BasicDBList list = (obj == null ? new BasicDBList() : (BasicDBList) obj);
+    
+    List<CSV> listFiles = new ArrayList<CSV>();
+    for (int i = 0; i < list.size(); i ++) {
+      String id = ((BasicDBObject) list.get(i)).getString("_id");
+      String name = ((BasicDBObject) list.get(i)).getString("name");
+      CSV csv = new CSV(id, name);
+      
+      listFiles.add(csv);
+    }
+    
+    return listFiles;
+  }
+  
+  public void addCSVFiles(CSV... csvs) {
+    Object obj = this.get("csv_files");
+    
+    BasicDBList list = obj == null ? new BasicDBList() : (BasicDBList) obj;
+    
+    for (CSV csv : csvs) {
+      list.add(csv);
+    }
+    
+    this.put("csv_files", list);
+  }
+  
+  public void removeCSVFile(CSV csv) {
+    
+    Object obj = this.get("csv_files");
+    if (obj == null) return;
+    
+    BasicDBList list = (BasicDBList) obj;
+    list.remove(csv);
+    
+    this.put("csv_files", list);
   }
   
   public List<JMeterSampler> getSamplers() {

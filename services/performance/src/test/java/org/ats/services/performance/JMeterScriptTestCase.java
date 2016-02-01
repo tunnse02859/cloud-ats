@@ -3,10 +3,15 @@
  */
 package org.ats.services.performance;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import org.ats.service.BlobModule;
+import org.ats.service.blob.FileService;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -29,6 +34,8 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author NamBV2
@@ -45,6 +52,8 @@ private AuthenticationService<User> authService;
   
   private JMeterScriptService  jmeterService;
   
+  private FileService fileService;
+  
   private Tenant tenant;
 
   private Space space;
@@ -57,14 +66,15 @@ private AuthenticationService<User> authService;
         new DatabaseModule(),
         new EventModule(),
         new PerformanceServiceModule(),
-        new OrganizationServiceModule());
+        new OrganizationServiceModule(),
+        new BlobModule());
     this.factory = injector.getInstance(PerformanceProjectFactory.class);
     this.service = injector.getInstance(PerformanceProjectService.class);
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
-    
+    this.fileService = injector.getInstance(FileService.class);
     //start event service
     this.eventService = injector.getInstance(EventService.class);
     this.eventService.setInjector(injector);
@@ -134,7 +144,7 @@ private AuthenticationService<User> authService;
   }
   
   @Test
-  public void testMixin() throws UnsupportedEncodingException {
+  public void testMixin() throws IOException {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
@@ -157,5 +167,22 @@ private AuthenticationService<User> authService;
     JMeterScript newScript = jmeterService.get(jmeter.getId(), "number_engines");
     Assert.assertEquals(newScript.getNumberEngines(), 4);
     
+    File file1 = new File("src/test/resources/b.csv");
+    File file2 = new File("src/test/resources/test.csv");
+    File file3 = new File("src/test/resources/test.csv");
+    
+    jmeter = jmeterService.get(jmeter.getId(), "csv_files");
+    jmeter.addCSVFiles(new CSV(UUID.randomUUID().toString(), file1.getName()));
+    jmeterService.update(jmeter);
+    
+    jmeter = jmeterService.get(jmeter.getId(), "csv_files");
+    jmeter.addCSVFiles(new CSV(UUID.randomUUID().toString(), file2.getName()));
+    jmeterService.update(jmeter);
+    
+    jmeter = jmeterService.get(jmeter.getId(), "csv_files");
+    jmeter.addCSVFiles(new CSV(UUID.randomUUID().toString(), file3.getName()));
+    jmeterService.update(jmeter);
+    
+    Assert.assertEquals(jmeterService.get(jmeter.getId(), "csv_files").getCSVFiles().size(), 3);
   }
 }

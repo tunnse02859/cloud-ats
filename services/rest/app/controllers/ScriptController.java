@@ -5,11 +5,16 @@ package controllers;
 
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
+import org.ats.service.blob.FileService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.performance.CSV;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterFactory;
 import org.ats.services.performance.JMeterSampler;
@@ -26,7 +31,10 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author TrinhTV3
@@ -41,6 +49,8 @@ public class ScriptController extends Controller {
   
   @Inject
   private JMeterFactory jmeterFactory;
+  
+  @Inject private FileService fileService;
   
   public Result list(String projectId) {
      
@@ -164,7 +174,10 @@ public class ScriptController extends Controller {
     
     JMeterScript script = service.get(id, "number_threads", "number_engines", "ram_up", "loops");
     if (script == null) return notFound();
-    
+    List<GridFSDBFile> files = fileService.find(new BasicDBObject("script_id", id));
+    for (GridFSDBFile file : files) {
+      script.addCSVFiles(new CSV(file.getId().toString(), file.getFilename()));
+    }
     return status(200, Json.parse(script.toString()));
   }
   
@@ -188,15 +201,57 @@ public class ScriptController extends Controller {
     
     JMeterScript oldScript = service.get(script.getId(), "number_threads", "number_engines", "ram_up", "loops");
     
+    // handle csv files
+    List<GridFSDBFile> listCSV = fileService.find(new BasicDBObject("script_id", script.getId()));
+    int countFileChange = 0;
+    
+    for (GridFSDBFile file : listCSV) {
+      if (file.getId().toString().contains("_temp")) {
+        
+        countFileChange ++;
+        GridFSInputFile fileInput = fileService.create(file.getInputStream());
+        String fileId = file.getId().toString().substring(0, file.getId().toString().length() - 5);
+        fileService.deleteById(fileId.toString());
+        
+        fileInput.setId(fileId.toString());
+        fileInput.put("script_id", script.getId());
+        fileInput.put("filename", file.getFilename());
+        fileService.save(fileInput);
+      }
+    }
+    
+    for (GridFSDBFile file : listCSV) {
+      if (file.getId().toString().contains("_temp")) {
+        fileService.deleteById(file.getId().toString());
+      }
+    }
+    
+    Set<String> listDeletedCSV = new HashSet<String>();
+    for (JsonNode json : data.get("csv_files")) {
+      listDeletedCSV.add(json.get("_id").asText());
+    }
+    
+    Set<String> listOriginCSV = new HashSet<String>();
+    for (GridFSDBFile file : listCSV) {
+      listOriginCSV.add(file.getId().toString());
+    }    
+    
+    for (String s : listOriginCSV) {
+      if (!listDeletedCSV.contains(s)) {
+        fileService.deleteById(s);
+      }
+    }
+    
     if (!script.getId().equals(oldScript.getId()) || oldScript == null) {
       return status(400);
     }
     
-    if (script.equals(oldScript)) {
+    if (script.equals(oldScript) && (countFileChange == 0) && (listDeletedCSV.size() == listOriginCSV.size())) {
       return status(204);
     }
     
     service.update(script);
     return status(202);
   }
+  
 }

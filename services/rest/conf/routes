@@ -108,5 +108,12 @@ PUT		/api/v1/project/performance/:projectId/script				@controllers.ScriptControl
 # Dashboard controller
 GET		/api/v1/dashboard/summary									@controllers.DashboardController.summary()
 
+# Csv file controller
+POST    /api/v1/project/performance/:scriptId/csv/upload            @controllers.FileController.uploadCSVData(scriptId)
+GET     /api/v1/project/performance/:scriptId/csv/list              @controllers.FileController.list(scriptId)
+GET		/api/v1/project/performance/:scriptId/csv/:csvId			@controllers.FileController.getCSVData(scriptId, csvId)
+DELETE	/api/v1/project/performance/:scriptId/csv/delete/:csvId		@controllers.FileController.deleteCSVData(scriptId, csvId)
+PUT 	/api/v1/project/performance/:scriptId/csv/update/:csvId		@controllers.FileController.updateTempCSVData(scriptId, csvId)
+DELETE	/api/v1/project/performance/:scriptId/csv/deletetemp		@controllers.FileController.deleteTempCSVData(scriptId)
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

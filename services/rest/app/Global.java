@@ -1,5 +1,6 @@
 import java.lang.reflect.Method;
 
+import org.ats.service.BlobModule;
 import org.ats.service.ReportModule;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
@@ -84,6 +85,7 @@ public class Global extends GlobalSettings {
           new ExecutorModule(),
           new KeywordServiceModule(),
           new KeywordUploadServiceModule(),
+          new BlobModule(),
           new ReportModule());
 
       //start event service

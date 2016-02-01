@@ -24,7 +24,6 @@ public class PerformanceServiceModule extends AbstractModule {
   protected void configure() {
     bind(PerformanceProjectService.class);
     bind(JMeterScriptService.class);
-
     install(new FactoryModuleBuilder().build(PerformanceProjectFactory.class));
     install(new FactoryModuleBuilder().build(new TypeLiteral<ReferenceFactory<JMeterScriptReference>>(){}));
     
