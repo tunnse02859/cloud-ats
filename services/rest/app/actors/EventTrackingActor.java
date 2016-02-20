@@ -10,6 +10,8 @@ import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.executor.job.PerformanceJob;
+import org.ats.services.iaas.AzureService;
+import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.performance.PerformanceProject;
@@ -42,6 +44,8 @@ public class EventTrackingActor extends UntypedActor {
   
   @Inject VMachineService vmachineService;
   
+  @Inject IaaSServiceProvider iaasProvider;
+  
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   @Override
@@ -63,8 +67,17 @@ public class EventTrackingActor extends UntypedActor {
           if (job.getStatus() == AbstractJob.Status.Running) {
             VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
             VMachine testVM = vmachineService.get(job.getTestVMachineId());
-            StringBuilder sb = new StringBuilder("http://").append(jenkinsVM.getPublicIp())
-                .append(":8081/guacamole/#/client/c/vnc_node_").append(testVM.getPrivateIp());
+            
+            StringBuilder sb = new StringBuilder("http://");
+            if (iaasProvider.get() instanceof AzureService) {
+              jenkinsVM = vmachineService.get(jenkinsVM.getId(), "remote_url");
+              sb.append(jenkinsVM.getString("remote_url"));
+              sb.append("/guacamole/#/client/c/vnc_node_").append(testVM.getPrivateIp());
+            } else {
+              sb.append(jenkinsVM.getPublicIp());
+              sb.append(":8081/guacamole/#/client/c/vnc_node_").append(testVM.getPrivateIp());
+            }
+            
             job.put("watch_url", sb.toString());
           }
           

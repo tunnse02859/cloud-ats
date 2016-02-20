@@ -48,6 +48,7 @@ public class VMachineServiceModule extends AbstractModule {
     bind(VMachineService.class);
     bind(OpenStackService.class);
     bind(AWSService.class);
+    bind(AzureService.class);
     bind(IaaSService.class).toProvider(IaaSServiceProvider.class);
     
     install(new FactoryModuleBuilder().build(VMachineFactory.class));

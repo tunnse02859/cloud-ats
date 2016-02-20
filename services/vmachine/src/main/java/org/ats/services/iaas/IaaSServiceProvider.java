@@ -19,13 +19,16 @@ public class IaaSServiceProvider implements Provider<IaaSService> {
   
   private final AWSService awsService;
   
+  private final AzureService azureService;
+  
   private final Class<IaaSService> iaasClazz;
   
   @SuppressWarnings("unchecked")
   @Inject
-  IaaSServiceProvider(OpenStackService opsService, AWSService awsService, @Named("org.ats.cloud.iaas") String iaasClazz) throws ClassNotFoundException {
+  IaaSServiceProvider(OpenStackService opsService, AWSService awsService, AzureService azureService, @Named("org.ats.cloud.iaas") String iaasClazz) throws ClassNotFoundException {
     this.opsService = opsService;
     this.awsService = awsService;
+    this.azureService = azureService;
     this.iaasClazz = (Class<IaaSService>) Class.forName(iaasClazz);
   }
 
@@ -33,6 +36,7 @@ public class IaaSServiceProvider implements Provider<IaaSService> {
   public IaaSService get() {
     if (iaasClazz.isInstance(opsService)) return opsService;
     else if (iaasClazz.isInstance(awsService)) return awsService;
+    else if (iaasClazz.isInstance(azureService)) return azureService;
     return null;
   }
 
