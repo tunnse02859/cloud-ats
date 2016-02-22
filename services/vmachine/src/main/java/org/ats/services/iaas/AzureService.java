@@ -186,7 +186,7 @@ public class AzureService implements IaaSService {
     while (!isVMReady(vm)) {
       Thread.sleep(5000);
     }
-    vm = vmachineService.get(vm.getId());
+    vm = vmachineService.get(vm.getId(), "remote_url");
     return vm;
   }
 
