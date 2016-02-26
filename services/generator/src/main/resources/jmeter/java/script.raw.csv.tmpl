@@ -3,8 +3,7 @@
   String scriptName,
   int loops,
   int numberThreads,
-  int ramUp,
-  String dataPath
+  int ramUp
 }
  
  	@@Test
@@ -56,10 +55,10 @@
     SearchByClass<CSVDataSet> collectorCSV = new SearchByClass<CSVDataSet>(CSVDataSet.class);
     tree.traverse(collectorCSV);
     Collection<CSVDataSet> csvDataSet = collectorCSV.getSearchResults();
-    String path = "@dataPath";
+    String path = new File("src/test/resources").getAbsolutePath();
     for (CSVDataSet data : csvDataSet) {
       String fileName = data.getPropertyAsString("filename");
-      data.setProperty("filename",  path + fileName);
+      data.setProperty("filename",  path + "/" + fileName);
     }
     
     // Remove the disabled items
