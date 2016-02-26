@@ -21,6 +21,7 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
+import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.acl.Authenticated;
@@ -59,6 +60,8 @@ public class DashboardController extends Controller {
   @Inject KeywordProjectService keywordProjectService;
   
   @Inject ReportService reportService;
+  
+  @Inject CaseService caseService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -127,7 +130,7 @@ public class DashboardController extends Controller {
     // get all projects by number of test case
     PageList<KeywordProject> listSortedByTestCaseKeywordProjects = keywordProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
     LinkedList<ObjectNode> topBiggestKeyword = new LinkedList<ObjectNode>();
-    getProjects(listSortedByTestCaseKeywordProjects, topBiggestKeyword, "totalCases", true, 5);
+    getBiggestProject(listSortedByTestCaseKeywordProjects, topBiggestKeyword);
     
     // get top error performance projects
     PageList<PerformanceProject> listPers = performanceProjectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
@@ -187,7 +190,6 @@ public class DashboardController extends Controller {
         }
       }
     }
-    
     ArrayNode arraySortedByDescKeywordProject = Json.newObject().arrayNode();
     for (ObjectNode obj : topKeywordListPass) {
       arraySortedByDescKeywordProject.add(obj);
@@ -209,16 +211,68 @@ public class DashboardController extends Controller {
       arrayRecentKeywordProject.add(obj);
     }
     
+    ArrayNode arrayBiggestProject = Json.newObject().arrayNode();
+    for (ObjectNode obj : topBiggestKeyword) {
+      arrayBiggestProject.add(obj);
+    }
+    
     ObjectNode object = Json.newObject();
     object.put("recentProjects", arrayRecentKeywordProject.toString());
     object.put("topKeywordPass", arraySortedByDescKeywordProject.toString());
     object.put("topKeywordFail", arraySortedByAscKeywordProject.toString());
-    object.put("topBiggestProject", arraySortedByTestCaseKeywordProject.toString());
+    object.put("topBiggestProject", arrayBiggestProject.toString());
     object.put("persProjects", arrayPersProject.toString());
     
     return ok(object);
   }
   
+  private List<ObjectNode> getBiggestProject(PageList<KeywordProject> listKeywordProjects, LinkedList<ObjectNode> topBiggestKeyword) {
+    
+    while(listKeywordProjects.hasNext()) {
+      
+      for (KeywordProject project : listKeywordProjects.next()) {
+        long count = caseService.query(new BasicDBObject("project_id", project.getId())).count();
+        
+        ObjectNode object = Json.newObject();
+        object.put("_id", project.getId());
+        object.put("name", project.getString("name"));
+        object.put("numberCase", count);
+        insertByNumberOfCase(topBiggestKeyword, object, 5);
+      }
+    }
+    return topBiggestKeyword;
+  }
+  
+  private void sortByNumberOfCase(List<ObjectNode> list) {
+    
+    Collections.sort(list,  new Comparator<ObjectNode>() {
+
+      @Override
+      public int compare(ObjectNode o1, ObjectNode o2) {
+        return o2.get("numberCase").asInt() - o1.get("numberCase").asInt();
+      }
+    });
+  }
+  
+  private List<ObjectNode> insertByNumberOfCase(List<ObjectNode> list, ObjectNode object, int numberOfElement) {
+    
+    if (list.size() == 0) {
+      list.add(object);
+      return list;
+    } else if(list.size() < numberOfElement) {
+      list.add(object);
+      sortByNumberOfCase(list);
+      return list;
+    } else if (list.size() == numberOfElement) {
+      list.add(object);
+      sortByNumberOfCase(list);
+      list.remove(numberOfElement);
+      return list;
+    } else {
+      throw new IllegalStateException("The list has more than "+numberOfElement+" items");
+    }
+  }
+
   private void sortByDate (List<ObjectNode> source, final String asertionText, final boolean desc, boolean sortByDate) {
     
     if (!sortByDate) {
