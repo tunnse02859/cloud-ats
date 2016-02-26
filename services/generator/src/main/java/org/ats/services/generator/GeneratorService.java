@@ -21,6 +21,7 @@ import java.util.zip.ZipOutputStream;
 import org.ats.common.MapBuilder;
 import org.ats.common.StringUtil;
 import org.ats.common.http.HttpURL;
+import org.ats.service.blob.BlobService;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
@@ -35,6 +36,8 @@ import org.rythmengine.RythmEngine;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.mongodb.BasicDBObject;
+import com.mongodb.gridfs.GridFSDBFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -50,7 +53,11 @@ public class GeneratorService {
   @Inject
   PerformanceProjectService perService;
   
-  @Inject JMeterScriptService jmeterService;
+  @Inject 
+  JMeterScriptService jmeterService;
+  
+  @Inject
+  BlobService blobService;
   
   /**
    * 
@@ -80,6 +87,9 @@ public class GeneratorService {
     
     String scriptRawTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/script.raw.tmpl"));
+    
+    String scriptRawCsvTemplate = StringUtil.readStream(
+         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/script.raw.csv.tmpl"));
     
     String samplerTemplate = StringUtil.readStream(
         Thread.currentThread().getContextClassLoader().getResourceAsStream("jmeter/java/sampler.tmpl"));
@@ -140,7 +150,17 @@ public class GeneratorService {
       if (jScript.isRaw()) {
         write(new ByteArrayInputStream(jScript.getString("raw_content").getBytes()), 
             new FileOutputStream(new File(outDir + "/" + jobId  + "/src/test/resources", jScript.getId() + ".jmx")));
-        scriptBuilder.append(engine.render(scriptRawTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp));
+        
+        List<GridFSDBFile> files = blobService.find(new BasicDBObject("script_id", jScript.getId()));
+        if (files.size() > 0) {
+          String dataPath = new File(outDir + "/" + jobId  + "/src/test/resources").getAbsolutePath() + "/"; 
+          for (GridFSDBFile file : files) {
+            write(file.getInputStream(), new FileOutputStream(new File(outDir + "/" + jobId  + "/src/test/resources", file.getFilename())));
+          }
+          scriptBuilder.append(engine.render(scriptRawCsvTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp, dataPath));
+        } else {
+          scriptBuilder.append(engine.render(scriptRawTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp));
+        }
       } else {
         scriptBuilder.append(engine.render(scriptTemplate, ref.getId(), scriptName, loops, numberThreads, ramUp, samplers));
       }

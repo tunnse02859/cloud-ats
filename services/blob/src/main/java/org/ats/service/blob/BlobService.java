@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
-import org.ats.services.organization.base.AbstractMongoCRUD;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,13 +25,13 @@ import com.mongodb.gridfs.GridFSInputFile;
  */
 
 @Singleton
-public class FileService {
+public class BlobService {
   
   /** .*/
   private final GridFS fs;
   
   @Inject
-  FileService(MongoDBService mongo, Logger logger) {
+  BlobService(MongoDBService mongo, Logger logger) {
     this.fs = new GridFS(mongo.getDatabase());
   }
   

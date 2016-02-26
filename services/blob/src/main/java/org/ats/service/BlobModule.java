@@ -3,7 +3,7 @@
  */
 package org.ats.service;
 
-import org.ats.service.blob.FileService;
+import org.ats.service.blob.BlobService;
 
 import com.google.inject.AbstractModule;
 
@@ -15,7 +15,7 @@ public class BlobModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(FileService.class);
+    bind(BlobService.class);
     
   }
 

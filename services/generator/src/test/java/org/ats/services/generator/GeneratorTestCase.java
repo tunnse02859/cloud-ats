@@ -12,6 +12,8 @@ import java.util.List;
 
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
+import org.ats.service.BlobModule;
+import org.ats.service.blob.BlobService;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
@@ -59,6 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -89,6 +92,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   private ReferenceFactory<CaseReference> caseRefFactory;
   
   private GeneratorService generetorService;
+  private BlobService blobService;
 
   @BeforeClass
   public void init() throws Exception {
@@ -99,7 +103,8 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
         new DataDrivenModule(),
         new KeywordServiceModule(),
         new PerformanceServiceModule(),
-        new GeneratorModule());
+        new GeneratorModule(),
+        new BlobModule());
     
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -126,6 +131,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.generetorService = this.injector.getInstance(GeneratorService.class);
+    this.blobService = this.injector.getInstance(BlobService.class);
     
     //start event service
     this.eventService = injector.getInstance(EventService.class);
@@ -204,6 +210,23 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     rawScript.setRamUp(10);
     rawScript.setLoops(2);
     jmeterService.create(rawScript);
+    
+    JMeterScript rawCsvScript = factory.createRawJmeterScript(project.getId(), "rawUpload",
+        StringUtil.readStream(new FileInputStream("src/test/resources/multiple_thread_group.jmx")));
+    
+    rawCsvScript.setNumberEngines(1);
+    rawCsvScript.setNumberThreads(10);
+    rawCsvScript.setRamUp(10);
+    rawCsvScript.setLoops(2);
+    jmeterService.create(rawCsvScript);
+    
+    GridFSInputFile file1 = blobService.create(new File("src/test/resources/level.csv"));
+    file1.put("script_id", rawCsvScript.getId());
+    file1.save();
+    
+    GridFSInputFile file2 = blobService.create(new File("src/test/resources/LoginEinavi.csv"));
+    file2.put("script_id", rawCsvScript.getId());
+    file2.save();
     
     perfService.create(project);
     

@@ -5,13 +5,11 @@ package org.ats.services.performance;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.ats.service.BlobModule;
-import org.ats.service.blob.FileService;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
 import org.ats.services.data.DatabaseModule;
@@ -34,8 +32,6 @@ import org.testng.annotations.Test;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.mongodb.gridfs.GridFSDBFile;
-import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author NamBV2
@@ -51,8 +47,6 @@ private AuthenticationService<User> authService;
   private PerformanceProjectService service;
   
   private JMeterScriptService  jmeterService;
-  
-  private FileService fileService;
   
   private Tenant tenant;
 
@@ -74,7 +68,6 @@ private AuthenticationService<User> authService;
     this.jmeterService = this.injector.getInstance(JMeterScriptService.class);
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
-    this.fileService = injector.getInstance(FileService.class);
     //start event service
     this.eventService = injector.getInstance(EventService.class);
     this.eventService.setInjector(injector);

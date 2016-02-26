@@ -62,7 +62,8 @@ public class AuthenticationController extends Controller {
   @Inject
   private SpaceService spaceService;
   
-  @Inject private SpaceFactory spaceFactory;
+  @Inject 
+  private SpaceFactory spaceFactory;
   
   public Result checkAccount() {
     

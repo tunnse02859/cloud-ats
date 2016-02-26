@@ -11,11 +11,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
 
-import org.ats.service.blob.FileService;
+import org.ats.service.blob.BlobService;
 import org.ats.services.organization.acl.Authenticated;
-import org.ats.services.performance.CSV;
-import org.ats.services.performance.JMeterScript;
-import org.ats.services.performance.JMeterScriptService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -40,11 +37,11 @@ import com.mongodb.gridfs.GridFSInputFile;
 @Authenticated
 public class FileController extends Controller {
   
-  @Inject private FileService fileService;
+  @Inject private BlobService blobService;
   
   public Result list(String scriptId) {
     
-    List<GridFSDBFile> listFile = fileService.find(new BasicDBObject("script_id", scriptId));
+    List<GridFSDBFile> listFile = blobService.find(new BasicDBObject("script_id", scriptId));
     ArrayNode array = Json.newObject().arrayNode();
     for (GridFSDBFile f : listFile) {
       ObjectNode obj = Json.newObject();
@@ -60,11 +57,11 @@ public class FileController extends Controller {
     File file = body.getFile("file").getFile();
     String fileName = body.getFile("file").getFilename();
       
-    GridFSInputFile fileFs = fileService.create(file);
+    GridFSInputFile fileFs = blobService.create(file);
     fileFs.put("_id", UUID.randomUUID().toString());
     fileFs.put("filename", fileName);
     fileFs.put("script_id", scriptId);
-    fileService.save(fileFs);
+    blobService.save(fileFs);
 
 //    JMeterScript script = scriptService.get(scriptId);
 //    List<GridFSDBFile> files = fileService.find(new BasicDBObject("script_id", scriptId));
@@ -88,7 +85,7 @@ public class FileController extends Controller {
   
   public Result getCSVData(String scriptId, String csvId) throws IOException {
     
-    GridFSDBFile file = fileService.findOne(new BasicDBObject("_id", csvId+"_temp")) == null ?  fileService.findOne(new BasicDBObject("_id", csvId)) : fileService.findOne(new BasicDBObject("_id", csvId+"_temp"));
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("_id", csvId+"_temp")) == null ?  blobService.findOne(new BasicDBObject("_id", csvId)) : blobService.findOne(new BasicDBObject("_id", csvId+"_temp"));
     BufferedReader buffer = new BufferedReader(new InputStreamReader(file.getInputStream()));
     ArrayNode array = readBufferByOpenCSV(buffer);
     
@@ -97,7 +94,7 @@ public class FileController extends Controller {
   
   public Result deleteCSVData(String scriptId, String csvId) {
     
-    fileService.deleteById(csvId);
+    blobService.deleteById(csvId);
     return ok();
   }
   
@@ -107,23 +104,23 @@ public class FileController extends Controller {
     
     String fileName = body.asFormUrlEncoded().get("filename")[0];
     File file = body.getFile("file").getFile();
-    fileService.deleteById(csvId+"_temp");
-    GridFSInputFile fileFs = fileService.create(file);
+    blobService.deleteById(csvId+"_temp");
+    GridFSInputFile fileFs = blobService.create(file);
     fileFs.put("_id", csvId+"_temp");
     fileFs.put("script_id", scriptId);
     fileFs.put("filename", fileName);
     
-    fileService.save(fileFs);
+    blobService.save(fileFs);
     return ok();
   }
   
   public Result deleteTempCSVData(String scriptId) {
     
-    List<GridFSDBFile> list = fileService.find(new BasicDBObject("script_id", scriptId));
+    List<GridFSDBFile> list = blobService.find(new BasicDBObject("script_id", scriptId));
     
     for (GridFSDBFile file : list) {
       if (file.getId().toString().contains("_temp")) {
-        fileService.deleteById(file.getId().toString());
+        blobService.deleteById(file.getId().toString());
       }
     }
     return ok();
