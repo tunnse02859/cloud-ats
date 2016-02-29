@@ -214,13 +214,11 @@ class AWSService implements IaaSService {
 
   @Override
   public VMachine allocateFloatingIp(VMachine vm) {
-    vm.setPublicIp(vm.getPrivateIp());
     return vm;
   }
 
   @Override
   public VMachine deallocateFloatingIp(VMachine vm) {
-    vm.setPublicIp(null);
     return vm;
   }
   
