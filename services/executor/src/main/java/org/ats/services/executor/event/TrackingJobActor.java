@@ -17,6 +17,7 @@ import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.service.blob.BlobService;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.executor.ExecutorService;
@@ -47,6 +48,7 @@ import akka.actor.UntypedActor;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.gridfs.GridFSDBFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -76,6 +78,8 @@ public class TrackingJobActor extends UntypedActor {
   @Inject ReferenceFactory<VMachineReference> vmRefFactory;
   
   @Inject JMeterScriptService jmeterService;
+  
+  @Inject BlobService blobService;
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -278,11 +282,11 @@ public class TrackingJobActor extends UntypedActor {
         
         int count = 0;
         for (int j = 0; j < engines; j ++) {
-          
-          goalsBuilder.append(listVMs.get(j).getPrivateIp());
-          job.addVMachine(vmRefFactory.create(listVMs.get(j).getId()));
-          listVMs.get(j).setStatus(VMachine.Status.InProgress);
-          vmachineService.update(listVMs.get(j));
+          VMachine testVm = listVMs.get(j);
+          goalsBuilder.append(testVm.getPrivateIp());
+          job.addVMachine(vmRefFactory.create(testVm.getId()));
+          testVm.setStatus(VMachine.Status.InProgress);
+          vmachineService.update(testVm);
           
           count ++;
           
@@ -291,6 +295,8 @@ public class TrackingJobActor extends UntypedActor {
           }
         }
         goalsBuilder.append(" ");
+        
+        uploadCSVData(ref, job, listVMs);
       }
       
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
@@ -302,12 +308,25 @@ public class TrackingJobActor extends UntypedActor {
 
       job.setStatus(Status.Running);
       
-      }
+    }
     
-      executorService.update(job);
-      
-      Event event  = eventFactory.create(job, "performance-job-tracking");
-      event.broadcast();
+    executorService.update(job);
+
+    Event event  = eventFactory.create(job, "performance-job-tracking");
+    event.broadcast();
+  }
+  
+  private void uploadCSVData(JMeterScriptReference script, PerformanceJob job, List<VMachine> listVMs) throws Exception {
+    List<GridFSDBFile> files = blobService.find(new BasicDBObject("script_id", script.getId()));
+    if (files == null || files.size() == 0) return;
+    for (VMachine vm : listVMs) {
+      for (GridFSDBFile file : files) {
+        updateLog(job, "Synchronizing " + file.getFilename() + " to " + vm.getPrivateIp() + ":/home/cloudats/projects/"  + job.getId());
+        SSHClient.sendFile(vm.getPrivateIp(), 22, "cloudats", "#CloudATS", 
+            "/home/cloudats/projects/" + job.getId(), 
+            file.getFilename(), file.getInputStream());
+      }
+    }
   }
 
   private void processKeywordJob(KeywordJob job) throws Exception {
