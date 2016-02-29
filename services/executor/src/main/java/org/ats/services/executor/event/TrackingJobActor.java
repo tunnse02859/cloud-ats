@@ -27,6 +27,7 @@ import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.generator.GeneratorService;
+import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
@@ -319,12 +320,15 @@ public class TrackingJobActor extends UntypedActor {
   private void uploadCSVData(JMeterScriptReference script, PerformanceJob job, List<VMachine> listVMs) throws Exception {
     List<GridFSDBFile> files = blobService.find(new BasicDBObject("script_id", script.getId()));
     if (files == null || files.size() == 0) return;
+    IaaSService service = iaasProvider.get();
     for (VMachine vm : listVMs) {
       for (GridFSDBFile file : files) {
-        updateLog(job, "Synchronizing " + file.getFilename() + " to " + vm.getPrivateIp() + ":/home/cloudats/projects/"  + job.getId());
-        SSHClient.sendFile(vm.getPrivateIp(), 22, "cloudats", "#CloudATS", 
+        vm = service.allocateFloatingIp(vm);
+        updateLog(job, "Synchronizing " + file.getFilename() + " to " + vm.getPublicIp() + ":/home/cloudats/projects/"  + job.getId());
+        SSHClient.sendFile(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
             "/home/cloudats/projects/" + job.getId(), 
             file.getFilename(), file.getInputStream());
+        service.deallocateFloatingIp(vm);
       }
     }
   }
