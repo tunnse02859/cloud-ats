@@ -7,11 +7,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
@@ -297,7 +300,7 @@ public class TrackingJobActor extends UntypedActor {
         }
         goalsBuilder.append(" ");
         
-        uploadCSVData(ref, job, listVMs);
+        uploadCSVData(ref, job);
       }
       
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
@@ -317,19 +320,45 @@ public class TrackingJobActor extends UntypedActor {
     event.broadcast();
   }
   
-  private void uploadCSVData(JMeterScriptReference script, PerformanceJob job, List<VMachine> listVMs) throws Exception {
+  private void uploadCSVData(JMeterScriptReference script, PerformanceJob job) throws Exception {
     List<GridFSDBFile> files = blobService.find(new BasicDBObject("script_id", script.getId()));
     if (files == null || files.size() == 0) return;
     IaaSService service = iaasProvider.get();
-    for (VMachine vm : listVMs) {
+    for (VMachineReference ref : job.getVMs()) {
+
+      VMachine vm = ref.get();
+      vm = service.allocateFloatingIp(vm);
+      
+      ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream("/tmp/" + job.getId() + ".zip"));
       for (GridFSDBFile file : files) {
-        vm = service.allocateFloatingIp(vm);
-        updateLog(job, "Synchronizing " + file.getFilename() + " to " + vm.getPublicIp() + ":/home/cloudats/projects/"  + job.getId());
-        SSHClient.sendFile(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
-            "/home/cloudats/projects/" + job.getId(), 
-            file.getFilename(), file.getInputStream());
-        service.deallocateFloatingIp(vm);
+        
+        byte[] buffer = new byte[4096]; // Create a buffer for copying
+        int bytes_read;
+
+        InputStream is = file.getInputStream();
+        ZipEntry zip = new ZipEntry(file.getFilename());
+        outDir.putNextEntry(zip);
+        while ((bytes_read = is.read(buffer)) != -1) {
+          outDir.write(buffer, 0, bytes_read);
+        }
+        is.close();
       }
+      outDir.close();
+      
+      SSHClient.checkEstablished(vm.getPublicIp(), 22, 300);
+      logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+      
+      updateLog(job, "Synchronizing /tmp/" + job.getId() + ".zip to " + vm.getPublicIp() + ":/home/cloudats/projects/"  + job.getId() + "/src/test/resources");
+      SSHClient.sendFile(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "/home/cloudats/projects/" + job.getId() + "/src/test/resources", 
+          "data.zip", new File("/tmp/" + job.getId() + ".zip"));
+      
+      Thread.sleep(3000);
+      
+      SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
+          "cd /home/cloudats/projects/" + job.getId() + "/src/test/resources" + " && unzip data.zip", null, null);
+      
+      service.deallocateFloatingIp(vm);
     }
   }
 

@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.service.report.Report;
@@ -27,6 +29,8 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.PerformanceJob;
+import org.ats.services.iaas.IaaSService;
+import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -36,6 +40,7 @@ import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.vmachine.VMachine;
+import org.ats.services.vmachine.VMachineReference;
 import org.ats.services.vmachine.VMachineService;
 
 import play.Logger;
@@ -48,6 +53,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -78,6 +86,9 @@ public class PerformanceController extends Controller {
   @Inject ReportService reportService;
   
   @Inject VMachineService vmachineService;
+  
+  @Inject IaaSServiceProvider iaasProvider;
+  
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   public Result list() {
@@ -303,7 +314,7 @@ public class PerformanceController extends Controller {
     return status(200, Json.parse(report.toString()));
   }
   
-public Result stopProject(String projectId) throws IOException {
+public Result stopProject(String projectId) throws IOException, JSchException, InterruptedException {
     
     PerformanceProject project = projectService.get(projectId);
     
@@ -314,7 +325,40 @@ public Result stopProject(String projectId) throws IOException {
     PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
-    AbstractJob<?> lastJob = jobList.next().get(0);
+    PerformanceJob lastJob = (PerformanceJob) jobList.next().get(0);
+    lastJob = (PerformanceJob) executorService.get(lastJob.getId(), "vms");
+    IaaSService service = iaasProvider.get();
+    //Restart JMeter Service on Test VM
+    for (VMachineReference ref : lastJob.getVMs()) {
+      VMachine vm = ref.get();
+      vm = service.allocateFloatingIp(vm);
+      SSHClient.checkEstablished(vm.getPublicIp(), 22, 300);
+      Logger.info("Connection to  " + vm.getPublicIp() + " is established");
+      
+      String command = "sudo -S -p '' service jmeter-2.13 restart";
+      Session session = SSHClient.getSession(vm.getPublicIp(), 22, "cloudats", "#CloudATS");              
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      channel.setCommand(command);
+      
+      OutputStream out = channel.getOutputStream();
+      channel.connect();
+      
+      out.write("#CloudATS\n".getBytes());
+      out.flush();
+      
+      while(true) {
+        if (channel.isClosed()) {
+          Logger.info("Restart Jmeter Service: " + channel.getExitStatus());
+          break;
+        }
+      }
+      
+      channel.disconnect();
+      session.disconnect();
+      Logger.info("Restarted Jmeter Service on " + vm.getPrivateIp());
+      
+      service.deallocateFloatingIp(vm);
+    }
     
     JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
     JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, lastJob.getId(), 
