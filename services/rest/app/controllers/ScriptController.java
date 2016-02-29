@@ -226,18 +226,22 @@ public class ScriptController extends Controller {
     }
     
     Set<String> listDeletedCSV = new HashSet<String>();
-    for (JsonNode json : data.get("csv_files")) {
-      listDeletedCSV.add(json.get("_id").asText());
-    }
-    
     Set<String> listOriginCSV = new HashSet<String>();
-    for (GridFSDBFile file : listCSV) {
-      listOriginCSV.add(file.getId().toString());
-    }    
-    
-    for (String s : listOriginCSV) {
-      if (!listDeletedCSV.contains(s)) {
-        fileService.deleteById(s);
+    if (data.get("csv_files") != null) {
+      
+      for (JsonNode json : data.get("csv_files")) {
+        listDeletedCSV.add(json.get("_id").asText());
+      }
+      
+      
+      for (GridFSDBFile file : listCSV) {
+        listOriginCSV.add(file.getId().toString());
+      }    
+      
+      for (String s : listOriginCSV) {
+        if (!listDeletedCSV.contains(s)) {
+          fileService.deleteById(s);
+        }
       }
     }
     
