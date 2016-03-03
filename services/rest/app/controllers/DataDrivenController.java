@@ -78,7 +78,10 @@ public class DataDrivenController extends Controller {
       List<DataDriven> list = pages.next();
       
       for (DataDriven data : list) {
-        arrayData.add(Json.parse(data.toString()));
+    	ObjectNode obj = Json.newObject();
+    	obj.put("_id", data.getId());
+    	obj.put("name", data.getName());
+        arrayData.add(obj);
       }
     }
     return status(200, arrayData);
