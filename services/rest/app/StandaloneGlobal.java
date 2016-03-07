@@ -130,8 +130,8 @@ public class StandaloneGlobal extends GlobalSettings {
         SeleniumUploadProjectService uploadService = injector.getInstance(SeleniumUploadProjectService.class);
         
         BasicDBList or = new BasicDBList();
-        or.add(new BasicDBObject("status", AbstractJob.Status.Queued));
-        or.add(new BasicDBObject("status", AbstractJob.Status.Running));
+        or.add(new BasicDBObject("status", AbstractJob.Status.Queued.toString()));
+        or.add(new BasicDBObject("status", AbstractJob.Status.Running.toString()));
         PageList<AbstractJob<?>> result = execService.query(new BasicDBObject("$or", or));
         while(result.hasNext()) {
           List<AbstractJob<?>> page = result.next();
