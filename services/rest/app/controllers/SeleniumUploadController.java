@@ -226,7 +226,7 @@ public class SeleniumUploadController extends Controller {
 
   public Result download(String projectId, String jobId) {
     AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
-    String path = "/tmp/"+projectId.substring(0, 8)+"/result-"+jobId;
+    String path = "/tmp/"+projectId.substring(0, 8);
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
@@ -237,7 +237,7 @@ public class SeleniumUploadController extends Controller {
     byte[] report = job.getRawData();
     FileOutputStream fileOut;
     try {
-      fileOut = new FileOutputStream(path+".tar.gz");
+      fileOut = new FileOutputStream(path + "/result-" + jobId + ".tar.gz");
       fileOut.write(report);
       fileOut.close();
     } catch (FileNotFoundException e) {
@@ -251,7 +251,7 @@ public class SeleniumUploadController extends Controller {
     response().setHeader("Content-Encoding", "gzip");
     response().setHeader("Content-disposition",
         "attachment; filename=report.tar.gz");
-    return ok(new File(path + ".tar.gz"));
+    return ok(new File(path + "/result-" + jobId + ".tar.gz"));
   }
   
   private void deleteFolder(File folder) {
