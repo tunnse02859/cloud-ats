@@ -199,33 +199,36 @@ public class StandaloneTrackingJobActor extends UntypedActor {
   private void doExecutePerformanceJob(PerformanceJob job, PerformanceProject project) throws Exception {
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
-    updateLog(job, "Generating performance project");
-    generatorService.generatePerformance("/tmp", job.getId(), false, job.getScripts());
+    
+    if (jenkinsVM.getStatus() == VMachine.Status.Started) {
+      updateLog(job, "Generating performance project");
+      generatorService.generatePerformance("/tmp", job.getId(), false, job.getScripts());
 
-    List<JMeterScriptReference> listScript = job.getScripts();
-    StringBuilder goalsBuilder = new StringBuilder("clean test ");
-    for (JMeterScriptReference ref : listScript) {
+      List<JMeterScriptReference> listScript = job.getScripts();
+      StringBuilder goalsBuilder = new StringBuilder("clean test ");
+      for (JMeterScriptReference ref : listScript) {
 
-      goalsBuilder.append("-Djmeter.").append(ref.getId()).append("=");
-      goalsBuilder.append(jenkinsVM.getPrivateIp());
-      job.addVMachine(vmRefFactory.create(jenkinsVM.getId()));
-      jenkinsVM.setStatus(VMachine.Status.InProgress);
-      vmachineService.update(jenkinsVM);
+        goalsBuilder.append("-Djmeter.").append(ref.getId()).append("=");
+        goalsBuilder.append(jenkinsVM.getPrivateIp());
+        job.addVMachine(vmRefFactory.create(jenkinsVM.getId()));
+        jenkinsVM.setStatus(VMachine.Status.InProgress);
+        vmachineService.update(jenkinsVM);
 
-      goalsBuilder.append(" ");
+        goalsBuilder.append(" ");
+      }
+
+      JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
+          "master" , "/tmp/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+
+      jenkinsJob.submit();
+      updateLog(job, "Submitted Jenkins job");
+
+      job.setStatus(Status.Running);
+
+      executorService.update(job);
     }
-
-    JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
-    JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-        "master" , "/tmp/" + job.getId() + "/pom.xml", goalsBuilder.toString());
-
-    jenkinsJob.submit();
-    updateLog(job, "Submitted Jenkins job");
-
-    job.setStatus(Status.Running);
-
-    executorService.update(job);
-
+    
     Event event  = eventFactory.create(job, "performance-job-tracking");
     event.broadcast();
   }
@@ -349,10 +352,10 @@ public class StandaloneTrackingJobActor extends UntypedActor {
       job.setStatus(Status.Running);
       job.setVMachineId(jenkinsVM.getId());
       executorService.update(job);
-      
-      Event event  = eventFactory.create(job, "keyword-job-tracking");
-      event.broadcast();
     }
+    
+    Event event  = eventFactory.create(job, "keyword-job-tracking");
+    event.broadcast();
   }
   
   private void processUploadJob(SeleniumUploadJob job) throws Exception {
@@ -473,10 +476,10 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       job.setStatus(Status.Running);
       job.setVMachineId(jenkinsVM.getId());
       executorService.update(job);
-      
-      Event event = eventFactory.create(job, "upload-job-tracking");
-      event.broadcast();
     }
+    
+    Event event = eventFactory.create(job, "upload-job-tracking");
+    event.broadcast();
   }
   
   private void updateLog(AbstractJob<?> job, String log) {
