@@ -1,4 +1,5 @@
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -133,9 +134,11 @@ public class StandaloneGlobal extends GlobalSettings {
         or.add(new BasicDBObject("status", AbstractJob.Status.Queued.toString()));
         or.add(new BasicDBObject("status", AbstractJob.Status.Running.toString()));
         PageList<AbstractJob<?>> result = execService.query(new BasicDBObject("$or", or));
+        List<AbstractJob<?>> holder = new ArrayList<AbstractJob<?>>();
         while(result.hasNext()) {
           List<AbstractJob<?>> page = result.next();
           for (AbstractJob<?> job : page) {
+            holder.add(job);
             AbstractJob.Type type = AbstractJob.Type.valueOf((String) job.get("type"));
             String projectId = job.getProjectId();
             switch (type) {
@@ -158,6 +161,11 @@ public class StandaloneGlobal extends GlobalSettings {
                 break;
             }
           }
+        }
+        
+        for (AbstractJob<?> job : holder) {
+          job.setStatus(AbstractJob.Status.Completed);
+          execService.update(job);
         }
       }
       
