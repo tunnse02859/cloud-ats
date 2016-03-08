@@ -118,18 +118,23 @@ public class TrackingJobActor extends UntypedActor {
         break;
       }
     } catch(Exception e) {
+      job = (PerformanceJob) executorService.get(job.getId(), "vms");
       job.setStatus(Status.Completed);
-      executorService.update(job);
       
-      VMachine vm = vmachineService.get(job.getTestVMachineId());
-      if (vm != null) {
-        vm.setStatus(VMachine.Status.Started);
-        vmachineService.update(vm);
+      for (VMachineReference ref : job.getVMs()) {
+        VMachine vm = ref.get();
+        if (vm != null) {
+          vm.setStatus(VMachine.Status.Started);
+          vmachineService.update(vm);
+        }
       }
       
       PerformanceProject project = perfService.get(job.getProjectId());
       project.setStatus(PerformanceProject.Status.READY);
       perfService.update(project);
+      
+      
+      executorService.update(job);
       
       //bubble event
       Event event = eventFactory.create(job, "performance-job-tracking");
@@ -222,6 +227,8 @@ public class TrackingJobActor extends UntypedActor {
       totalEngines = Math.max(totalEngines, numberEngine);
     }
     
+    
+    //Create lacking VM
     if (listVM.count() < totalEngines) {
       Thread.sleep(5000);
       updateLog(job, "Lack "+(totalEngines - listVM.count())+" VM to run test");
@@ -242,6 +249,7 @@ public class TrackingJobActor extends UntypedActor {
       event.broadcast();
       return;
     }
+    //End create lacking VM
     
     PageList<VMachine> listVMStarted = vmachineService.query(new BasicDBObject("system", false).append("ui", false).append("status", VMachine.Status.Started.toString()));
     
@@ -272,6 +280,7 @@ public class TrackingJobActor extends UntypedActor {
           "cd /home/cloudats/projects && unzip " +  job.getId() + ".zip", null, null);
       
       //get list of VM (max = 10 VM)
+      //TODO: What will happen if need more than 10 VMs ?
       List<VMachine> listVMs = null;
       while (listVM.hasNext()) {
         listVMs = listVM.next();
@@ -299,7 +308,7 @@ public class TrackingJobActor extends UntypedActor {
           }
         }
         goalsBuilder.append(" ");
-        
+        executorService.update(job);
         uploadCSVData(ref, job);
       }
       
@@ -327,38 +336,40 @@ public class TrackingJobActor extends UntypedActor {
     for (VMachineReference ref : job.getVMs()) {
 
       VMachine vm = ref.get();
-      vm = service.allocateFloatingIp(vm);
-      
-      ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream("/tmp/" + job.getId() + ".zip"));
-      for (GridFSDBFile file : files) {
+      try {
+        vm = service.allocateFloatingIp(vm);
         
-        byte[] buffer = new byte[4096]; // Create a buffer for copying
-        int bytes_read;
+        ZipOutputStream outDir = new ZipOutputStream(new FileOutputStream("/tmp/" + job.getId() + ".zip"));
+        for (GridFSDBFile file : files) {
+          
+          byte[] buffer = new byte[4096]; // Create a buffer for copying
+          int bytes_read;
 
-        InputStream is = file.getInputStream();
-        ZipEntry zip = new ZipEntry(file.getFilename());
-        outDir.putNextEntry(zip);
-        while ((bytes_read = is.read(buffer)) != -1) {
-          outDir.write(buffer, 0, bytes_read);
+          InputStream is = file.getInputStream();
+          ZipEntry zip = new ZipEntry(file.getFilename());
+          outDir.putNextEntry(zip);
+          while ((bytes_read = is.read(buffer)) != -1) {
+            outDir.write(buffer, 0, bytes_read);
+          }
+          is.close();
         }
-        is.close();
+        outDir.close();
+        
+        SSHClient.checkEstablished(vm.getPublicIp(), 22, 300);
+        logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+        
+        updateLog(job, "Synchronizing /tmp/" + job.getId() + ".zip to " + vm.getPublicIp() + ":/home/cloudats/projects/"  + job.getId() + "/src/test/resources");
+        SSHClient.sendFile(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
+            "/home/cloudats/projects/" + job.getId() + "/src/test/resources", 
+            "data.zip", new File("/tmp/" + job.getId() + ".zip"));
+        
+        Thread.sleep(3000);
+        
+        SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
+            "cd /home/cloudats/projects/" + job.getId() + "/src/test/resources" + " && unzip data.zip", null, null);
+      } finally {
+        service.deallocateFloatingIp(vm);
       }
-      outDir.close();
-      
-      SSHClient.checkEstablished(vm.getPublicIp(), 22, 300);
-      logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
-      
-      updateLog(job, "Synchronizing /tmp/" + job.getId() + ".zip to " + vm.getPublicIp() + ":/home/cloudats/projects/"  + job.getId() + "/src/test/resources");
-      SSHClient.sendFile(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "/home/cloudats/projects/" + job.getId() + "/src/test/resources", 
-          "data.zip", new File("/tmp/" + job.getId() + ".zip"));
-      
-      Thread.sleep(3000);
-      
-      SSHClient.execCommand(vm.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "cd /home/cloudats/projects/" + job.getId() + "/src/test/resources" + " && unzip data.zip", null, null);
-      
-      service.deallocateFloatingIp(vm);
     }
   }
 
