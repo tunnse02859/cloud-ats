@@ -163,7 +163,7 @@ public class StandaloneTrackingJobActor extends UntypedActor {
       BasicDBList list = new BasicDBList();
       for (JMeterScriptReference ref : job.getScripts()) {
         
-        String report = StringUtil.readStream(new FileInputStream("/home/cloudats/projects/" + job.getId() + "/target/" + ref.getId() + ".jtl"));
+        String report = StringUtil.readStream(new FileInputStream("/tmp/" + job.getId() + "/target/" + ref.getId() + ".jtl"));
         if (report.length() > 0) {
           list.add(new BasicDBObject("_id", ref.getId()).append("content", report));
         }
@@ -202,7 +202,7 @@ public class StandaloneTrackingJobActor extends UntypedActor {
     
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating performance project");
-      generatorService.generatePerformance("/home/cloudats/projects", job.getId(), false, job.getScripts());
+      generatorService.generatePerformance("/tmp", job.getId(), false, job.getScripts());
 
       List<JMeterScriptReference> listScript = job.getScripts();
       StringBuilder goalsBuilder = new StringBuilder("clean test ");
@@ -219,7 +219,7 @@ public class StandaloneTrackingJobActor extends UntypedActor {
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-          "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+          "master" , "/tmp/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
@@ -298,12 +298,12 @@ public class StandaloneTrackingJobActor extends UntypedActor {
       //Download target resource
       
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      ArchiveUtils.gzipCompress("/home/cloudats/projects/" + job.getId(), bos);
+      ArchiveUtils.gzipCompress("/tmp/" + job.getId(), bos);
       if (bos.size() > 0) 
         job.put("raw_data", bos.toByteArray());
       
       //Download result
-      String report = StringUtil.readStream(new FileInputStream("/home/cloudats/projects/" + job.getId() + "/target/surefire-reports/testng-results.xml"));
+      String report = StringUtil.readStream(new FileInputStream("/tmp/" + job.getId() + "/target/surefire-reports/testng-results.xml"));
       if (report.length() > 0)
         job.put("report", report);
       //End download result
@@ -335,13 +335,13 @@ public class StandaloneTrackingJobActor extends UntypedActor {
 
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      generatorService.generateKeyword("/home/cloudats/projects", job.getId(), false, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
+      generatorService.generateKeyword("/tmp", job.getId(), false, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
 
       StringBuilder goalsBuilder = new StringBuilder("clean test");
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-          "master" , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+          "master" , "/tmp/" + job.getId() + "/pom.xml", goalsBuilder.toString());
 
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
@@ -424,7 +424,7 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
 
       //Zip report
       ByteArrayOutputStream bosReport = new ByteArrayOutputStream();
-      ArchiveUtils.gzipCompress("/home/cloudats/projects/" + job.getId(), bosReport);
+      ArchiveUtils.gzipCompress("/tmp/" + job.getId(), bosReport);
       if (bosReport.size() > 0) {
         job.put("raw_report", bosReport.toByteArray());
         job.put("result", jkJob.getStatus(1));
@@ -456,17 +456,17 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       byte [] bFile = project.getRawData();
       String fileName = job.getId();
-      String path = "/home/cloudats/projects/" + fileName + ".zip";
+      String path = "/tmp/" + fileName + ".zip";
       FileOutputStream fileOut = new FileOutputStream(path);
       fileOut.write(bFile);
       fileOut.close();
       
-      File out = new File("/home/cloudats/projects/" + fileName);
+      File out = new File("/tmp/" + fileName);
       out.mkdirs();
       ArchiveUtils.zipDecompress(new File(path), out);
       
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
-      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), "master" , "/home/cloudats/projects/" + fileName + "/pom.xml", "clean test");
+      JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), "master" , "/tmp/" + fileName + "/pom.xml", "clean test");
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
       
