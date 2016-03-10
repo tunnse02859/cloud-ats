@@ -394,7 +394,7 @@ public class TrackingJobActor extends UntypedActor {
       if (vm != null) {
         vm.setStatus(VMachine.Status.Started);
         if (vm.getPublicIp() != null) iaasProvider.get().deallocateFloatingIp(vm);
-        else vmachineService.update(vm);
+        vmachineService.update(vm);
       }
       
       KeywordProject project = keywordService.get(job.getProjectId());
@@ -511,6 +511,13 @@ public class TrackingJobActor extends UntypedActor {
       updateLog(job, "Generating keyword project");
       String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
 
+      if(testVM.getPublicIp() == null) {
+        testVM = iaasProvider.get().allocateFloatingIp(testVM);
+        vmachineService.update(testVM);
+        Thread.sleep(15 * 1000);
+        SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
+        logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
+      }
       SSHClient.sendFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", "/home/cloudats/projects", job.getId() + ".zip", new File(path));
       
       Thread.sleep(3000);
@@ -561,7 +568,7 @@ public class TrackingJobActor extends UntypedActor {
       if (vm != null) {
         vm.setStatus(VMachine.Status.Started);
         if (vm.getPublicIp() != null) iaasProvider.get().deallocateFloatingIp(vm);
-        else vmachineService.update(vm);
+        vmachineService.update(vm);
       }
       
       SeleniumUploadProject project = keywordUploadService.get(job.getProjectId(),"raw");
@@ -668,6 +675,7 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
     
     if (testVM.getPublicIp() == null) {
       testVM = iaasProvider.get().allocateFloatingIp(testVM);
+      vmachineService.update(testVM);
       Thread.sleep(15 * 1000);
       SSHClient.checkEstablished(testVM.getPublicIp(), 22, 300);
       logger.log(Level.INFO, "Connection to  " + testVM.getPublicIp() + " is established");
