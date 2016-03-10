@@ -122,6 +122,7 @@ public class StandaloneGlobal extends GlobalSettings {
         ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
         VMachine vm = vmService.getSystemVM(tenantRefFactory.create(fsoft.getId()), null);
         vm.setPublicIp(publicAddress);
+        vm.setStatus(VMachine.Status.Started);
         vmService.update(vm);
         
         //Reset project status
