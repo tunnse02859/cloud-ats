@@ -203,7 +203,8 @@ public class StandaloneTrackingJobActor extends UntypedActor {
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating performance project");
       generatorService.generatePerformance("/tmp", job.getId(), false, job.getScripts());
-
+      Runtime.getRuntime().exec("chmod 777 -R /tmp/" + job.getId());
+      
       List<JMeterScriptReference> listScript = job.getScripts();
       StringBuilder goalsBuilder = new StringBuilder("clean test ");
       for (JMeterScriptReference ref : listScript) {
@@ -336,7 +337,8 @@ public class StandaloneTrackingJobActor extends UntypedActor {
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
       generatorService.generateKeyword("/tmp", job.getId(), false, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
-
+      Runtime.getRuntime().exec("chmod 777 -R /tmp/" + job.getId());
+      
       StringBuilder goalsBuilder = new StringBuilder("clean test");
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
@@ -464,6 +466,8 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       File out = new File("/tmp/" + fileName);
       out.mkdirs();
       ArchiveUtils.zipDecompress(new File(path), out);
+      
+      Runtime.getRuntime().exec("chmod 777 -R /tmp/" + job.getId());
       
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), "master" , "/tmp/" + fileName + "/pom.xml", "clean test");
