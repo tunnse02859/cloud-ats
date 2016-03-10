@@ -296,13 +296,13 @@ public class KeywordController extends Controller {
     return status(404);
   }
   
-  public Result listReport(String projectId) throws Exception {
+  public Result listReport(String projectId , String indexRequest) throws Exception {
     PageList<AbstractJob<?>> jobtList = executorService.query(new BasicDBObject("project_id", projectId), 1);
     jobtList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();
-    while(jobtList.hasNext()) {
-      
+    ArrayNode result = Json.newObject().arrayNode();
+    while(jobtList.hasNext()) {     
       for(AbstractJob<?> job: jobtList.next()) {
         if(job.getRawDataOutput() != null) {
           ObjectNode obj = Json.newObject();
@@ -315,9 +315,15 @@ public class KeywordController extends Controller {
           array.add(obj);
         }
       }
+      
     }
+    int index = Integer.parseInt(indexRequest);
+    for (int i = (index -1)*10; i < (index * 10); i++) {
+  	  result.add(array.get(i));
+    }
+    System.out.println("------COUNT------- : "+result.size());
 
-    return ok(array);
+    return ok(result);
   }
   
   public Result stopProject(String projectId) throws IOException {

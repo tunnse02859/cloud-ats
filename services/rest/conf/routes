@@ -40,7 +40,7 @@ POST    /api/v1/project/keyword                          @controllers.KeywordCon
 PUT		/api/v1/project/keyword							 @controllers.KeywordController.update()
 DELETE	/api/v1/project/keyword							 @controllers.KeywordController.delete()
 GET		/api/v1/project/keyword/:projectId/report/:jobId @controllers.KeywordController.report(projectId,jobId)
-GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
+GET		/api/v1/project/keyword/:projectId/reports/:index	     @controllers.KeywordController.listReport(projectId, index)
 GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
 GET		/api/v1/project/keyword/:projectId/logs			 @controllers.KeywordController.viewLog(projectId)	
 GET		/api/v1/project/keyword/:projectId/download/:jobId	@controllers.KeywordController.download(projectId,jobId)
