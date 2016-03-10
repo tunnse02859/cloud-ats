@@ -3,7 +3,6 @@
  */
 package org.ats.services.iaas;
 
-import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,13 +60,10 @@ public class StandaloneService implements IaaSService {
   @Override
   public VMachine createSystemVMAsync(TenantReference tenant, SpaceReference space) throws CreateVMException {
     try {
-      String hostname = InetAddress.getLocalHost().getHostName();
-      String localAddress = InetAddress.getByName(hostname).getHostAddress();
-
       HttpResponse response = HttpClientUtil.execute(HttpClientFactory.getInstance(), "http://ipinfo.io/ip");
       String publicAddress = HttpClientUtil.getContentBodyAsString(response).trim();
       
-      VMachine vm = vmachineFactory.create("standalone", tenant, space, true, false, publicAddress, localAddress, VMachine.Status.Started);
+      VMachine vm = vmachineFactory.create("standalone", tenant, space, true, false, publicAddress, "localhost", VMachine.Status.Started);
       vmachineService.create(vm);
       return vm;
     } catch (Exception e) {
