@@ -296,34 +296,40 @@ public class KeywordController extends Controller {
     return status(404);
   }
   
-  public Result listReport(String projectId , String indexRequest) throws Exception {
-    PageList<AbstractJob<?>> jobtList = executorService.query(new BasicDBObject("project_id", projectId), 1);
-    jobtList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+  public Result listReport(String projectId) throws Exception {
+	  
+	String indexRequest = request().getQueryString("index");
+    BasicDBObject query = new BasicDBObject();
+    BasicDBList andCondition = new BasicDBList();
+    andCondition.add(new BasicDBObject("project_id", projectId));
+    andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
+    query.append("$and", andCondition);
+    
+    PageList<AbstractJob<?>> jobs= executorService.query(query);
+    jobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();
-    ArrayNode result = Json.newObject().arrayNode();
-    while(jobtList.hasNext()) {     
-      for(AbstractJob<?> job: jobtList.next()) {
-        if(job.getRawDataOutput() != null) {
-          ObjectNode obj = Json.newObject();
-          
-          PageList<Report> pages = reportService.getList(job.getId(), Type.FUNCTIONAL, null);
-          Report report = pages.next().get(0);
-          
-          obj.put("report", Json.parse(report.toString()));
-          obj.put("created_date", formater.format(job.getCreatedDate()));
-          array.add(obj);
-        }
-      }
-      
-    }
     int index = Integer.parseInt(indexRequest);
-    for (int i = (index -1)*10; i < (index * 10); i++) {
-  	  result.add(array.get(i));
+    int count = 1;
+    List<AbstractJob<?>> list = jobs.getPage(index);
+    for (int i = 1; i <= list.size(); i ++) {
+    	AbstractJob<?> job = list.get(i -1);
+    	ObjectNode obj = Json.newObject();
+        PageList<Report> pages = reportService.getList(job.getId(), Type.FUNCTIONAL, null);
+        Report report = pages.next().get(0);
+        count = count + (index - 1)*10;
+        obj.put("report", Json.parse(report.toString()));
+        obj.put("created_date", formater.format(job.getCreatedDate()));
+        obj.put("stt", ((index -1) * 10) + i);
+        array.add(obj);
     }
-    System.out.println("------COUNT------- : "+result.size());
-
-    return ok(result);
+    
+    
+    ObjectNode obj = Json.newObject();
+    obj.put("result", array.toString());
+    obj.put("total", jobs.count());
+    
+    return ok(obj);
   }
   
   public Result stopProject(String projectId) throws IOException {
