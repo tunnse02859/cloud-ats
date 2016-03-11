@@ -15,5 +15,6 @@ public class CaseReport extends BasicDBObject {
    * 
    */
   private static final long serialVersionUID = 1L;
-
+  
+  
 }
