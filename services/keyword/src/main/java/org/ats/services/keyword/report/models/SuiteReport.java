@@ -5,6 +5,7 @@ package org.ats.services.keyword.report.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -26,8 +27,8 @@ public class SuiteReport extends BasicDBObject {
   
   @Inject ReferenceFactory<CaseReference> caseRefFactory;
   
-  public SuiteReport(String jobId, String name, String id, int totalPass, int totalFail, int totalSkip, List<CaseReference> cases) {
-    this.put("_id", id);
+  public SuiteReport(String jobId, String name, int totalPass, int totalFail, int totalSkip, List<CaseReference> cases) {
+    this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("totalPass", totalPass);
     this.put("totalFail", totalFail);
