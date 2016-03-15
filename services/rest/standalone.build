@@ -1,0 +1,53 @@
+import com.typesafe.sbt.SbtNativePackager._
+import com.typesafe.sbt.packager.Keys._
+import NativePackagerKeys._
+import com.typesafe.sbt.packager.archetypes.ServerLoader.{SystemV, Upstart}
+
+packageArchetype.java_server
+
+serverLoading in Debian := SystemV
+
+name := """rest"""
+
+version := "1.1-SNAPSHOT"
+
+lazy val root = (project in file(".")).enablePlugins(PlayJava)
+
+scalaVersion := "2.11.1"
+
+maintainer in Debian := "Hai Nguyen <haithanh0809@gmail.com>"
+
+packageSummary in Debian := "CloudATS Standalone"
+
+packageDescription in Debian := "CloudATS Standalone"
+
+exportJars := true
+
+libraryDependencies ++= Seq(
+  cache,
+	"org.ats" % "cloud-common" % "1.1-SNAPSHOT",
+	"org.ats" % "cloud-jenkins" % "1.1-SNAPSHOT",
+	"org.ats.services" % "database" % "1.1-SNAPSHOT",
+	"org.ats.services" % "organization" % "1.1-SNAPSHOT",
+	"org.ats.services" % "event" % "1.1-SNAPSHOT",
+	"org.ats.services" % "datadriven" % "1.1-SNAPSHOT",
+	"org.ats.services" % "keyword" % "1.1-SNAPSHOT",
+	"org.ats.services" % "performance" % "1.1-SNAPSHOT",
+	"org.ats.services" % "vmachine" % "1.1-SNAPSHOT",
+	"org.ats.services" % "generator" % "1.1-SNAPSHOT",
+	"org.ats.services" % "executor" % "1.1-SNAPSHOT",
+	"org.ats.services" % "report" % "1.1-SNAPSHOT",
+	"org.ats.services" % "selenium-upload" % "1.1-SNAPSHOT",
+	"com.amazonaws" % "aws-java-sdk-ec2" % "1.10.15",
+	"net.sf.opencsv" % "opencsv" % "2.3"
+)
+
+
+resolvers += (
+	"Local Maven Repository" at "file://" + Path.userHome.absolutePath  + "/java/dependencies/repository"		
+)
+
+resolvers ++= Seq(
+	Resolver.sonatypeRepo("snapshots"),
+	Resolver.mavenLocal
+)

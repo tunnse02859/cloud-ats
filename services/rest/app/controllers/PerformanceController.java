@@ -135,7 +135,7 @@ public class PerformanceController extends Controller {
       log = lastJob.getLog();
     }
     
-    return status(200, log);
+    return log.isEmpty() ? status(404) : status(200, log);
   }
   
   public Result create() {
