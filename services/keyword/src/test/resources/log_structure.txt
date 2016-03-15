@@ -1,28 +1,28 @@
 [Duration-Start][Suite]{id: suiteId, timestamp: longValue}
-[Start][Suite]{name: suiteName, id: suiteId}
+[Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId"}
 
-		[Start][Case]{name: getCaseNameWithData, id: getCaseWithDataId}
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":{"url"}}}
+				[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
 				//content output here
 				
 				[End][Step]
-				[Start][Step]{"name": "get", "url": "${url_data}", "params":{"url"}}}
+				[Start][Step]{"name": "get", "url": "${url_data}", "locator" : "locator", "params":["url", "locator"]}
 				//content output here
 				[End][Step]
 			[End][Data]
 			[Start][Data]{"url_data": "http://localhost1:8080"}
-				[Start][Step]{"name": "get", "url": "${url_data}", "params":["url"]}}
+				[Start][Step]{"name": "get", "url": "${url_data}", "params":["url"]}
 				//content output here
 				[End][Step]
 			[End][Data]
-		[End][Case]{name: getCaseNameWithData, id: getCaseWithDataId}
+		[End][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
 		
-		[Start][Case]{name: getCaseNameNoData, id: getCaseNoDataId}
-			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}}
+		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
+			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
-		[End][Case]{name: getCaseNameNoData, id: getCaseNoDataId}
+		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
 		
-[End][Suite][name: suiteName, id: suiteId]
+[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId"]
 [Duration-End][Suite]{id: suiteId, timestamp: longValue}

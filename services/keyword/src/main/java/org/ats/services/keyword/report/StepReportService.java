@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
  */
 public class StepReportService extends AbstractMongoCRUD<StepReport> {
   
-  private final String COL_NAME = "step-report";
+  private final String COL_NAME = "report-step";
   
   @Inject
   StepReportService(MongoDBService mongo, Logger logger) {

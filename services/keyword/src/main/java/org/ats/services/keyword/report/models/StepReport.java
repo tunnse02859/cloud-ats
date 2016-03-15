@@ -31,4 +31,12 @@ public class StepReport extends BasicDBObject {
     return this.getString("name");
   }
   
+  public String getId() {
+    return this.getString("_id");
+  }
+  
+  public void setId(String id) {
+    this.put("_id", id);
+  }
+  
 }

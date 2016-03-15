@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
  */
 public class SuiteReportService extends AbstractMongoCRUD<SuiteReport> {
   
-  private final String COL_NAME = "suite-report";
+  private final String COL_NAME = "report-suite";
    
   @Inject
   public SuiteReportService(MongoDBService mongo, Logger logger) {

@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
  */
 public class CaseReportService extends AbstractMongoCRUD<CaseReport> {
   
-  private final String COL_NAME = "case-report";
+  private final String COL_NAME = "report-case";
   
   
   @Inject

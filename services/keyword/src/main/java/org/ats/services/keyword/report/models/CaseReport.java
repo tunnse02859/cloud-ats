@@ -3,8 +3,14 @@
  */
 package org.ats.services.keyword.report.models;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import org.ats.services.data.common.Reference;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -18,12 +24,38 @@ public class CaseReport extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
   
-  public CaseReport(String suite_report_id, String data_source, String name, String case_id) {
+  private ReferenceFactory<StepReportReference> stepRefFactory;
+  
+  public CaseReport(String suite_report_id, String data_source, String name, String case_id, List<StepReportReference> steps) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("suite_report_id", suite_report_id);
     this.put("data_source", data_source);
     this.put("name", name);
     this.put("case_id", case_id);
+    BasicDBList list = new BasicDBList();
+    for (StepReportReference step : steps) {
+      list.add(step.toJSon());
+    }
+    this.put("steps", list);
+  }
+  
+  public void setSteps(List<StepReportReference> steps) {
+    BasicDBList list = new BasicDBList();
+    for (StepReportReference ref : steps) {
+      list.add(ref.toJSon());
+    }
+    this.put("steps", list);
+  }
+  
+  public List<StepReportReference> getSteps() {
+    
+    BasicDBList list = this.get("steps") == null ? new BasicDBList() : (BasicDBList) this.get("steps");
+    List<StepReportReference> steps = new ArrayList<StepReportReference>();
+    for (Object obj : list) {
+      
+      steps.add(stepRefFactory.create(((BasicDBObject) obj).getString("_id")));
+    }
+    return steps;
     
   }
   
