@@ -39,8 +39,8 @@ public class GoogleWithOptions {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource27e0c42f")
-  public static Object[][] userSource27e0c42f() throws Exception {
+  @DataProvider(name = "userSourceb2f1ce9e")
+  public static Object[][] userSourceb2f1ce9e() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,9 +50,11 @@ public class GoogleWithOptions {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource27e0c42f")
-  public void test27e0c42f(JsonNode data) throws Exception {
-    String username = data.get("username").toString().split("\"")[1];
+  @Test (dataProvider = "userSourceb2f1ce9e")
+  public void testb2f1ce9e(JsonNode data) throws Exception {
+    int length_username = data.get("username").toString().length();
+    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     System.out.println("[INFO] Waiting 3(s) for next step");

@@ -39,8 +39,8 @@ public class GoogleWithPriovity {
     wd.quit();
   }
   
-  @DataProvider(name = "userSourcebc1fe76f")
-  public static Object[][] userSourcebc1fe76f() throws Exception {
+  @DataProvider(name = "userSource40fc119a")
+  public static Object[][] userSource40fc119a() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,8 +50,8 @@ public class GoogleWithPriovity {
     }
     return objData;
 }
-  @Test (dataProvider = "userSourcebc1fe76f", priority =1)
-  public void testbc1fe76f(JsonNode data) throws Exception {
+  @Test (dataProvider = "userSource40fc119a", priority = 1)
+  public void test40fc119a(JsonNode data) throws Exception {
     int length_username = data.get("username").toString().length();
     String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
 
@@ -72,8 +72,8 @@ try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e)
 
     System.out.println("[INFO] Waiting 3(s) for next step");
 try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e); }
-  }@DataProvider(name = "userSourcec4d6df1a")
-  public static Object[][] userSourcec4d6df1a() throws Exception {
+  }@DataProvider(name = "userSource55b973a3")
+  public static Object[][] userSource55b973a3() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -83,8 +83,8 @@ try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e)
     }
     return objData;
 }
-  @Test (dataProvider = "userSourcec4d6df1a", priority =2)
-  public void test2c4d6df1a(JsonNode data) throws Exception {
+  @Test (dataProvider = "userSource55b973a3", priority = 2)
+  public void test255b973a3(JsonNode data) throws Exception {
     int length_username = data.get("username").toString().length();
     String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
 

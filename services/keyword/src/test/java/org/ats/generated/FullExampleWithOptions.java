@@ -2,8 +2,8 @@
 
 package org.ats.generated;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 import java.io.IOException;
@@ -27,27 +27,27 @@ public class FullExampleWithOptions {
 
   private RemoteWebDriver wd;
 
-  @BeforeMethod
+  @BeforeClass
   public void setUp() throws Exception {
     wd = new FirefoxDriver();
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
   }
    
-  @AfterMethod
+  @AfterClass
   public void tearDown() {
     wd.quit();
   }
   
   
-  @Test
-  public void testde6df0dc() throws Exception {
+  @Test(priority = 1)
+  public void testfd7065b7() throws Exception {
     System.out.println("[INFO] Perform get url \"http://saucelabs.com/test/guinea-pig/\"");
     wd.get("http://saucelabs.com/test/guinea-pig/");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform clickElement at \"i am a link\"");
+    System.out.println("[INFO] Perform clickElement by \"link text\" at \"i am a link\"");
     wd.findElement(By.linkText("i am a link")).click();
 
     System.out.println("[INFO] Waiting 5(s) for next step");
@@ -110,31 +110,31 @@ try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e)
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform storeText at \"i_am_an_id\" with variable \"text\"");
+    System.out.println("[INFO] Perform storeText by \"id\" at \"i_am_an_id\" with variable \"text\"");
     String text = wd.findElement(By.id("i_am_an_id")).getText();
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyText at \"i_am_an_id\" value \"" + text + "\"");
+    System.out.println("[INFO] Perform verifyText by \"id\" at \"i_am_an_id\" value \"" + text + "\"");
     if (!wd.findElement(By.id("i_am_an_id")).getText().equals(text)) {
       System.out.println("verifyText failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyText at \"i_am_an_id\" value \"not " + text + "\"");
+    System.out.println("[INFO] Perform verifyText by \"id\" at \"i_am_an_id\" value \"not " + text + "\"");
     if (wd.findElement(By.id("i_am_an_id")).getText().equals("not \" + text + \"")) {
       System.out.println("!verifyText failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertText at \"i_am_an_id\" value \"" + text + "\"");
+    System.out.println("[INFO] Perform assertText by \"id\" at \"i_am_an_id\" value \"" + text + "\"");
     assertEquals(wd.findElement(By.id("i_am_an_id")).getText(), text);
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertText at \"i_am_an_id\" value \"not " + text + "\"");
+    System.out.println("[INFO] Perform assertText by \"id\" at \"i_am_an_id\" value \"not " + text + "\"");
     assertNotEquals(wd.findElement(By.id("i_am_an_id")).getText(), "not \" + text + \"");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
@@ -336,114 +336,114 @@ try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e)
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform storeElementSelected at \"unchecked_checkbox\" with variable \"element_is_selected\"");
+    System.out.println("[INFO] Perform storeElementSelected by \"id\" at \"unchecked_checkbox\" with variable \"element_is_selected\"");
     boolean element_is_selected = (wd.findElement(By.id("unchecked_checkbox")).isSelected());
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform setElementSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform setElementSelected by \"id\" at \"unchecked_checkbox\"");
     if (!wd.findElement(By.id("unchecked_checkbox")).isSelected()) {
       wd.findElement(By.id("unchecked_checkbox")).click();
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform verifyElementSelected by \"id\" at \"unchecked_checkbox\"");
     if (!(wd.findElement(By.id("unchecked_checkbox")).isSelected())) {
       System.out.println("verifyElementSelected failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform assertElementSelected by \"id\" at \"unchecked_checkbox\"");
     assertTrue((wd.findElement(By.id("unchecked_checkbox")).isSelected()));
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform setElementNotSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform setElementNotSelected by \"id\" at \"unchecked_checkbox\"");
     if (wd.findElement(By.id("unchecked_checkbox")).isSelected()) {
       wd.findElement(By.id("unchecked_checkbox")).click();
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform verifyElementSelected by \"id\" at \"unchecked_checkbox\"");
     if ((wd.findElement(By.id("unchecked_checkbox")).isSelected())) {
       System.out.println("!verifyElementSelected failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementSelected at \"unchecked_checkbox\"");
+    System.out.println("[INFO] Perform assertElementSelected by \"id\" at \"unchecked_checkbox\"");
     assertFalse((wd.findElement(By.id("unchecked_checkbox")).isSelected()));
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform storeElementAttribute at \"i am a link\" attribute name \"href\" with variable \"link_href\"");
+    System.out.println("[INFO] Perform storeElementAttribute by \"link text\" at \"i am a link\" attribute name \"href\" with variable \"link_href\"");
     String link_href = wd.findElement(By.linkText("i am a link")).getAttribute("href");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementAttribute at \"i am a link\" attribute name \"href\" value \"" + link_href + "\"");
+    System.out.println("[INFO] Perform verifyElementAttribute by \"link text\" at \"i am a link\" attribute name \"href\" value \"" + link_href + "\"");
     if (!wd.findElement(By.linkText("i am a link")).getAttribute("href").equals(link_href)) {
       System.out.println("verifyElementAttribute failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementAttribute at \"i am a link\" attribute name \"href\" value \"" + link_href + "\"");
+    System.out.println("[INFO] Perform assertElementAttribute by \"link text\" at \"i am a link\" attribute name \"href\" value \"" + link_href + "\"");
     assertEquals(wd.findElement(By.linkText("i am a link")).getAttribute("href"), link_href);
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform sendKeysToElement at \"comments\" value \"w00t\"");
+    System.out.println("[INFO] Perform sendKeysToElement by \"id\" at \"comments\" value \"w00t\"");
     wd.findElement(By.id("comments")).click();
     wd.findElement(By.id("comments")).sendKeys("w00t");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementAttribute at \"i am a link\" attribute name \"href\" value \"not " + link_href + "\"");
+    System.out.println("[INFO] Perform verifyElementAttribute by \"link text\" at \"i am a link\" attribute name \"href\" value \"not " + link_href + "\"");
     if (wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not \" + link_href + \"")) {
       System.out.println("!verifyElementAttribute failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementAttribute at \"i am a link\" attribute name \"href\" value \"not " + link_href + "\"");
+    System.out.println("[INFO] Perform assertElementAttribute by \"link text\" at \"i am a link\" attribute name \"href\" value \"not " + link_href + "\"");
     assertNotEquals(wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not \" + link_href + \"");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform storeElementValue at \"comments\" with variable \"comments\"");
+    System.out.println("[INFO] Perform storeElementValue by \"id\" at \"comments\" with variable \"comments\"");
     String comments = wd.findElement(By.id("comments")).getAttribute("value");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementValue at \"comments\" value \"w00t\"");
+    System.out.println("[INFO] Perform verifyElementValue by \"id\" at \"comments\" value \"w00t\"");
     if (!wd.findElement(By.id("comments")).getAttribute("value").equals("w00t")) {
       System.out.println("verifyElementValue failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementValue at \"comments\" value \"w00t\"");
+    System.out.println("[INFO] Perform assertElementValue by \"id\" at \"comments\" value \"w00t\"");
     assertEquals(wd.findElement(By.id("comments")).getAttribute("value"), "w00t");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform verifyElementValue at \"comments\" value \"not w00t\"");
+    System.out.println("[INFO] Perform verifyElementValue by \"id\" at \"comments\" value \"not w00t\"");
     if (wd.findElement(By.id("comments")).getAttribute("value").equals("not w00t")) {
       System.out.println("!verifyElementValue failed");
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform assertElementValue at \"comments\" value \"not w00t\"");
+    System.out.println("[INFO] Perform assertElementValue by \"id\" at \"comments\" value \"not w00t\"");
     assertNotEquals(wd.findElement(By.id("comments")).getAttribute("value"), "not w00t");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform submitElement at \"comments\"");
+    System.out.println("[INFO] Perform submitElement by \"id\" at \"comments\"");
     wd.findElement(By.id("comments")).submit();
 
     System.out.println("[INFO] Waiting 5(s) for next step");

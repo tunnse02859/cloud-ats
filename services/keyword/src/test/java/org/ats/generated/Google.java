@@ -39,8 +39,8 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource77f9ab66")
-  public static Object[][] userSource77f9ab66() throws Exception {
+  @DataProvider(name = "userSource68acc340")
+  public static Object[][] userSource68acc340() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,9 +50,11 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource77f9ab66")
-  public void test77f9ab66(JsonNode data) throws Exception {
-    String username = data.get("username").toString().split("\"")[1];
+  @Test (dataProvider = "userSource68acc340")
+  public void test68acc340(JsonNode data) throws Exception {
+    int length_username = data.get("username").toString().length();
+    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+
     wd.get("https://www.google.com/?gws_rd=ssl");
 
     wd.findElement(By.xpath(".//input[@id='lst-ib']")).click();

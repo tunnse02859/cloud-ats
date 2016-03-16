@@ -41,7 +41,7 @@ public class SwitchToFrame {
   
   
   @Test
-  public void test1a4f38d1() throws Exception {
+  public void test7d90f5e2() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/frames.html");
 
     wd = (FirefoxDriver) wd.switchTo().frame("content");

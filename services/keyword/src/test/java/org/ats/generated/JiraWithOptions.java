@@ -2,8 +2,8 @@
 
 package org.ats.generated;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 import java.io.IOException;
@@ -27,21 +27,21 @@ public class JiraWithOptions {
 
   private RemoteWebDriver wd;
 
-  @BeforeMethod
+  @BeforeClass
   public void setUp() throws Exception {
     wd = new FirefoxDriver();
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
   }
    
-  @AfterMethod
+  @AfterClass
   public void tearDown() {
     wd.quit();
   }
   
   
-  @Test
-  public void test0148e9d6() throws Exception {
+  @Test(priority = 1)
+  public void teste5d1b3f3() throws Exception {
     System.out.println("[INFO] Perform get url \"https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa\"");
     wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
 
@@ -52,31 +52,31 @@ try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e)
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform sendKeysToElement at \".//*[@id='login-form-username']\" value \"trinhtv3\"");
+    System.out.println("[INFO] Perform sendKeysToElement by \"xpath\" at \".//*[@id='login-form-username']\" value \"trinhtv3\"");
     wd.findElement(By.xpath(".//*[@id='login-form-username']")).click();
     wd.findElement(By.xpath(".//*[@id='login-form-username']")).sendKeys("trinhtv3");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform sendKeysToElement at \".//*[@id='login-form-password']\" value \"DamMai@65\"");
+    System.out.println("[INFO] Perform sendKeysToElement by \"xpath\" at \".//*[@id='login-form-password']\" value \"DamMai@65\"");
     wd.findElement(By.xpath(".//*[@id='login-form-password']")).click();
     wd.findElement(By.xpath(".//*[@id='login-form-password']")).sendKeys("DamMai@65");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform setElementSelected at \".//*[@id='login-form-remember-me']\"");
+    System.out.println("[INFO] Perform setElementSelected by \"xpath\" at \".//*[@id='login-form-remember-me']\"");
     if (!wd.findElement(By.xpath(".//*[@id='login-form-remember-me']")).isSelected()) {
       wd.findElement(By.xpath(".//*[@id='login-form-remember-me']")).click();
     }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform submitElement at \".//*[@id='login']\"");
+    System.out.println("[INFO] Perform submitElement by \"xpath\" at \".//*[@id='login']\"");
     wd.findElement(By.xpath(".//*[@id='login']")).submit();
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform pause wait time \"2000\"s");
+    System.out.println("[INFO] Perform pause wait time \"2000\"ms");
     try { Thread.sleep(2000l); } catch (Exception e) { throw new RuntimeException(e); }
 
     System.out.println("[INFO] Waiting 5(s) for next step");

@@ -39,8 +39,8 @@ public class GoogleMultiCasesWithPriovity {
     wd.quit();
   }
   
-  @DataProvider(name = "userSourcec4d065f3")
-  public static Object[][] userSourcec4d065f3() throws Exception {
+  @DataProvider(name = "userSource1dc131ec")
+  public static Object[][] userSource1dc131ec() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,8 +50,8 @@ public class GoogleMultiCasesWithPriovity {
     }
     return objData;
 }
-  @Test (dataProvider = "userSourcec4d065f3", priority =1)
-  public void testc4d065f3(JsonNode data) throws Exception {
+  @Test (dataProvider = "userSource1dc131ec", priority = 1)
+  public void test1dc131ec(JsonNode data) throws Exception {
     int length_username = data.get("username").toString().length();
     String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
 
@@ -73,8 +73,8 @@ try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e)
     System.out.println("[INFO] Waiting 3(s) for next step");
 try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e); }
   }
-  @Test(priority =2)
-  public void test29be9e8e7() throws Exception {
+  @Test(priority = 2)
+  public void test2ef5adbf6() throws Exception {
     wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
 
     System.out.println("[INFO] Waiting 3(s) for next step");

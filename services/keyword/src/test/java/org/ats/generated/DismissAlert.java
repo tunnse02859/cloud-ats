@@ -41,7 +41,7 @@ public class DismissAlert {
   
   
   @Test
-  public void test483ee068() throws Exception {
+  public void teste5f8cfcc() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/confirm.html");
 
     wd.switchTo().alert().dismiss();

@@ -2,8 +2,8 @@
 
 package org.ats.generated;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 import java.io.IOException;
@@ -27,27 +27,27 @@ public class SwitchToWindowWithOptions {
 
   private RemoteWebDriver wd;
 
-  @BeforeMethod
+  @BeforeClass
   public void setUp() throws Exception {
     wd = new FirefoxDriver();
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
   }
    
-  @AfterMethod
+  @AfterClass
   public void tearDown() {
     wd.quit();
   }
   
   
-  @Test
-  public void test545bccfd() throws Exception {
+  @Test(priority = 1)
+  public void test70e60419() throws Exception {
     System.out.println("[INFO] Perform get url \"http://seleniumbuilder.github.io/se-builder/test/window.html\"");
     wd.get("http://seleniumbuilder.github.io/se-builder/test/window.html");
 
     System.out.println("[INFO] Waiting 5(s) for next step");
 try { Thread.sleep(5000l); } catch (Exception e) { throw new RuntimeException(e); }
-    System.out.println("[INFO] Perform pause wait time \"1000\"s");
+    System.out.println("[INFO] Perform pause wait time \"1000\"ms");
     try { Thread.sleep(1000l); } catch (Exception e) { throw new RuntimeException(e); }
 
     System.out.println("[INFO] Waiting 5(s) for next step");
