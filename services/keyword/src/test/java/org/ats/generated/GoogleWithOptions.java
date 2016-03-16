@@ -39,8 +39,8 @@ public class GoogleWithOptions {
     wd.quit();
   }
   
-  @DataProvider(name = "userSourceb2f1ce9e")
-  public static Object[][] userSourceb2f1ce9e() throws Exception {
+  @DataProvider(name = "userSource03c3571f")
+  public static Object[][] userSource03c3571f() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,10 +50,14 @@ public class GoogleWithOptions {
     }
     return objData;
 }
-  @Test (dataProvider = "userSourceb2f1ce9e")
-  public void testb2f1ce9e(JsonNode data) throws Exception {
-    int length_username = data.get("username").toString().length();
-    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+  @Test (dataProvider = "userSource03c3571f")
+  public void test03c3571f(JsonNode data) throws Exception {
+    Object data_username = data.get("username");
+    String username = null;
+    if (data_username != null) {
+        username = data_username.toString();
+        username = username.substring(1, username.length() - 1).replace("\\\"","\"");
+    }
 
     wd.get("https://www.google.com/?gws_rd=ssl");
 

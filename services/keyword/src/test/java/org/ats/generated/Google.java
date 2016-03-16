@@ -39,8 +39,8 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource68acc340")
-  public static Object[][] userSource68acc340() throws Exception {
+  @DataProvider(name = "userSource61054a24")
+  public static Object[][] userSource61054a24() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,10 +50,14 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource68acc340")
-  public void test68acc340(JsonNode data) throws Exception {
-    int length_username = data.get("username").toString().length();
-    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+  @Test (dataProvider = "userSource61054a24")
+  public void test61054a24(JsonNode data) throws Exception {
+    Object data_username = data.get("username");
+    String username = null;
+    if (data_username != null) {
+        username = data_username.toString();
+        username = username.substring(1, username.length() - 1).replace("\\\"","\"");
+    }
 
     wd.get("https://www.google.com/?gws_rd=ssl");
 

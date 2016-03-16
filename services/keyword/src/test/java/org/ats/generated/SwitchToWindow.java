@@ -41,7 +41,7 @@ public class SwitchToWindow {
   
   
   @Test
-  public void test58846b14() throws Exception {
+  public void test9c1dfef9() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/window.html");
 
     try { Thread.sleep(1000l); } catch (Exception e) { throw new RuntimeException(e); }

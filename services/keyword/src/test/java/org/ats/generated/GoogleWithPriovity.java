@@ -39,8 +39,8 @@ public class GoogleWithPriovity {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource40fc119a")
-  public static Object[][] userSource40fc119a() throws Exception {
+  @DataProvider(name = "userSource377c5723")
+  public static Object[][] userSource377c5723() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -50,10 +50,14 @@ public class GoogleWithPriovity {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource40fc119a", priority = 1)
-  public void test40fc119a(JsonNode data) throws Exception {
-    int length_username = data.get("username").toString().length();
-    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+  @Test (dataProvider = "userSource377c5723", priority = 1)
+  public void test377c5723(JsonNode data) throws Exception {
+    Object data_username = data.get("username");
+    String username = null;
+    if (data_username != null) {
+        username = data_username.toString();
+        username = username.substring(1, username.length() - 1).replace("\\\"","\"");
+    }
 
     wd.get("https://www.google.com/?gws_rd=ssl");
 
@@ -72,8 +76,8 @@ try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e)
 
     System.out.println("[INFO] Waiting 3(s) for next step");
 try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e); }
-  }@DataProvider(name = "userSource55b973a3")
-  public static Object[][] userSource55b973a3() throws Exception {
+  }@DataProvider(name = "userSourcefe9265e0")
+  public static Object[][] userSourcefe9265e0() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
 
@@ -83,10 +87,14 @@ try { Thread.sleep(3000l); } catch (Exception e) { throw new RuntimeException(e)
     }
     return objData;
 }
-  @Test (dataProvider = "userSource55b973a3", priority = 2)
-  public void test255b973a3(JsonNode data) throws Exception {
-    int length_username = data.get("username").toString().length();
-    String username = data.get("username").toString().substring(1,length_username-1).replace("\\\"","\"");
+  @Test (dataProvider = "userSourcefe9265e0", priority = 2)
+  public void test2fe9265e0(JsonNode data) throws Exception {
+    Object data_username = data.get("username");
+    String username = null;
+    if (data_username != null) {
+        username = data_username.toString();
+        username = username.substring(1, username.length() - 1).replace("\\\"","\"");
+    }
 
     wd.get("https://www.google.com/?gws_rd=ssl");
 

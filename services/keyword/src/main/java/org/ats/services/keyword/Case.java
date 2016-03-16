@@ -145,10 +145,13 @@ public class Case extends AbstractTemplate {
       
       while (nodeIterator.hasNext()) {
         Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodeIterator.next();
-        String length = "    int length_"+entry.getKey()+" = data.get(\""+entry.getKey()+"\").toString().length();\n";
-        sb.append(length);
-        String a = "    String "+entry.getKey()+" = data.get(\""+entry.getKey().toString()+"\").toString().substring(1,length_"+entry.getKey()+"-1).replace(\"\\\\\\\"\",\"\\\"\");\n";
-        sb.append(a);
+        String key = entry.getKey();
+        sb.append("    Object data_").append(key).append(" = data.get(\"").append(key).append("\");\n");
+        sb.append("    String ").append(key).append(" = null;\n");
+        sb.append("    if (data_").append(key).append(" != null) {\n");
+        sb.append("        ").append(key).append(" = ").append("data_").append(key).append(".toString();\n");
+        sb.append("        ").append(key).append(" = ").append(key).append(".substring(1, ").append(key).append(".length() - 1).replace(\"\\\\\\\"\",\"\\\"\");\n");
+        sb.append("    }\n");
         sb.append("\n");
      }
       

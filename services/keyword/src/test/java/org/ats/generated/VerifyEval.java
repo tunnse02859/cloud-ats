@@ -41,7 +41,7 @@ public class VerifyEval {
   
   
   @Test
-  public void testa2a54ea3() throws Exception {
+  public void test5d8f54d5() throws Exception {
     wd.get("http://saucelabs.com/test/guinea-pig");
 
     if (!(wd.findElements(By.cssSelector("#i_am_an_id")).size() != 0)) {

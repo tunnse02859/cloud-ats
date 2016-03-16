@@ -41,7 +41,7 @@ public class FullExampleWithPriority {
   
   
   @Test(priority = 1)
-  public void test3d57bafe() throws Exception {
+  public void test7cd76e60() throws Exception {
     wd.get("http://saucelabs.com/test/guinea-pig/");
 
     wd.findElement(By.linkText("i am a link")).click();
@@ -241,7 +241,7 @@ public class FullExampleWithPriority {
 
   }
   @Test(priority = 2)
-  public void test2dc1b4ce7() throws Exception {
+  public void test2ded707fd() throws Exception {
     wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
 
     wd = (FirefoxDriver) wd.switchTo().frame("gadget-0");

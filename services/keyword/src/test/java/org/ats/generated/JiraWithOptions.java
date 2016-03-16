@@ -41,7 +41,7 @@ public class JiraWithOptions {
   
   
   @Test(priority = 1)
-  public void teste5d1b3f3() throws Exception {
+  public void testa7b6fe75() throws Exception {
     System.out.println("[INFO] Perform get url \"https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa\"");
     wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
 

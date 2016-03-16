@@ -41,7 +41,7 @@ public class SwitchToWindowWithOptions {
   
   
   @Test(priority = 1)
-  public void test70e60419() throws Exception {
+  public void test846f9f3e() throws Exception {
     System.out.println("[INFO] Perform get url \"http://seleniumbuilder.github.io/se-builder/test/window.html\"");
     wd.get("http://seleniumbuilder.github.io/se-builder/test/window.html");
 

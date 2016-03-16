@@ -41,7 +41,7 @@ public class FullExampleWithOptions {
   
   
   @Test(priority = 1)
-  public void testfd7065b7() throws Exception {
+  public void testb3fe3f4c() throws Exception {
     System.out.println("[INFO] Perform get url \"http://saucelabs.com/test/guinea-pig/\"");
     wd.get("http://saucelabs.com/test/guinea-pig/");
 

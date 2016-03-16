@@ -41,7 +41,7 @@ public class AcceptAlert {
   
   
   @Test
-  public void testa8bb8e7b() throws Exception {
+  public void test69771b2f() throws Exception {
     wd.get("http://seleniumbuilder.github.io/se-builder/test/confirm.html");
 
     wd.switchTo().alert().accept();

@@ -41,7 +41,7 @@ public class Jira {
   
   
   @Test
-  public void testd547db2a() throws Exception {
+  public void test351e844e() throws Exception {
     wd.get("https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa");
 
     wd = (FirefoxDriver) wd.switchTo().frame("gadget-0");
