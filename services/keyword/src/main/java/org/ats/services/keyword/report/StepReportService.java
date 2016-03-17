@@ -3,6 +3,7 @@
  */
 package org.ats.services.keyword.report;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
@@ -27,10 +28,21 @@ public class StepReportService extends AbstractMongoCRUD<StepReport> {
     this.createTextIndex("name");
   }
   
+  public void createSteps(List<StepReport> report) {
+    StepReport[] steps = new StepReport [report.size()];
+    report.toArray(steps);
+    this.create(steps);
+  }
+  
   @Override
   public StepReport transform(DBObject source) {
-    // TODO Auto-generated method stub
-    return null;
+
+    String id = source.get("_id").toString();
+    String name = source.get("name").toString();
+    StepReport report = new StepReport(name);
+    report.put("_id", id);
+
+    return report;
   }
 
 }

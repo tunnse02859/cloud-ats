@@ -3,47 +3,37 @@
  */
 package org.ats.report;
 
-import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.ats.common.PageList;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
-import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.event.EventService;
-import org.ats.services.keyword.CaseFactory;
-import org.ats.services.keyword.CaseReference;
-import org.ats.services.keyword.CaseService;
-import org.ats.services.keyword.KeywordProjectFactory;
-import org.ats.services.keyword.KeywordProjectService;
-import org.ats.services.keyword.SuiteFactory;
-import org.ats.services.keyword.SuiteService;
+import org.ats.services.keyword.report.CaseReportService;
 import org.ats.services.keyword.report.KeywordReportService;
+import org.ats.services.keyword.report.StepReportService;
+import org.ats.services.keyword.report.SuiteReportService;
 import org.ats.services.keyword.report.models.CaseReport;
-import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.StepReport;
-import org.ats.services.keyword.report.models.StepReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
-import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.event.AbstractEventTestCase;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -59,21 +49,17 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   private KeywordReportService keywordReportService;
   
   private AuthenticationService<User> authService;
-  private OrganizationContext context;
   
   private Tenant tenant;
   private Space space;
   private User user;
   
-  private KeywordProjectService keywordProjectService;
-  private KeywordProjectFactory keywordProjectFactory;
-  private SuiteService suiteService;
-  private SuiteFactory suiteFactory;
-  private CaseFactory caseFactory;
-  private CaseService caseService;
-  private ReferenceFactory<CaseReference> caseRefFactory;
-  private ReferenceFactory<CaseReportReference> caseReportRefFactory;
-  private ReferenceFactory<StepReportReference> stepReportRefFactory;
+  private SuiteReportService suiteReportService;
+  
+  private CaseReportService caseReportService;
+  
+  private StepReportService stepReportService;
+  
   
   @BeforeClass
   public void init() throws Exception {
@@ -89,23 +75,11 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
     this.mongoService.dropDatabase();
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
-    this.context = injector.getInstance(OrganizationContext.class);
-    
-    
     //keyword
-    this.keywordProjectService = injector.getInstance(KeywordProjectService.class);
-    this.keywordProjectFactory = injector.getInstance(KeywordProjectFactory.class);
     this.keywordReportService = injector.getInstance(KeywordReportService.class);
-    this.suiteService = injector.getInstance(SuiteService.class);
-    this.suiteFactory = injector.getInstance(SuiteFactory.class);
-    
-    this.caseService = injector.getInstance(CaseService.class);
-    this.caseFactory = injector.getInstance(CaseFactory.class);
-    this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
-    this.caseReportRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReportReference>>(){}));
-    this.stepReportRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<StepReportReference>>(){}));
-    
-    
+    this.suiteReportService = injector.getInstance(SuiteReportService.class);
+    this.caseReportService = injector.getInstance(CaseReportService.class);
+    this.stepReportService = injector.getInstance(StepReportService.class);
     //start event service
     this.eventService = injector.getInstance(EventService.class);
     this.eventService.setInjector(injector);
@@ -116,9 +90,8 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   
   @AfterClass
   public void shutdown() throws Exception {
-   // this.mongoService.dropDatabase();
+    this.mongoService.dropDatabase();
   }
-
   
   @BeforeMethod
   public void setup() throws Exception {
@@ -139,107 +112,69 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
   }
   
-  
   @AfterMethod
   public void tearDown() {
     this.authService.logOut();
-    //this.mongoService.dropDatabase();
+    this.mongoService.dropDatabase();
   }
+  
+  /**
+   * One suite, 3 case, 4 steps
+   * 1 case fail, 1 steps fail
+   * @throws IOException
+   */
   
   @Test
   public void testLogParser() throws IOException {
     
-    BufferedReader br = null;
-    try {
-      String currentLine;
-      br = new BufferedReader(new java.io.FileReader("src/test/resources/log_structure.txt"));
-      SuiteReport suiteReport = null;
-      CaseReport caseReport = null;
-      List<SuiteReport> suites = new ArrayList<SuiteReport>();
-      List<CaseReport> cases = new ArrayList<CaseReport>();
-      List<StepReport> steps = new ArrayList<StepReport>();
-      List<CaseReportReference> listCaseReportRef = null;
-      String id = null;
-      List<StepReportReference> listStepReportRef = null;
-      List<String> dataSource = null;
-      while ((currentLine = br.readLine()) != null) {
-        ObjectMapper mapper = new ObjectMapper();
-        if (currentLine.contains("[Start][Suite]")) {
-          listCaseReportRef = new ArrayList<CaseReportReference>();
-          int start = currentLine.indexOf("{");
-          int end = currentLine.lastIndexOf("}");
-          String obj = currentLine.substring(start, end + 1);
-          JsonNode json = mapper.readTree(obj);
-          String suiteName = json.get("name").asText();
-          String jobId = json.get("jobId").asText();
-          suiteReport = new SuiteReport(jobId, suiteName, 0, 0, 0, listCaseReportRef);
-        }
-        if (currentLine.contains("[Start][Case]")) {
-          dataSource = new ArrayList<String>();
-          listStepReportRef = new ArrayList<StepReportReference>();
-        }
-        if (currentLine.contains("[End][Case]")) {
-          int start = currentLine.indexOf("{");
-          int end = currentLine.lastIndexOf("}");
-          String obj = currentLine.substring(start, end + 1);
-          JsonNode json = mapper.readTree(obj);
-          id = json.get("id").toString();
-          caseReport = new CaseReport(suiteReport.getId(), "test", json.get("name").asText(), json.get("id").asText(), listStepReportRef);
-          caseReport.setDataSource(dataSource.toString());
-          
-          cases.add(caseReport);
-          CaseReportReference ref = caseReportRefFactory.create(caseReport.getId());
-          listCaseReportRef.add(ref);
-          caseReport.setSteps(listStepReportRef);
-        }
-        
-        if (currentLine.contains("[Start][Data]")) {
-          int start = currentLine.indexOf("{");
-          int end = currentLine.lastIndexOf("}");
-          String obj = currentLine.substring(start, end + 1);
-          dataSource.add(obj);
-        }
-        if (currentLine.contains("[Start][Step]")) {
-          int start = currentLine.indexOf("{");
-          int end = currentLine.lastIndexOf("}");
-          String obj = currentLine.substring(start, end + 1);
-          JsonNode json = mapper.readTree(obj);
-          String name = json.get("name").toString();
-          StepReport step = new StepReport(name);
-          JsonNode params = json.get("params");
-          BasicDBList list = new BasicDBList();
-          for (JsonNode j : params) {
-            BasicDBObject object = new BasicDBObject();
-            String value = json.get(j.asText()).asText();
-            object.put(j.asText(), value);
-            list.add(object);
-          }
-          
-          step.put("params", list);
-          StepReportReference ref = stepReportRefFactory.create(step.getId());
-          listStepReportRef.add(ref);
-          steps.add(step);
-        }
-        
-        if (currentLine.contains("[End][Data]")) {
-          
-        }
-        if (currentLine.contains("[End][Suite]")) {
-          suiteReport.setCases(listCaseReportRef);
-          suites.add(suiteReport);
-        }
-      }
-      
-      keywordReportService.createSuitesReport(suites);
-      keywordReportService.createCasesReport(cases);
-      keywordReportService.createStepsReport(steps);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } 
+    FileReader file = new FileReader("src/test/resources/log_structure.txt");
+    keywordReportService.logParser(file);
+    
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("name", "suiteName"));
+    
+    SuiteReport report = suites.next().get(0);
+    
+    Assert.assertEquals(report.getName(), "suiteName");
+    Assert.assertEquals(report.getCases().size(), 3);
+    
+    PageList<CaseReport> caseReports = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()));
+    Assert.assertTrue(caseReports.count() == 3);
+    Assert.assertEquals(caseReportService.query(new BasicDBObject("isPass", true)).count(), 2);
+    
+    Assert.assertTrue(stepReportService.count() == 4);
+    PageList<StepReport> failSteps = stepReportService.query(new BasicDBObject("isPass", false));
+    Assert.assertEquals(failSteps.count(), 1);
+    
+    PageList<StepReport> trueSteps = stepReportService.query(new BasicDBObject("isPass", true));
+    Assert.assertEquals(trueSteps.count(), 3);
+    
   }
   
-  
-  
- 
+  /**
+   * Run 2 suite 
+   * 3 cases, 9 steps in suite1 (1 case use 2 datasets)
+   * 2 cases, 6 steps in suite2 (1 case use 2 datasets)
+   * No case fail, no step fail
+   * @throws FileNotFoundException 
+   */
+  @Test
+  public void testLogParserWith2Suite() throws FileNotFoundException {
+    FileReader file = new FileReader("src/test/resources/log_structure_2_suite");
+    keywordReportService.logParser(file);
+    
+    Assert.assertEquals(suiteReportService.count(), 2);
+    Assert.assertEquals(caseReportService.count(), 7);
+    Assert.assertEquals(stepReportService.count(), 15);
+    
+    SuiteReport suite = suiteReportService.query(new BasicDBObject("name", "suiteName")).next().get(0);
+    Assert.assertEquals(((BasicDBList) suite.get("cases")).size(), 4);
+    Assert.assertEquals(suite.getTotalCase(), 3);
+    PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("isPass", true));
+    Assert.assertEquals(cases.count(), 7);
+    
+    PageList<StepReport> steps = stepReportService.query(new BasicDBObject("isPass", true));
+    Assert.assertEquals(steps.count(), 15);
+    
+  }
 
 }

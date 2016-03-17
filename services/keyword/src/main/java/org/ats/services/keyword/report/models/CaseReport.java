@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.ats.services.data.common.Reference;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -17,16 +18,17 @@ import com.mongodb.BasicDBObject;
  * @author TrinhTV3
  *
  */
+@SuppressWarnings("serial")
 public class CaseReport extends BasicDBObject {
 
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
-  
+  @Inject
   private ReferenceFactory<StepReportReference> stepRefFactory;
   
-  public CaseReport(String suite_report_id, String data_source, String name, String case_id, List<StepReportReference> steps) {
+  @Inject
+  public CaseReport(@Assisted("suite_report_id") String suite_report_id, @Assisted("data_source") String data_source, @Assisted("name") String name, @Assisted("case_id") String case_id, @Assisted("steps") List<StepReportReference> steps) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("suite_report_id", suite_report_id);
     this.put("data_source", data_source);

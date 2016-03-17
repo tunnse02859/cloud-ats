@@ -1,0 +1,87 @@
+[Duration-Start][Suite]{id: suiteId, timestamp: longValue}
+[Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId"}
+
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
+			[Start][Data]{"url_data": "http://localhost:8080"}
+				[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+				//content output here
+				[End][Step]
+				[Start][Step]{"name": "get", "url": "${url_data}", "locator" : "locator", "params":["url", "locator"]}
+				//content output here
+				[End][Step]
+			[End][Data]
+		[End][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
+		
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
+			[Start][Data]{"url_data": "http://localhost1:8080"}
+					[Start][Step]{"name": "get", "url": "${url_data}", "params":["url"]}
+					//content output here
+					[End][Step]
+			[End][Data]
+		[End][Case]
+		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
+			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "click", "locator": "http://hardcode_url", "params":["locator"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
+		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1"}
+			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "click", "locator": "http://hardcode_url", "params":["locator"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId1"}
+		
+[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId"]
+[Duration-End][Suite]{id: suiteId, timestamp: longValue}
+
+[Duration-Start][Suite]{id: suiteId, timestamp: longValue}
+[Start][Suite]{"name": "suiteName2", "id": "suiteId2", "jobId" : "jobId2"}
+
+		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
+			[Start][Data]{"url_data": "http://localhost:8080"}
+				[Start][Step]{"name": "get2", "url": "http://hardcode_url", "params":["url"]}
+				//content output here
+				
+				[End][Step]
+				[Start][Step]{"name": "get2", "url": "${url_data}", "locator" : "locator", "params":["url", "locator"]}
+				//content output here
+				[End][Step]
+			[End][Data]
+		[End][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
+		
+		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
+		[Start][Data]{"url_data": "http://localhost1:8080"}
+			[Start][Data]{"url_data": "http://localhost:8080"}
+				[Start][Step]{"name": "get2", "url": "${url_data}", "params":["url"]}
+				//content output here
+				[End][Step]
+			[End][Data]
+		[End][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
+		
+		[Start][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
+			[Start][Step]{"name": "get2", "url": "http://hardcode_url2", "params":["url"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "click2", "locator": "http://hardcode_url2", "params":["locator"]}
+			//content output here
+			[End][Step]
+			[Start][Step]{"name": "get2", "url": "http://hardcode_url2", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
+		
+[End][Suite]["name": "suiteName2", "id": "suiteId2", "jobId" : "jobId2"]
+[Duration-End][Suite]{id: suiteId, timestamp: longValue}
+
+

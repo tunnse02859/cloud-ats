@@ -20,7 +20,6 @@ public class StepReportReference extends Reference<StepReport> {
   @Inject
   public StepReportReference(@Assisted("id") String id) {
     super(id);
-    // TODO Auto-generated constructor stub
   }
 
   public StepReport get() {
@@ -29,7 +28,6 @@ public class StepReportReference extends Reference<StepReport> {
 
   @Override
   public StepReport get(String... mixins) {
-    // TODO Auto-generated method stub
     return service.get(id, mixins);
   }
 

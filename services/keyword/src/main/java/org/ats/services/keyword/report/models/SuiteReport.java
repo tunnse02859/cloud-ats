@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.ats.services.keyword.CaseReference;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
@@ -25,15 +25,17 @@ public class SuiteReport extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
   
-  @Inject ReferenceFactory<CaseReportReference> caseReportRefFactory;
+  @Inject private ReferenceFactory<CaseReportReference> caseReportRefFactory;
   
-  public SuiteReport(String jobId, String name, int totalPass, int totalFail, int totalSkip, List<CaseReportReference> cases) {
+  @Inject
+  public SuiteReport(@Assisted("jobId")String jobId, @Assisted("name") String name, @Assisted("totalPass") int totalPass, @Assisted("totalFail") int totalFail, @Assisted("totalSkip") int totalSkip, @Assisted("totalCase") int totalCase, @Assisted("cases") List<CaseReportReference> cases) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("totalPass", totalPass);
     this.put("totalFail", totalFail);
     this.put("totalSkip", totalSkip);
     this.put("jobId", jobId);
+    this.put("totalCase", totalCase);
     BasicDBList list = new BasicDBList();
     for (CaseReportReference caze : cases) {
       list.add(caze.toJSon());
@@ -47,6 +49,14 @@ public class SuiteReport extends BasicDBObject {
   
   public void setId(String id) {
     this.put("_id", id);
+  }
+  
+  public void setTotalCase(int totalCase) {
+    this.put("totalCase", totalCase);
+  }
+  
+  public int getTotalCase() {
+    return this.getInt("totalCase");
   }
   
   public String getName() {
@@ -96,10 +106,12 @@ public class SuiteReport extends BasicDBObject {
   
   public List<CaseReportReference> getCases() {
     
-    BasicDBList list = (BasicDBList) (this.get("cases") == null ? new BasicDBList() : this.get("cases"));
+    BasicDBList list = (BasicDBList) this.get("cases");
     List<CaseReportReference> cases = new ArrayList<CaseReportReference>();
-    for(Object obj : list) {
-      cases.add(caseReportRefFactory.create(((BasicDBObject) obj).getString("_id")));
+    for (Object obj : list) {
+      String id = ((BasicDBObject) obj).getString("_id");
+      CaseReportReference ref = caseReportRefFactory.create(id);
+      cases.add(ref);
     }
     return cases;
   }

@@ -19,19 +19,18 @@ public class CaseReportReference extends Reference<CaseReport> {
   private CaseReportService service;
   
   @Inject
-  public CaseReportReference(@Assisted("id")String id) {
+  CaseReportReference(@Assisted("id") String id) {
     super(id);
   }
 
   @Override
   public CaseReport get() {
-   
-    return service.get(this.id);
+    return service.get(id);
   }
 
   @Override
   public CaseReport get(String... mixins) {
-    return service.get(this.id, mixins);
+    return service.get(id, mixins);
   }
 
 }
