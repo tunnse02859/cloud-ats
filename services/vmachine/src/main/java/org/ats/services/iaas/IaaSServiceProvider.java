@@ -15,13 +15,19 @@ import com.google.inject.name.Named;
  */
 public class IaaSServiceProvider implements Provider<IaaSService> {
   
+  private final OpenStackService opsService;
+  
+  private final AWSService awsService;
+  
   private final StandaloneService standaloneService;
   
   private final Class<IaaSService> iaasClazz;
   
   @SuppressWarnings("unchecked")
   @Inject
-  IaaSServiceProvider(StandaloneService standaloneService, @Named("org.ats.cloud.iaas") String iaasClazz) throws ClassNotFoundException {
+  IaaSServiceProvider(StandaloneService standaloneService, OpenStackService opsService, AWSService awsService, @Named("org.ats.cloud.iaas") String iaasClazz) throws ClassNotFoundException {
+    this.opsService = opsService;
+    this.awsService = awsService;
     this.standaloneService = standaloneService;
     this.iaasClazz = (Class<IaaSService>) Class.forName(iaasClazz);
   }
@@ -29,6 +35,8 @@ public class IaaSServiceProvider implements Provider<IaaSService> {
   @Override
   public IaaSService get() {
     if (iaasClazz.isInstance(standaloneService)) return standaloneService;
+    else if (iaasClazz.isInstance(opsService)) return opsService;
+    else if (iaasClazz.isInstance(awsService)) return awsService;
     return null;
   }
 
