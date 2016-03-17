@@ -1,9 +1,11 @@
-@args() {String suiteName, String initDriver, String cases} 
+@args() {String id, String jobId, String suiteName, String initDriver, String cases} 
 
 package org.ats.generated;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 import java.io.IOException;
@@ -13,6 +15,8 @@ import org.testng.annotations.DataProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.io.File;
 import org.openqa.selenium.support.ui.Select;
@@ -26,6 +30,20 @@ import static org.openqa.selenium.OutputType.*;
 public class @suiteName {
 
   private RemoteWebDriver wd;
+  
+  @@BeforeClass
+  public void beforeClass() {
+  DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  Date date = new Date();
+  System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  }
+   
+  @@AfterClass
+  public void afterClass() {
+  DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  Date date = new Date();
+  System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  }
 
   @@BeforeMethod
   public void setUp() throws Exception {

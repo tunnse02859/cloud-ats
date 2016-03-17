@@ -94,10 +94,10 @@ public class Suite extends AbstractTemplate {
   }
   
   public String transform() throws IOException {
-    return transform(false, 0,false);
+    return transform(null, false, 0,false);
   }
   
-  public String transform(boolean showAction, int valueDelay,boolean sequenceMode) throws IOException {
+  public String transform(String jobId, boolean showAction, int valueDelay,boolean sequenceMode) throws IOException {
     String suite = "";
     if(sequenceMode) {
       suite = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("suite.with.priority.java.tmpl"));
@@ -116,7 +116,7 @@ public class Suite extends AbstractTemplate {
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
 
-    return engine.render(suite, StringUtil.normalizeName((String) this.get("name")), this.getString("init_driver"), sbCase.toString());
+    return engine.render(suite, this.getId(), jobId, StringUtil.normalizeName((String) this.get("name")), this.getString("init_driver"), sbCase.toString());
   }
   
 }

@@ -212,7 +212,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(false,3,false);
+      String output = suite.transform(null, false,3,false);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleWithOptions.java"));
       writer.write(output);
       writer.close();
@@ -270,7 +270,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", "GoogleMultiCasesWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(false,3,true);
+      String output = suite.transform(null, false,3,true);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleMultiCasesWithPriovity.java"));
       writer.write(output);
       writer.close();
@@ -328,7 +328,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", "GoogleWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(false,3,true);
+      String output = suite.transform(null, false,3,true);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/GoogleWithPriovity.java"));
       writer.write(output);
       writer.close();

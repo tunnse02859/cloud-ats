@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,9 @@ public class Case extends AbstractTemplate {
   }
   
   public String transform(boolean showAction, int valueDelay, boolean sequenceMode, int order) throws IOException {
-    StringBuilder sb = new StringBuilder();
+	String str ="";
+	List<String> listParams = new ArrayList<String>();
+	StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;
     int valueDelayTransform = valueDelay*1000;
     
@@ -143,6 +146,9 @@ public class Case extends AbstractTemplate {
       }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("(JsonNode data) throws Exception {\n");
       
+      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\"} \"); \n");
+      sb.append("    System.out.println(\"[Start][Data]\"+data.toString()); \n");
+      
       while (nodeIterator.hasNext()) {
         Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodeIterator.next();
         String key = entry.getKey();
@@ -163,6 +169,7 @@ public class Case extends AbstractTemplate {
         sb.append("  @Test\n");
       }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("() throws Exception {\n");
+      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\"} \"); \n");
     }
     
     for (JsonNode json : actions) {
@@ -173,7 +180,7 @@ public class Case extends AbstractTemplate {
       //If show action is true, show action in log
       if (showAction) {
         
-        String type = json.get("type").asText();
+        String type = "\\\"keyword_type\\\":\\\""+json.get("type").asText()+" \\\",";
         String locator = "";
         String text = "";
         String url = "";
@@ -208,7 +215,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          locator = " by \\\""+locationType+"\\\" at \\\"" +temp+"\\\"";
+          locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp+"\\\"},";
+          listParams.add("\\\"locator\\\"");
         }
         
         if (json.get("text") != null) {
@@ -222,11 +230,13 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          text = " value "+ "\\\""+temp+"\\\"";
+          text = "\\\"text\\\":"+ "\\\""+temp+"\\\",";
+          listParams.add("\\\"text\\\"");
         }
         
         if (json.get("waitTime") != null) {
-          waitTime = " wait time "+"\\\""+json.get("waitTime").asLong()+"\\\"ms";
+        	waitTime = "\\\"waittime\\\":"+"\\\""+json.get("waitTime").asLong()+"ms\\\",";
+        	listParams.add("\\\"waittime\\\"");
         }
         
         if (json.get("url") != null) {
@@ -240,7 +250,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          url = " url "+ "\\\""+temp+"\\\"";
+          url = "\\\"url\\\":"+ "\\\""+temp+"\\\",";
+          listParams.add("\\\"url\\\"");
         }
         
         if (json.get("targetLocator") != null) {
@@ -256,7 +267,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          targetLocator = " to targetLocator by \\\""+locationType+"\\\" \\\""+temp+"\\\"";
+          targetLocator = "\\\"targetLocator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp+"\\\"},";
+          listParams.add("\\\"targetLocator\\\"");
         }
         
         if (json.get("variable") != null) {
@@ -270,7 +282,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          variable = " with variable "+ "\\\""+temp+"\\\"";
+          variable = "\\\"variable\\\":"+ "\\\""+temp+"\\\",";
+          listParams.add("\\\"variable\\\"");
         }
         
         if (json.get("source") != null) {
@@ -284,7 +297,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          source = " source "+"\\\""+temp+"\\\"";
+          source = "\\\"source\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"source\\\"");
         }
         
         if (json.get("title") != null) {
@@ -298,7 +312,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          title = " title "+"\\\""+temp+"\\\"";
+          title = "\\\"title\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"title\\\"");
         }
         
         if (json.get("attributeName") != null) {
@@ -312,7 +327,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          attributeName = " attribute name "+ "\\\""+temp+"\\\"";
+          attributeName = "\\\"attribute_name\\\":"+ "\\\""+temp+"\\\",";
+          listParams.add("\\\"attribute_name\\\"");
         }
         
         if (json.get("propertyName") != null) {
@@ -326,7 +342,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          propertyName = " property name " + "\\\""+temp+"\\\"";
+          propertyName = "\\\"property_name\\\":" + "\\\""+temp+"\\\",";
+          listParams.add("\\\"property_name\\\"");
         }
         
         if (json.get("options") != null) {
@@ -340,7 +357,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          options = " options "+ "\\\""+temp+"\\\"";
+          options = "\\\"options\\\":"+ "\\\""+temp+"\\\",";
+          listParams.add("\\\"options\\\"");
         }
         
         if (json.get("name") != null) {
@@ -354,7 +372,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          name = " name "+"\\\""+temp+"\\\"";
+          name = "\\\"name\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"name\\\"");
         }
         
         if (json.get("file") != null) {
@@ -368,7 +387,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          file = " file "+"\\\""+temp+"\\\"";
+          file = "\\\"file\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"file\\\"");
         }
         
         if (json.get("identifier") != null) {
@@ -382,11 +402,13 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          identifier = " identifier "+"\\\""+temp+"\\\"";
+          identifier = "\\\"identifier\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"identifier\\\"");
         }
         
         if (json.get("index") != null) {
-          index = " index "+"\\\""+json.get("index").asInt()+"\\\"";
+        	index = "\\\"index\\\":"+"\\\""+json.get("index").asInt()+"\\\",";
+        	listParams.add("\\\"index\\\"");
         }
         
         if (json.get("script") != null) {
@@ -400,7 +422,8 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          script = " script "+"\\\""+temp+"\\\"";
+          script = "\\\"script\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"script\\\"");
         }
         
         if(json.get("value") != null) {
@@ -414,41 +437,34 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          value = " value "+"\\\""+temp+"\\\"";
+          value = "\\\"value\\\":"+"\\\""+temp+"\\\",";
+          listParams.add("\\\"value\\\"");
+        }
+        str = type + locator + targetLocator + url + text + script + name + source + title +
+        		options + propertyName + attributeName + variable + value + file + waitTime + identifier + index ;
+        sb.append("    System.out.println(\"[Start][Step]{");
+        sb.append(str);
+        sb.append("\\\"params\\\":"+listParams.toString()+" } \"); \n");
+        
+        sb.append("    ");
+        sb.append(action.transform());
+        sb.append("\n");
+        if(valueDelayTransform != 0) {
+          sb.append("    System.out.println(\"");
+          sb.append(delayTime);
+          sb.append("\");\n");
+          sb.append(actionPause.transform());
         }
         
-        sb.append("    System.out.println(\"[INFO] Perform ");
-        sb.append(type);
-        sb.append(locator);
-        sb.append(targetLocator);
-        sb.append(url);
-        sb.append(text);
-        sb.append(script);
-        sb.append(name);
-        sb.append(source);
-        sb.append(title);
-        sb.append(options);
-        sb.append(propertyName);
-        sb.append(attributeName);
-        sb.append(variable);
-        sb.append(value);
-        sb.append(file);
-        sb.append(waitTime);
-        sb.append(identifier);
-        sb.append(index);
-        sb.append("\");\n");
+        sb.append("    System.out.println(\"[End][Step]\"); \n");
+        listParams.clear();
       }
       
-      sb.append("    ");
-      sb.append(action.transform());
-      sb.append("\n");
-      if(valueDelayTransform != 0) {
-        sb.append("    System.out.println(\"");
-        sb.append(delayTime);
-        sb.append("\");\n");
-        sb.append(actionPause.transform());
-      }
     }
+    if(isUseDataProvider) {
+    	sb.append("System.out.println(\"[End][Data]\"); \n");
+    }
+    sb.append("    System.out.println(\"[End][Case]\"); \n");
     sb.append("  }");
     return sb.toString();
   }

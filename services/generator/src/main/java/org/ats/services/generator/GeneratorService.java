@@ -205,7 +205,7 @@ public class GeneratorService {
       Suite suite = suiteRef.get();
       String fileName = getAvailableName(StringUtil.normalizeName(suite.getName()), pool) + ".java";
       FileOutputStream os = new FileOutputStream(new File(sourceDir, fileName));
-      os.write(suite.transform(showAction,valueDelay,suite.getMode()).getBytes());
+      os.write(suite.transform(jobId, showAction,valueDelay,suite.getMode()).getBytes());
       os.flush();
       os.close();
     }
