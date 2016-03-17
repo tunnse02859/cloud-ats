@@ -35,7 +35,7 @@ public class CaseReportService extends AbstractMongoCRUD<CaseReport> {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
     
-    this.createTextIndex("name");
+    //this.createTextIndex("name");
   }
   
   public void createCases(List<CaseReport> report) {

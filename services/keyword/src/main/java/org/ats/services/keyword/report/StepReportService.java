@@ -25,7 +25,7 @@ public class StepReportService extends AbstractMongoCRUD<StepReport> {
   StepReportService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
-    this.createTextIndex("name");
+    //this.createTextIndex("name");
   }
   
   public void createSteps(List<StepReport> report) {
@@ -41,7 +41,7 @@ public class StepReportService extends AbstractMongoCRUD<StepReport> {
     String name = source.get("name").toString();
     StepReport report = new StepReport(name);
     report.put("_id", id);
-
+    
     return report;
   }
 

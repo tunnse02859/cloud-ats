@@ -176,5 +176,17 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
     Assert.assertEquals(steps.count(), 15);
     
   }
-
+  
+  @Test
+  public void testLogParserFinal() throws FileNotFoundException {
+    FileReader file = new FileReader("src/test/resources/log_structure_final_test");
+    keywordReportService.logParser(file);
+    PageList<SuiteReport> suites = suiteReportService.list();
+    Assert.assertEquals(suites.count(), 4);
+    SuiteReport suite = suiteReportService.query(new BasicDBObject("name", "Invitation")).next().get(0);
+    Assert.assertEquals(suite.getTotalCase(), 24);
+    Assert.assertEquals(suite.getCases().size(), 25);
+    Assert.assertEquals(suite.getTotalPass(), 22);
+  }
+  
 }

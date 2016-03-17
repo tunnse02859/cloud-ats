@@ -3,10 +3,10 @@
 
 		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 				//content output here
 				[End][Step]
-				[Start][Step]{"name": "get", "url": "${url_data}", "locator" : "locator", "params":["url", "locator"]}
+				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
 				//content output here
 				[End][Step]
 			[End][Data]
@@ -14,30 +14,30 @@
 		
 		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
 			[Start][Data]{"url_data": "http://localhost1:8080"}
-					[Start][Step]{"name": "get", "url": "${url_data}", "params":["url"]}
+					[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"]}
 					//content output here
 					[End][Step]
 			[End][Data]
 		[End][Case]
 		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
-			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "click", "locator": "http://hardcode_url", "params":["locator"]}
+			[Start][Step]{"keyword_type": "click", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
 		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1"}
-			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "click", "locator": "http://hardcode_url", "params":["locator"]}
+			[Start][Step]{"keyword_type": "click", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "get", "url": "http://hardcode_url", "params":["url"]}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId1"}
@@ -50,11 +50,11 @@
 
 		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"name": "get2", "url": "http://hardcode_url", "params":["url"]}
+				[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url", "params":["url"]}
 				//content output here
 				
 				[End][Step]
-				[Start][Step]{"name": "get2", "url": "${url_data}", "locator" : "locator", "params":["url", "locator"]}
+				[Start][Step]{"keyword_type": "get2", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
 				//content output here
 				[End][Step]
 			[End][Data]
@@ -63,20 +63,20 @@
 		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
 		[Start][Data]{"url_data": "http://localhost1:8080"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"name": "get2", "url": "${url_data}", "params":["url"]}
+				[Start][Step]{"keyword_type": "get2", "url": "${url_data}", "params":["url"]}
 				//content output here
 				[End][Step]
 			[End][Data]
 		[End][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
 		
 		[Start][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
-			[Start][Step]{"name": "get2", "url": "http://hardcode_url2", "params":["url"]}
+			[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url2", "params":["url"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "click2", "locator": "http://hardcode_url2", "params":["locator"]}
+			[Start][Step]{"keyword_type": "click2", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
 			//content output here
 			[End][Step]
-			[Start][Step]{"name": "get2", "url": "http://hardcode_url2", "params":["url"]}
+			[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url2", "params":["url"]}
 			//content output here
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
