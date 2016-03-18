@@ -124,7 +124,7 @@ public class Case extends AbstractTemplate {
     ObjectMapper mapper = new ObjectMapper(); 
     JsonNode nodePause = mapper.readTree("{\"type\":\"pause\",\"waitTime\":\""+valueDelayTransform+"\"}");
     AbstractAction actionPause = actionFactory.createAction(nodePause);
-    delayTime = "[INFO] Waiting "+ valueDelay + "(s) for next step";
+    delayTime = "[INFO] Waiting "+ valueDelay + "(s) ";
     
     if(isUseDataProvider) {
       
