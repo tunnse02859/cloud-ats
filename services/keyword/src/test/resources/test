@@ -1,0 +1,11 @@
+
+[Start][Suite]{"name": "ParserTestSuite", "id": "f9d104e6-4a43-48aa-bf93-41269db3216f", "jobId" : "3c7f1232-12935e9f", "timestamp": "1458290330000"}
+[Start][Case]{"name": "LogParser", "id": "68cc2138-e2dc-46ca-88c6-6a27d46183a5"} 
+[Start][Step]{"keyword_type":"get","url":"http://vnexpress.net/","params":["url"]} 
+[INFO] Waiting 1(s) for next step
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"box_news_top\"]/div/div/div[1]/div[2]/a[1]"},"params":["locator"]} 
+[INFO] Waiting 1(s) for next step
+[End][Step]
+[End][Case]
+[End][Suite]{"name": "ParserTestSuite", "id": "f9d104e6-4a43-48aa-bf93-41269db3216f", "jobId" : "3c7f1232-12935e9f", "timestamp": "1458290348000"}

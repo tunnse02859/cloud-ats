@@ -444,7 +444,7 @@ public class TrackingJobActor extends UntypedActor {
       
     } else {
       updateLog(job, jkJob);
-      
+      System.out.println(job.getLog());
       //parse log
       InputStream input_stream = new ByteArrayInputStream(job.getLog().getBytes());
       BufferedReader br = new BufferedReader(new InputStreamReader(input_stream, "UTF-8"));

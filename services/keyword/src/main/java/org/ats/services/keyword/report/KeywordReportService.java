@@ -128,6 +128,7 @@ public class KeywordReportService {
           int start = currentLine.indexOf("{");
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
+          System.out.println(obj);
           JsonNode json = mapper.readTree(obj);
           String name = json.get("keyword_type").asText();
           stepReport = new StepReport(name);

@@ -214,7 +214,7 @@ public class Case extends AbstractTemplate {
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
             temp = sbTemp.toString();
           }
-          locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp+"\\\"},";
+          locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
           listParams.add("\\\"locator\\\"");
         }
         
@@ -439,11 +439,30 @@ public class Case extends AbstractTemplate {
           value = "\\\"value\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"value\\\"");
         }
-        str = type + locator + targetLocator + url + text + script + name + source + title +
-        		options + propertyName + attributeName + variable + value + file + waitTime + identifier + index ;
+        
+        str = new StringBuilder() 
+          .append(type)
+          .append(locator)
+          .append(targetLocator)
+          .append(url)
+          .append(text)
+          .append(script)
+          .append(name)
+          .append(source)
+          .append(title)
+        	.append(options)
+        	.append(propertyName)
+        	.append(attributeName)
+        	.append(variable)
+        	.append(value)
+        	.append(file)
+        	.append(waitTime)
+        	.append(identifier)
+        	.append(index).toString() ;
+        
         sb.append("    System.out.println(\"[Start][Step]{");
         sb.append(str);
-        sb.append("\\\"params\\\":"+listParams.toString()+" } \"); \n");
+        sb.append("\\\"params\\\":"+listParams.toString()+"} \"); \n");
         
         sb.append("    ");
         sb.append(action.transform());

@@ -27,9 +27,6 @@ libraryDependencies ++= Seq(
 )
 
 
-resolvers += (
-	"Local Maven Repository" at "file://" + Path.userHome.absolutePath  + "/java/dependencies/repository"		
-)
 
 resolvers ++= Seq(
 	Resolver.sonatypeRepo("snapshots"),
