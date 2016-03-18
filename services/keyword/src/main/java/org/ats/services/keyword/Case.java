@@ -178,7 +178,6 @@ public class Case extends AbstractTemplate {
       if (action == null) continue;
       
       //If show action is true, show action in log
-      if (showAction) {
         
         String type = "\\\"keyword_type\\\":\\\""+json.get("type").asText()+" \\\",";
         String locator = "";
@@ -458,7 +457,6 @@ public class Case extends AbstractTemplate {
         
         sb.append("    System.out.println(\"[End][Step]\"); \n");
         listParams.clear();
-      }
       
     }
     if(isUseDataProvider) {
