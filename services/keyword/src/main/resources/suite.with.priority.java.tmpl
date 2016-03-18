@@ -2,6 +2,7 @@
 
 package org.ats.generated;
 
+import java.text.ParseException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,20 +31,20 @@ public class @suiteName {
   private RemoteWebDriver wd;
 
   @@BeforeClass
-  public void setUp() throws Exception {
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-    System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  public void setUp() throws Exception throws ParseException {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+    System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
     @initDriver
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
   }
    
   @@AfterClass
-  public void tearDown() {
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-    System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  public void tearDown() throws ParseException {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+    System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
     wd.quit();
   }
   

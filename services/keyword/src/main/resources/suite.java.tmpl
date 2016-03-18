@@ -2,6 +2,7 @@
 
 package org.ats.generated;
 
+import java.text.ParseException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -32,17 +33,17 @@ public class @suiteName {
   private RemoteWebDriver wd;
   
   @@BeforeClass
-  public void beforeClass() {
-  DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-  Date date = new Date();
-  System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  public void beforeClass() throws ParseException {
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+  System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
   }
    
   @@AfterClass
-  public void afterClass() {
-  DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-  Date date = new Date();
-  System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+dateFormat.format(date)+"\"}");
+  public void afterClass() throws ParseException {
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+  System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
   }
 
   @@BeforeMethod
