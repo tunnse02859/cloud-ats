@@ -28,7 +28,7 @@ public class SuiteReport extends BasicDBObject {
   @Inject private ReferenceFactory<CaseReportReference> caseReportRefFactory;
   
   @Inject
-  public SuiteReport(@Assisted("jobId")String jobId, @Assisted("name") String name, @Assisted("totalPass") int totalPass, @Assisted("totalFail") int totalFail, @Assisted("totalSkip") int totalSkip, @Assisted("totalCase") int totalCase, @Assisted("cases") List<CaseReportReference> cases) {
+  public SuiteReport(@Assisted("jobId")String jobId, @Assisted("name") String name, @Assisted("totalPass") int totalPass, @Assisted("totalFail") int totalFail, @Assisted("totalSkip") int totalSkip, @Assisted("totalCase") int totalCase, @Assisted("cases") List<CaseReportReference> cases, @Assisted("duration") long duration) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
     this.put("totalPass", totalPass);
@@ -41,6 +41,15 @@ public class SuiteReport extends BasicDBObject {
       list.add(caze.toJSon());
     }
     this.put("cases", list);
+    this.put("duration", duration);
+  }
+  
+  public long getDuration() {
+    return this.getLong("duration");
+  }
+  
+  public void setDuration(long time) {
+    this.put("duration", time);
   }
   
   public String getId() {

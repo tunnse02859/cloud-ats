@@ -3,11 +3,16 @@
  */
 package org.ats.services.executor.event;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +39,7 @@ import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.report.KeywordReportService;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -53,6 +59,7 @@ import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -84,6 +91,8 @@ public class TrackingJobActor extends UntypedActor {
   @Inject JMeterScriptService jmeterService;
   
   @Inject BlobService blobService;
+  
+  @Inject KeywordReportService reportService;
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -190,7 +199,7 @@ public class TrackingJobActor extends UntypedActor {
 
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
-
+      
       //Reset test vm status and release floating ip
     //  VMachine testVM = vmachineService.get(job.getTestVMachineId());
       List<VMachineReference> pages = job.getVMs();
@@ -436,6 +445,11 @@ public class TrackingJobActor extends UntypedActor {
     } else {
       updateLog(job, jkJob);
       
+      //parse log
+      InputStream input_stream = new ByteArrayInputStream(job.getLog().getBytes());
+      BufferedReader br = new BufferedReader(new InputStreamReader(input_stream, "UTF-8"));
+      reportService.logParserByBuffer(br);
+      
       //Download target resource
       
       //Zip report
@@ -455,10 +469,24 @@ public class TrackingJobActor extends UntypedActor {
       
       if (bosTarget.size() > 0) 
         job.put("raw_data", bosTarget.toByteArray());
+      
+      //create raw_data file
+      if (bosTarget.size() > 0) {
+        GridFSInputFile project_file = blobService.create(bosTarget.toByteArray());
+        project_file.put("job_project_id", job.getId());
+        
+        blobService.save(project_file);
+      }
+      
       //End download result
-
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
+      
+      //save log to file 
+      
+      GridFSInputFile file = blobService.create(input_stream);
+      file.put("job_log_id", job.getId());
+      blobService.save(file);
       
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
@@ -735,4 +763,27 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       executorService.update(job);
     }
   }
+  
+  @SuppressWarnings("unused")
+  private void updateLogToFile(AbstractJob<?> job, JenkinsMavenJob jkJob) throws IOException {
+    int start = job.getLog() == null ? 0 : job.getLog().length();
+    if (job.getLog() != null) {
+      int _index = job.getLog().indexOf("Submitted Jenkins job");
+      if (_index != -1) {
+        _index += "Submitted Jenkins job\n".length();
+        start -= _index;
+      }
+    }
+    byte[] bytes = jkJob.getConsoleOutput(1, start); 
+    byte[] next = new byte[bytes.length - start];
+    System.arraycopy(bytes, start, next, 0, next.length);
+    
+    GridFSDBFile file = new GridFSDBFile();
+    if (next.length > 0) {
+      job.appendLog(new String(next));
+      executorService.update(job);
+    }
+  }
+  
+  
 }

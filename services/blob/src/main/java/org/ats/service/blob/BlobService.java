@@ -3,6 +3,8 @@
  */
 package org.ats.service.blob;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,4 +74,7 @@ public class BlobService {
     return fs.createFile(in);
   }
   
+  public GridFSInputFile create(byte[] binary) {
+    return fs.createFile(binary);
+  }
 }
