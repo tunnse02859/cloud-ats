@@ -20,7 +20,6 @@ import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
 import org.ats.service.report.ReportService.Type;
-import org.ats.service.report.function.SuiteReport;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -35,6 +34,10 @@ import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
+import org.ats.services.keyword.report.CaseReportService;
+import org.ats.services.keyword.report.SuiteReportService;
+import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -70,6 +73,10 @@ public class KeywordController extends Controller {
   
   @Inject SuiteService suiteService;
   
+  @Inject SuiteReportService suiteReportService;
+  
+  @Inject CaseReportService caseReportService;
+  
   @Inject KeywordProjectFactory keywordProjectFactory;
   
   @Inject OrganizationContext context;
@@ -85,6 +92,7 @@ public class KeywordController extends Controller {
   @Inject CustomKeywordService customKeywordService;
   
   @Inject VMachineService vmachineService;
+  
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -122,6 +130,7 @@ public class KeywordController extends Controller {
   }
   
   public Result viewLog(String projectId) {
+    
     BasicDBObject query = new BasicDBObject("project_id", projectId);
     PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
@@ -130,6 +139,7 @@ public class KeywordController extends Controller {
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
       log = lastJob.getLog();
+      System.out.println(lastJob.getId());
     }
     
     return log.isEmpty() ? status(404) : status(200, log);
@@ -264,37 +274,39 @@ public class KeywordController extends Controller {
     return status(201, Json.parse(job.toString()));
   }
   
-  public Result report(String projectId,String jobId) throws Exception{                    
+  public Result report(String projectId,String jobId) throws Exception{
     ArrayNode array = Json.newObject().arrayNode();
     
     AbstractJob<?> job = executorService.get(jobId);
     if(job.getRawDataOutput() != null) {
       PageList<Report> pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
-      
-      if (pages.totalPage() <= 0) {
+    
+          if (pages.totalPage() <= 0) {
+            return status(404);
+          }
+    
+          Report report = pages.next().get(0);
+          report.put("created_date", formater.format(job.getCreatedDate()));
+          Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
+    
+          while (iterator.hasNext()) {
+            SuiteReport suiteReport = iterator.next();
+            Date date = suiteReport.getRunningTime();
+            String parseDate = formater.format(date);
+            suiteReport.put("running_time", parseDate);
+            array.add(Json.parse(suiteReport.toString()));
+    
+          }
+    
+          report.put("suite_reports", array.toString());
+    
+          return status(200, Json.parse(report.toString()));
+        }
+    
         return status(404);
       }
-      
-      Report report = pages.next().get(0);
-      report.put("created_date", formater.format(job.getCreatedDate()));
-      Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-      
-      while (iterator.hasNext()) {
-        SuiteReport suiteReport = iterator.next();
-        Date date = suiteReport.getRunningTime();
-        String parseDate = formater.format(date);
-        suiteReport.put("running_time", parseDate);
-        array.add(Json.parse(suiteReport.toString()));
-        
-      }
-      
-      report.put("suite_reports", array.toString());
-      
-      return status(200, Json.parse(report.toString()));
-    }
-    
-    return status(404);
-  }
+
+  
   
   public Result listReport(String projectId) throws Exception {
 	  
@@ -310,26 +322,35 @@ public class KeywordController extends Controller {
     
     ArrayNode array = Json.newObject().arrayNode();
     int index = Integer.parseInt(indexRequest);
-    int count = 1;
+    
     List<AbstractJob<?>> list = jobs.getPage(index);
     for (int i = 1; i <= list.size(); i ++) {
     	AbstractJob<?> job = list.get(i -1);
     	ObjectNode obj = Json.newObject();
-        PageList<Report> pages = reportService.getList(job.getId(), Type.FUNCTIONAL, null);
-        Report report = pages.next().get(0);
-        count = count + (index - 1)*10;
-        obj.put("report", Json.parse(report.toString()));
-        obj.put("created_date", formater.format(job.getCreatedDate()));
-        obj.put("stt", ((index -1) * 10) + i);
-        array.add(obj);
+    	PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
+    	
+    	long duration = 0;
+    	int count_fail = 0;
+    	while (suites.hasNext()) {
+    	  for (SuiteReport suite : suites.next()) {
+    	    duration += (suite.getDuration()/1000);
+    	    PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()).append("isPass", false));
+    	    
+    	    if (cases.count() > 0) {
+    	      count_fail ++;
+    	    }
+    	    
+    	  }
+    	}
+    	obj.put("jobId", job.getId());
+    	obj.put("duration", duration);
+    	obj.put("numberPassedSuite", suites.count() - count_fail);
+    	obj.put("numberFailedSuite", count_fail);
+    	obj.put("created_date", formater.format(job.getCreatedDate()));
+    	obj.put("stt", ((index - 1) * 10 ) + i);
+    	array.add(obj);
     }
-    
-    
-    ObjectNode obj = Json.newObject();
-    obj.put("result", array.toString());
-    obj.put("total", jobs.count());
-    
-    return ok(obj);
+    return ok(array);
   }
   
   public Result stopProject(String projectId) throws IOException {
