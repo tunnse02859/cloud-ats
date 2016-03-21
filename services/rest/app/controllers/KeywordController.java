@@ -9,17 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
-import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
-import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -92,7 +88,6 @@ public class KeywordController extends Controller {
   @Inject CustomKeywordService customKeywordService;
   
   @Inject VMachineService vmachineService;
-  
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -278,35 +273,20 @@ public class KeywordController extends Controller {
     ArrayNode array = Json.newObject().arrayNode();
     
     AbstractJob<?> job = executorService.get(jobId);
+    
     if(job.getRawDataOutput() != null) {
-      PageList<Report> pages = reportService.getList(jobId, Type.FUNCTIONAL, null);
-    
-          if (pages.totalPage() <= 0) {
-            return status(404);
-          }
-    
-          Report report = pages.next().get(0);
-          report.put("created_date", formater.format(job.getCreatedDate()));
-          Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-    
-          while (iterator.hasNext()) {
-            SuiteReport suiteReport = iterator.next();
-            Date date = suiteReport.getRunningTime();
-            String parseDate = formater.format(date);
-            suiteReport.put("running_time", parseDate);
-            array.add(Json.parse(suiteReport.toString()));
-    
-          }
-    
-          report.put("suite_reports", array.toString());
-    
-          return status(200, Json.parse(report.toString()));
-        }
-    
-        return status(404);
+      PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
+      
+      while (suites.hasNext()) {
+    	  for (SuiteReport suite : suites.next()) {
+    		  array.add(Json.parse(suite.toString()));
+    	  }
       }
-
-  
+      return status(200, array);
+    }
+    
+    return status(404);
+  }
   
   public Result listReport(String projectId) throws Exception {
 	  
