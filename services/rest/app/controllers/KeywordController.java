@@ -300,7 +300,7 @@ public class KeywordController extends Controller {
 	  
 	  PageList<CaseReport> caseReport = caseReportService.query(new BasicDBObject("_id",caseReportId));
 	  CaseReport caze = caseReport.next().get(0);
-	  objNode.put("caseName", caze.getName(""));
+	  objNode.put("caseName", caze.getName());
 	  objNode.put("dataSource", caze.getDataSource());
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {
