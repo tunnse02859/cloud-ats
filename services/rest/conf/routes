@@ -44,6 +44,7 @@ GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordControl
 GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
 GET		/api/v1/project/keyword/:projectId/logs			 @controllers.KeywordController.viewLog(projectId)	
 GET		/api/v1/project/keyword/:projectId/download/:jobId	@controllers.KeywordController.download(projectId,jobId)
+GET     /api/v1/project/keyword/:projectId/report/:jobId/case/:caseReportId  @controllers.KeywordController.getReportCase(projectId,jobId,caseReportId)
 
 # Keyword upload project controller
 POST	/api/v1/project/selenium					 @controllers.SeleniumUploadController.create()

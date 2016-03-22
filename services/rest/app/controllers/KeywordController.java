@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
@@ -31,8 +32,11 @@ import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteReference;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.keyword.report.CaseReportService;
+import org.ats.services.keyword.report.StepReportService;
 import org.ats.services.keyword.report.SuiteReportService;
 import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.StepReport;
+import org.ats.services.keyword.report.models.StepReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
@@ -72,6 +76,8 @@ public class KeywordController extends Controller {
   @Inject SuiteReportService suiteReportService;
   
   @Inject CaseReportService caseReportService;
+  
+  @Inject StepReportService stepReportService;
   
   @Inject KeywordProjectFactory keywordProjectFactory;
   
@@ -286,6 +292,23 @@ public class KeywordController extends Controller {
     }
     
     return status(404);
+  }
+  
+  public Result getReportCase(String projectId, String jobId, String caseReportId){
+	  ObjectNode objNode = Json.newObject() ;
+	  ArrayNode array = Json.newObject().arrayNode();
+	  
+	  PageList<CaseReport> caseReport = caseReportService.query(new BasicDBObject("_id",caseReportId));
+	  CaseReport caze = caseReport.next().get(0);
+	  objNode.put("caseName", caze.getName(""));
+	  objNode.put("dataSource", caze.getDataSource());
+	  List<StepReportReference> listStepReport = caze.getSteps() ;
+	  for (StepReportReference stepReportReference : listStepReport) {
+		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass");
+		array.add(Json.parse(stepReport.toString()));
+	  }
+	  objNode.put("listStep", Json.parse(array.toString()));
+	  return status(200, objNode);
   }
   
   public Result listReport(String projectId) throws Exception {
