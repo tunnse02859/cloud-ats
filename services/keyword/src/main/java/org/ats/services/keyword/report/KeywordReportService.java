@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,11 +76,11 @@ public class KeywordReportService {
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
-          
+          String suiteId = json.get("id").asText();
           start_time = Long.parseLong(json.get("timestamp").asText());
           String suiteName = json.get("name").asText();
           jobId = json.get("jobId").asText();
-          suiteReport = suiteReportFactory.create(jobId, suiteName, 0, 0, 0, 0, listCaseReportRef, 0);
+          suiteReport = suiteReportFactory.create(start_time, jobId, suiteId, suiteName, 0, 0, 0, 0, listCaseReportRef, 0);
         }
         if (currentLine.contains("[Start][Case]")) {
           dataSource = new ArrayList<String>();
@@ -128,7 +127,6 @@ public class KeywordReportService {
           int start = currentLine.indexOf("{");
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
-          System.out.println(obj);
           JsonNode json = mapper.readTree(obj);
           String name = json.get("keyword_type").asText();
           stepReport = new StepReport(name);
@@ -243,8 +241,9 @@ public class KeywordReportService {
           
           start_time = Long.parseLong(json.get("timestamp").asText());
           String suiteName = json.get("name").asText();
+          String suiteId = json.get("id").asText();
           jobId = json.get("jobId").asText();
-          suiteReport = suiteReportFactory.create(jobId, suiteName, 0, 0, 0, 0, listCaseReportRef, 0);
+          suiteReport = suiteReportFactory.create(start_time, jobId, suiteId, suiteName, 0, 0, 0, 0, listCaseReportRef, 0);
         }
         if (currentLine.contains("[Start][Case]")) {
           dataSource = new ArrayList<String>();

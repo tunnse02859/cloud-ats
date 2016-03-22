@@ -85,7 +85,7 @@ public class CaseReport extends BasicDBObject {
     this.put("name", name);
   }
   
-  public String getName(String name) {
+  public String getName() {
     return this.getString("name");
   }
   

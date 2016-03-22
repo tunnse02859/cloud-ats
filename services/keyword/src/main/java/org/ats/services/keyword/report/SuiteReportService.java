@@ -54,6 +54,8 @@ public class SuiteReportService extends AbstractMongoCRUD<SuiteReport> {
     int totalSkip = (Integer) source.get("totalSkip");
     int totalCase = (Integer) source.get("totalCase");
     long duration = (Long) source.get("duration");
+    long created_date = (Long) source.get("created_date");
+    String suiteId = source.get("suiteId").toString();
     
     String jobId = source.get("jobId").toString();
     
@@ -67,7 +69,7 @@ public class SuiteReportService extends AbstractMongoCRUD<SuiteReport> {
       }
     }
     
-    SuiteReport report = suiteReportFactory.create(jobId, name, totalPass, totalFail, totalSkip, totalCase, list, duration);
+    SuiteReport report = suiteReportFactory.create(created_date, jobId, suiteId, name, totalPass, totalFail, totalSkip, totalCase, list, duration);
     String id = source.get("_id").toString();
     report.put("_id", id);
     return report;

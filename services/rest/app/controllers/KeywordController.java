@@ -9,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 import org.ats.common.MapBuilder;
@@ -37,6 +39,7 @@ import org.ats.services.keyword.report.SuiteReportService;
 import org.ats.services.keyword.report.models.CaseReport;
 import org.ats.services.keyword.report.models.StepReport;
 import org.ats.services.keyword.report.models.StepReportReference;
+import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
@@ -140,7 +143,6 @@ public class KeywordController extends Controller {
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
       log = lastJob.getLog();
-      System.out.println(lastJob.getId());
     }
     
     return log.isEmpty() ? status(404) : status(200, log);
@@ -345,6 +347,7 @@ public class KeywordController extends Controller {
     	    
     	  }
     	}
+    	obj.put("total", jobs.count());
     	obj.put("jobId", job.getId());
     	obj.put("duration", duration);
     	obj.put("numberPassedSuite", suites.count() - count_fail);
@@ -391,6 +394,87 @@ public class KeywordController extends Controller {
     jenkinsJob.stop();
     
     return status(200);
+  }
+  
+  public Result suiteReport(String projectId, String jobId, String suiteId, String suite_report_id) {
+    
+    int index = Integer.parseInt(request().getQueryString("index"));
+    
+    // get suite report with suiteId and jobId
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId).append("suiteId", suiteId));
+    SuiteReport suite = suites.next().get(0);
+    List<CaseReportReference> caseRefs = suite.getCases();
+    
+    // store unique case id by set
+    Set<String> set = new HashSet<String>();
+    for (CaseReportReference ref : caseRefs) {
+      CaseReport report = ref.get();
+      set.add(report.getCaseId());
+    }
+    //create list unique case id
+    List<String> list = new ArrayList<>(set);
+    
+    //result object is used to return data to client
+    ObjectNode result = Json.newObject();
+    
+    // array node to store  list case report with data driven
+    ArrayNode caseArray = Json.newObject().arrayNode();
+    
+    //get report with 10 caseId
+    int startIndex = index * 10;
+    for (int i = startIndex; i < list.size() && i < (startIndex + 10); i ++) {
+      ObjectNode obj = Json.newObject();
+      
+      //get all case report with case id and suite report id
+      PageList<CaseReport> reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
+      
+      
+      if (reports.count() > 1) {
+        obj.put("data_driven", true);
+        ArrayNode array = Json.newObject().arrayNode();
+        while (reports.hasNext()) {
+          for (CaseReport report : reports.next()) {
+            array.add(Json.parse(report.toString()));
+          }
+        }
+        obj.put("data_source", array.toString());
+        
+      } else {
+        obj.put("report", reports.next().get(0).toString());
+        obj.put("data_driven", false);
+      }
+      
+      reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
+      
+      //Get failed case 
+      PageList<CaseReport> failedReports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id).append("isPass", false));
+      //if one data line is failed, the test case is failed
+      if (failedReports.count() > 0) {
+        obj.put("result", "Fail");
+      } else obj.put("result", "Pass");
+      
+      obj.put("name", reports.next().get(0).getName());
+      obj.put("stt", i+1+"");
+      caseArray.add(obj);
+      
+      result.put("totalCase", list.size());
+      result.put("reports", caseArray.toString());
+      
+    }
+    
+    // 10 last job contains test suite
+    suites = suiteReportService.query(new BasicDBObject("suiteId", suiteId));
+    suites.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    List<SuiteReport> listSuites = suites.next();
+    
+    ArrayNode suiteArray = Json.newObject().arrayNode();
+    for (int i = 0; i < listSuites.size() && i < 10; i ++) {
+      SuiteReport report = listSuites.get(i);
+      suiteArray.add(Json.parse(report.toString()));
+    }
+    result.put("suites", suiteArray.toString());
+    
+    return ok(result);
   }
   
   public Result download(String projectId, String jobId) {

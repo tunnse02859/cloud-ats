@@ -13,5 +13,5 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface SuiteReportFactory {
   
-  public SuiteReport create(@Assisted("jobId") String jobId, @Assisted("name") String name, @Assisted("totalPass") int totalPass, @Assisted("totalFail") int totalFail, @Assisted("totalSkip") int totalSkip, @Assisted("totalCase") int totalCase, @Assisted("cases") List<CaseReportReference> cases, @Assisted("duration") long duration);
+  public SuiteReport create(@Assisted("created_date") long date, @Assisted("jobId") String jobId, @Assisted("suiteId") String suiteId, @Assisted("name") String name, @Assisted("totalPass") int totalPass, @Assisted("totalFail") int totalFail, @Assisted("totalSkip") int totalSkip, @Assisted("totalCase") int totalCase, @Assisted("cases") List<CaseReportReference> cases, @Assisted("duration") long duration);
 }
