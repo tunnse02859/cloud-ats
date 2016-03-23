@@ -100,7 +100,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
   public void testVMAction() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
     
-    VMachine vm = openstackService.createTestVM(tenantRef, null, false);
+    VMachine vm = openstackService.createTestVM(tenantRef, null, false, false);
     openstackService.deallocateFloatingIp(vm);
     
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
@@ -122,7 +122,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     
     VMachine jenkins = vmachineService.getSystemVM(tenantRef, null);
     
-    VMachine vm = openstackService.createTestVM(tenantRef, null, true);
+    VMachine vm = openstackService.createTestVM(tenantRef, null, true, false);
     openstackService.deallocateFloatingIp(vm);
     
     JenkinsMaster master = new JenkinsMaster(jenkins.getPublicIp(), "http", "jenkins", 8080);
@@ -152,7 +152,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateNonUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, false);
+    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, false, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {
@@ -166,7 +166,7 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, true);
+    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, true, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {
@@ -174,6 +174,19 @@ public class OpenStackServiceTestCase extends AbstractEventTestCase {
     }
     Assert.assertTrue(vm.getPrivateIp().startsWith("192.168.1"));
     Assert.assertNotNull(vm.getPublicIp());
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
+  }
+  
+  @Test
+  public void testCreateWindowsAsync() throws Exception {
+    TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
+    VMachine vm = openstackService.createTestVMAsync(tenantRef, null, true, true);
+    Assert.assertNotNull(vm);
+    Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
+    while (isVMNotStarted(vm.getId())) {
+      Thread.sleep(5000);
+    }
+    Assert.assertTrue(vm.getPrivateIp().startsWith("192.168.1"));
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
   }
   

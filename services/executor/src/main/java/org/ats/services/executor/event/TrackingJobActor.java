@@ -244,7 +244,7 @@ public class TrackingJobActor extends UntypedActor {
       // create new test VM
       for (int i = 0; i < totalEngines - listVM.count(); i ++) {
         
-        VMachine testVM = iaasProvider.get().createTestVMAsync(project.getTenant(),  project.getSpace(),  false);
+        VMachine testVM = iaasProvider.get().createTestVMAsync(project.getTenant(),  project.getSpace(),  false, false);
         updateLog(job, "Created new VM "+ testVM);
         
         job.addVMachine(vmRefFactory.create(testVM.getId()));
@@ -505,17 +505,22 @@ public class TrackingJobActor extends UntypedActor {
   }
   
   private void doExecuteKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
-
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    BasicDBObject options = job.getOptions();
+    String browser = options.getString("browser");
+    boolean isWindows = "ie".equals(browser);
+    
     VMachine testVM = job.getTestVMachineId() == null ? 
-        vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true) : vmachineService.get(job.getTestVMachineId());
+        (isWindows ? vmachineService.findOneWindowsAvailable(project.getTenant(), project.getSpace()) : 
+          vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true)) : 
+          vmachineService.get(job.getTestVMachineId());
 
     if (testVM == null) {
       updateLog(job, "None VM available.");
       updateLog(job, "Creating new VM (about 4-8 minutes).... ");
       
       //We will create new test vm async
-      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true, isWindows);
       updateLog(job, "Created new VM " + testVM);
       
       job.setVMachineId(testVM.getId());
@@ -556,7 +561,7 @@ public class TrackingJobActor extends UntypedActor {
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-          testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+          testVM.getPrivateIp() , (isWindows ? "C:/cygwin64/home/cloudats/projects/" : "/home/cloudats/projects/") + job.getId() + "/pom.xml", goalsBuilder.toString());
 
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
@@ -679,7 +684,7 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       updateLog(job, "Creating new VM (about 4-8 minitues).... ");
       
       //We will create new test vm async
-      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true, false);
       updateLog(job, "Created new VM " + testVM);
       
       job.setVMachineId(testVM.getId());

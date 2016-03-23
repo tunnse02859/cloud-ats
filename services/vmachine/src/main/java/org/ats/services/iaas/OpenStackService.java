@@ -95,7 +95,7 @@ class OpenStackService implements IaaSService {
   
   private String keystoneURL, adminKeystoneEndpoint, keystoneProvider, neutronProvider, novaProvider, externalNetwork, defaultRole;
   
-  private String systemImage, uiImage, nonUIImage;
+  private String systemImage, uiImage, nonUIImage, windowsImage;
   
   private DBCollection col;
   
@@ -125,6 +125,7 @@ class OpenStackService implements IaaSService {
       @Named("org.ats.cloud.openstack.image.system") String systemImage,
       @Named("org.ats.cloud.openstack.image.ui") String uiImage,
       @Named("org.ats.cloud.openstack.image.nonui") String nonUIImage,
+      @Named("org.ats.cloud.openstack.image.windows") String windowsImage,
       MongoDBService mongo) {
     
     this.keystoneURL = keystoneURL;
@@ -138,6 +139,7 @@ class OpenStackService implements IaaSService {
     this.systemImage = systemImage;
     this.uiImage = uiImage;
     this.nonUIImage = nonUIImage;
+    this.windowsImage = windowsImage;
     
     this.col = mongo.getDatabase().getCollection("openstack-identity");
   }
@@ -364,7 +366,7 @@ class OpenStackService implements IaaSService {
           machine = deallocateFloatingIp(machine);
         
         machine.setStatus(VMachine.Status.Started);
-        vmachineService.update(machine);
+//        vmachineService.update(machine);
         return machine;
       } else {
         throw new StartVMException("Cannot connect to vm " + machine.getPrivateIp()); 
@@ -454,7 +456,7 @@ class OpenStackService implements IaaSService {
   public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
     String flavorId = getFlavorIdByName(tenant, "m1.small");
     String imageId = getImageIdByName(tenant, systemImage);
-    return createVM(imageId, flavorId, true, false, tenant, space);
+    return createVM(imageId, flavorId, true, false, false, tenant, space);
   }
   
   @Override
@@ -463,25 +465,39 @@ class OpenStackService implements IaaSService {
   }
 
   @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
-    String flavorId = getFlavorIdByName(tenant, "m1.small");
-    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
-    return createVM(imageId, flavorId, false, hasUI, tenant, space);
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
+    String flavorId = getFlavorIdByName(tenant, isWindows ? "m1.medium" : "m1.small");
+    String imageId = null;
+    if (isWindows) {
+      imageId = getImageIdByName(tenant, windowsImage);
+    } else if (hasUI) {
+      imageId = getImageIdByName(tenant, uiImage);
+    } else {
+      imageId = getImageIdByName(tenant, nonUIImage);
+    }
+    return createVM(imageId, flavorId, false, hasUI, isWindows, tenant, space);
   }
   
   @Override
-  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
 
-    String flavorId = getFlavorIdByName(tenant, "m1.small");
-    String imageId = hasUI ? getImageIdByName(tenant, uiImage) : getImageIdByName(tenant, nonUIImage); 
-    VMachine vm = createVMAsync(imageId, flavorId, false, hasUI, tenant, space);
+    String flavorId = getFlavorIdByName(tenant, isWindows ? "m1.medium" : "m1.small");
+    String imageId = null;
+    if (isWindows) {
+      imageId = getImageIdByName(tenant, windowsImage);
+    } else if (hasUI) {
+      imageId = getImageIdByName(tenant, uiImage);
+    } else {
+      imageId = getImageIdByName(tenant, nonUIImage);
+    }
+    VMachine vm = createVMAsync(imageId, flavorId, false, hasUI, isWindows, tenant, space);
     
     Event event = eventFactory.create(vm, "initialize-vm");
     event.broadcast();
     return vm;
   }
   
-  private VMachine createVMAsync(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
+  private VMachine createVMAsync(String imageId, String flavorId, boolean system, boolean hasUI, boolean isWindows,TenantReference tenant, SpaceReference space) throws CreateVMException {
     NovaApi novaApi = createNovaApi(tenant.getId());
     String region = novaApi.getConfiguredRegions().iterator().next();
     ServerApi serverApi = novaApi.getServerApi(region);
@@ -501,16 +517,16 @@ class OpenStackService implements IaaSService {
     logger.info("Requesting OpenStack to create new instance");
     ServerCreated serverCreated = serverApi.create(serverName, imageId, flavorId, new CreateServerOptions().userData(sb.toString().getBytes()));
     
-    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, null, null, Status.Initializing);
+    VMachine vm = vmachineFactory.create(serverCreated.getId(), tenant, space, system, hasUI, isWindows, null, null, Status.Initializing);
     vmachineService.create(vm);
     logger.info("Created VM " + vm);
     
     return vm;
   }
   
-  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, TenantReference tenant, SpaceReference space) throws CreateVMException {
+  private VMachine createVM(String imageId, String flavorId, boolean system, boolean hasUI, boolean isWindows, TenantReference tenant, SpaceReference space) throws CreateVMException {
 
-    VMachine vm = createVMAsync(imageId, flavorId, system, hasUI, tenant, space);
+    VMachine vm = createVMAsync(imageId, flavorId, system, hasUI, isWindows, tenant, space);
     
    vm = waitUntilInstanceRunning(vm);
    
@@ -594,19 +610,63 @@ class OpenStackService implements IaaSService {
     if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
       logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
       
-      try {
-        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
-        logger.info("Created Jenkins slave by " + vm);
+      if (!vm.isWindows()) {
+        try {
+          if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+          logger.info("Created Jenkins slave by " + vm);
+          
+        } catch (Exception e) {
+          CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+          ex.setStackTrace(e.getStackTrace());
+          throw ex;
+        }
+      } else {
+        JenkinsSlave winSlave = new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), true);
+        try {
+          winSlave.join(5 * 1000);
+        } catch (Exception e) {
+          //No problem
+        }
+        //TODO: that is trick to reload jenkins slave configuration
+        String cmd = "/cygdrive/c/jenkin_slave/change_jenkinconfig.sh " + systemVM.getPrivateIp() + " " + vm.getPrivateIp();
+        Session session = SSHClient.getSession(vm.getPublicIp(), 22, "cloudats", "#CloudATS");              
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(cmd);
+        channel.connect();
         
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
+        while(true) {
+          if (channel.isClosed()) {
+            logger.info("Register Windows Jenkins Slave exit code: " + channel.getExitStatus());
+            break;
+          }
+        }
+        
+        channel.disconnect();
+        session.disconnect();
+        logger.info("Registered Windows Jenkins slave.");
+        //The vm will be restart
+        
+        if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+          logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+          //wait jenkins slave available
+          String fetchUrl = jenkinsMaster.buildURL(new StringBuilder("computer/").append(vm.getPrivateIp()).append("/api/json").toString());
+          try {
+            if (!winSlave.waitJenkinsSlaveJoinUntil(System.currentTimeMillis(), 10 * 60 * 1000, fetchUrl)) throw new CreateVMException("Can not create jenkins slave for test vm");
+            logger.info("Created Jenkins slave by " + vm);
+            
+          } catch (Exception e) {
+            CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+            ex.setStackTrace(e.getStackTrace());
+            throw ex;
+          }
+        } else {
+          throw new CreateVMException("Connection to VM can not established");
+        }
       }
       
     //register Guacamole vnc
       try {
-        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' "  + (vm.isWindows() ? "rdp" : "vnc")  +  " 0";
         Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(command);

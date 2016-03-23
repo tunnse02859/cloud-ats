@@ -48,7 +48,6 @@ public class KeywordReportService {
   
   @Inject CaseReportFactory caseReportFactory;
   
-  @SuppressWarnings({ "rawtypes", "deprecation" })
   public void logParser(FileReader file) {
     BufferedReader br = null;
     String jobId = null;
@@ -62,7 +61,6 @@ public class KeywordReportService {
       List<CaseReport> cases = new ArrayList<CaseReport>();
       List<StepReport> steps = new ArrayList<StepReport>();
       List<CaseReportReference> listCaseReportRef = null;
-      String id = null;
       List<StepReportReference> listStepReportRef = null;
       List<String> dataSource = null;
       BasicDBList listParams = null;
@@ -94,7 +92,6 @@ public class KeywordReportService {
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
-          id = json.get("id").toString();
           
           caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef);
           caseReport.setDataSource(dataSource.toString());
@@ -218,7 +215,6 @@ public class KeywordReportService {
     }
   }
   
-  @SuppressWarnings({ "rawtypes", "deprecation" })
   public void logParserByBuffer(BufferedReader br) {
     String jobId = null;
     try {
@@ -230,7 +226,6 @@ public class KeywordReportService {
       List<CaseReport> cases = new ArrayList<CaseReport>();
       List<StepReport> steps = new ArrayList<StepReport>();
       List<CaseReportReference> listCaseReportRef = null;
-      String id = null;
       List<StepReportReference> listStepReportRef = null;
       List<String> dataSource = null;
       BasicDBList listParams = null;
@@ -263,7 +258,6 @@ public class KeywordReportService {
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
-          id = json.get("id").toString();
           
           caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef);
           caseReport.setDataSource(dataSource.toString());

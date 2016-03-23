@@ -96,6 +96,8 @@ public class AzureService implements IaaSService {
   private String uiImage;
 
   private String nonUIImage;
+  
+  private String windowsImage;
 
   private DBCollection col;
 
@@ -111,6 +113,7 @@ public class AzureService implements IaaSService {
       @Named("org.ats.cloud.azure.image.system") String systemImage,
       @Named("org.ats.cloud.azure.image.ui") String uiImage,
       @Named("org.ats.cloud.azure.image.nonui") String nonUIImage,
+      @Named("org.ats.cloud.azure.image.windows") String windowsImage,
       MongoDBService mongo) {
 
     this.keystorePath = keystorePath;
@@ -123,6 +126,7 @@ public class AzureService implements IaaSService {
     this.systemImage = systemImage;
     this.uiImage = uiImage;
     this.nonUIImage = nonUIImage;
+    this.windowsImage = windowsImage;
     this.col = mongo.getDatabase().getCollection("azure-public-port");
   }
 
@@ -228,7 +232,7 @@ public class AzureService implements IaaSService {
 
       RoleInstance roleInstance = getVMByName(params.getRoleName());
       VMachine vm = vmachineFactory
-          .create(params.getRoleName(), tenant, space, true, false,  
+          .create(params.getRoleName(), tenant, space, true, false,  false,
               roleInstance.getIPAddress().getHostAddress(),
               roleInstance.getIPAddress().getHostAddress(), 
               Status.Initializing);
@@ -263,9 +267,9 @@ public class AzureService implements IaaSService {
   }
 
   @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
 
-    VMachine vm = createTestVMAsync(tenant, space, hasUI);
+    VMachine vm = createTestVMAsync(tenant, space, hasUI, isWindows);
 
     logger.info("Waiting for instance's state is running");
     try {
@@ -282,7 +286,7 @@ public class AzureService implements IaaSService {
   }
 
   @Override
-  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
     try {
       VirtualMachineCreateParameters params = new VirtualMachineCreateParameters();
       params.setRoleName(generateVMName(false, hasUI, tenant, space));
@@ -317,7 +321,7 @@ public class AzureService implements IaaSService {
 
       RoleInstance roleInstance = getVMByName(params.getRoleName());
       VMachine vm = vmachineFactory
-          .create(params.getRoleName(), tenant, space, false, hasUI,  
+          .create(params.getRoleName(), tenant, space, false, hasUI,  isWindows,
               roleInstance.getIPAddress().getHostAddress(),
               roleInstance.getIPAddress().getHostAddress(), 
               Status.Initializing);
@@ -431,7 +435,7 @@ public class AzureService implements IaaSService {
       logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
 
       try {
-        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
         logger.info("Created Jenkins slave by " + vm);
 
       } catch (Exception e) {

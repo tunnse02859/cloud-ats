@@ -32,7 +32,9 @@ libraryDependencies ++= Seq(
 	"com.sun.jersey" % "jersey-core" % "1.13"
 )
 
-
+resolvers += (
+	"Local Maven Repository" at "file://" + Path.userHome.absolutePath  + "/java/dependencies/repository"		
+)
 
 resolvers ++= Seq(
 	Resolver.sonatypeRepo("snapshots"),

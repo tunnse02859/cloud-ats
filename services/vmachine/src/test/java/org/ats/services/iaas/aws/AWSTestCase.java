@@ -96,7 +96,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
   @Test
   public void testCreateNonUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = awsService.createTestVM(tenantRef, null, false);
+    VMachine vm = awsService.createTestVM(tenantRef, null, false, false);
     Assert.assertNotNull(vm);
     Assert.assertTrue(vm.getPrivateIp().startsWith("10.10.13"));
     Assert.assertNotNull(vm.getPublicIp());
@@ -105,7 +105,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
   @Test
   public void testCreateUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = awsService.createTestVM(tenantRef, null, true);
+    VMachine vm = awsService.createTestVM(tenantRef, null, true, false);
     Assert.assertNotNull(vm);
     Assert.assertTrue(vm.getPrivateIp().startsWith("10.10.13"));
     Assert.assertNotNull(vm.getPublicIp());
@@ -114,7 +114,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
   @Test
   public void testCreateNonUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = awsService.createTestVMAsync(tenantRef, null, false);
+    VMachine vm = awsService.createTestVMAsync(tenantRef, null, false, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {
@@ -128,7 +128,7 @@ public class AWSTestCase  extends AbstractEventTestCase {
   @Test
   public void testCreateUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = awsService.createTestVMAsync(tenantRef, null, true);
+    VMachine vm = awsService.createTestVMAsync(tenantRef, null, true, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {

@@ -66,6 +66,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -278,7 +279,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     KeywordJob job = executorService.execute(project, Arrays.asList(
         suiteRefFactory.create(fullExampleSuite.getId()),
-        suiteRefFactory.create(acceptAlertSuite.getId())));
+        suiteRefFactory.create(acceptAlertSuite.getId())), new BasicDBObject());
     
     Assert.assertEquals(job.getStatus(), Status.Queued);
     Assert.assertNull(job.getTestVMachineId());

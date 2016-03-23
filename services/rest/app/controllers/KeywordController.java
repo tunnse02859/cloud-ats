@@ -180,6 +180,7 @@ public class KeywordController extends Controller {
       project.put("log", true);
       project.put("lastSuites", lastJob.get("suites"));
       project.put("lastJobId", lastJob.getId());
+      project.put("lastJobOptions", lastJob.get("options"));
     }
     
     return ok(Json.parse(project.toString()));
@@ -247,24 +248,26 @@ public class KeywordController extends Controller {
     JsonNode jsonOptions = data.get("options");
     
     List<SuiteReference> suites = new ArrayList<SuiteReference>(jsonSuites.size());
-    String versionSelenium = jsonOptions.get("versionSelenium") != null ? jsonOptions.get("versionSelenium").asText() : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
-    SuiteReference ref;
+    String seleniumVersion = jsonOptions.get("selenium_version") != null ? jsonOptions.get("selenium_version").asText() : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
+    String browser = jsonOptions.get("browser") != null ? jsonOptions.get("browser").asText() : null;
+    String browserVersion = jsonOptions.get("browser_version") != null ? jsonOptions.get("browser_version").asText() : null;
+    BasicDBObject options = new BasicDBObject("browser", browser).append("browser_version", browserVersion).append("selenium_version", seleniumVersion);
+    
+    StringBuilder initDriver = new StringBuilder();
+    if ("firefox".equals(browser)) {
+      initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"/home/cloudats/firefox-store/").append(browserVersion).append("/firefox\");\n");
+      initDriver.append("wd = new FirefoxDriver();");
+    } else if ("chrome".equals(browser)) {
+      initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"/home/cloudats/chromedriver\");\n wd = new ChromeDriver();");
+    } else if ("ie".equals(browser)) {
+      initDriver.append("System.setProperty(\"webdriver.ie.driver\", \"C:/jenkin_slave/IEDriverServer32.exe\");\n wd = new InternetExplorerDriver();");
+    }
+    
     for (JsonNode sel : jsonSuites) {
-      ref = suiteRefFactory.create(sel.asText());
+      SuiteReference ref = suiteRefFactory.create(sel.asText());
       
       if (suiteService.get(ref.getId()) == null) {
         return status(400);
-      }
-      
-      String browser = jsonOptions.get("browser") != null ? jsonOptions.get("browser").asText() : null;
-      String version = jsonOptions.get("version") != null ? jsonOptions.get("version").asText() : null;
-      
-      StringBuilder initDriver = new StringBuilder();
-      if ("firefox".equals(browser)) {
-        initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"/home/cloudats/firefox-store/").append(version).append("/firefox\");\n");
-        initDriver.append("wd = new FirefoxDriver();");
-      } else if ("chrome".equals(browser)) {
-        initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"/home/cloudats/chromedriver\");\n wd = new ChromeDriver();");
       }
       
       if (initDriver.length() > 0) {
@@ -279,12 +282,12 @@ public class KeywordController extends Controller {
     KeywordProject project = keywordProjectService.get(projectId, "value_delay");
     if (project == null) return status(404);
     
-    project.setVersionSelenium(versionSelenium);
+    project.setVersionSelenium(seleniumVersion);
     keywordProjectService.update(project);
     
     if (project.getStatus() == KeywordProject.Status.RUNNING) return status(204);
     
-    KeywordJob job = executorService.execute(project, suites);
+    KeywordJob job = executorService.execute(project, suites, options);
     return status(201, Json.parse(job.toString()));
   }
   

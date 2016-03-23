@@ -95,7 +95,7 @@ public class AzureTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateNonUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = azureService.createTestVM(tenantRef, null, false);
+    VMachine vm = azureService.createTestVM(tenantRef, null, false, false);
     Assert.assertNotNull(vm);
     Assert.assertTrue(vm.getPrivateIp().startsWith("172.16.1"));
     Assert.assertNotNull(vm.getPublicIp());
@@ -104,7 +104,7 @@ public class AzureTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateUI() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = azureService.createTestVM(tenantRef, null, true);
+    VMachine vm = azureService.createTestVM(tenantRef, null, true, false);
     Assert.assertNotNull(vm);
     Assert.assertTrue(vm.getPrivateIp().startsWith("172.16.1"));
     Assert.assertNotNull(vm.getPublicIp());
@@ -113,7 +113,7 @@ public class AzureTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateNonUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = azureService.createTestVMAsync(tenantRef, null, false);
+    VMachine vm = azureService.createTestVMAsync(tenantRef, null, false, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {
@@ -127,7 +127,7 @@ public class AzureTestCase extends AbstractEventTestCase {
   @Test
   public void testCreateUIAsync() throws Exception {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = azureService.createTestVMAsync(tenantRef, null, true);
+    VMachine vm = azureService.createTestVMAsync(tenantRef, null, true, false);
     Assert.assertNotNull(vm);
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Initializing);
     while (isVMNotStarted(vm.getId())) {

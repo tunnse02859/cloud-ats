@@ -94,12 +94,12 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     return job;
   }
   
-  public KeywordJob execute(KeywordProject project, List<SuiteReference> suites) throws Exception {
+  public KeywordJob execute(KeywordProject project, List<SuiteReference> suites, BasicDBObject options) throws Exception {
     project.setStatus(KeywordProject.Status.RUNNING);
     keywordService.update(project);
     
     String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
-    KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, null, Status.Queued);
+    KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, options, null, Status.Queued);
     create(job);
 
     Event event = eventFactory.create(job, "keyword-job-tracking");
@@ -139,7 +139,8 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
         BasicDBObject dbObj = (BasicDBObject) obj;
         suites.add(suiteRefFactory.create(dbObj.getString("_id")));
       }
-      KeywordJob keywordJob = keywordFactory.create(projectHash, projectId, suites, vmachineId, status);
+      BasicDBObject options = source.get("options") == null ? new BasicDBObject() : (BasicDBObject) source.get("options");
+      KeywordJob keywordJob = keywordFactory.create(projectHash, projectId, suites, options, vmachineId, status);
       keywordJob.put("_id", id);
       keywordJob.put("created_date", createdDate);
       keywordJob.put("report", source.get("report"));

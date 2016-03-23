@@ -114,7 +114,6 @@ public class Case extends AbstractTemplate {
   
   public String transform(int valueDelay, boolean sequenceMode, int order) throws IOException {
 	String str = "";
-	String strLog = "";
 	List<String> listParams = new ArrayList<String>();
 	StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;

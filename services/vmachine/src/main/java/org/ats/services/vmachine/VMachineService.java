@@ -79,6 +79,15 @@ public class VMachineService extends AbstractMongoCRUD<VMachine>{
     return list.count() > 0 ? list.next().get(0) : null;
   }
   
+  public VMachine findOneWindowsAvailable(TenantReference tenantRef, SpaceReference spaceRef) {
+    BasicDBObject query = new BasicDBObject("tenant", tenantRef.toJSon());
+    query.put("space", spaceRef == null ? null : spaceRef.toJSon());
+    query.put("windows", true);
+    
+    PageList<VMachine> list = query(query);
+    return list.count() > 0 ? list.next().get(0) : null;
+  }
+  
   @Override
   public VMachine transform(DBObject source) {
     BasicDBObject obj = (BasicDBObject) source.get("tenant");
@@ -89,13 +98,14 @@ public class VMachineService extends AbstractMongoCRUD<VMachine>{
     
     boolean isSystem = ((BasicDBObject) source).getBoolean("system");
     boolean hasUI = ((BasicDBObject) source).getBoolean("ui");
+    boolean isWindows = ((BasicDBObject) source).getBoolean("windows");
     
     String publicIp = ((BasicDBObject) source).getString("public_ip");
     String privateIp = ((BasicDBObject) source).getString("private_ip");
     
     VMachine.Status status = source.get("status") == null ? null : VMachine.Status.valueOf((String) source.get("status"));
     
-    VMachine machine = vmFactory.create((String) source.get("_id"), tenant, space, isSystem, hasUI, publicIp, privateIp, status);
+    VMachine machine = vmFactory.create((String) source.get("_id"), tenant, space, isSystem, hasUI, isWindows, publicIp, privateIp, status);
     return machine;
   }
 
