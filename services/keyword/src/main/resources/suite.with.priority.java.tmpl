@@ -31,7 +31,7 @@ public class @suiteName {
   private RemoteWebDriver wd;
 
   @@BeforeClass
-  public void setUp() throws Exception throws ParseException {
+  public void setUp() throws Exception {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
     System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
@@ -41,7 +41,7 @@ public class @suiteName {
   }
    
   @@AfterClass
-  public void tearDown() throws ParseException {
+  public void tearDown() throws Exception {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
     System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");

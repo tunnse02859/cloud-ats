@@ -296,6 +296,36 @@ public class KeywordController extends Controller {
     return status(404);
   }
   
+  public Result updateStatus(String projectId, String jobId) {
+    AbstractJob<?> job = executorService.get(jobId);
+    if(job.getRawDataOutput() != null) {
+      ObjectNode obj = Json.newObject();
+      PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
+      
+      long duration = 0;
+      int count_fail = 0;
+      while (suites.hasNext()) {
+        for (SuiteReport suite : suites.next()) {
+          duration += (suite.getDuration()/1000);
+          PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()).append("isPass", false));
+          
+          if (cases.count() > 0) {
+            count_fail ++;
+          }
+          
+        }
+      }
+      obj.put("jobId", job.getId());
+      obj.put("duration", duration);
+      obj.put("numberPassedSuite", suites.count() - count_fail);
+      obj.put("numberFailedSuite", count_fail);
+      obj.put("created_date", formater.format(job.getCreatedDate()));
+      
+      return ok(obj);
+    }
+    return status(404);
+  }
+  
   public Result getReportCase(String projectId, String jobId, String caseReportId){
 	  ObjectNode objNode = Json.newObject() ;
 	  ArrayNode array = Json.newObject().arrayNode();
@@ -501,12 +531,12 @@ public class KeywordController extends Controller {
     int numberOfPassedCase = 0;
     int numberOfFailedCase = 0;
     for (SuiteReference ref : suiteRefs) {
-      PageList<SuiteReport> reports= suiteReportService.query(new BasicDBObject("jobId", jobId).append("suiteId", ref.getId()));
+      PageList<SuiteReport> reports= suiteReportService.query(new BasicDBObject("jobId", keywordJob.getId()).append("suiteId", ref.getId()));
       while (reports.hasNext()) {
         for (SuiteReport report : reports.next()) {
           Set<String> set = getCaseIds(report.getCases());
           for (String s : set) {
-            PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()).append("caseId", s).append("isPass", false));
+            PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()).append("case_id", s).append("isPass", false));
             if (cases.count() > 0) {
               numberOfFailedCase ++;
             } else numberOfPassedCase ++;
