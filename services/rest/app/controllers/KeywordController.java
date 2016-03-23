@@ -301,9 +301,10 @@ public class KeywordController extends Controller {
 	  ArrayNode array = Json.newObject().arrayNode();
 	  
 	  PageList<CaseReport> caseReport = caseReportService.query(new BasicDBObject("_id",caseReportId));
-	  CaseReport caze = caseReport.next().get(0);
-	  objNode.put("caseName", caze.getName());
-	  objNode.put("dataSource", caze.getDataSource());
+	  String id = caseReport.next().get(0).getId();
+	  
+	  CaseReport caze = caseReportService.get(id, "isPass");
+	  objNode.put("case", caze.toString());
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {
 		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass");
@@ -431,7 +432,8 @@ public class KeywordController extends Controller {
         ArrayNode array = Json.newObject().arrayNode();
         while (reports.hasNext()) {
           for (CaseReport report : reports.next()) {
-            array.add(Json.parse(report.toString()));
+        	CaseReport cazeReport = caseReportService.get(report.getId(), "isPass");
+            array.add(Json.parse(cazeReport.toString()));
           }
         }
         obj.put("data_source", array.toString());
