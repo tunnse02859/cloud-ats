@@ -315,7 +315,7 @@ public class KeywordController extends Controller {
   
   public Result listReport(String projectId) throws Exception {
 	  
-	String indexRequest = request().getQueryString("index");
+    String indexRequest = request().getQueryString("index");
     BasicDBObject query = new BasicDBObject();
     BasicDBList andCondition = new BasicDBList();
     andCondition.add(new BasicDBObject("project_id", projectId));
@@ -406,11 +406,8 @@ public class KeywordController extends Controller {
     List<CaseReportReference> caseRefs = suite.getCases();
     
     // store unique case id by set
-    Set<String> set = new HashSet<String>();
-    for (CaseReportReference ref : caseRefs) {
-      CaseReport report = ref.get();
-      set.add(report.getCaseId());
-    }
+    Set<String> set = getCaseIds(caseRefs);
+    
     //create list unique case id
     List<String> list = new ArrayList<>(set);
     
@@ -440,7 +437,7 @@ public class KeywordController extends Controller {
         obj.put("data_source", array.toString());
         
       } else {
-        obj.put("report", reports.next().get(0).toString());
+        obj.put("data_source", reports.next().get(0).toString());
         obj.put("data_driven", false);
       }
       
@@ -462,8 +459,21 @@ public class KeywordController extends Controller {
       
     }
     
-    // 10 last job contains test suite
-    suites = suiteReportService.query(new BasicDBObject("suiteId", suiteId));
+    return ok(result);
+  }
+  
+  /**
+   * 
+   * @param projectId
+   * @param jobId
+   * @param suiteId
+   * @param suite_report_id
+   * @return 10 lastest job with suiteId
+   */
+  public Result getLastestJobWithSuiteId (String projectId, String jobId, String suiteId, String suite_report_id) {
+   
+    ObjectNode object = Json.newObject();
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("suiteId", suiteId));
     suites.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     List<SuiteReport> listSuites = suites.next();
     
@@ -472,9 +482,60 @@ public class KeywordController extends Controller {
       SuiteReport report = listSuites.get(i);
       suiteArray.add(Json.parse(report.toString()));
     }
-    result.put("suites", suiteArray.toString());
     
-    return ok(result);
+    BasicDBObject query = new BasicDBObject();
+    BasicDBList andCondition = new BasicDBList();
+    andCondition.add(new BasicDBObject("project_id", projectId));
+    andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
+    query.append("$and", andCondition);
+    
+    PageList<AbstractJob<?>> jobs= executorService.query(query);
+    jobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    AbstractJob<?> job = jobs.next().get(0);
+    
+    KeywordJob keywordJob = (KeywordJob) job;
+    
+    List<SuiteReference> suiteRefs = keywordJob.getSuites();
+    int numberOfPassedCase = 0;
+    int numberOfFailedCase = 0;
+    for (SuiteReference ref : suiteRefs) {
+      PageList<SuiteReport> reports= suiteReportService.query(new BasicDBObject("jobId", jobId).append("suiteId", ref.getId()));
+      while (reports.hasNext()) {
+        for (SuiteReport report : reports.next()) {
+          Set<String> set = getCaseIds(report.getCases());
+          for (String s : set) {
+            PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()).append("caseId", s).append("isPass", false));
+            if (cases.count() > 0) {
+              numberOfFailedCase ++;
+            } else numberOfPassedCase ++;
+          }
+          
+        }
+      }
+    
+    }
+    
+    object.put("suites", suiteArray.toString());
+    object.put("numberOfPassedCase", numberOfPassedCase);
+    object.put("numberOfFailedCase", numberOfFailedCase);
+    
+    return ok(object);
+  }
+  
+  /**
+   * 
+   * @param refs
+   * @return number of case from case report id
+   */
+  public Set<String> getCaseIds (List<CaseReportReference> refs) {
+    
+    Set<String> set = new HashSet<String>();
+    for (CaseReportReference ref : refs) {
+      CaseReport caze = caseReportService.get(ref.getId(), "isPass");
+      set.add(caze.getCaseId());
+    }
+    
+    return set;
   }
   
   public Result download(String projectId, String jobId) {
