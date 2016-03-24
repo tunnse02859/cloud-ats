@@ -173,6 +173,12 @@ public class KeywordReportService {
           suiteReport.setDuration(duration);
           suiteReport.setCases(listCaseReportRef);
           suites.add(suiteReport);
+          
+          if (listStepReportRef != null) {
+            if (!listStepReportRef.isEmpty()) {
+              cases.get(cases.size()-1).setSteps(listStepReportRef);
+            }
+          }
         }
       }
       
@@ -336,6 +342,12 @@ public class KeywordReportService {
           suiteReport.setDuration(duration);
           suiteReport.setCases(listCaseReportRef);
           suites.add(suiteReport);
+          
+          if (listStepReportRef != null) {
+            if (!listStepReportRef.isEmpty()) {
+              cases.get(cases.size()-1).setSteps(listStepReportRef);
+            }
+          }
         }
       }
       
