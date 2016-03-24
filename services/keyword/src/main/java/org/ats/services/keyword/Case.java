@@ -215,7 +215,7 @@ public class Case extends AbstractTemplate {
             String subTemp = temp.substring(start + 2, end);
             StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
+            temp = sbTemp.toString().replace("\"", "\\\"");
           }
           locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
           listParams.add("\\\"locator\\\"");
@@ -267,7 +267,7 @@ public class Case extends AbstractTemplate {
             String subTemp = temp.substring(start + 2, end);
             StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
             sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
+            temp = sbTemp.toString().replace("\"", "\\\"");
           }
           targetLocator = "\\\"targetLocator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp+"\\\"},";
           listParams.add("\\\"targetLocator\\\"");
