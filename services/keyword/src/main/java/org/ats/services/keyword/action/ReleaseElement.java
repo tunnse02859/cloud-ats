@@ -23,8 +23,17 @@ public class ReleaseElement extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    String template = "new Actions(wd).release(wd.findElement(@locator)).build().perform();\n";
-    return Rythm.render(template, locator.transform());
+//    String template = "new Actions(wd).release(wd.findElement(@locator)).build().perform();\n";
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     new Actions(wd).release(wd.findElement(@locator)).build().perform();\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
+	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
+    return Rythm.render(sb.toString(), locator.transform());
   }
 
   public String getAction() {

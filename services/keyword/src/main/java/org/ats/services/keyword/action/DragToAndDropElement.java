@@ -29,7 +29,17 @@ public class DragToAndDropElement extends AbstractAction {
   
   public String transform() throws IOException {
     String template = "new Actions(wd).dragAndDrop(wd.findElement(@source), wd.findElement(@destination)).build().perform();\n";
-    return Rythm.render(template, source.transform(), destination.transform());
+    
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     new Actions(wd).dragAndDrop(wd.findElement(@source), wd.findElement(@destination)).build().perform();\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
+	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
+    return Rythm.render(sb.toString(), source.transform(), destination.transform());
   }
 
   public String getAction() {

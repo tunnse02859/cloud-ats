@@ -23,8 +23,17 @@ public class SubmitElement extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    String template = "wd.findElement(@locator).submit();\n";
-    return Rythm.render(template, locator.transform());
+//    String template = "wd.findElement(@locator).submit();\n";
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     wd.findElement(@locator).submit();\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
+	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
+    return Rythm.render(sb.toString(), locator.transform());
   }
 
   public String getAction() {
