@@ -285,8 +285,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     Assert.assertEquals(
         generetorService.generateKeyword("target/fk",  project.getId().substring(0, 8), true, Arrays.<SuiteReference>asList(
             suiteRefFactory.create(fullExampleSuite.getId()), 
-            suiteRefFactory.create(acceptAlertSuite.getId())),
-            true,2,project.getVersionSelenium()), 
+            suiteRefFactory.create(acceptAlertSuite.getId())), 2, project.getVersionSelenium()), 
         "target/fk/" + project.getId().substring(0, 8) + ".zip");
     
     Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/FullExample.java").exists());
@@ -345,7 +344,6 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     KeywordProject project = keywordProjectFactory.create(context, "Full Example");
     
-    project.setShowAction(true);
     project.setValueDelay(3);
     project.setVersionSelenium("2.45.0");
     
@@ -384,7 +382,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
         generetorService.generateKeyword("target/fk",  project.getId().substring(0, 8), true, Arrays.<SuiteReference>asList(
             suiteRefFactory.create(fullExampleSuite.getId()), 
             suiteRefFactory.create(acceptAlertSuite.getId())),
-            project.getShowAction(), project.getValueDelay(),project.getVersionSelenium()), 
+             project.getValueDelay(),project.getVersionSelenium()), 
         "target/fk/" + project.getId().substring(0, 8) + ".zip");
     
     Assert.assertTrue(new File("target/fk/" + project.getId().substring(0, 8) + "/src/test/java/org/ats/generated/FullExampleWithOptions.java").exists());

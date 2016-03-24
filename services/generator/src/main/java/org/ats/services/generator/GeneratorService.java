@@ -192,7 +192,7 @@ public class GeneratorService {
    * @throws IOException
    */
   
-  public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites, boolean showAction, int valueDelay, String versionSelenium) throws IOException{
+  public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites, int valueDelay, String versionSelenium) throws IOException{
     File sourceDir = new File(outDir + "/" + jobId  + "/src/test/java/org/ats/generated");
     sourceDir.mkdirs();
     
@@ -205,7 +205,7 @@ public class GeneratorService {
       Suite suite = suiteRef.get();
       String fileName = getAvailableName(StringUtil.normalizeName(suite.getName()), pool) + ".java";
       FileOutputStream os = new FileOutputStream(new File(sourceDir, fileName));
-      os.write(suite.transform(jobId, showAction,valueDelay,suite.getMode()).getBytes());
+      os.write(suite.transform(jobId,valueDelay,suite.getMode()).getBytes());
       os.flush();
       os.close();
     }
@@ -219,7 +219,7 @@ public class GeneratorService {
   }
   
   public String generateKeyword(String outDir, String jobId, boolean compress, List<SuiteReference> suites) throws IOException {
-    return generateKeyword(outDir,jobId,compress,suites,false,0,KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
+    return generateKeyword(outDir, jobId, compress, suites, 0, KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM);
   }
   
   private void loadKeywordPOM(String outDir, String versionSelenium) throws IOException {

@@ -537,7 +537,7 @@ public class TrackingJobActor extends UntypedActor {
       return;
     } else if (testVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
+      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getValueDelay(), project.getVersionSelenium());
 
       if(testVM.getPublicIp() == null) {
         testVM = iaasProvider.get().allocateFloatingIp(testVM);

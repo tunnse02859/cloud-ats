@@ -173,10 +173,8 @@ public class KeywordController extends Controller {
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
-    boolean showAction = json.get("showAction").asBoolean();
     int valueDelay = json.get("valueDelay").asInt();
     KeywordProject project = keywordProjectFactory.create(context, name);
-    project.setShowAction(showAction);
     project.setValueDelay(valueDelay);
     keywordProjectService.create(project);
     return status(201, project.getId());
@@ -186,17 +184,15 @@ public class KeywordController extends Controller {
     JsonNode data = request().body().asJson();
     String id = data.get("id").asText();
     String name = data.get("name").asText();
-    boolean showAction = data.get("showAction").asBoolean();
     int valueDelay = data.get("valueDelay").asInt();
     KeywordProject project = keywordProjectService.get(id,"show_action","value_delay");
     
     if (name.equals(project.getString("name"))) {
-      if((project.getShowAction() == showAction) && (project.getValueDelay() == valueDelay)) {
+      if((project.getValueDelay() == valueDelay)) {
         return status(304);
       }
     }
     project.put("name", name);
-    project.setShowAction(showAction);
     project.setValueDelay(valueDelay);
     keywordProjectService.update(project);
 

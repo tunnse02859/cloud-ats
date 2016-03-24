@@ -1,4 +1,4 @@
-[Start][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot"}
+[Start][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
 
 		[Start][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
@@ -382,9 +382,9 @@
 			[End][Step]
 		[End][Case]{"name": "GenerateInvation", "id": "GenerateInvation12345"}
 		
-[End][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot"}
+[End][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
 
-[Start][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot"}
+[Start][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
 		[Start][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
 			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
@@ -470,9 +470,9 @@
 			[End][Step]
 		[End][Case]{"name": "UpdateRecommendedLevel", "id": "UpdateRecommendedLevel12345"}
 		
-[End][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot"}
+[End][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
 
-[Start][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot"}
+[Start][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot", "timestamp": "123234"}
 	[Start][Case]{"name": "LoginToHomePage", "id": "LoginToHomePage12345"}
 			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
@@ -520,9 +520,9 @@
 			//content output here
 			[End][Step]
 	[End][Case]{"name": "ApproveIBA", "id": "ApproveIBA12345"}
-[End][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot"}
+[End][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
 
-[Start][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot"}
+[Start][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
 
 
 	[Start][Case]{"name": "AdminLogin", "id": "AdminLogin12345"}
@@ -562,5 +562,5 @@
 			[End][Step]
 	[End][Case]{"name": "VerifyEikenConfirmation", "id": "VerifyEikenConfirmation12345"}
 
-[End][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot"}
+[End][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
 

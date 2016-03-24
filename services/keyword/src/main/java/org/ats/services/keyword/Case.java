@@ -110,10 +110,10 @@ public class Case extends AbstractTemplate {
   }
    
   public String transform() throws IOException {
-    return transform(false,0,false,0);
+    return transform(0,false,0);
   }
   
-  public String transform(boolean showAction, int valueDelay, boolean sequenceMode, int order) throws IOException {
+  public String transform(int valueDelay, boolean sequenceMode, int order) throws IOException {
 	String str ="";
 	List<String> listParams = new ArrayList<String>();
 	StringBuilder sb = new StringBuilder();

@@ -1,5 +1,5 @@
 [Duration-Start][Suite]{id: suiteId, timestamp: longValue}
-[Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId"}
+[Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId", "timestamp": "12"}
 
 		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
@@ -27,7 +27,7 @@
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
 		
-[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId"]
+[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId",  "timestamp": "2325235"]
 [Duration-End][Suite]{id: suiteId, timestamp: longValue}
 
 
