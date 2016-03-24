@@ -559,7 +559,7 @@ public class KeywordController extends Controller {
    * @param refs
    * @return number of case from case report id
    */
-  public Set<String> getCaseIds (List<CaseReportReference> refs) {
+  private Set<String> getCaseIds (List<CaseReportReference> refs) {
     
     Set<String> set = new HashSet<String>();
     for (CaseReportReference ref : refs) {

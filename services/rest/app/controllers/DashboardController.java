@@ -7,23 +7,29 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
-import org.ats.service.report.ReportService.Type;
-import org.ats.service.report.function.SuiteReport;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
+import org.ats.services.executor.job.KeywordJob;
 import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.SuiteReference;
+import org.ats.services.keyword.report.CaseReportService;
+import org.ats.services.keyword.report.SuiteReportService;
+import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.CaseReportReference;
+import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.performance.JMeterScriptReference;
@@ -39,6 +45,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -63,6 +70,10 @@ public class DashboardController extends Controller {
   
   @Inject CaseService caseService;
   
+  @Inject SuiteReportService suiteReportService;
+  
+  @Inject CaseReportService caseReportService;
+  
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   public Result summary() throws Exception {
@@ -77,42 +88,46 @@ public class DashboardController extends Controller {
     
     while(listKeywordProjects.hasNext()) {
       for (KeywordProject project : listKeywordProjects.next()) {
-        ObjectNode object = null;
-        BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
-        PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
-        jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
         
-        if (jobList.totalPage() > 0) {
-          AbstractJob<?> lastJob = jobList.next().get(0);
+        BasicDBObject query = new BasicDBObject();
+        BasicDBList andCondition = new BasicDBList();
+        andCondition.add(new BasicDBObject("project_id", project.getId()));
+        andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
+        query.append("$and", andCondition);
+        
+        PageList<AbstractJob<?>> jobs= executorService.query(query);
+        jobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+        if (jobs.totalPage() > 0) {
+          ObjectNode object = Json.newObject();
+          AbstractJob<?> job = jobs.next().get(0);
+          KeywordJob keywordJob = (KeywordJob) job;
           
-          if(lastJob.getRawDataOutput() != null) {
-            PageList<Report> pages = reportService.getList(lastJob.getId(), Type.FUNCTIONAL, null);
-            
-            if (pages.totalPage() > 0) {
-              object = Json.newObject();
-              object.put("x", project.getString("name"));
-              Report report = pages.next().get(0);
-              Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-              int totalPass = 0;
-              int totalFail = 0;
-              int totalSkip = 0;
-              
-              while (iterator.hasNext()) {
-                SuiteReport suiteReport = iterator.next();
-                totalPass += suiteReport.getTotalPass();
-                totalFail += suiteReport.getTotalFail();
-                totalSkip += suiteReport.getTotalSkip();
+          List<SuiteReference> suiteRefs = keywordJob.getSuites();
+          int numberOfPassedCase = 0;
+          int numberOfFailedCase = 0;
+          for (SuiteReference ref : suiteRefs) {
+            PageList<SuiteReport> reports= suiteReportService.query(new BasicDBObject("jobId", keywordJob.getId()).append("suiteId", ref.getId()));
+            while (reports.hasNext()) {
+              for (SuiteReport report : reports.next()) {
+                Set<String> set = getCaseIds(report.getCases());
+                for (String s : set) {
+                  PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()).append("case_id", s).append("isPass", false));
+                  if (cases.count() > 0) {
+                    numberOfFailedCase ++;
+                  } else numberOfPassedCase ++;
+                }
+                
               }
-              object.put("created_date", formater.format(lastJob.getCreatedDate()));
-              object.put("P", totalPass);
-              object.put("F", totalFail);
-              object.put("S", totalSkip);
-              object.put("_id", project.getId());
-              
-              insert(listRecentProject, object, "created_date", true, 10, true);
-              
             }
+          
           }
+          object.put("x", project.getString("name"));
+          object.put("created_date", formater.format(keywordJob.getCreatedDate()));
+          object.put("P", numberOfPassedCase);
+          object.put("F", numberOfFailedCase);
+          object.put("S", 0);
+          object.put("_id", project.getId());
+          insert(listRecentProject, object, "created_date", true, 10, true);
         }
       }
     }
@@ -168,9 +183,7 @@ public class DashboardController extends Controller {
                 object.put("projectName", project.getName());
                 object.put("ram_up", script.get().getRamUp());
                 object.put("loops", script.get().getLoops());
-//                object.put("duration", script.get().getDuration());
                 object.put("number_engines", script.get().getNumberEngines());
-                
               }
             } catch (Exception e) {
               e.printStackTrace();
@@ -334,48 +347,72 @@ public class DashboardController extends Controller {
   private List<ObjectNode> getProjects(PageList<KeywordProject> list, List<ObjectNode> objectList, final String assertionText, boolean desc, int numberOfElement) throws Exception {
     while (list.hasNext()) {
       for (KeywordProject project : list.next()) {
-        BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
-        PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
-        jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+        
+        ObjectNode object = Json.newObject();
+        
+        BasicDBObject query = new BasicDBObject();
+        BasicDBList andCondition = new BasicDBList();
+        andCondition.add(new BasicDBObject("project_id", project.getId()));
+        andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
+        query.append("$and", andCondition);
+        
+        PageList<AbstractJob<?>> jobs= executorService.query(query);
+        jobs.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+        if (jobs.totalPage() > 0) {
+          AbstractJob<?> job = jobs.next().get(0);
           
-        ObjectNode object;
-        if (jobList.totalPage() > 0) {
-          AbstractJob<?> lastJob = jobList.next().get(0);
-            
-          if (lastJob.getRawDataOutput() != null) {
-            PageList<Report> pages = reportService.getList(lastJob.getId(), Type.FUNCTIONAL, null);
-            if (pages.totalPage() > 0) {
+          KeywordJob keywordJob = (KeywordJob) job;
+          
+          List<SuiteReference> suiteRefs = keywordJob.getSuites();
+          int numberOfPassedCase = 0;
+          int numberOfFailedCase = 0;
+          for (SuiteReference ref : suiteRefs) {
+            PageList<SuiteReport> reports= suiteReportService.query(new BasicDBObject("jobId", keywordJob.getId()).append("suiteId", ref.getId()));
+            while (reports.hasNext()) {
+              for (SuiteReport report : reports.next()) {
+                Set<String> set = getCaseIds(report.getCases());
+                for (String s : set) {
+                  PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", report.getId()).append("case_id", s).append("isPass", false));
+                  if (cases.count() > 0) {
+                    numberOfFailedCase ++;
+                  } else numberOfPassedCase ++;
+                }
                 
-              object = Json.newObject();
-                
-              Report report = pages.next().get(0);
-              object.put("_id", project.getId());
-              object.put("name", project.getString("name"));
-              Iterator<SuiteReport> iterator = report.getSuiteReports().values().iterator();
-              int totalPass = 0;
-              int totalFail = 0;
-              int totalCases = 0;
-              while (iterator.hasNext()) {
-                SuiteReport suiteReport = iterator.next();
-                totalPass += suiteReport.getTotalPass();
-                totalFail += suiteReport.getTotalFail();
-                totalCases += suiteReport.getTotalTestCase();
               }
-                
-              double percentPass = (totalPass * 100.0) / totalCases;
-              double percentFail = (totalFail * 100.0) /totalCases; 
-                
-              object.put("percentPass", percentPass);
-              object.put("percentFail", percentFail);
-              object.put("totalCases", totalCases);
-  
-              insert(objectList, object, assertionText, desc, numberOfElement, false);
             }
+          
           }
+          object.put("_id", project.getId());
+          object.put("name", project.getString("name"));
+          object.put("created_date", formater.format(keywordJob.getCreatedDate()));
+          object.put("_id", project.getId());
+          int totalCases = numberOfFailedCase + numberOfPassedCase;
+          double percentPass = (numberOfPassedCase * 100.0) / totalCases;
+          double percentFail = (numberOfFailedCase * 100.0) /totalCases; 
+          object.put("percentPass", percentPass);
+          object.put("percentFail", percentFail);
+          
+          insert(objectList, object, assertionText, desc, numberOfElement, false);
         }
       }
     }
     return objectList;
+  }
+  
+  /**
+   * 
+   * @param refs
+   * @return number of case from case report id
+   */
+  private Set<String> getCaseIds (List<CaseReportReference> refs) {
+    
+    Set<String> set = new HashSet<String>();
+    for (CaseReportReference ref : refs) {
+      CaseReport caze = caseReportService.get(ref.getId(), "isPass");
+      set.add(caze.getCaseId());
+    }
+    
+    return set;
   }
   
 }
