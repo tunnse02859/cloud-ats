@@ -26,10 +26,21 @@ public class AssertTextPresent extends AbstractAction {
   }
   
   public String transform() throws IOException {
+//    StringBuilder sb = new StringBuilder();
+//    sb.append(negated ? "assertFalse(" : "assertTrue(");
+//    sb.append("wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
+//    sb.append(");\n");
     StringBuilder sb = new StringBuilder();
-    sb.append(negated ? "assertFalse(" : "assertTrue(");
-    sb.append("wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
-    sb.append(");\n");
+	sb.append("try { \n");
+	sb.append(     negated ? "assertFalse(" : "assertTrue(");
+	sb.append("     wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
+	sb.append(");\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
+	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 
