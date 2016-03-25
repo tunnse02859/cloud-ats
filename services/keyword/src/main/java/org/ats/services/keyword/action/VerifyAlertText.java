@@ -28,10 +28,6 @@ public class VerifyAlertText extends AbstractAction {
   }
   
   public String transform() throws IOException {
-//    StringBuilder sb = new StringBuilder(negated ? "if (wd." : "if (!wd.");
-//    sb.append("switchTo().alert().getText().equals(");
-//    sb.append(text);
-//    sb.append(")) {\n      System.out.println(\"").append(negated ? "!" : "").append("verifyAlertText failed\");\n    }\n");
     StringBuilder sb = new StringBuilder();
 	sb.append("try { \n");
 	sb.append(      negated ? "if (wd." : "if (!wd.");
@@ -41,7 +37,7 @@ public class VerifyAlertText extends AbstractAction {
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
 	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyAlertText.png\"));\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());

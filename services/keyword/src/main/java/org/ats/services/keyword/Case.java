@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +113,8 @@ public class Case extends AbstractTemplate {
   }
   
   public String transform(int valueDelay, boolean sequenceMode, int order) throws IOException {
-	String str ="";
+	String str = "";
+	String strLog = "";
 	List<String> listParams = new ArrayList<String>();
 	StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;
@@ -208,15 +208,6 @@ public class Case extends AbstractTemplate {
           locatorNode = json.get("locator");
           locationType = locatorNode.get("type").toString().split("\"")[1];
           temp = locatorNode.get("value").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString().replace("\"", "\\\"");
-          }
           locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
           listParams.add("\\\"locator\\\"");
         }
@@ -224,14 +215,6 @@ public class Case extends AbstractTemplate {
         if (json.get("text") != null) {
           temp =  json.get("text").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           text = "\\\"text\\\":"+ "\\\""+temp+"\\\",";
           listParams.add("\\\"text\\\"");
         }
@@ -244,14 +227,6 @@ public class Case extends AbstractTemplate {
         if (json.get("url") != null) {
           temp = json.get("url").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           url = "\\\"url\\\":"+ "\\\""+temp+"\\\",";
           listParams.add("\\\"url\\\"");
         }
@@ -261,14 +236,6 @@ public class Case extends AbstractTemplate {
           locationType = json.get("type").toString().split("\"")[1];
           temp = locatorNode.get("value").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString().replace("\"", "\\\"");
-          }
           targetLocator = "\\\"targetLocator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp+"\\\"},";
           listParams.add("\\\"targetLocator\\\"");
         }
@@ -276,14 +243,6 @@ public class Case extends AbstractTemplate {
         if (json.get("variable") != null) {
           temp = json.get("variable").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           variable = "\\\"variable\\\":"+ "\\\""+temp+"\\\",";
           listParams.add("\\\"variable\\\"");
         }
@@ -291,14 +250,6 @@ public class Case extends AbstractTemplate {
         if (json.get("source") != null) {
           temp = json.get("source").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           source = "\\\"source\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"source\\\"");
         }
@@ -306,14 +257,6 @@ public class Case extends AbstractTemplate {
         if (json.get("title") != null) {
           temp = json.get("title").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           title = "\\\"title\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"title\\\"");
         }
@@ -321,14 +264,6 @@ public class Case extends AbstractTemplate {
         if (json.get("attributeName") != null) {
           temp = json.get("attributeName").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           attributeName = "\\\"attribute_name\\\":"+ "\\\""+temp+"\\\",";
           listParams.add("\\\"attribute_name\\\"");
         }
@@ -336,14 +271,6 @@ public class Case extends AbstractTemplate {
         if (json.get("propertyName") != null) {
           temp = json.get("propertyName").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           propertyName = "\\\"property_name\\\":" + "\\\""+temp+"\\\",";
           listParams.add("\\\"property_name\\\"");
         }
@@ -351,14 +278,6 @@ public class Case extends AbstractTemplate {
         if (json.get("options") != null) {
           temp = json.get("options").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           options = "\\\"options\\\":"+ "\\\""+temp+"\\\",";
           listParams.add("\\\"options\\\"");
         }
@@ -366,29 +285,12 @@ public class Case extends AbstractTemplate {
         if (json.get("name") != null) {
           temp = json.get("name").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           name = "\\\"name\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"name\\\"");
         }
         
         if (json.get("file") != null) {
           temp = json.get("file").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           file = "\\\"file\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"file\\\"");
         }
@@ -396,14 +298,6 @@ public class Case extends AbstractTemplate {
         if (json.get("identifier") != null) {
           temp = json.get("identifier").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           identifier = "\\\"identifier\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"identifier\\\"");
         }
@@ -416,14 +310,6 @@ public class Case extends AbstractTemplate {
         if (json.get("script") != null) {
           temp = json.get("script").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           script = "\\\"script\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"script\\\"");
         }
@@ -431,37 +317,29 @@ public class Case extends AbstractTemplate {
         if(json.get("value") != null) {
           temp = json.get("value").asText();
           if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          if(temp.indexOf("${") != -1 && temp.lastIndexOf("}") != -1 ) {
-            int start = temp.indexOf("${");
-            int end = temp.indexOf("}");
-            String subTemp = temp.substring(start + 2, end);
-            StringBuilder sbTemp = new StringBuilder(temp.substring(0, start)).append("\" + ");
-            sbTemp.append(subTemp).append(" + \"").append(temp.substring(end + 1));
-            temp = sbTemp.toString();
-          }
           value = "\\\"value\\\":"+"\\\""+temp+"\\\",";
           listParams.add("\\\"value\\\"");
         }
         
         str = new StringBuilder() 
-          .append(type)
-          .append(locator)
-          .append(targetLocator)
-          .append(url)
-          .append(text)
-          .append(script)
-          .append(name)
-          .append(source)
-          .append(title)
-        	.append(options)
-        	.append(propertyName)
-        	.append(attributeName)
-        	.append(variable)
-        	.append(value)
-        	.append(file)
-        	.append(waitTime)
-        	.append(identifier)
-        	.append(index).toString() ;
+        .append(type)
+        .append(locator)
+        .append(targetLocator)
+        .append(url)
+        .append(text)
+        .append(script)
+        .append(name)
+        .append(source)
+        .append(title)
+        .append(options)
+        .append(propertyName)
+        .append(attributeName)
+        .append(variable)
+        .append(value)
+        .append(file)
+        .append(waitTime)
+        .append(identifier)
+        .append(index).toString() ;
         
         sb.append("    System.out.println(\"[Start][Step]{");
         sb.append(str);
