@@ -27,9 +27,6 @@ public class SetElementText extends AbstractAction {
   }
   
   public String transform() throws IOException {
-//    String template = "wd.findElement(@locator).click();\n"
-//        + "wd.findElement(@locator).clear();\n"
-//        + "wd.findElement(@locator).sendKeys(@text);\n";
     StringBuilder sb = new StringBuilder();
 	sb.append("try { \n");
 	sb.append("     wd.findElement(@locator).click();\n");
@@ -38,7 +35,7 @@ public class SetElementText extends AbstractAction {
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
 	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+time+\".png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_setElementText.png\"));\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform(), text.transform());
