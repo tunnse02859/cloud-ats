@@ -23,7 +23,13 @@ libraryDependencies ++= Seq(
 	"org.ats.services" % "blob" % "1.1-SNAPSHOT",
 	"org.ats.services" % "selenium-upload" % "1.1-SNAPSHOT",
 	"com.amazonaws" % "aws-java-sdk-ec2" % "1.10.15",
-	"net.sf.opencsv" % "opencsv" % "2.3"
+	"net.sf.opencsv" % "opencsv" % "2.3",
+	"com.microsoft.azure" % "azure-core" % "0.9.2",
+	"com.microsoft.azure" % "azure-svc-mgmt" % "0.9.2",
+	"com.microsoft.azure" % "azure-svc-mgmt-network" % "0.9.2",
+	"com.microsoft.azure" % "azure-svc-mgmt-compute" % "0.9.2",
+	"com.microsoft.azure" % "azure-svc-mgmt-storage" % "0.9.2",
+	"com.sun.jersey" % "jersey-core" % "1.13"
 )
 
 

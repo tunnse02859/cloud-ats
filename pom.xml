@@ -5,6 +5,7 @@
   <properties>
 		<jclouds.version>1.9.0</jclouds.version>
 		<cloudats.version>1.1-SNAPSHOT</cloudats.version>
+		<azure.version>0.9.2</azure.version>
   </properties>
 
   <groupId>org.ats</groupId>
@@ -279,6 +280,36 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-ec2</artifactId>
 				<version>1.10.15</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-core</artifactId>
+				<version>${azure.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-svc-mgmt</artifactId>
+				<version>${azure.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-svc-mgmt-network</artifactId>
+				<version>${azure.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-svc-mgmt-compute</artifactId>
+				<version>${azure.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-svc-mgmt-storage</artifactId>
+				<version>${azure.version}</version>
 			</dependency>
 
 			<dependency>
