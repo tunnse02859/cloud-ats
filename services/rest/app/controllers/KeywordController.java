@@ -4,20 +4,23 @@
 package controllers;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.common.StringUtil;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.service.blob.BlobService;
 import org.ats.service.report.ReportService;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
@@ -58,6 +61,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.gridfs.GridFSDBFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -97,6 +101,8 @@ public class KeywordController extends Controller {
   @Inject CustomKeywordService customKeywordService;
   
   @Inject VMachineService vmachineService;
+   
+  @Inject BlobService blobService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -148,8 +154,17 @@ public class KeywordController extends Controller {
     return log.isEmpty() ? status(404) : status(200, log);
   }
   
+  public Result viewJobLog (String projectId, String jobId) throws IOException {
+    
+    
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("job_log_id", jobId));
+    
+    InputStream stream = file.getInputStream();
+    
+    return ok(StringUtil.readStream(stream));
+  }
   public Result get(String projectId) {
-    KeywordProject project = keywordProjectService.get(projectId,"show_action","value_delay");
+    KeywordProject project = keywordProjectService.get(projectId, "value_delay");
     if (project == null) return status(404);
     
     project.put("type", "keyword");
@@ -185,7 +200,7 @@ public class KeywordController extends Controller {
     String id = data.get("id").asText();
     String name = data.get("name").asText();
     int valueDelay = data.get("valueDelay").asInt();
-    KeywordProject project = keywordProjectService.get(id,"show_action","value_delay");
+    KeywordProject project = keywordProjectService.get(id, "value_delay");
     
     if (name.equals(project.getString("name"))) {
       if((project.getValueDelay() == valueDelay)) {
@@ -261,7 +276,7 @@ public class KeywordController extends Controller {
       suites.add(suiteRefFactory.create(sel.asText()));
     }
     
-    KeywordProject project = keywordProjectService.get(projectId,"show_action","value_delay");
+    KeywordProject project = keywordProjectService.get(projectId, "value_delay");
     if (project == null) return status(404);
     
     project.setVersionSelenium(versionSelenium);

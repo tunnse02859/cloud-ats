@@ -7,9 +7,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -483,7 +481,7 @@ public class TrackingJobActor extends UntypedActor {
       executorService.update(job);
       
       //save log to file 
-      
+      input_stream = new ByteArrayInputStream(job.getLog().getBytes());
       GridFSInputFile file = blobService.create(input_stream);
       file.put("job_log_id", job.getId());
       blobService.save(file);

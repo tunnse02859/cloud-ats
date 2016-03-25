@@ -44,6 +44,7 @@ GET		/api/v1/project/keyword/:projectId/report/status/:jobId @controllers.Keywor
 GET		/api/v1/project/keyword/:projectId/reports	     @controllers.KeywordController.listReport(projectId)
 GET		/api/v1/project/keyword/:projectId/stop			 @controllers.KeywordController.stopProject(projectId)
 GET		/api/v1/project/keyword/:projectId/logs			 @controllers.KeywordController.viewLog(projectId)	
+GET		/api/v1/project/keyword/:projectId/job/:jobId/logs			 @controllers.KeywordController.viewJobLog(projectId, jobId)
 GET		/api/v1/project/keyword/:projectId/download/:jobId	@controllers.KeywordController.download(projectId,jobId)
 GET     /api/v1/project/keyword/:projectId/report/:jobId/case/:caseReportId  @controllers.KeywordController.getReportCase(projectId,jobId,caseReportId)
 GET		/api/v1/project/keyword/:projectId/report/:jobId/suite/:suiteId/:suiteReportId   @controllers.KeywordController.suiteReport(projectId, jobId, suiteId, suiteReportId)
