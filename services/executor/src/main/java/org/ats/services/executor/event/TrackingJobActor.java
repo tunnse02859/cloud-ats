@@ -3,8 +3,11 @@
  */
 package org.ats.services.executor.event;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +19,9 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
@@ -497,7 +503,30 @@ public class TrackingJobActor extends UntypedActor {
       GridFSInputFile file = blobService.create(logBytes);
       file.put("job_log_id", job.getId());
       blobService.save(file);
+      // get raw data to tmp folder
+      String path = "/tmp/"+job.getProjectId().substring(0, 8);
+      File folder = new File(path);
+      if(!folder.exists()) {
+        folder.mkdir();
+      }
+      byte[] report = bosTarget.toByteArray();
+      FileOutputStream fileOut;
+      String filePath = null;
+      try {
+        filePath = path+"/resource-"+job.getId()+".tar.gz";
+        fileOut = new FileOutputStream(filePath);
+        fileOut.write(report);
+        fileOut.close();
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      }
+       catch (IOException e) {
+        e.printStackTrace();
+      }
       
+      String destPath = path+"/resource-"+job.getId();
+      // extract tar file
+      extractTarFile(filePath, destPath);
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       vmachineService.update(testVM);
@@ -516,6 +545,41 @@ public class TrackingJobActor extends UntypedActor {
     }
   }
   
+  private static void extractTarFile(String path, String destFolderPath) throws IOException {
+    //read tar file into tarachiveinputstream
+    TarArchiveInputStream tarFile = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(path))));
+    //read individual tar file
+    TarArchiveEntry entry = null;
+    int offset;
+    FileOutputStream outputFile = null;
+    File dest = new File(destFolderPath);
+    
+    if (!dest.exists()) {
+      dest.mkdirs();
+    }
+    
+    while ((entry = tarFile.getNextTarEntry()) != null) {
+      File file = null;
+      String name = entry.getName();
+      if (name.contains(".png") && name.contains("error_")) {
+        name = entry.getName();
+        int index = name.lastIndexOf("/");
+        name = name.substring(index);
+        file = new File(destFolderPath+name);
+        byte[] content = new byte [(int) entry.getSize()];
+        offset = 0;
+        tarFile.read(content, offset, content.length - offset);
+        // define output stream for writing the file
+        outputFile = new FileOutputStream(file);
+        outputFile.write(content);
+        outputFile.close();
+      }
+      
+    }
+    
+    tarFile.close();
+  }
+     
   private void doExecuteKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     BasicDBObject options = job.getOptions();
