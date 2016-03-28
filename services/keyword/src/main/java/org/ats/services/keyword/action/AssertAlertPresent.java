@@ -28,7 +28,7 @@ public class AssertAlertPresent extends AbstractAction {
    	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
    	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
    	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_assertAlertPresent.png\"));\n");
-   	sb.append("     throw e ; \n");
+   	sb.append("     throw ae ; \n");
    	sb.append("   }\n");
     return sb.toString();
   }
