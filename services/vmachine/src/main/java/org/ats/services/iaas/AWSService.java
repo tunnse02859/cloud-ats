@@ -169,9 +169,16 @@ class AWSService implements IaaSService {
 
   @Override
   public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
-    String imageId = hasUI ? uiImage : nonUIImage;
+    String imageId = null;
+    if (isWindows) {
+      imageId = windowsImage;
+    } else if (hasUI) {
+      imageId = uiImage;
+    } else {
+      imageId = nonUIImage;
+    }
     try {
-      return createVM(imageId, InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
+      return createVM(imageId, isWindows ? InstanceType.T2Medium : InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException(e.getMessage());
       ex.setStackTrace(e.getStackTrace());
@@ -181,9 +188,16 @@ class AWSService implements IaaSService {
   
   @Override
   public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
-    String imageId = hasUI ? uiImage : nonUIImage;
+    String imageId = null;
+    if (isWindows) {
+      imageId = windowsImage;
+    } else if (hasUI) {
+      imageId = uiImage;
+    } else {
+      imageId = nonUIImage;
+    }
     try {
-      VMachine vm = createVMAsync(imageId, InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
+      VMachine vm = createVMAsync(imageId, isWindows ? InstanceType.T2Medium : InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
       Event event = eventFactory.create(vm, "initialize-vm");
       event.broadcast();
       return vm;
@@ -302,22 +316,68 @@ class AWSService implements IaaSService {
       throw ex;
     }
     
+    boolean isWindows = vm.isWindows();
+    
     if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
       logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
       
-      try {
-        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
-        logger.info("Created Jenkins slave by " + vm);
+      if (!isWindows) {
+        try {
+          if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+          logger.info("Created Jenkins slave by " + vm);
+          
+        } catch (Exception e) {
+          CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+          ex.setStackTrace(e.getStackTrace());
+          throw ex;
+        }
+      } else {
+        JenkinsSlave winSlave = new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), true);
+        try {
+          winSlave.join(5 * 1000);
+        } catch (Exception e) {
+          //No problem
+        }
+        //TODO: that is trick to reload jenkins slave configuration
+        String cmd = "/cygdrive/c/jenkin_slave/change_jenkinconfig.sh " + systemVM.getPrivateIp() + " " + vm.getPrivateIp();
+        Session session = SSHClient.getSession(vm.getPublicIp(), 22, "cloudats", "#CloudATS");              
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(cmd);
+        channel.connect();
         
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
+        while(true) {
+          if (channel.isClosed()) {
+            logger.info("Register Windows Jenkins Slave exit code: " + channel.getExitStatus());
+            break;
+          }
+        }
+        
+        channel.disconnect();
+        session.disconnect();
+        logger.info("Registered Windows Jenkins slave.");
+        //The vm will be restart
+        
+        if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+          logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+          //wait jenkins slave available
+          String fetchUrl = jenkinsMaster.buildURL(new StringBuilder("computer/").append(vm.getPrivateIp()).append("/api/json").toString());
+          try {
+            if (!winSlave.waitJenkinsSlaveJoinUntil(System.currentTimeMillis(), 10 * 60 * 1000, fetchUrl)) throw new CreateVMException("Can not create jenkins slave for test vm");
+            logger.info("Created Jenkins slave by " + vm);
+            
+          } catch (Exception e) {
+            CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+            ex.setStackTrace(e.getStackTrace());
+            throw ex;
+          }
+        } else {
+          throw new CreateVMException("Connection to VM can not established");
+        }
       }
       
     //register Guacamole vnc
       try {
-        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + (isWindows ? " 3389 " : " 5900 ") + "'#CloudATS' "  + (isWindows ? "rdp" : "vnc")  +  " 0";
         Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(command);
