@@ -191,5 +191,6 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
     keywordReportService.processLog(new FileInputStream("src/test/resources/test"));
     PageList<SuiteReport> suites = suiteReportService.list();
     Assert.assertEquals(suites.count(), 1);
+    
   }
 }

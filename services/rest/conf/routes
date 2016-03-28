@@ -49,7 +49,7 @@ GET		/api/v1/project/keyword/:projectId/download/:jobId	@controllers.KeywordCont
 GET     /api/v1/project/keyword/:projectId/report/:jobId/case/:caseReportId  @controllers.KeywordController.getReportCase(projectId,jobId,caseReportId)
 GET		/api/v1/project/keyword/:projectId/report/:jobId/suite/:suiteId/:suiteReportId   @controllers.KeywordController.suiteReport(projectId, jobId, suiteId, suiteReportId)
 GET		/api/v1/project/keyword/:projectId/report/:jobId/suite/:suiteId/:suiteReportId/lastest/jobs   @controllers.KeywordController.getLastestJobWithSuiteId(projectId, jobId, suiteId, suiteReportId)
-
+GET     /api/v1/project/keyword/:projectId/report/:jobId/suite/:suiteId/:suiteReportId/case/:caseReportId/image  @controllers.KeywordController.showImage(projectId, jobId, suiteId, suiteReportId, caseReportId)
 
 # Keyword upload project controller
 POST	/api/v1/project/selenium					 @controllers.SeleniumUploadController.create()

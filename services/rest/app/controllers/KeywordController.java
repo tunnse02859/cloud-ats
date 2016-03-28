@@ -3,6 +3,10 @@
  */
 package controllers;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
@@ -348,12 +354,19 @@ public class KeywordController extends Controller {
 	  String id = caseReport.next().get(0).getId();
 	  
 	  CaseReport caze = caseReportService.get(id, "isPass");
-	  objNode.put("case", caze.toString());
+	  
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {
 		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass");
 		array.add(Json.parse(stepReport.toString()));
 	  }
+	  
+	  
+	  GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", caze.getId()));
+	  if (file != null) {
+	    caze.put("hasImage", true);
+	  }
+	  objNode.put("case", caze.toString());
 	  objNode.put("listStep", Json.parse(array.toString()));
 	  return status(200, objNode);
   }
@@ -613,4 +626,42 @@ public class KeywordController extends Controller {
         "attachment; filename=resource.tar.gz");
     return ok(new File(path+"/resource-"+jobId+".tar.gz"));
   }
+  
+  public Result showImage(String projectId, String jobId, String suiteId, String suite_report_id, String case_report_id) throws IOException {
+    
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", case_report_id));
+    
+    BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    
+    byte[] buff = new byte[1024];
+    for (int l = bis.read(buff); l != -1; l = bis.read(buff)) {
+      baos.write(buff, 0, l);
+    }
+    
+    byte[] image = baos.toByteArray();
+    return ok(image);
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }

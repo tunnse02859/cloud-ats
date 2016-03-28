@@ -96,8 +96,8 @@ public class KeywordReportService {
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
-          
-          caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef);
+          long timeStamp = Long.parseLong(json.get("timeStamp").asText());
+          caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef, timeStamp);
           caseReport.setDataSource(dataSource.toString());
           caseReport.put("isPass", false);
           cases.add(caseReport);

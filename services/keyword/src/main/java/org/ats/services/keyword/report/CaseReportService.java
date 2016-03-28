@@ -56,7 +56,7 @@ public class CaseReportService extends AbstractMongoCRUD<CaseReport> {
     String case_id = source.get("case_id").toString();
     String data_source = source.get("data_source").toString();
     ArrayList list = (ArrayList) source.get("steps");
-    
+    long startTime = source.get("startTime") == null ? null : (Long) source.get("startTime");
     List<StepReportReference> steps = new ArrayList<StepReportReference>();
     
     for (Object obj : list) {
@@ -65,7 +65,7 @@ public class CaseReportService extends AbstractMongoCRUD<CaseReport> {
         steps.add(ref);
       }
     }
-    CaseReport report = caseReportFactory.create(suite_report_id, data_source, name, case_id, steps);
+    CaseReport report = caseReportFactory.create(suite_report_id, data_source, name, case_id, steps, startTime);
     report.put("_id", id);
     
     return report;

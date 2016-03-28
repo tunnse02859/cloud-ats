@@ -41,6 +41,10 @@ import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.report.KeywordReportService;
+import org.ats.services.keyword.report.SuiteReportService;
+import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.CaseReportReference;
+import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -96,6 +100,9 @@ public class TrackingJobActor extends UntypedActor {
   @Inject BlobService blobService;
   
   @Inject KeywordReportService reportService;
+  
+  @Inject SuiteReportService suiteReportService;
+  
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -524,9 +531,23 @@ public class TrackingJobActor extends UntypedActor {
         e.printStackTrace();
       }
       
-      String destPath = path+"/resource-"+job.getId();
+      String destPath = path+"/images-"+job.getId();
       // extract tar file
       extractTarFile(filePath, destPath);
+      
+      File imagesFolder = new File(destPath);
+      
+      if (imagesFolder.listFiles() != null) {
+        for (File image : imagesFolder.listFiles()) {
+          
+          String name = image.getName();
+          int index = name.indexOf("_");
+          int last = name.lastIndexOf("_");
+          long timeStamp = Long.parseLong(name.substring(index + 1, last));
+          
+          saveImage(image, timeStamp, job.getId());
+        }
+      }
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       vmachineService.update(testVM);
@@ -545,7 +566,33 @@ public class TrackingJobActor extends UntypedActor {
     }
   }
   
-  private static void extractTarFile(String path, String destFolderPath) throws IOException {
+  private void saveImage(File file, long timeStamp, String jobId) throws IOException {
+    
+    GridFSInputFile image = blobService.create(file);
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId));
+    while (suites.hasNext()) {
+      for (SuiteReport suite : suites.next()) {
+        List<CaseReportReference> cases = suite.getCases();
+        
+        for (CaseReportReference ref : cases) {
+          CaseReport report = ref.get();
+          if (timeStamp > report.getStartTime()) {
+            if (image.get("timestamp") == null) {
+              image.put("timestamp", report.getStartTime());
+              image.put("case_id", report.getId());
+            } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
+              image.put("timestamp", report.getStartTime());
+              image.put("case_id", report.getId());
+            }
+          }
+        }
+      }
+    }
+    
+    blobService.save(image);
+  }
+  
+  private void extractTarFile(String path, String destFolderPath) throws IOException {
     //read tar file into tarachiveinputstream
     TarArchiveInputStream tarFile = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(path))));
     //read individual tar file

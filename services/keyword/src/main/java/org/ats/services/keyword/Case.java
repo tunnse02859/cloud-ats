@@ -207,6 +207,7 @@ public class Case extends AbstractTemplate {
           locatorNode = json.get("locator");
           locationType = locatorNode.get("type").toString().split("\"")[1];
           temp = locatorNode.get("value").asText();
+          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
           locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
           listParams.add("\\\"locator\\\"");
         }

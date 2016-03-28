@@ -28,7 +28,7 @@ public class CaseReport extends BasicDBObject {
   private ReferenceFactory<StepReportReference> stepRefFactory;
   
   @Inject
-  public CaseReport(@Assisted("suite_report_id") String suite_report_id, @Assisted("data_source") String data_source, @Assisted("name") String name, @Assisted("case_id") String case_id, @Assisted("steps") List<StepReportReference> steps) {
+  public CaseReport(@Assisted("suite_report_id") String suite_report_id, @Assisted("data_source") String data_source, @Assisted("name") String name, @Assisted("case_id") String case_id, @Assisted("steps") List<StepReportReference> steps,@Assisted("startTime") long startTime) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("suite_report_id", suite_report_id);
     this.put("data_source", data_source);
@@ -39,6 +39,7 @@ public class CaseReport extends BasicDBObject {
       list.add(step.toJSon());
     }
     this.put("steps", list);
+    this.put("startTime", startTime);
   }
   
   public void setSteps(List<StepReportReference> steps) {
@@ -59,6 +60,14 @@ public class CaseReport extends BasicDBObject {
     }
     return steps;
     
+  }
+  
+  public void setStartTime(long start) {
+    this.put("startTime", start);
+  }
+  
+  public long getStartTime() {
+    return this.get("startTime") == null ? null : this.getLong("startTime");
   }
   
   public String getId() {

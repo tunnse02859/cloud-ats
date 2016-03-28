@@ -13,6 +13,6 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface CaseReportFactory {
   
-  public CaseReport create(@Assisted("suite_report_id") String suite_report_id, @Assisted("data_source") String data_source, @Assisted("name") String name, @Assisted("case_id") String case_id, @Assisted("steps") List<StepReportReference> step);
+  public CaseReport create(@Assisted("suite_report_id") String suite_report_id, @Assisted("data_source") String data_source, @Assisted("name") String name, @Assisted("case_id") String case_id, @Assisted("steps") List<StepReportReference> step, @Assisted("startTime") long start);
   
 }
