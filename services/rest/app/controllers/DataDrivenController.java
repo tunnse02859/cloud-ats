@@ -83,6 +83,7 @@ public class DataDrivenController extends Controller {
     	ObjectNode obj = Json.newObject();
     	obj.put("_id", data.getId());
     	obj.put("name", data.getName());
+    	obj.put("data_source", data.getDataSource());
         arrayData.add(obj);
       }
     }
