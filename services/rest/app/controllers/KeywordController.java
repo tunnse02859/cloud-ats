@@ -145,12 +145,18 @@ public class KeywordController extends Controller {
     return ok(array);
   }
   
-  public Result viewLog(String projectId) {
+  public Result viewLog(String projectId) throws IOException {
     
     BasicDBObject query = new BasicDBObject("project_id", projectId);
     PageList<AbstractJob<?>> jobList = executorService.query(query, 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    AbstractJob<?> job = jobList.next().get(0);
     
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("job_log_id", job.getId()));
+    
+    if (file != null) {
+      return status(200, StringUtil.readStream(file.getInputStream()));
+    }
     String log = "";
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
