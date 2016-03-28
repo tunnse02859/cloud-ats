@@ -54,6 +54,8 @@ import org.ats.services.vmachine.VMachineService;
 import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -451,8 +453,23 @@ public class TrackingJobActor extends UntypedActor {
       //Download target resource
       
       //Zip report
-      SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src", null, null);
+      String cmd =  "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src";
+      Session session = SSHClient.getSession(testVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      channel.setCommand(cmd);
+      channel.connect();
+      
+      while(true) {
+        if (channel.isClosed()) {
+          logger.info("Compress project target status: " + channel.getExitStatus());
+          break;
+        }
+      }
+      
+      channel.disconnect();
+      session.disconnect();
+      
+      
       ByteArrayOutputStream bosTarget = new ByteArrayOutputStream();
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
           "/home/cloudats/projects/" + job.getId() + "/resource.tar.gz",  bosTarget);
