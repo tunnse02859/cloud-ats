@@ -607,10 +607,12 @@ class OpenStackService implements IaaSService {
       throw ex;
     }
     
+    boolean isWindows = vm.isWindows();
+    
     if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
       logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
       
-      if (!vm.isWindows()) {
+      if (!isWindows) {
         try {
           if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
           logger.info("Created Jenkins slave by " + vm);
@@ -666,7 +668,7 @@ class OpenStackService implements IaaSService {
       
     //register Guacamole vnc
       try {
-        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' "  + (vm.isWindows() ? "rdp" : "vnc")  +  " 0";
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + (isWindows ? " 3389 " : " 5900 ") + "'#CloudATS' "  + (isWindows ? "rdp" : "vnc")  +  " 0";
         Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(command);
