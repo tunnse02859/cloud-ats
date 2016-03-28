@@ -15,6 +15,7 @@ import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -22,6 +23,7 @@ import com.mongodb.DBObject;
  * @author TrinhTV3
  *
  */
+@Singleton
 public class SuiteReportService extends AbstractMongoCRUD<SuiteReport> {
   
   private final String COL_NAME = "report-suite";

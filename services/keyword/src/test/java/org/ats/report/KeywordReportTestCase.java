@@ -3,8 +3,8 @@
  */
 package org.ats.report;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import org.ats.common.PageList;
@@ -127,8 +127,7 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   @Test
   public void testLogParser() throws IOException {
     
-    FileReader file = new FileReader("src/test/resources/log_structure.txt");
-    keywordReportService.logParser(file);
+    keywordReportService.processLog(new FileInputStream("src/test/resources/log_structure.txt"));
     
     PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("name", "suiteName"));
     
@@ -158,9 +157,8 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
    * @throws FileNotFoundException 
    */
   @Test
-  public void testLogParserWith2Suite() throws FileNotFoundException {
-    FileReader file = new FileReader("src/test/resources/log_structure_2_suite");
-    keywordReportService.logParser(file);
+  public void testLogParserWith2Suite() throws Exception {
+    keywordReportService.processLog(new FileInputStream("src/test/resources/log_structure_2_suite"));
     
     Assert.assertEquals(suiteReportService.count(), 2);
     Assert.assertEquals(caseReportService.count(), 7);
@@ -178,9 +176,8 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   }
   
   @Test
-  public void testLogParserFinal() throws FileNotFoundException {
-    FileReader file = new FileReader("src/test/resources/log_structure_final_test");
-    keywordReportService.logParser(file);
+  public void testLogParserFinal() throws IOException {
+    keywordReportService.processLog(new FileInputStream("src/test/resources/log_structure_final_test"));
     PageList<SuiteReport> suites = suiteReportService.list();
     Assert.assertEquals(suites.count(), 4);
     SuiteReport suite = suiteReportService.query(new BasicDBObject("name", "Invitation")).next().get(0);
@@ -190,9 +187,8 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   }
   
   @Test
-  public void testLogParserFinalTest() throws FileNotFoundException {
-    FileReader file = new FileReader("src/test/resources/test");
-    keywordReportService.logParser(file);
+  public void testLogParserFinalTest() throws IOException {
+    keywordReportService.processLog(new FileInputStream("src/test/resources/test"));
     PageList<SuiteReport> suites = suiteReportService.list();
     Assert.assertEquals(suites.count(), 1);
   }

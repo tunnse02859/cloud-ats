@@ -11,12 +11,14 @@ import org.ats.services.keyword.report.models.StepReport;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mongodb.DBObject;
 
 /**
  * @author TrinhTV3
  *
  */
+@Singleton
 public class StepReportService extends AbstractMongoCRUD<StepReport> {
   
   private final String COL_NAME = "report-step";

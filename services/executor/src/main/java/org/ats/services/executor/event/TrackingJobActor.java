@@ -3,14 +3,11 @@
  */
 package org.ats.services.executor.event;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -444,11 +441,9 @@ public class TrackingJobActor extends UntypedActor {
       
     } else {
       updateLog(job, jkJob);
-      System.out.println(job.getLog());
       //parse log
-      InputStream input_stream = new ByteArrayInputStream(job.getLog().getBytes());
-      BufferedReader br = new BufferedReader(new InputStreamReader(input_stream, "UTF-8"));
-      reportService.logParserByBuffer(br);
+      byte[] logBytes = job.getLog().getBytes();
+      reportService.processLog(logBytes);
       
       //Download target resource
       
@@ -495,11 +490,11 @@ public class TrackingJobActor extends UntypedActor {
       
       //End download result
       job.setStatus(AbstractJob.Status.Completed);
+      job.put("log", "");
       executorService.update(job);
       
       //save log to file 
-      input_stream = new ByteArrayInputStream(job.getLog().getBytes());
-      GridFSInputFile file = blobService.create(input_stream);
+      GridFSInputFile file = blobService.create(logBytes);
       file.put("job_log_id", job.getId());
       blobService.save(file);
       
