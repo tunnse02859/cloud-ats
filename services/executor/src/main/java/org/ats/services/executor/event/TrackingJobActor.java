@@ -490,9 +490,6 @@ public class TrackingJobActor extends UntypedActor {
       if (bos.size() > 0)
         job.put("report", new String(bos.toByteArray()));
       
-      if (bosTarget.size() > 0) 
-        job.put("raw_data", bosTarget.toByteArray());
-      
       //create raw_data file
       if (bosTarget.size() > 0) {
         GridFSInputFile project_file = blobService.create(bosTarget.toByteArray());

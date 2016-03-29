@@ -3,12 +3,9 @@
  */
 package controllers;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,8 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.imageio.ImageIO;
-
+import org.apache.commons.compress.utils.IOUtils;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
@@ -46,9 +42,9 @@ import org.ats.services.keyword.report.CaseReportService;
 import org.ats.services.keyword.report.StepReportService;
 import org.ats.services.keyword.report.SuiteReportService;
 import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.StepReport;
 import org.ats.services.keyword.report.models.StepReportReference;
-import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
@@ -321,7 +317,7 @@ public class KeywordController extends Controller {
     return status(404);
   }
   
-  public Result updateStatus(String projectId, String jobId) {
+  public Result updateStatus(String projectId, String jobId) throws IOException {
     AbstractJob<?> job = executorService.get(jobId);
     if(job.getRawDataOutput() != null) {
       ObjectNode obj = Json.newObject();
@@ -340,6 +336,10 @@ public class KeywordController extends Controller {
           
         }
       }
+      GridFSDBFile file = blobService.findOne(new BasicDBObject("job_log_id", jobId));
+      if (file != null) {
+        obj.put("log", StringUtil.readStream(file.getInputStream()));
+      } else obj.put("log", job.getLog());
       obj.put("jobId", job.getId());
       obj.put("duration", duration);
       obj.put("numberPassedSuite", suites.count() - count_fail);
@@ -391,34 +391,36 @@ public class KeywordController extends Controller {
     ArrayNode array = Json.newObject().arrayNode();
     int index = Integer.parseInt(indexRequest);
     
-    List<AbstractJob<?>> list = jobs.getPage(index);
-    for (int i = 1; i <= list.size(); i ++) {
-    	AbstractJob<?> job = list.get(i -1);
-    	ObjectNode obj = Json.newObject();
-    	PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
-    	
-    	long duration = 0;
-    	int count_fail = 0;
-    	while (suites.hasNext()) {
-    	  for (SuiteReport suite : suites.next()) {
-    	    duration += (suite.getDuration()/1000);
-    	    PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()).append("isPass", false));
-    	    
-    	    if (cases.count() > 0) {
-    	      count_fail ++;
-    	    }
-    	    
-    	  }
-    	}
-    	obj.put("total", jobs.count());
-    	obj.put("jobId", job.getId());
-    	obj.put("duration", duration);
-    	obj.put("numberPassedSuite", suites.count() - count_fail);
-    	obj.put("numberFailedSuite", count_fail);
-    	obj.put("created_date", formater.format(job.getCreatedDate()));
-    	obj.put("stt", ((index - 1) * 10 ) + i);
-    	array.add(obj);
+    if (jobs.totalPage() > 0) {
+      List<AbstractJob<?>> list = jobs.getPage(index);
+      for (int i = 1; i <= list.size(); i ++) {
+        AbstractJob<?> job = list.get(i -1);
+        ObjectNode obj = Json.newObject();
+        PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
+        
+        long duration = 0;
+        int count_fail = 0;
+        while (suites.hasNext()) {
+          for (SuiteReport suite : suites.next()) {
+            duration += (suite.getDuration()/1000);
+            PageList<CaseReport> cases = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()).append("isPass", false));
+            
+            if (cases.count() > 0) {
+              count_fail ++;
+            }
+          }
+        }
+        obj.put("total", jobs.count());
+        obj.put("jobId", job.getId());
+        obj.put("duration", duration);
+        obj.put("numberPassedSuite", suites.count() - count_fail);
+        obj.put("numberFailedSuite", count_fail);
+        obj.put("created_date", formater.format(job.getCreatedDate()));
+        obj.put("stt", ((index - 1) * 10 ) + i);
+        array.add(obj);
+      }
     }
+    
     return ok(array);
   }
   
@@ -602,7 +604,7 @@ public class KeywordController extends Controller {
     return set;
   }
   
-  public Result download(String projectId, String jobId) {
+  public Result download(String projectId, String jobId) throws IOException {
     AbstractJob<?> absJob = executorService.get(jobId,"raw_data");
     String path = "/tmp/"+projectId.substring(0, 8);
     File folder = new File(path);
@@ -612,7 +614,10 @@ public class KeywordController extends Controller {
     KeywordJob job = (KeywordJob) absJob;
     if(job.getRawData() == null)
       return status(404);
-    byte[] report = job.getRawData();
+    
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("job_project_id", jobId));
+    
+    byte[] report = IOUtils.toByteArray(file.getInputStream());
     FileOutputStream fileOut;
     try {
       fileOut = new FileOutputStream(path+"/resource-"+jobId+".tar.gz");
