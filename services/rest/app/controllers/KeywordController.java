@@ -159,8 +159,7 @@ public class KeywordController extends Controller {
     }
     String log = "";
     if (jobList.totalPage() > 0) {
-      AbstractJob<?> lastJob = jobList.next().get(0);
-      log = lastJob.getLog();
+      log = job.getLog();
     }
     
     return log.isEmpty() ? status(404) : status(200, log);
@@ -359,7 +358,7 @@ public class KeywordController extends Controller {
 	  PageList<CaseReport> caseReport = caseReportService.query(new BasicDBObject("_id",caseReportId));
 	  String id = caseReport.next().get(0).getId();
 	  
-	  CaseReport caze = caseReportService.get(id, "isPass");
+	  CaseReport caze = caseReportService.get(id, "isPass", "skipped_steps");
 	  
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {

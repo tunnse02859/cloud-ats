@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.ats.common.PageList;
+import org.ats.services.keyword.Case;
+import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.report.models.CaseReport;
 import org.ats.services.keyword.report.models.CaseReportFactory;
 import org.ats.services.keyword.report.models.CaseReportReference;
@@ -30,6 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author TrinhTV3
@@ -52,6 +55,8 @@ public class KeywordReportService {
   
   @Inject CaseReportFactory caseReportFactory;
 
+  @Inject CaseService caseService;
+  
   public void processLog(InputStream is) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
     String jobId = null;
@@ -181,6 +186,20 @@ public class KeywordReportService {
             }
           }
         }
+      }
+      
+      //save skipped step for each case
+      for (CaseReport report : cases) {
+        int index = report.getSteps().size();
+        Case caze = caseService.get(report.getCaseId());
+        List<JsonNode> full_step = caze.getActions();
+        List<JsonNode> skipped_step = full_step.subList(index, full_step.size());
+        
+        BasicDBList list = new BasicDBList();
+        for (JsonNode action : skipped_step) {
+          list.add(JSON.parse(action.toString()));
+        }
+        report.put("skipped_steps", list);
       }
       
       caseReportService.createCases(cases);
