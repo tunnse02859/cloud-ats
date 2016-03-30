@@ -32,10 +32,11 @@ public class AssertAlertText extends AbstractAction{
    	sb.append("     wd.switchTo().alert().getText(), ");
    	sb.append(text);
    	sb.append(");\n");
+   	sb.append("    System.out.println(\"[End][Step]\"); \n");
    	sb.append("   } catch (AssertionError ae) { \n");
-   	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-   	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+   	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
    	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/_error\"+time+\"_assertAlertText.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
    	sb.append("     throw ae ; \n");
    	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());

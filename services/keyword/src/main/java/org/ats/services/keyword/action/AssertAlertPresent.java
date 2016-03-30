@@ -24,10 +24,11 @@ public class AssertAlertPresent extends AbstractAction {
    	sb.append("try { \n");
    	sb.append(      negated ? "assertFalse(" : "assertTrue(");
    	sb.append("     isAlertPresent(wd));\n");
-   	sb.append("   } catch (Exception e) { \n");
-   	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-   	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+   	sb.append("     System.out.println(\"[End][Step]\"); \n");
+   	sb.append("   } catch (AssertionError ae) { \n");
+   	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
    	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_assertAlertPresent.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
    	sb.append("     throw ae ; \n");
    	sb.append("   }\n");
     return sb.toString();

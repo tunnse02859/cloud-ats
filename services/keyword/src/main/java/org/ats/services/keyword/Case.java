@@ -144,9 +144,8 @@ public class Case extends AbstractTemplate {
         sb.append("  @Test (dataProvider = \"").append(StringUtil.normalizeName(dataDriven.getName())).append(getId().substring(0, 8)).append("\")\n");
       }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("(JsonNode data) throws Exception {\n");
-      sb.append("    SimpleDateFormat dateStartCase = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-      sb.append("    long timeStartCase = dateStartCase.parse(dateStartCase.format(new Date())).getTime();\n");
-      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\", \\\"timeStamp\\\": \\\"\"+timeStartCase+\"\\\"} \"); \n");
+      sb.append("    time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\", \\\"timeStamp\\\": \\\"\"+time+\"\\\"} \"); \n");
       sb.append("    System.out.println(\"[Start][Data]\"+data.toString()); \n");
       
       while (nodeIterator.hasNext()) {
@@ -169,9 +168,8 @@ public class Case extends AbstractTemplate {
         sb.append("  @Test\n");
       }
       sb.append("  public void ").append(StringUtil.normalizeName(getName())).append(getId().substring(0, 8)).append("() throws Exception {\n");
-      sb.append("    SimpleDateFormat dateStartCase = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-      sb.append("    long timeStartCase = dateStartCase.parse(dateStartCase.format(new Date())).getTime();\n");
-      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\", \\\"timeStamp\\\": \\\"\"+timeStartCase+\"\\\"} \"); \n");
+      sb.append("    time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+      sb.append("    System.out.println(\"[Start][Case]{\\\"name\\\": \\\""+this.getName()+"\\\", \\\"id\\\": \\\""+this.getId()+"\\\", \\\"timeStamp\\\": \\\"\"+time+\"\\\"} \"); \n");
     }
     
     for (JsonNode json : actions) {
@@ -355,7 +353,6 @@ public class Case extends AbstractTemplate {
           sb.append(actionPause.transform());
         }
         
-        sb.append("    System.out.println(\"[End][Step]\"); \n");
         listParams.clear();
       
     }

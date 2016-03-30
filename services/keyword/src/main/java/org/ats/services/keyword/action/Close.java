@@ -14,7 +14,15 @@ import java.io.IOException;
 public class Close extends AbstractAction {
 
   public String transform() throws IOException {
-    return "wd.close();\n";
+	  StringBuilder sb = new StringBuilder();
+	  sb.append("try { \n");
+	  sb.append("     wd.close();\n");
+	  sb.append("     System.out.println(\"[End][Step]\"); \n");
+	  sb.append("   } catch (Exception e) { \n");
+	  sb.append("     e.printStackTrace();\n");
+	  sb.append("     throw e ; \n");
+	  sb.append("   }\n");
+    return sb.toString();
   }
 
   public String getAction() {

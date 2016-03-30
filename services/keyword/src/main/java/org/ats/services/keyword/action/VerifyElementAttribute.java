@@ -35,15 +35,17 @@ public class VerifyElementAttribute extends AbstractAction {
   }
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
+    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
-	sb.append("     if (").append(negated ? "" : "!");
+	sb.append("     if (").append(negated ? "!" : "");
 	sb.append("     wd.findElement(@locator).getAttribute(@name).equals(@value)) {\n");
-	sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyElementAttribute failed\");\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("    } else {\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyElementAttribute.png\"));\n");
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyElementAttribute.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());

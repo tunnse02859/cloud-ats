@@ -141,6 +141,10 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
   public void testJira() throws Exception {
     testBase("Jira", "jira.json");
   }
+  @Test
+  public void testVNEpress() throws Exception {
+    testBase("TestVNEpress", "test.json");
+  }
   
   @Test
   public void testSwitchToWindowWithOptions() throws Exception {

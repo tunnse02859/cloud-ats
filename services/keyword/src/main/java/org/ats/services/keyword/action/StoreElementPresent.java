@@ -35,10 +35,11 @@ public class StoreElementPresent extends AbstractAction {
 	sb.append("try { \n");
 	sb.append(variable);
 	sb.append(" = (wd.findElements(@locator).size() != 0);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     SimpleDateFormat dateFormat = new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\");\n");
-	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
+	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_storeElementPresent.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform());
