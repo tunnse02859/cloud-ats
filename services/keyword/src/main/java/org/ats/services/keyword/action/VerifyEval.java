@@ -32,9 +32,15 @@ public class VerifyEval extends AbstractAction {
   @Override
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("wd.executeScript(@script).equals(@value)) {\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append("try {\n");
+    sb.append("if (").append(negated ? "!" : "").append("wd.executeScript(@script).equals(@value)) {\n");
     sb.append("     System.out.println(\"[End][Step]\"); \n");
     sb.append("    }\n");
+    sb.append(" } catch (Exception e) { \n");
+    sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(sb.toString(), script.transform(), value.transform());

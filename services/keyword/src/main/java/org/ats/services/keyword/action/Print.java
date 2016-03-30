@@ -23,9 +23,11 @@ public class Print extends AbstractAction {
   }
 
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("System.out.println(");
+    StringBuilder sb = new StringBuilder();
+    sb.append("System.out.println(");
     sb.append(text);
     sb.append(");\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

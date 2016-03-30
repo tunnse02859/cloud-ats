@@ -26,6 +26,7 @@ public class SaveScreenShot extends AbstractAction {
     sb.append("wd.getScreenshotAs(FILE).renameTo(new File(");
     sb.append(file);
     sb.append("));\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return sb.toString();
   }
 

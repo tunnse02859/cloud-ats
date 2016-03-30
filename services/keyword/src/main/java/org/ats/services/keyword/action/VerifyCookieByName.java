@@ -31,7 +31,7 @@ public class VerifyCookieByName extends AbstractAction {
   }
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
+    StringBuilder sb = new StringBuilder("if (").append(negated ? "!" : "");
     sb.append("wd.manage().getCookieNamed(@name).getValue().equals(@value)) {\n");
     sb.append("     System.out.println(\"[End][Step]\"); \n");
     sb.append("    }\n");

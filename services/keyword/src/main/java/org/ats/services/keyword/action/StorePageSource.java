@@ -27,6 +27,7 @@ public class StorePageSource extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = wd.getPageSource();\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return sb.toString();
   }
 

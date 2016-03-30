@@ -35,6 +35,7 @@ public class AssertTextPresent extends AbstractAction {
 	sb.append("   } catch (AssertionError ae) { \n");
 	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_assertTextPresent.png\"));\n");
+	sb.append("     ae.printStackTrace();\n");
 	sb.append("     throw ae ; \n");
 	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());

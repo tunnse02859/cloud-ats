@@ -36,6 +36,7 @@ public class StoreAlertText extends AbstractAction{
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_storeAlertText.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     return sb.toString();

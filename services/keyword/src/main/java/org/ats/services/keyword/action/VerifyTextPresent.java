@@ -28,9 +28,9 @@ public class VerifyTextPresent extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
+    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
-	sb.append("     long time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-	sb.append("     if (").append(negated ? "" : "!");
+	sb.append("     if (").append(negated ? "!" : "");
 	sb.append("wd.findElement(By.tagName(\"html\")).getText().contains(@text)) {\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
     sb.append("    } else {\n");
@@ -38,6 +38,7 @@ public class VerifyTextPresent extends AbstractAction {
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error\"+time+\"_verifyTextPresent.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
