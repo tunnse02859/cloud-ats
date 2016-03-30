@@ -1,33 +1,32 @@
-[Duration-Start][Suite]{id: suiteId, timestamp: longValue}
 [Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId", "timestamp": "12"}
-
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timeStamp": "2325235"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
 				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-				//content output here
-				
+				//exception stack trace
+				print ba lang nhang
 				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
 				//content output here
 				[End][Step]
 			[End][Data]
 		[End][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
-		
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timeStamp": "2325435"}
 		[Start][Data]{"url_data": "http://localhost1:8080"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
 				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"]}
 				//content output here
+				linh tinh
 				[End][Step]
 			[End][Data]
-		
-		
-		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
+		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId", "timeStamp": "2326235"}
 			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
 			//content output here
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
-		
-[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId",  "timestamp": "2325235"]
-[Duration-End][Suite]{id: suiteId, timestamp: longValue}
+		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1", "timeStamp": "2328235"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+[End][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId",  "timestamp": "2325235"}
+fake
+sdg
+sdg
 
 

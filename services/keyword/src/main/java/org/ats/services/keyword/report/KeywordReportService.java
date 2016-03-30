@@ -74,6 +74,7 @@ public class KeywordReportService {
       BasicDBList listParams = null;
       long start_time = 0;
       long end_time = 0;
+      StringBuilder sb = null;
       while ((currentLine = br.readLine()) != null) {
         ObjectMapper mapper = new ObjectMapper();
         if (currentLine.contains("[Start][Suite]")) {
@@ -125,18 +126,25 @@ public class KeywordReportService {
           cases.get(cases.size() - 1).put("data_source", dataSource.toString()); 
         }
         if (currentLine.contains("[Start][Step]")) {
+          
+          if (steps.size() > 0) {
+            if (steps.get(steps.size() - 1).get("isPass") == null){ 
+              steps.get(steps.size() -1).put("isPass", false);
+            }
+          }
           if (listParams != null) {
             if (!listParams.isEmpty()) {
               steps.get(steps.size()-1).put("params", listParams);
             }
           }
+          sb = new StringBuilder();
           int start = currentLine.indexOf("{");
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
           String name = json.get("keyword_type").asText();
           stepReport = new StepReport(name);
-          stepReport.put("isPass", false);
+          stepReport.put("isPass", null);
           ArrayNode params = (ArrayNode) json.get("params");
           listParams = new BasicDBList();
           for (JsonNode j : params) {
@@ -182,8 +190,27 @@ public class KeywordReportService {
           
           if (listStepReportRef != null) {
             if (!listStepReportRef.isEmpty()) {
-              cases.get(cases.size()-1).setSteps(listStepReportRef);
+              cases.get(cases.size() - 1).setSteps(listStepReportRef);
             }
+          }
+          if (steps.get(steps.size() - 1).get("isPass") == null) {
+            steps.get(steps.size() - 1).put("isPass", false);
+          }
+        }
+        if (   !currentLine.contains("[Start][Suite]") 
+            && !currentLine.contains("[Start][Case]")
+            && !currentLine.contains("[Start][Step]")
+            && !currentLine.contains("[End][Case]")
+            && !currentLine.contains("[End][Suite]")
+            && !currentLine.contains("[End][Step]")
+            && !currentLine.contains("[Start][Data]")
+            && !currentLine.contains("[End][Data]")) {
+          if (steps.size() > 0) {
+            if (steps.get(steps.size() -1).get("isPass") == null){
+              sb.append(currentLine);
+              steps.get(steps.size() - 1).put("output", sb.toString());
+            }
+            
           }
         }
       }
