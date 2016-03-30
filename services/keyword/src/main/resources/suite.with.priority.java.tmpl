@@ -30,11 +30,12 @@ import static org.openqa.selenium.OutputType.*;
 public class @suiteName {
 
   private RemoteWebDriver wd;
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  long time = 0 ;
 
   @@BeforeClass
   public void setUp() throws Exception {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+    time = dateFormat.parse(dateFormat.format(new Date())).getTime();
     System.out.println("[Start][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
     @initDriver
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
@@ -43,8 +44,7 @@ public class @suiteName {
    
   @@AfterClass
   public void tearDown() throws Exception {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    long time = dateFormat.parse(dateFormat.format(new Date())).getTime();
+    time = dateFormat.parse(dateFormat.format(new Date())).getTime();
     System.out.println("[End][Suite]{\"name\": \"@suiteName\", \"id\": \"@id\", \"jobId\" : \"@jobId\", \"timestamp\": \""+time+"\"}");
     wd.quit();
   }

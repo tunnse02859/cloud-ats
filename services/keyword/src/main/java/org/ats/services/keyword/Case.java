@@ -355,7 +355,6 @@ public class Case extends AbstractTemplate {
           sb.append(actionPause.transform());
         }
         
-        sb.append("    System.out.println(\"[End][Step]\"); \n");
         listParams.clear();
       
     }

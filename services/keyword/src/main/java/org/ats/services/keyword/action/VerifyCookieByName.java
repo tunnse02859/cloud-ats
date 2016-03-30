@@ -33,7 +33,7 @@ public class VerifyCookieByName extends AbstractAction {
     
     StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
     sb.append("wd.manage().getCookieNamed(@name).getValue().equals(@value)) {\n");
-    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyCookieByName failed\");\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     sb.append("    }\n");
     
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
