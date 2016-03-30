@@ -3,9 +3,8 @@
  */
 package controllers;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.ats.common.ArchiveUtils;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
@@ -639,23 +639,49 @@ public class KeywordController extends Controller {
   
   public Result showImage(String projectId, String jobId, String suiteId, String suite_report_id, String case_report_id) throws IOException {
     
-    GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", case_report_id));
+    String stepName = request().getQueryString("step");
     
-    BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    
-    byte[] buff = new byte[1024];
-    for (int l = bis.read(buff); l != -1; l = bis.read(buff)) {
-      baos.write(buff, 0, l);
+    // stepName is empty -> show exception image
+    if (stepName.isEmpty()) {
+      GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", case_report_id));
+      byte[] image = IOUtils.toByteArray(file.getInputStream());
+      
+      return ok(image);
+      
     }
+    // show screenshot image
+    String path = "/tmp/"+projectId.substring(0, 8);
+    File folder = new File(path);
+    if(!folder.exists()) {
+      folder.mkdir();
+    }
+    GridFSDBFile file = blobService.findOne(new BasicDBObject("job_project_id", jobId));
     
-    byte[] image = baos.toByteArray();
+    byte[] report = IOUtils.toByteArray(file.getInputStream());
+    // write data to temporary file
+    FileOutputStream fileOut;
+    try {
+      fileOut = new FileOutputStream(path+"/resource-"+jobId+".tar.gz");
+      fileOut.write(report);
+      fileOut.close();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+     catch (IOException e) {
+      e.printStackTrace();
+    }
+    // unzip file
+    ArchiveUtils.gzipDecompress(new File(path+"/resource-"+jobId+".tar.gz"), new File(path+"/resource-"+jobId));
+    
+    InputStream stream = new FileInputStream(path+"/resource-"+jobId+"/"+stepName);
+    
+    byte[] image = IOUtils.toByteArray(stream);
     return ok(image);
     
   }
   
   
-  
+ 
   
   
   
