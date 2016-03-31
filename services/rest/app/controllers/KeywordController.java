@@ -362,15 +362,14 @@ public class KeywordController extends Controller {
 	  
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {
-		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass", "output");
-		array.add(Json.parse(stepReport.toString()));
+	    StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass", "output");
+		  GridFSDBFile file = blobService.findOne(new BasicDBObject("step_report_id", stepReport.getId()));
+		  if (file != null) {
+		    stepReport.put("hasImage", true);
+		  }
+		  array.add(Json.parse(stepReport.toString()));
 	  }
 	  
-	  
-	  GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", caze.getId()));
-	  if (file != null) {
-	    caze.put("hasImage", true);
-	  }
 	  objNode.put("case", caze.toString());
 	  objNode.put("listStep", Json.parse(array.toString()));
 	  return status(200, objNode);

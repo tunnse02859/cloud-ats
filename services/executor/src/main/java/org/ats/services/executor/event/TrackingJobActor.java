@@ -44,6 +44,8 @@ import org.ats.services.keyword.report.KeywordReportService;
 import org.ats.services.keyword.report.SuiteReportService;
 import org.ats.services.keyword.report.models.CaseReport;
 import org.ats.services.keyword.report.models.CaseReportReference;
+import org.ats.services.keyword.report.models.StepReport;
+import org.ats.services.keyword.report.models.StepReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
@@ -572,14 +574,18 @@ public class TrackingJobActor extends UntypedActor {
         List<CaseReportReference> cases = suite.getCases();
         
         for (CaseReportReference ref : cases) {
-          CaseReport report = ref.get();
-          if (timeStamp > report.getStartTime()) {
-            if (image.get("timestamp") == null) {
-              image.put("timestamp", report.getStartTime());
-              image.put("case_id", report.getId());
-            } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
-              image.put("timestamp", report.getStartTime());
-              image.put("case_id", report.getId());
+          CaseReport caseReport = ref.get();
+          List<StepReportReference> steps = caseReport.getSteps();
+          for (StepReportReference step : steps) {
+            StepReport report = step.get();
+            if (timeStamp > report.getStartTime()) {
+              if (image.get("timestamp") == null) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              }
             }
           }
         }
