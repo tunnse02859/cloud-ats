@@ -41,7 +41,8 @@ public class StepReportService extends AbstractMongoCRUD<StepReport> {
 
     String id = source.get("_id").toString();
     String name = source.get("name").toString();
-    StepReport report = new StepReport(name);
+    long startTime = (Long) source.get("startTime");
+    StepReport report = new StepReport(name, startTime);
     report.put("_id", id);
     
     return report;

@@ -90,7 +90,7 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   
   @AfterClass
   public void shutdown() throws Exception {
-    this.mongoService.dropDatabase();
+   // this.mongoService.dropDatabase();
   }
   
   @BeforeMethod
@@ -115,7 +115,7 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   @AfterMethod
   public void tearDown() {
     this.authService.logOut();
-    this.mongoService.dropDatabase();
+   // this.mongoService.dropDatabase();
   }
   
   /**

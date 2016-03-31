@@ -1,29 +1,29 @@
 [Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId", "timestamp": "12"}
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timeStamp": "2325235"}
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timestamp": "2325235"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"], "timestamp":"2325235"}
 				//exception stack trace
 				print ba lang nhang
-				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
+				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"], "timestamp":"23265235"}
 				//content output here
 				[End][Step]
 			[End][Data]
 		[End][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timeStamp": "2325435"}
+		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId", "timestamp": "2325435"}
 		[Start][Data]{"url_data": "http://localhost1:8080"}
 			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"]}
+				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"], "timestamp":"2327235"}
 				//content output here
 				linh tinh
 				[End][Step]
 			[End][Data]
-		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId", "timeStamp": "2326235"}
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId", "timestamp": "2326235"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"], "timestamp":"2328235"}
 			//content output here
 			[End][Step]
 		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
-		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1", "timeStamp": "2328235"}
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1", "timestamp": "2328235"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"], "timestamp":"2329235"}
 [End][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId",  "timestamp": "2325235"}
 fake
 sdg

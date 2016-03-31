@@ -102,7 +102,7 @@ public class KeywordReportService {
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
-          long timeStamp = Long.parseLong(json.get("timeStamp").asText());
+          long timeStamp = Long.parseLong(json.get("timestamp").asText());
           caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef, timeStamp);
           caseReport.setDataSource(dataSource.toString());
           caseReport.put("isPass", false);
@@ -143,7 +143,8 @@ public class KeywordReportService {
           String obj = currentLine.substring(start, end + 1);
           JsonNode json = mapper.readTree(obj);
           String name = json.get("keyword_type").asText();
-          stepReport = new StepReport(name);
+          long timestamp = Long.parseLong(json.get("timestamp").asText());
+          stepReport = new StepReport(name, timestamp);
           stepReport.put("isPass", null);
           ArrayNode params = (ArrayNode) json.get("params");
           listParams = new BasicDBList();

@@ -18,9 +18,11 @@ public class StepReport extends BasicDBObject {
    */
   private static final long serialVersionUID = 1L;
   
-  public StepReport(String name) {
+  public StepReport(String name, long startTime) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", name);
+    this.put("startTime", startTime);
+    
   }
   
   public void setName(String name) {
@@ -33,6 +35,14 @@ public class StepReport extends BasicDBObject {
   
   public String getId() {
     return this.getString("_id");
+  }
+  
+  public long getStartTime() {
+    return this.getLong("startTime");
+  }
+  
+  public void setStartTime(long startTime) {
+    this.put("startTime", startTime);
   }
   
   public void setId(String id) {
