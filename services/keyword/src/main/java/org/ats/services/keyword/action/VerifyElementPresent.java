@@ -31,7 +31,7 @@ public class VerifyElementPresent extends AbstractAction {
     sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
 	sb.append("     if (").append(negated ? "!" : "");
-	sb.append("     wd.findElements(@locator).size() != 0)) {\n");
+	sb.append("     wd.findElements(@locator).size() != 0) {\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("    } else {\n");
     sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyElementPresent.png\"));\n");
