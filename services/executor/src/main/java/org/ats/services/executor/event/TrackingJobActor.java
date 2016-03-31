@@ -566,7 +566,6 @@ public class TrackingJobActor extends UntypedActor {
   }
   
   private void saveImage(File file, long timeStamp, String jobId) throws IOException {
-    
     GridFSInputFile image = blobService.create(file);
     PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId));
     while (suites.hasNext()) {
@@ -578,14 +577,9 @@ public class TrackingJobActor extends UntypedActor {
           List<StepReportReference> steps = caseReport.getSteps();
           for (StepReportReference step : steps) {
             StepReport report = step.get();
-            if (timeStamp > report.getStartTime()) {
-              if (image.get("timestamp") == null) {
-                image.put("timestamp", report.getStartTime());
-                image.put("step_report_id", report.getId());
-              } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
-                image.put("timestamp", report.getStartTime());
-                image.put("step_report_id", report.getId());
-              }
+            if (timeStamp == report.getStartTime()) {
+              image.put("timestamp", report.getStartTime());
+              image.put("step_report_id", report.getId());
             }
           }
         }

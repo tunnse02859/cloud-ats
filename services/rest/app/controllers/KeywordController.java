@@ -635,11 +635,12 @@ public class KeywordController extends Controller {
   
   public Result showImage(String projectId, String jobId, String suiteId, String suite_report_id, String case_report_id) throws IOException {
     
-    String stepName = request().getQueryString("step");
+    String key = request().getQueryString("step");
+    boolean isName = Boolean.getBoolean(request().getQueryString("isName"));
     
     // stepName is empty -> show exception image
-    if (stepName.isEmpty()) {
-      GridFSDBFile file = blobService.findOne(new BasicDBObject("case_id", case_report_id));
+    if (!isName) {
+      GridFSDBFile file = blobService.findOne(new BasicDBObject("step_report_id", key));
       byte[] image = IOUtils.toByteArray(file.getInputStream());
       
       return ok(image);
@@ -669,7 +670,7 @@ public class KeywordController extends Controller {
     // unzip file
     ArchiveUtils.gzipDecompress(new File(path+"/resource-"+jobId+".tar.gz"), new File(path+"/resource-"+jobId));
     
-    InputStream stream = new FileInputStream(path+"/resource-"+jobId+"/"+stepName);
+    InputStream stream = new FileInputStream(path+"/resource-"+jobId+"/"+key);
     
     byte[] image = IOUtils.toByteArray(stream);
     return ok(image);
