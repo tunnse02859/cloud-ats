@@ -461,7 +461,7 @@ public class TrackingJobActor extends UntypedActor {
       //Download target resource
       
       //Zip report
-      String cmd =  "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src";
+      String cmd =  "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src pom.xml";
       Session session = SSHClient.getSession(testVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
       ChannelExec channel = (ChannelExec) session.openChannel("exec");
       channel.setCommand(cmd);

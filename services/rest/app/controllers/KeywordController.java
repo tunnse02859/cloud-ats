@@ -362,7 +362,7 @@ public class KeywordController extends Controller {
 	  
 	  List<StepReportReference> listStepReport = caze.getSteps() ;
 	  for (StepReportReference stepReportReference : listStepReport) {
-		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass");
+		StepReport stepReport = stepReportService.get(stepReportReference.getId(), "params", "isPass", "output");
 		array.add(Json.parse(stepReport.toString()));
 	  }
 	  
@@ -605,18 +605,16 @@ public class KeywordController extends Controller {
   }
   
   public Result download(String projectId, String jobId) throws IOException {
-    AbstractJob<?> absJob = executorService.get(jobId,"raw_data");
     String path = "/tmp/"+projectId.substring(0, 8);
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
     }
-    KeywordJob job = (KeywordJob) absJob;
-    if(job.getRawData() == null)
-      return status(404);
     
     GridFSDBFile file = blobService.findOne(new BasicDBObject("job_project_id", jobId));
-    
+    if (file == null) {
+       return status(404);
+    }
     byte[] report = IOUtils.toByteArray(file.getInputStream());
     FileOutputStream fileOut;
     try {
@@ -629,7 +627,6 @@ public class KeywordController extends Controller {
      catch (IOException e) {
       e.printStackTrace();
     }
-    
     response().setContentType("application/x-download");
     response().setHeader("Content-Encoding", "gzip");
     response().setHeader("Content-disposition",
