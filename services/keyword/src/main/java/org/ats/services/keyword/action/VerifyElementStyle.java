@@ -33,7 +33,6 @@ public class VerifyElementStyle extends AbstractAction{
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
 	sb.append("    System.out.println(\"Actual CSSValue : \" + wd.findElement(@locator).getCssValue(");
 	sb.append(negated ? "if (!wd." : "if (wd.");
@@ -46,10 +45,10 @@ public class VerifyElementStyle extends AbstractAction{
     sb.append(")");
     sb.append("    System.out.println(\"[End][Step]\"); \n");
     sb.append("    } else {\n");
-    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error\"+time+\"_verifyElementStyle.png\"));\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error\"+System.currentTimeMillis()+\"_verifyElementStyle.png\"));\n");
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyElementStyle.png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyElementStyle.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");

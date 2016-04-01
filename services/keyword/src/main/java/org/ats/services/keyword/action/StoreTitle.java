@@ -32,8 +32,7 @@ public class StoreTitle extends AbstractAction {
 		sb.append(     variable ).append(" = wd.getTitle();\n");
 		sb.append("     System.out.println(\"[End][Step]\"); \n");
 		sb.append("   } catch (Exception e) { \n");
-		sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-		sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_storeTitle.png\"));\n");
+		sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_storeTitle.png\"));\n");
 		sb.append("     e.printStackTrace();\n");
 		sb.append("     throw e ; \n");
 		sb.append("   }\n");

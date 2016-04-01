@@ -22,15 +22,14 @@ public class VerifyAlertPresent extends AbstractAction {
   @Override
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
 	sb.append("     if (").append(negated ? "!" : "").append("isAlertPresent(wd)) {\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("    } else {\n");
-    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyAlertPresent.png\"));\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertPresent.png\"));\n");
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyAlertPresent.png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertPresent.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");

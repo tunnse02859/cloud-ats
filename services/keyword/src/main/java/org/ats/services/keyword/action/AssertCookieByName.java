@@ -33,8 +33,7 @@ public class AssertCookieByName extends AbstractAction{
    	sb.append("     wd.manage().getCookieNamed(").append(name).append(").getValue(), @value);\n");
    	sb.append("     System.out.println(\"[End][Step]\"); \n");
    	sb.append("   } catch (AssertionError ae) { \n");
-   	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_assertCookieByName.png\"));\n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertCookieByName.png\"));\n");
    	sb.append("     ae.printStackTrace();\n");
    	sb.append("     throw ae ; \n");
    	sb.append("   }\n");

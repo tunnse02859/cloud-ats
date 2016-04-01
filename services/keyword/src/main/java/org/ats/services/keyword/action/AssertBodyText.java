@@ -32,8 +32,7 @@ public class AssertBodyText extends AbstractAction {
    	sb.append("     wd.findElement(By.tagName(\"html\")).getText(), @text);\n");
    	sb.append("     System.out.println(\"[End][Step]\"); \n");
    	sb.append("   } catch (AssertionError ae) { \n");
-   	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_assertBodyText.png\"));\n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertBodyText.png\"));\n");
    	sb.append("     ae.printStackTrace();\n");
    	sb.append("     throw ae ; \n");
    	sb.append("   }\n");

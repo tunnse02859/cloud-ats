@@ -28,17 +28,16 @@ public class VerifyCurrentUrl extends AbstractAction {
 
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
 	sb.append("     System.out.println(\"Actual URL : \"+wd.getCurrentUrl()); \n");
 	sb.append("     if (").append(negated ? "!" : "");
 	sb.append("     wd.getCurrentUrl().equals(@url)) {\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("    } else {\n");
-    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyCurrentUrl.png\"));\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyCurrentUrl.png\"));\n");
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyCurrentUrl.png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyCurrentUrl.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");

@@ -29,7 +29,6 @@ public class VerifyAlertText extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
 	sb.append("try { \n");
 	sb.append("    System.out.println(\"Actual Text Alert : \"+wd.switchTo().alert().getText()); \n");
 	sb.append(      negated ? "if (!wd." : "if (wd.");
@@ -38,10 +37,10 @@ public class VerifyAlertText extends AbstractAction {
     sb.append(")) {\n");
     sb.append("    System.out.println(\"[End][Step]\"); \n");
     sb.append("    } else {\n");
-    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyAlertText.png\"));\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertText.png\"));\n");
     sb.append("    }\n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_verifyAlertText.png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertText.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");

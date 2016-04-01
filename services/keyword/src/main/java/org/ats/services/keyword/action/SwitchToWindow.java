@@ -27,8 +27,7 @@ public class SwitchToWindow extends AbstractAction {
 	sb.append("     wd = (FirefoxDriver) wd.switchTo().window(@name);\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("   } catch (Exception e) { \n");
-	sb.append("     time = dateFormat.parse(dateFormat.format(new Date())).getTime();\n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+time+\"_switchToWindow.png\"));\n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_switchToWindow.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
 	sb.append("     throw e ; \n");
 	sb.append("   }\n");
