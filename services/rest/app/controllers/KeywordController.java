@@ -462,68 +462,21 @@ public class KeywordController extends Controller {
   
   public Result suiteReport(String projectId, String jobId, String suiteId, String suite_report_id) {
     
-    int index = Integer.parseInt(request().getQueryString("index"));
+    ArrayNode result = Json.newObject().arrayNode();
     
-    // get suite report with suiteId and jobId
-    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId).append("suiteId", suiteId));
-    SuiteReport suite = suites.next().get(0);
-    List<CaseReportReference> caseRefs = suite.getCases();
+    PageList<CaseReport> reports = caseReportService.query(new BasicDBObject("suite_report_id", suite_report_id));
+    reports.setSortable(new MapBuilder<String, Boolean>("startTime", true).build());
     
-    // store unique case id by set
-    Set<String> set = getCaseIds(caseRefs);
-    
-    //create list unique case id
-    List<String> list = new ArrayList<>(set);
-    
-    //result object is used to return data to client
-    ObjectNode result = Json.newObject();
-    
-    // array node to store  list case report with data driven
-    ArrayNode caseArray = Json.newObject().arrayNode();
-    
-    //get report with 10 caseId
-    int startIndex = index * 10;
-    for (int i = startIndex; i < list.size() && i < (startIndex + 10); i ++) {
-      ObjectNode obj = Json.newObject();
-      
-      //get all case report with case id and suite report id
-      PageList<CaseReport> reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
-      reports.setSortable(new MapBuilder<String, Boolean>("startTime", true).build());
-      
-      if (reports.count() > 1) {
-        obj.put("data_driven", true);
-        ArrayNode array = Json.newObject().arrayNode();
-        while (reports.hasNext()) {
-          for (CaseReport report : reports.next()) {
-        	CaseReport cazeReport = caseReportService.get(report.getId(), "isPass");
-            array.add(Json.parse(cazeReport.toString()));
-          }
-        }
-        obj.put("data_source", array.toString());
+    while (reports.hasNext()) {
+      for (CaseReport report : reports.next()) {
+        report = caseReportService.get(report.getId(), "isPass");
         
-      } else {
-        obj.put("data_source", reports.next().get(0).toString());
-        obj.put("data_driven", false);
+        if ("[]".equals(report.getDataSource())) {
+          report.put("useDataDriven", false);
+        } else report.put("useDataDriven", true);
+        result.add(Json.parse(report.toString()));
       }
-      
-      reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
-      reports.setSortable(new MapBuilder<String, Boolean>("startTime", true).build());
-      //Get failed case 
-      PageList<CaseReport> failedReports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id).append("isPass", false));
-      //if one data line is failed, the test case is failed
-      if (failedReports.count() > 0) {
-        obj.put("result", "Fail");
-      } else obj.put("result", "Pass");
-      
-      obj.put("name", reports.next().get(0).getName());
-      obj.put("stt", i+1+"");
-      caseArray.add(obj);
-      
-      result.put("totalCase", list.size());
-      result.put("reports", caseArray.toString());
-      
     }
-    
     return ok(result);
   }
   
