@@ -229,6 +229,7 @@ public class KeywordReportService {
         for (JsonNode action : skipped_step) {
           list.add(JSON.parse(action.toString()));
         }
+       
         report.put("skipped_steps", list);
       }
       
@@ -236,10 +237,31 @@ public class KeywordReportService {
       suiteReportService.createSuites(suites);
       stepReportService.createSteps(steps);
       
-      PageList<SuiteReport> pageSuites = suiteReportService.list();
+      
+      
+      PageList<SuiteReport> pageSuites = suiteReportService.query(new BasicDBObject("jobId", jobId));
       
       while (pageSuites.hasNext()) {
         for (SuiteReport suite : pageSuites.next()) {
+          
+          // count failed steps in each case
+          PageList<CaseReport> caseReports = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()));
+          
+          while (caseReports.hasNext()) {
+            for (CaseReport report : caseReports.next()) {
+              int count = 0;
+              for (StepReportReference ref : report.getSteps()) {
+                StepReport step = stepReportService.get(ref.getId(), "isPass");
+                if (!step.getBoolean("isPass")) {
+                  count ++;
+                }
+              }
+              if (count > 0) {
+                report.put("isPass", false);
+                caseReportService.update(report);
+              }
+            }
+          }
           
           Set<String> set = new HashSet<String>();
           for (CaseReportReference ref : suite.getCases()) {
