@@ -183,6 +183,7 @@ public class KeywordController extends Controller {
     
     if (jobList.totalPage() > 0) {
       AbstractJob<?> lastJob = jobList.next().get(0);
+      
       project.put("lastRunning", formater.format(lastJob.getCreatedDate()));
       project.put("log", true);
       project.put("lastSuites", lastJob.get("suites"));
@@ -396,7 +397,6 @@ public class KeywordController extends Controller {
         AbstractJob<?> job = list.get(i -1);
         ObjectNode obj = Json.newObject();
         PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", job.getId()));
-        
         long duration = 0;
         int count_fail = 0;
         while (suites.hasNext()) {
@@ -488,7 +488,7 @@ public class KeywordController extends Controller {
       
       //get all case report with case id and suite report id
       PageList<CaseReport> reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
-      
+      reports.setSortable(new MapBuilder<String, Boolean>("startTime", true).build());
       
       if (reports.count() > 1) {
         obj.put("data_driven", true);
@@ -507,7 +507,7 @@ public class KeywordController extends Controller {
       }
       
       reports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id));
-      
+      reports.setSortable(new MapBuilder<String, Boolean>("startTime", true).build());
       //Get failed case 
       PageList<CaseReport> failedReports = caseReportService.query(new BasicDBObject("case_id", list.get(i)).append("suite_report_id", suite_report_id).append("isPass", false));
       //if one data line is failed, the test case is failed
@@ -636,8 +636,8 @@ public class KeywordController extends Controller {
   public Result showImage(String projectId, String jobId, String suiteId, String suite_report_id, String case_report_id) throws IOException {
     
     String key = request().getQueryString("step");
-    boolean isName = Boolean.getBoolean(request().getQueryString("isName"));
-    
+    String name = request().getQueryString("isName");
+    boolean isName = Boolean.parseBoolean(name);
     // stepName is empty -> show exception image
     if (!isName) {
       GridFSDBFile file = blobService.findOne(new BasicDBObject("step_report_id", key));

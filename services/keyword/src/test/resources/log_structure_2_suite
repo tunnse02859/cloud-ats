@@ -1,87 +1,41 @@
-[Duration-Start][Suite]{id: suiteId, timestamp: longValue}
-[Start][Suite]{"name": "suiteName", "id": "suiteId", "jobId" : "jobId", "timestamp": "123234"}
-
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
-			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-				//content output here
-				[End][Step]
-				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
-				//content output here
-				[End][Step]
-			[End][Data]
-		[End][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
-		
-		[Start][Case]{"name": "getCaseNameWithData", "id": "getCaseWithDataId"}
-			[Start][Data]{"url_data": "http://localhost1:8080"}
-					[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"]}
-					//content output here
-					[End][Step]
-			[End][Data]
-		[End][Case]
-		[Start][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "click", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-			//content output here
-			[End][Step]
-		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId"}
-		[Start][Case]{"name": "getCaseNameNoData1", "id": "getCaseNoDataId1"}
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "click", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
-			//content output here
-			[End][Step]
-		[End][Case]{"name": "getCaseNameNoData", "id": "getCaseNoDataId1"}
-		
-[End][Suite]["name": "suiteName", "id": "suiteId", "jobId" : "jobId",  "timestamp": "2325235"]
-[Duration-End][Suite]{id: suiteId, timestamp: longValue}
-
-[Duration-Start][Suite]{id: suiteId, timestamp: longValue}
-[Start][Suite]{"name": "suiteName2", "id": "suiteId2", "jobId" : "jobId2",  "timestamp": "123234"}
-
-		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
-			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url", "params":["url"]}
-				//content output here
-				
-				[End][Step]
-				[Start][Step]{"keyword_type": "get2", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
-				//content output here
-				[End][Step]
-			[End][Data]
-		[End][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
-		
-		[Start][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
-		[Start][Data]{"url_data": "http://localhost1:8080"}
-			[Start][Data]{"url_data": "http://localhost:8080"}
-				[Start][Step]{"keyword_type": "get2", "url": "${url_data}", "params":["url"]}
-				//content output here
-				[End][Step]
-			[End][Data]
-		[End][Case]{"name": "getCaseNameWithData2", "id": "getCaseWithDataId2"}
-		
-		[Start][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
-			[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url2", "params":["url"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "click2", "locator": {"type":"link text","value":"i am a link"}, "params":["locator"]}
-			//content output here
-			[End][Step]
-			[Start][Step]{"keyword_type": "get2", "url": "http://hardcode_url2", "params":["url"]}
-			//content output here
-			[End][Step]
-		[End][Case]{"name": "getCaseNameNoData2", "id": "getCaseNoDataId2"}
-		
-[End][Suite]["name": "suiteName2", "id": "suiteId2", "jobId" : "jobId2",  "timestamp": "2325235"]
-[Duration-End][Suite]{id: suiteId, timestamp: longValue}
+[Start][Suite]{"name": "All", "id": "5ed4e65e-d9f4-483a-9fcd-033dcf28ab81", "jobId" : "3c7f1232-c8579be3", "timestamp": "1459409150000"}
+[Start][Case]{"name": "Change status of Issue", "id": "bb58dc8a-d84a-402c-b22a-ee76c9740e92", "timestamp": "1459409156000"} 
+[Start][Step]{"keyword_type":"get ","url":"https://issues.jboss.org/secure/RapidStart.jspa","timestamp": "1459409156000","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"user-options\"]/a"},"timestamp": "1459409170000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"username\"]"},"text":"haint","timestamp": "1459409174000","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"password\"]"},"text":"89198601","timestamp": "1459409179000","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"fm1\"]/input[7]"},"timestamp": "1459409180000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyElementPresent ","locator":{"type":"xpath","value":"//*[@id=\"create-menu\"]"},"timestamp": "1459409186000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"browse_link\"]"},"timestamp": "1459409187000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459409187000","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"admin_main_proj_link_lnk\"]"},"timestamp": "1459409192000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"xpath","value":"//*[@id=\"ghx-board-name\"]"},"text":"GateIn - Kanban","timestamp": "1459409192000","params":["locator", "text"]} 
+Actual Text : GateIn - Kanban
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"js-work-quickfilters\"]/dd[1]/a"},"timestamp": "1459409200000","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"7000ms","timestamp": "89372789","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"dragToAndDropElement ","locator":{"type":"xpath","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[1]/div[1]"},"targetLocator":{"type":"dragToAndDropElement","value":"//*[@id="ghx-pool"]/div[2]/ul/li[2]"},"timestamp": "1459409207000","params":["locator", "targetLocator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459409208000","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"dragToAndDropElement ","locator":{"type":"xpath","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[2]/div"},"targetLocator":{"type":"dragToAndDropElement","value":"//*[@id="ghx-pool"]/div[2]/ul/li[1]"},"timestamp": "1459409213000","params":["locator", "targetLocator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459409214000","params":["waittime"]} 
+[End][Step]
+[End][Case]
 
 
+[End][Suite]{"name": "All", "id": "5ed4e65e-d9f4-483a-9fcd-033dcf28ab81", "jobId" : "3c7f1232-c8579be3", "timestamp": "1459409657000"}
+Tests run: 10, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 508.297 sec <<< FAILURE! - in org.ats.generated.All
+FPTSitea618e9a2(org.ats.generated.All)  Time elapsed: 13.119 sec  <<< FAILURE!

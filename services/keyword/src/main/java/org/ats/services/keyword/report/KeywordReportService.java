@@ -60,8 +60,8 @@ public class KeywordReportService {
   public void processLog(InputStream is) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
     String jobId = null;
+    String currentLine = null;
     try {
-      String currentLine;
       SuiteReport suiteReport = null;
       CaseReport caseReport = null;
       StepReport stepReport = null;
@@ -141,7 +141,9 @@ public class KeywordReportService {
           int start = currentLine.indexOf("{");
           int end = currentLine.lastIndexOf("}");
           String obj = currentLine.substring(start, end + 1);
+          
           JsonNode json = mapper.readTree(obj);
+          
           String name = json.get("keyword_type").asText();
           long timestamp = Long.parseLong(json.get("timestamp").asText());
           stepReport = new StepReport(name, timestamp);
