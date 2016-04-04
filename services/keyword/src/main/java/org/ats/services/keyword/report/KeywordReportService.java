@@ -92,11 +92,20 @@ public class KeywordReportService {
         }
         if (currentLine.contains("[Start][Case]")) {
           dataSource = new ArrayList<String>();
+          
+          if (steps.size() > 0) {
+            if (steps.get(steps.size() - 1).get("isPass") == null){ 
+              steps.get(steps.size() -1).put("isPass", false);
+              cases.get(cases.size()-1).put("isPass", false);
+            }
+          }
+          
           if (listStepReportRef != null) {
             if (!listStepReportRef.isEmpty()) {
               cases.get(cases.size()-1).setSteps(listStepReportRef);
             }
           }
+          
           listStepReportRef = new ArrayList<StepReportReference>();
           int start = currentLine.indexOf("{");
           int end = currentLine.lastIndexOf("}");
@@ -105,16 +114,18 @@ public class KeywordReportService {
           long timeStamp = Long.parseLong(json.get("timestamp").asText());
           caseReport = caseReportFactory.create(suiteReport.getId(), "", json.get("name").asText(), json.get("id").asText(), listStepReportRef, timeStamp);
           caseReport.setDataSource(dataSource.toString());
-          caseReport.put("isPass", false);
+          caseReport.put("isPass", null);
           cases.add(caseReport);
           CaseReportReference ref = caseReportRefFactory.create(caseReport.getId());
           listCaseReportRef.add(ref);
-          caseReport.setSteps(listStepReportRef);
+          //caseReport.setSteps(listStepReportRef);
         }
         if (currentLine.contains("[End][Case]")) {
           caseReport.setSteps(listStepReportRef);
-          cases.get(cases.size()-1).put("isPass", true);
-          listStepReportRef.clear();
+          if (cases.get(cases.size() - 1).get("isPass") == null) {
+            cases.get(cases.size()-1).put("isPass", true);
+            listStepReportRef.clear();
+          }
         }
         
         if (currentLine.contains("[Start][Data]")) {
@@ -130,6 +141,7 @@ public class KeywordReportService {
           if (steps.size() > 0) {
             if (steps.get(steps.size() - 1).get("isPass") == null){ 
               steps.get(steps.size() -1).put("isPass", false);
+              cases.get(cases.size()-1).put("isPass", false);
             }
           }
           if (listParams != null) {
@@ -198,6 +210,7 @@ public class KeywordReportService {
           }
           if (steps.get(steps.size() - 1).get("isPass") == null) {
             steps.get(steps.size() - 1).put("isPass", false);
+            cases.get(cases.size()-1).put("isPass", false);
           }
         }
         if (   !currentLine.contains("[Start][Suite]") 
@@ -243,25 +256,6 @@ public class KeywordReportService {
       
       while (pageSuites.hasNext()) {
         for (SuiteReport suite : pageSuites.next()) {
-          
-          // count failed steps in each case
-          PageList<CaseReport> caseReports = caseReportService.query(new BasicDBObject("suite_report_id", suite.getId()));
-          
-          while (caseReports.hasNext()) {
-            for (CaseReport report : caseReports.next()) {
-              int count = 0;
-              for (StepReportReference ref : report.getSteps()) {
-                StepReport step = stepReportService.get(ref.getId(), "isPass");
-                if (!step.getBoolean("isPass")) {
-                  count ++;
-                }
-              }
-              if (count > 0) {
-                report.put("isPass", false);
-                caseReportService.update(report);
-              }
-            }
-          }
           
           Set<String> set = new HashSet<String>();
           for (CaseReportReference ref : suite.getCases()) {
