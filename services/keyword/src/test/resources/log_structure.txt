@@ -1,0 +1,560 @@
+ [Fri Apr 01 18:17:45 ICT 2016][INFO] Generating keyword project
+[Fri Apr 01 18:17:51 ICT 2016][INFO] Uploading to VM Test
+[Fri Apr 01 18:17:52 ICT 2016][INFO] Submitted Jenkins job
+Started by user anonymous
+Building remotely on 192.168.1.72 in workspace /home/cloudats/workspace/3c7f1232-be1e58b1
+Parsing POMs
+Discovered a new module org.ats.generated:keyword keyword
+Modules changed, recalculating dependency graph
+maven3-agent.jar already up to date
+maven3-interceptor.jar already up to date
+maven3-interceptor-commons.jar already up to date
+[3c7f1232-be1e58b1] $ /usr/lib/jvm/java-1.7.0-openjdk-amd64/bin/java -cp /home/cloudats/maven3-agent.jar:/usr/share/maven/boot/plexus-classworlds-2.x.jar org.jvnet.hudson.maven3.agent.Maven3Main /usr/share/maven /home/cloudats/slave.jar /home/cloudats/maven3-interceptor.jar /home/cloudats/maven3-interceptor-commons.jar 47607
+<===[JENKINS REMOTING CAPACITY]===>channel started
+Executing Maven:  -B -f /home/cloudats/projects/3c7f1232-be1e58b1/pom.xml clean test
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building keyword 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ keyword ---[INFO] 
+[INFO] --- maven-resources-plugin:2.3:resources (default-resources) @ keyword ---[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent![INFO] skip non existing resourceDirectory /home/cloudats/projects/3c7f1232-be1e58b1/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ keyword ---[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.3:testResources (default-testResources) @ keyword ---[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent![INFO] skip non existing resourceDirectory /home/cloudats/projects/3c7f1232-be1e58b1/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ keyword ---[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent![INFO] Compiling 1 source file to /home/cloudats/projects/3c7f1232-be1e58b1/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.18.1:test (default-test) @ keyword ---[INFO] Surefire report directory: /home/cloudats/projects/3c7f1232-be1e58b1/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running org.ats.generated.All
+Configuring TestNG with: TestNG652Configurator
+[Start][Suite]{"name": "All", "id": "5ed4e65e-d9f4-483a-9fcd-033dcf28ab81", "jobId" : "3c7f1232-be1e58b1", "timestamp": "1459509050784"}
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 29311
+Only local connections are allowed.
+[Start][Case]{"name": "Change status of Issue", "id": "bb58dc8a-d84a-402c-b22a-ee76c9740e92", "timestamp": "1459509053682"} 
+[Start][Step]{"keyword_type":"get ","url":"https://issues.jboss.org/secure/RapidStart.jspa","timestamp": "1459509053683","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"user-options\"]/a"},"timestamp": "1459509064325","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"username\"]"},"text":"haint","timestamp": "1459509066853","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"password\"]"},"text":"89198601","timestamp": "1459509067221","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"fm1\"]/input[7]"},"timestamp": "1459509067665","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyElementPresent ","locator":{"type":"xpath","value":"//*[@id=\"create-menu\"]"},"timestamp": "1459509073605","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"browse_link\"]"},"timestamp": "1459509073664","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459509073836","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"admin_main_proj_link_lnk\"]"},"timestamp": "1459509078837","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"xpath","value":"//*[@id=\"ghx-board-name\"]"},"text":"GateIn - Kanban","timestamp": "1459509085672","params":["locator", "text"]} 
+Actual Text : GateIn - Kanban
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"js-work-quickfilters\"]/dd[1]/a"},"timestamp": "1459509085878","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"7000ms","timestamp": "1459509086081","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"dragToAndDropElement ","locator":{"type":"xpath","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[1]/div[1]"},"targetLocator":{"type":"dragToAndDropElement","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[2]"},"timestamp": "1459509093082","params":["locator", "targetLocator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459509093485","params":["waittime"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"dragToAndDropElement ","locator":{"type":"xpath","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[2]/div"},"targetLocator":{"type":"dragToAndDropElement","value":"//*[@id=\"ghx-pool\"]/div[2]/ul/li[1]"},"timestamp": "1459509098486","params":["locator", "targetLocator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"pause ","waittime":"5000ms","timestamp": "1459509098857","params":["waittime"]} 
+[End][Step]
+[End][Case]
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 3532
+Only local connections are allowed.
+[Start][Case]{"name": "FPT Site", "id": "a618e9a2-3675-4a55-a993-f18b7b3f9de3", "timestamp": "1459509106096"} 
+[Start][Data]{"locator":"//*[@id=\"header\"]/div[3]/div[4]/ul/li[1]/a"}
+[Start][Step]{"keyword_type":"get ","url":"https://fpt.com.vn/en/","timestamp": "1459509106097","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"${locator}"},"timestamp": "1459509112861","params":["locator"]} 
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 72 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: ad3579801bfbcd86df5fa145ea0434b2
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.Nx5buS, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.FPTSitea618e9a2(All.java:553)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:85)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:696)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:882)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1189)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:124)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:108)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:348)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:343)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:305)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:254)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:115)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeSingleClass(TestNGDirectoryTestSuite.java:129)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(TestNGDirectoryTestSuite.java:113)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:111)
+	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 3004
+Only local connections are allowed.
+[Start][Case]{"name": "FPT Site", "id": "a618e9a2-3675-4a55-a993-f18b7b3f9de3", "timestamp": "1459509115656"} 
+[Start][Data]{"locator":"//*[@id=\"header\"]/div[3]/div[4]/ul/li[2]/a/fake"}
+[Start][Step]{"keyword_type":"get ","url":"https://fpt.com.vn/en/","timestamp": "1459509115657","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"${locator}"},"timestamp": "1459509121993","params":["locator"]} 
+org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"xpath","selector":"//*[@id="header"]/div[3]/div[4]/ul/li[2]/a/fake"}
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 60.07 seconds
+For documentation on this error, please visit: http://seleniumhq.org/exceptions/no_such_element.html
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+*** Element info: {Using=xpath, value=//*[@id="header"]/div[3]/div[4]/ul/li[2]/a/fake}
+Session ID: 93e6ba3a8073555c3b6cce59f1e14a00
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.warIe7, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:353)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElementByXPath(RemoteWebDriver.java:490)
+	at org.openqa.selenium.By$ByXPath.findElement(By.java:361)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:345)
+	at org.ats.generated.All.FPTSitea618e9a2(All.java:553)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:85)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:696)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:882)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1189)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:124)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:108)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:348)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:343)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:305)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:254)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:115)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeSingleClass(TestNGDirectoryTestSuite.java:129)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(TestNGDirectoryTestSuite.java:113)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:111)
+	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 26396
+Only local connections are allowed.
+[Start][Case]{"name": "FPT fake", "id": "1852fadd-c77c-4f54-9ca3-9b91eaac74b6", "timestamp": "1459509184781"} 
+[Start][Step]{"keyword_type":"get ","url":"https://fpt.com.vn/en/","timestamp": "1459509184782","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"setElementText ","locator":{"type":"id","value":"aaaaaaaaaa"},"text":"test","timestamp": "1459509190973","params":["locator", "text"]} 
+org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"id","selector":"aaaaaaaaaa"}
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 60.08 seconds
+For documentation on this error, please visit: http://seleniumhq.org/exceptions/no_such_element.html
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+*** Element info: {Using=id, value=aaaaaaaaaa}
+Session ID: 77bdba1385f128c7a86fa776c92d2a9c
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.WpHLte, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:353)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElementById(RemoteWebDriver.java:403)
+	at org.openqa.selenium.By$ById.findElement(By.java:218)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:345)
+	at org.ats.generated.All.FPTfake1852fadd(All.java:506)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:85)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:696)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:882)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1189)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:124)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:108)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:348)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:343)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:305)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:254)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:115)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeSingleClass(TestNGDirectoryTestSuite.java:129)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(TestNGDirectoryTestSuite.java:113)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:111)
+	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 26805
+Only local connections are allowed.
+[Start][Case]{"name": "JBoss", "id": "d059bca3-d0f4-4a47-b26d-5d561886e7c9", "timestamp": "1459509253603"} 
+[Start][Step]{"keyword_type":"get ","url":"https://issues.jboss.org/secure/RapidStart.jspa","timestamp": "1459509253603","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"user-options\"]/a"},"timestamp": "1459509267134","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"username\"]"},"text":"haint","timestamp": "1459509267290","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"password\"]"},"text":"89198601","timestamp": "1459509271385","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"fm1\"]/input[7]"},"timestamp": "1459509271823","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyElementSelected ","locator":{"type":"xpath","value":"//*[@id=\"create-menu\"]"},"timestamp": "1459509278642","params":["locator"]} 
+[End][Case]
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 19257
+Only local connections are allowed.
+[Start][Case]{"name": "LocatorVarible", "id": "ad85244c-b096-4029-889f-6f0579c7ae1e", "timestamp": "1459509280990"} 
+[Start][Data]{"locator":"//*[@id=\"header\"]/div[3]/div[4]/ul/li[1]/a","title":"FPT Corporation"}
+[Start][Step]{"keyword_type":"get ","url":"https://fpt.com.vn/en/","timestamp": "1459509280990","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"${locator}"},"timestamp": "1459509285671","params":["locator"]} 
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 82 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: 0562cb2598217303a7767404a7c59191
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.LY47p1, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.LocatorVariblead85244c(All.java:440)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:85)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:696)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:882)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1189)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:124)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:108)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:348)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:343)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:305)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:254)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:115)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeSingleClass(TestNGDirectoryTestSuite.java:129)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(TestNGDirectoryTestSuite.java:113)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:111)
+	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 26311
+Only local connections are allowed.
+[Start][Case]{"name": "LocatorVarible", "id": "ad85244c-b096-4029-889f-6f0579c7ae1e", "timestamp": "1459509288347"} 
+[Start][Data]{"locator":"//*[@id=\"header\"]/div[3]/div[4]/ul/li[2]/a","title":"FPT Corporation1"}
+[Start][Step]{"keyword_type":"get ","url":"https://fpt.com.vn/en/","timestamp": "1459509288347","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"${locator}"},"timestamp": "1459509292983","params":["locator"]} 
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 75 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: 900ee1a4cb73bd1a19682ea5102f8fd3
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.jxfaTG, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.LocatorVariblead85244c(All.java:440)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:85)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:696)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:882)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1189)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:124)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:108)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:348)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:343)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:305)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:254)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.apache.maven.surefire.testng.TestNGExecutor.run(TestNGExecutor.java:115)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeSingleClass(TestNGDirectoryTestSuite.java:129)
+	at org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(TestNGDirectoryTestSuite.java:113)
+	at org.apache.maven.surefire.testng.TestNGProvider.invoke(TestNGProvider.java:111)
+	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 13822
+Only local connections are allowed.
+[Start][Case]{"name": "LogParser", "id": "68cc2138-e2dc-46ca-88c6-6a27d46183a5", "timestamp": "1459509295542"} 
+[Start][Step]{"keyword_type":"get ","url":"http://vnexpress.net/","timestamp": "1459509295543","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"box_news_top\"]/div/div/div[1]/div[2]/a[1]"},"timestamp": "1459509307841","params":["locator"]} 
+[End][Step]
+[End][Case]
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 23653
+Only local connections are allowed.
+[Start][Case]{"name": "VNExpress", "id": "ba328bbe-e3bc-4d50-87be-274e72856417", "timestamp": "1459509310719"} 
+[Start][Step]{"keyword_type":"get ","url":"http://vnexpress.net/","timestamp": "1459509310719","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"box_news_top\"]/div/div/div[1]/div[2]/a[1]"},"timestamp": "1459509322156","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"saveScreenshot ","file":"target/test.png","timestamp": "1459509357893","params":["file"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"menu_web\"]/li[9]/a"},"timestamp": "1459509358167","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyTitle ","title":"fake","timestamp": "1459509363791","params":["title"]} 
+Actual Title : Sức Kh�?e Gia �?ình, cách Phòng Bệnh & chăm sóc - VnExpress Sức Kh�?e
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"menu_web\"]/li[12]/a"},"timestamp": "1459509364472","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyTitle ","title":"fake2","timestamp": "1459509371470","params":["title"]} 
+Actual Title : Khoa h�?c - Tin công nghệ, kỹ thuật, nghiên cứu ứng dụng - VnExpress - VnExpress
+[End][Step]
+[End][Case]
+Starting ChromeDriver 2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a) on port 25700
+Only local connections are allowed.
+[Start][Case]{"name": "Verify Login Pass", "id": "2799015d-77d4-412c-9035-19765e094b08", "timestamp": "1459509374242"} 
+[Start][Step]{"keyword_type":"get ","url":"https://issues.jboss.org/secure/RapidStart.jspa","timestamp": "1459509374243","params":["url"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"user-options\"]/a"},"timestamp": "1459509384993","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"username\"]"},"text":"haint","timestamp": "1459509387655","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"sendKeysToElement ","locator":{"type":"xpath","value":"//*[@id=\"password\"]"},"text":"89198601","timestamp": "1459509387953","params":["locator", "text"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"xpath","value":"//*[@id=\"fm1\"]/input[7]"},"timestamp": "1459509388441","params":["locator"]} 
+[End][Step]
+[Start][Step]{"keyword_type":"verifyElementSelected ","locator":{"type":"xpath","value":"//*[@id=\"create-menu\"]"},"timestamp": "1459509388613","params":["locator"]} 
+[End][Step]
+[End][Case]
+[End][Suite]{"name": "All", "id": "5ed4e65e-d9f4-483a-9fcd-033dcf28ab81", "jobId" : "3c7f1232-be1e58b1", "timestamp": "1459509399250"}
+Tests run: 10, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 349 sec <<< FAILURE! - in org.ats.generated.All
+FPTSitea618e9a2(org.ats.generated.All)  Time elapsed: 7.462 sec  <<< FAILURE!
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 72 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: ad3579801bfbcd86df5fa145ea0434b2
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.Nx5buS, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.FPTSitea618e9a2(All.java:553)
+
+FPTSitea618e9a2(org.ats.generated.All)  Time elapsed: 67.016 sec  <<< FAILURE!
+org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"xpath","selector":"//*[@id="header"]/div[3]/div[4]/ul/li[2]/a/fake"}
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 60.07 seconds
+For documentation on this error, please visit: http://seleniumhq.org/exceptions/no_such_element.html
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+*** Element info: {Using=xpath, value=//*[@id="header"]/div[3]/div[4]/ul/li[2]/a/fake}
+Session ID: 93e6ba3a8073555c3b6cce59f1e14a00
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.warIe7, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:353)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElementByXPath(RemoteWebDriver.java:490)
+	at org.openqa.selenium.By$ByXPath.findElement(By.java:361)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:345)
+	at org.ats.generated.All.FPTSitea618e9a2(All.java:553)
+
+FPTfake1852fadd(org.ats.generated.All)  Time elapsed: 66.754 sec  <<< FAILURE!
+org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"id","selector":"aaaaaaaaaa"}
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 60.08 seconds
+For documentation on this error, please visit: http://seleniumhq.org/exceptions/no_such_element.html
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+*** Element info: {Using=id, value=aaaaaaaaaa}
+Session ID: 77bdba1385f128c7a86fa776c92d2a9c
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.WpHLte, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:353)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElementById(RemoteWebDriver.java:403)
+	at org.openqa.selenium.By$ById.findElement(By.java:218)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:345)
+	at org.ats.generated.All.FPTfake1852fadd(All.java:506)
+
+LocatorVariblead85244c(org.ats.generated.All)  Time elapsed: 5.236 sec  <<< FAILURE!
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 82 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: 0562cb2598217303a7767404a7c59191
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.LY47p1, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.LocatorVariblead85244c(All.java:440)
+
+LocatorVariblead85244c(org.ats.generated.All)  Time elapsed: 5.111 sec  <<< FAILURE!
+org.openqa.selenium.ElementNotVisibleException: element not visible
+  (Session info: chrome=49.0.2623.110)
+  (Driver info: chromedriver=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a),platform=Linux 3.13.0-55-generic x86_64) (WARNING: The server did not provide any stacktrace information)
+Command duration or timeout: 75 milliseconds
+Build info: version: '2.48.2', revision: '41bccdd10cf2c0560f637404c2d96164b67d9d67', time: '2015-10-09 13:08:06'
+System info: host: 'fsoft-ui-public', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '3.13.0-55-generic', java.version: '1.7.0_79'
+Session ID: 900ee1a4cb73bd1a19682ea5102f8fd3
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities [{platform=LINUX, acceptSslCerts=true, javascriptEnabled=true, browserName=chrome, chrome={userDataDir=/tmp/.com.google.Chrome.jxfaTG, chromedriverVersion=2.21.371461 (633e689b520b25f3e264a2ede6b74ccc23cb636a)}, rotatable=false, locationContextEnabled=true, mobileEmulationEnabled=false, version=49.0.2623.110, takesHeapSnapshot=true, cssSelectorsEnabled=true, databaseEnabled=false, handlesAlerts=true, browserConnectionEnabled=false, webStorageEnabled=true, nativeEvents=true, hasTouchScreen=false, applicationCacheEnabled=false, takesScreenshot=true}]
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:647)
+	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:326)
+	at org.openqa.selenium.remote.RemoteWebElement.click(RemoteWebElement.java:84)
+	at org.ats.generated.All.LocatorVariblead85244c(All.java:440)
+
+
+Results :
+
+Failed tests: 
+org.ats.generated.All.FPTSitea618e9a2(org.ats.generated.All)
+  Run 1: All.FPTSitea618e9a2:553 » ElementNotVisible element not visible
+  (Session inf...
+  Run 2: All.FPTSitea618e9a2:553 » NoSuchElement no such element: Unable to locate elem...
+
+  All.FPTfake1852fadd:506 » NoSuchElement no such element: Unable to locate elem...
+org.ats.generated.All.LocatorVariblead85244c(org.ats.generated.All)
+  Run 1: All.LocatorVariblead85244c:440 » ElementNotVisible element not visible
+  (Sess...
+  Run 2: All.LocatorVariblead85244c:440 » ElementNotVisible element not visible
+  (Sess...
+
+
+Tests run: 8, Failures: 3, Errors: 0, Skipped: 0
+
+[ERROR] There are test failures.
+Please refer to /home/cloudats/projects/3c7f1232-be1e58b1/target/surefire-reports for the individual test results.
+[JENKINS] Recording test results
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 6:00.164s
+[INFO] Finished at: Fri Apr 01 11:16:43 UTC 2016
+[INFO] Final Memory: 19M/48M
+[INFO] ------------------------------------------------------------------------
+Waiting for Jenkins to finish collecting data
+[JENKINS] Archiving /home/cloudats/projects/3c7f1232-be1e58b1/pom.xml to org.ats.generated/keyword/1.0-SNAPSHOT/keyword-1.0-SNAPSHOT.pom
+/home/cloudats/projects/3c7f1232-be1e58b1/pom.xml is not inside /home/cloudats/workspace/3c7f1232-be1e58b1/home/cloudats/projects/3c7f1232-be1e58b1/; will archive in a separate pass
+channel stopped
+Finished: UNSTABLE

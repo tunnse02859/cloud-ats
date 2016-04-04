@@ -34,6 +34,7 @@ public class StoreEval extends AbstractAction {
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(factory.getVariable(DataType.OBJECT, variable));
     sb.append(" = wd.executeScript(@script);\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return Rythm.render(sb.toString(), script.transform());
   }
 

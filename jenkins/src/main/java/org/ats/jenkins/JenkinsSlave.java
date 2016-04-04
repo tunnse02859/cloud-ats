@@ -52,29 +52,42 @@ public class JenkinsSlave {
   /** .*/
   private String slaveTmpl, slaveJsonTmpl;
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress) throws IOException {
-    this(master, slaveAddress, System.getProperty("jenkins.slave.credential"));
+  /** .*/
+  private String winSlaveTmpl, winSlaveJsonTmpl;
+  
+  /** .*/
+  private boolean isWindows = false;
+  
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, boolean isWindows) throws IOException {
+    this(master, slaveAddress, System.getProperty("jenkins.slave.credential"), isWindows);
   }
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress, String credentialId) throws IOException {
-    this(master, slaveAddress, new HashMap<String, String>(), credentialId);
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, String credentialId, boolean isWindows) throws IOException {
+    this(master, slaveAddress, new HashMap<String, String>(), credentialId, isWindows);
   }
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment) throws IOException {
-    this(master, slaveAddress, environment, System.getProperty("jenkins.slave.credential"));
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment, boolean isWindows) throws IOException {
+    this(master, slaveAddress, environment, System.getProperty("jenkins.slave.credential"), isWindows);
   }
   
-  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment, String credentialId) throws IOException {
+  public JenkinsSlave(JenkinsMaster master, String slaveAddress, Map<String, String> environment, String credentialId, boolean isWindows) throws IOException {
     this.slaveAddress = slaveAddress;
     this.master = master;
     this.environment = environment;
     this.credentialId = credentialId;
+    this.isWindows = isWindows;
     
     String slaveTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-template"));
     this.slaveTmpl = Rythm.render(slaveTmpl, new MapBuilder<String, String>("credential", credentialId).build());
     
     String slaveJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-slave-json-template"));
     this.slaveJsonTmpl = Rythm.render(slaveJsonTmpl, new MapBuilder<String, String>("name", slaveAddress).append("credential", credentialId).build());
+    
+    String winSlaveTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-windows-slave-template"));
+    this.winSlaveTmpl = Rythm.render(winSlaveTmpl, new MapBuilder<String, String>("credential", credentialId).build());
+    
+    String winSlaveJsonTmpl = StringUtil.readStream(Thread.currentThread().getContextClassLoader().getResourceAsStream("jenkins-windows-slave-json-template"));
+    this.winSlaveJsonTmpl = winSlaveJsonTmpl;
   }
   
   public String getCredential() {
@@ -92,7 +105,7 @@ public class JenkinsSlave {
   private HttpEntity buildFormData() throws IOException {
     List<NameValuePair> list = new ArrayList<NameValuePair>();
     
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(slaveTmpl.getBytes())));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(isWindows ? winSlaveTmpl.getBytes() : slaveTmpl.getBytes())));
     String line = null;
     while ((line = reader.readLine()) != null) {
       String[] arrays = line.split(" ");
@@ -111,7 +124,7 @@ public class JenkinsSlave {
       }
     }
     
-    String json = slaveJsonTmpl;
+    String json = isWindows ? winSlaveJsonTmpl : slaveJsonTmpl;
     
     if (environment != null && !environment.isEmpty()) {
       JSONObject jsonObj = new JSONObject(json);
@@ -165,7 +178,7 @@ public class JenkinsSlave {
     return false;
   }
   
-  private boolean waitJenkinsSlaveJoinUntil(long startTime, long timeout, String fetchUrl) throws IOException, InterruptedException {
+  public boolean waitJenkinsSlaveJoinUntil(long startTime, long timeout, String fetchUrl) throws IOException, InterruptedException {
     String body = HttpClientUtil.fetch(HttpClientFactory.getInstance(), fetchUrl);
     JSONObject json = new JSONObject(body);
     boolean offline = json.getBoolean("offline");

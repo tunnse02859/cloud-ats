@@ -23,8 +23,16 @@ public class ClickAndHoldElement extends AbstractAction {
   }
 
   public String transform() throws IOException {
-    String template = "new Actions(wd).clickAndHold(wd.findElement(@locator)).build().perform();\n";
-    return Rythm.render(template, locator.transform());
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     new Actions(wd).clickAndHold(wd.findElement(@locator)).build().perform();\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_clickAndHoldElement.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
+    return Rythm.render(sb.toString(), locator.transform());
   }
 
   public String getAction() {

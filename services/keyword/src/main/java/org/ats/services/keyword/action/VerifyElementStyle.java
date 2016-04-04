@@ -32,13 +32,26 @@ public class VerifyElementStyle extends AbstractAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "if (wd." : "if (!wd.");
-    sb.append("findElement(@locator).getCssValue(");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("    System.out.println(\"Actual CSSValue : \" + wd.findElement(@locator).getCssValue(");
+	sb.append(negated ? "if (!wd." : "if (wd.");
+	sb.append("findElement(@locator).getCssValue(");
     sb.append(propertyName);
     sb.append(").equals(");
     sb.append(value);
-    sb.append(")) {\n      System.out.println(\"").append(negated ? "!" : "").append("verifyElementStyle failed\");\n    }\n");
-    
+    sb.append("))  {\n      ");
+    sb.append(propertyName);
+    sb.append(")");
+    sb.append("    System.out.println(\"[End][Step]\"); \n");
+    sb.append("    } else {\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error\"+System.currentTimeMillis()+\"_verifyElementStyle.png\"));\n");
+    sb.append("    }\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyElementStyle.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(sb.toString(), locator.transform(), propertyName.transform(), value.transform());
   }

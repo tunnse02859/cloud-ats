@@ -32,6 +32,7 @@ public class StoreCookiePresent extends AbstractAction{
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
     sb.append(" = (wd.manage().getCookieNamed(").append(name).append(") != null);\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return sb.toString();
   }
 

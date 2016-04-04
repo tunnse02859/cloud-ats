@@ -104,20 +104,12 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
     return this.get("version_selenium") != null ? this.getString("version_selenium") : KeywordProjectFactory.DEFAULT_INIT_VERSION_SELENIUM;
   }
   
-  public void setShowAction(boolean status) {
-    this.put("show_action", status);
-  }
-  
   public void setValueDelay(int value) {
     this.put("value_delay", value);
   }
   
   public int getValueDelay() {
     return this.get("value_delay") != null ? this.getInt("value_delay") : 0;
-  }
-  
-  public boolean getShowAction() {
-    return this.get("show_action") != null ? this.getBoolean("show_action") : false;
   }
   
   /**

@@ -31,8 +31,16 @@ public class AssertElementAttribute extends AbstractAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.findElement(@locator).getAttribute(").append(attributeName).append("), @value);\n");
+    StringBuilder sb = new StringBuilder();
+   	sb.append("try { \n");
+   	sb.append(      negated ? "assertNotEquals(" : "assertEquals(");
+   	sb.append("     wd.findElement(@locator).getAttribute(").append(attributeName).append("), @value);\n");
+   	sb.append("     System.out.println(\"[End][Step]\"); \n");
+   	sb.append("   } catch (AssertionError ae) { \n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertElementAttribute.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
+   	sb.append("     throw ae ; \n");
+   	sb.append("   }\n");
     return Rythm.render(sb.toString(),locator.transform(),value.transform());
   }
 

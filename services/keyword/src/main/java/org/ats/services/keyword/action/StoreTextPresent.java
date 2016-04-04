@@ -31,8 +31,15 @@ public class StoreTextPresent extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
-    sb.append(" = wd.findElement(By.tagName(\"html\")).getText().contains(@text);\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable)).append(" = true;\n");
+	sb.append("try { \n");
+	sb.append( variable).append(" = wd.findElement(By.tagName(\"html\")).getText().contains(@text);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error\"+System.currentTimeMillis()+\"_storeTextPresent.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

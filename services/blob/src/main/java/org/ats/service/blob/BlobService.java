@@ -72,4 +72,7 @@ public class BlobService {
     return fs.createFile(in);
   }
   
+  public GridFSInputFile create(byte[] binary) {
+    return fs.createFile(binary);
+  }
 }

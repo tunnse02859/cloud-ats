@@ -31,8 +31,16 @@ public class StoreElementPresent extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable));
-    sb.append(" = (wd.findElements(@locator).size() != 0);\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.BOOLEAN, variable)).append(" = true;\n");
+	sb.append("try { \n");
+	sb.append(variable);
+	sb.append(" = (wd.findElements(@locator).size() != 0);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_storeElementPresent.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform());
   }
 

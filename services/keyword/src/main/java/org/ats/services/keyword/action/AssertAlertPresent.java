@@ -20,8 +20,16 @@ public class AssertAlertPresent extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertFalse(" : "assertTrue(");
-    sb.append("isAlertPresent(wd));\n");
+    StringBuilder sb = new StringBuilder();
+   	sb.append("try { \n");
+   	sb.append(      negated ? "assertFalse(" : "assertTrue(");
+   	sb.append("     isAlertPresent(wd));\n");
+   	sb.append("     System.out.println(\"[End][Step]\"); \n");
+   	sb.append("   } catch (AssertionError ae) { \n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertAlertPresent.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
+   	sb.append("     throw ae ; \n");
+   	sb.append("   }\n");
     return sb.toString();
   }
 

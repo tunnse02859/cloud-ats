@@ -29,9 +29,9 @@ public interface IaaSService {
   
   public VMachine createSystemVMAsync(TenantReference tenant, SpaceReference space) throws CreateVMException;
   
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException;
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException;
   
-  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException;
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException;
   
   public VMachine start(VMachine machine) throws StartVMException;
   

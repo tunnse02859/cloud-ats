@@ -141,6 +141,10 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
   public void testJira() throws Exception {
     testBase("Jira", "jira.json");
   }
+  @Test
+  public void testVNEpress() throws Exception {
+    testBase("TestVNEpress", "test.json");
+  }
   
   @Test
   public void testSwitchToWindowWithOptions() throws Exception {
@@ -226,7 +230,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(false,0,true);
+      String output = suite.transform(null, 0, true);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/" + testClass +".java"));
       writer.write(output);
       writer.close();
@@ -257,7 +261,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     Suite suite = suiteFactory.create("fake", testClass, SuiteFactory.DEFAULT_INIT_DRIVER, cases);
     
     try {
-      String output = suite.transform(true,5,true);
+      String output = suite.transform(null, 5, true);
       FileWriter writer = new FileWriter(new File("src/test/java/org/ats/generated/" + testClass +".java"));
       writer.write(output);
       writer.close();

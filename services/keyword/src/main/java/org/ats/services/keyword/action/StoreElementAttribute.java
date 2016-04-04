@@ -36,8 +36,16 @@ public class StoreElementAttribute extends AbstractAction{
   
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = ");
-    sb.append("wd.findElement(@locator).getAttribute(@attributeName);\n");
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = \"\";\n");
+	sb.append("try { \n");
+	sb.append(variable).append(" = ");
+	sb.append("     wd.findElement(@locator).getAttribute(@attributeName);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_storeElementAttribute.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform(), attributeName.transform());
   }
 

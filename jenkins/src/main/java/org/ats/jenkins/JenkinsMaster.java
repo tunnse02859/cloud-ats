@@ -100,7 +100,7 @@ public class JenkinsMaster {
   
   public void deleteAllSlaves() throws IOException {
     for (String slave : listSlaves()) {
-      new JenkinsSlave(this, slave).release();
+      new JenkinsSlave(this, slave, false).release();
     }
   }
   

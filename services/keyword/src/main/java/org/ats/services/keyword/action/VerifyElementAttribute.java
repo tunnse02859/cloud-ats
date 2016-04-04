@@ -34,12 +34,19 @@ public class VerifyElementAttribute extends AbstractAction {
     
   }
   public String transform() throws IOException {
-    
-    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!");
-    sb.append("wd.findElement(@locator).getAttribute(@name).equals(@value)) {\n");
-    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyElementAttribute failed\");\n");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     if (").append(negated ? "!" : "");
+	sb.append("     wd.findElement(@locator).getAttribute(@name).equals(@value)) {\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("    } else {\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyElementAttribute.png\"));\n");
     sb.append("    }\n");
-    
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyElementAttribute.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(sb.toString(),locator.transform(), attributeName.transform(), value.transform());
   }

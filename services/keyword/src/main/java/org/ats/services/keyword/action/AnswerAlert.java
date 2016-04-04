@@ -25,7 +25,15 @@ public class AnswerAlert extends AbstractAction {
   @Override
   public String transform() throws IOException {
     
-    StringBuilder sb = new StringBuilder("wd.switchTo().alert().sendKeys(@text);\n");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     wd.switchTo().alert().sendKeys(@text);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+System.currentTimeMillis()+\".png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

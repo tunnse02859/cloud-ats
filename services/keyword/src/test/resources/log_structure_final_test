@@ -1,0 +1,566 @@
+[Start][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
+
+		[Start][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
+			[Start][Data]{"url_data": "http://localhost:8080"}
+				[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+				//content output here
+				[End][Step]
+				[Start][Step]{"keyword_type": "get", "url": "${url_data}", "locator" : {"type":"link text","value":"i am a link"}, "params":["url", "locator"]}
+				//content output here
+				[End][Step]
+			[End][Data]
+		[End][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
+		
+		[Start][Case]{"name": "AddSchoolYear", "id": "AddSchoolYear12345"}
+		[Start][Data]{"url_data": "http://localhost1:8080"}
+			[Start][Step]{"keyword_type": "get", "url": "${url_data}", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Data]
+		
+		[Start][Case]{"name": "GoToSL", "id": "GoToSL12345"}
+			[Start][Step]{"keyword_type":"get ","url":"http://seleniumbuilder.github.io/se-builder/test/confirm.html","params":["url"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"acceptAlert ","params":[] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertAlertText ","text":"yes","params":["text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"get ","url":"http://saucelabs.com/test/guinea-pig/","params":["url"]}
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"link text","value":"i am a link"},"params":["locator"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"storeTitle ","variable":"title","params":["variable"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyTitle ","title":"asdf","params":["title"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertTitle ","title":"asdf","params":["title"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"storeCurrentUrl ","variable":"url","params":["variable"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://google.com","params":["url"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://google.com","params":["url"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"storeText ","locator":{"type":"id","value":"i_am_an_id"},"variable":"text","params":["locator", "variable"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"storeTextPresent ","text":"I am another div","variable":"text_is_present","params":["text", "variable"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"store ","text":"I am another div","variable":"text_present","params":["text", "variable"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyTextPresent ","text":"I am another div","params":["text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"verifyTextPresent ","text":"not I am another div","params":["text"] }
+			
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertTextPresent ","text":"I am another div","params":["text"] }
+			[INFO] Waiting 3(s) for next step
+			[End][Step]
+			[Start][Step]{"keyword_type":"assertTextPresent ","text":"not I am another div","params":["text"] }
+
+		[End][Case]{"name": "GoToSL", "id": "GoToSL12345"}
+		
+		[Start][Case]{"name": "SetStandardLevel", "id": "SetStandardLevel12345"}
+			[Start][Data]{"username":"food"}
+				[Start][Step]{"keyword_type":"get ","url":"http://seleniumbuilder.github.io/se-builder/test/confirm.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"acceptAlert ","params":[] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertAlertText ","text":"yes","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"get ","url":"http://saucelabs.com/test/guinea-pig/","params":["url"]}
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"link text","value":"i am a link"},"params":["locator"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeTitle ","variable":"title","params":["variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTitle ","title":"asdf","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTitle ","title":"asdf","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeCurrentUrl ","variable":"url","params":["variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://google.com","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://google.com","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeText ","locator":{"type":"id","value":"i_am_an_id"},"variable":"text","params":["locator", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeTextPresent ","text":"I am another div","variable":"text_is_present","params":["text", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"store ","text":"I am another div","variable":"text_present","params":["text", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTextPresent ","text":"I am another div","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTextPresent ","text":"not I am another div","params":["text"] }
+				
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTextPresent ","text":"I am another div","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTextPresent ","text":"not I am another div","params":["text"] }
+				[End][Step]
+			[End][Data]
+		[Start][Case]{"name": "SetStandardLevel", "id": "SetStandardLevel12345"}
+			[Start][Data]{"username":"food"}
+				[Start][Step]{"keyword_type":"get ","url":"http://seleniumbuilder.github.io/se-builder/test/confirm.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"acceptAlert ","params":[] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertAlertText ","text":"yes","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"get ","url":"http://saucelabs.com/test/guinea-pig/","params":["url"]}
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"clickElement ","locator":{"type":"link text","value":"i am a link"},"params":["locator"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeTitle ","variable":"title","params":["variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTitle ","title":"asdf","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTitle ","title":"I am another page title - Sauce Labs","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTitle ","title":"asdf","params":["title"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeCurrentUrl ","variable":"url","params":["variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyCurrentUrl ","url":"http://google.com","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://saucelabs.com/test-guinea-pig2.html","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertCurrentUrl ","url":"http://google.com","params":["url"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeText ","locator":{"type":"id","value":"i_am_an_id"},"variable":"text","params":["locator", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertText ","locator":{"type":"id","value":"i_am_an_id"},"text":"not I am another div","params":["locator", "text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"storeTextPresent ","text":"I am another div","variable":"text_is_present","params":["text", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"store ","text":"I am another div","variable":"text_present","params":["text", "variable"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTextPresent ","text":"I am another div","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"verifyTextPresent ","text":"not I am another div","params":["text"] }
+				
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTextPresent ","text":"I am another div","params":["text"] }
+				[INFO] Waiting 3(s) for next step
+				[End][Step]
+				[Start][Step]{"keyword_type":"assertTextPresent ","text":"not I am another div","params":["text"] }
+				[End][Step]
+			[End][Data]
+		[End][Case]
+		[Start][Case]{"name": "SaveStandardLevel", "id": "SaveStandardLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SaveStandardLevel", "id": "SaveStandardLevel12345"}
+		
+		[Start][Case]{"name": "GoToClass", "id": "GoToClass12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GoToClass", "id": "GoToClass12345"}
+		
+		[Start][Case]{"name": "GenerateClass", "id": "GenerateClass12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GenerateClass", "id": "GenerateClass12345"}
+		
+		[Start][Case]{"name": "AddClasses", "id": "AddClasses12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "AddClasses", "id": "AddClasses12345"}
+		
+		[Start][Case]{"name": "SaveCreatedClasses", "id": "SaveCreatedClasses12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SaveCreatedClasses", "id": "SaveCreatedClasses12345"}
+		
+		[Start][Case]{"name": "ClickStudentList", "id": "ClickStudentList12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "ClickStudentList", "id": "ClickStudentList12345"}
+		
+		[Start][Case]{"name": "VerifyPipul", "id": "VerifyPipul12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "VerifyPipul", "id": "VerifyPipul12345"}
+		
+		[Start][Case]{"name": "ClickEditPupilWithId", "id": "ClickEditPupilWithId12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "ClickEditPupilWithId", "id": "ClickEditPupilWithId12345"}
+		
+		[Start][Case]{"name": "EditPupilAndAssert", "id": "EditPupilAndAssert12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "EditPupilAndAssert", "id": "EditPupilAndAssert12345"}
+		
+		[Start][Case]{"name": "FindDeletePupilButton", "id": "FindDeletePupilButton12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "FindDeletePupilButton", "id": "FindDeletePupilButton12345"}
+		
+		[Start][Case]{"name": "ClickDeletePupilButtonAndAssert", "id": "ClickDeletePupilButtonAndAssert12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "ClickDeletePupilButtonAndAssert", "id": "ClickDeletePupilButtonAndAssert12345"}
+		
+		[Start][Case]{"name": "GoToInvitationNewSettingList", "id": "GoToInvitationNewSettingList12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GoToInvitationNewSettingList", "id": "GoToInvitationNewSettingList12345"}
+		
+		[Start][Case]{"name": "FillInformationForm", "id": "FillInformationForm12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "FillInformationForm", "id": "FillInformationForm12345"}
+		
+		[Start][Case]{"name": "CheckStandardHall", "id": "CheckStandardHall12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "CheckStandardHall", "id": "CheckStandardHall12345"}
+		
+		[Start][Case]{"name": "SelectExamDay", "id": "SelectExamDay12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SelectExamDay", "id": "SelectExamDay12345"}
+		
+		[Start][Case]{"name": "PaymentType", "id": "PaymentType12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "PaymentType", "id": "PaymentType12345"}
+		
+		[Start][Case]{"name": "SchoolVersion", "id": "SchoolVersion12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SchoolVersion", "id": "SchoolVersion12345"}
+		
+		[Start][Case]{"name": "SelectDoubleEiken", "id": "SelectDoubleEiken12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SelectDoubleEiken", "id": "SelectDoubleEiken12345"}
+		
+		[Start][Case]{"name": "SaveInvitationSetting", "id": "SaveInvitationSetting12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SaveInvitationSetting", "id": "SaveInvitationSetting12345"}
+		
+		[Start][Case]{"name": "GenerateInvation", "id": "GenerateInvation12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GenerateInvation", "id": "GenerateInvation12345"}
+		
+[End][Suite]{"name": "Invitation", "id": "Invitation12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
+
+[Start][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
+		[Start][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "loginAndGoToSchoolYear", "id": "loginAndGoToSchoolYear12345"}
+		
+		[Start][Case]{"name": "AddSchoolYear", "id": "AddSchoolYear12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "AddSchoolYear", "id": "AddSchoolYear12345"}
+		
+		[Start][Case]{"name": "GoToSL", "id": "GoToSL12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GoToSL", "id": "GoToSL12345"}
+		
+		[Start][Case]{"name": "SetStandardLevel", "id": "SetStandardLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SetStandardLevel", "id": "SetStandardLevel12345"}
+		
+		[Start][Case]{"name": "SaveStandardLevel", "id": "SaveStandardLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SaveStandardLevel", "id": "SaveStandardLevel12345"}
+		
+		[Start][Case]{"name": "GoToClass", "id": "GoToClass12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GoToClass", "id": "GoToClass12345"}
+		
+		[Start][Case]{"name": "GenerateClass", "id": "GenerateClass12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]
+		
+		[Start][Case]{"name": "AddClasses", "id": "AddClasses12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "AddClasses", "id": "AddClasses12345"}
+		
+		[Start][Case]{"name": "SaveCreatedClasses", "id": "SaveCreatedClasses12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "SaveCreatedClasses", "id": "SaveCreatedClasses12345"}
+		
+		[Start][Case]{"name": "ClickStudentList", "id": "ClickStudentList12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "ClickStudentList", "id": "ClickStudentList12345"}
+		
+		
+		[Start][Case]{"name": "ClickRecommendedLevel", "id": "ClickRecommendedLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "ClickRecommendedLevel", "id": "ClickRecommendedLevel12345"}
+		
+		[Start][Case]{"name": "GoToRecommendedPupil", "id": "GoToRecommendedPupil12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "GoToRecommendedPupil", "id": "GoToRecommendedPupil12345"}
+		
+		[Start][Case]{"name": "VerifyRecommendedLevel", "id": "VerifyRecommendedLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "VerifyRecommendedLevel", "id": "VerifyRecommendedLevel12345"}
+		
+		[Start][Case]{"name": "UpdateRecommendedLevel", "id": "UpdateRecommendedLevel12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+		[End][Case]{"name": "UpdateRecommendedLevel", "id": "UpdateRecommendedLevel12345"}
+		
+[End][Suite]{"name": "RecomendedTestSuite", "id": "RecomendedTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
+
+[Start][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot", "timestamp": "123234"}
+	[Start][Case]{"name": "LoginToHomePage", "id": "LoginToHomePage12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "LoginToHomePage", "id": "LoginToHomePage12345"}
+		
+	[Start][Case]{"name": "GoToIBA", "id": "GoToIBA12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "GoToIBA", "id": "GoToIBA12345"}
+		
+	[Start][Case]{"name": "IBA_Info", "id": "IBA_Info12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "IBA_Info", "id": "IBA_Info12345"}
+		
+	[Start][Case]{"name": "IBA_BeforeSubmit", "id": "IBA_BeforeSubmit12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "IBA_BeforeSubmit", "id": "IBA_BeforeSubmit12345"}
+	
+	[Start][Case]{"name": "VerifyIBAPolicy", "id": "VerifyIBAPolicy12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "VerifyIBAPolicy", "id": "VerifyIBAPolicy12345"}
+		
+	[Start][Case]{"name": "Logout", "id": "Logout12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "Logout", "id": "Logout12345"}
+	
+	[Start][Case]{"name": "AdminLogin", "id": "AdminLogin12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "AdminLogin", "id": "AdminLogin12345"}
+	
+	[Start][Case]{"name": "ApproveIBA", "id": "ApproveIBA12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "ApproveIBA", "id": "ApproveIBA12345"}
+[End][Suite]{"name": "ApplyIBATestSuite", "id": "ApplyIBATestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
+
+[Start][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "123234"}
+
+
+	[Start][Case]{"name": "AdminLogin", "id": "AdminLogin12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "AdminLogin", "id": "AdminLogin12345"}
+	
+	[Start][Case]{"name": "SearchOrg", "id": "SearchOrg12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "SearchOrg", "id": "SearchOrg12345"}
+
+	[Start][Case]{"name": "GotoEiken", "id": "GotoEiken12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "GotoEiken", "id": "GotoEiken12345"}
+	
+	[Start][Case]{"name": "EikenPolicy", "id": "EikenPolicy12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "EikenPolicy", "id": "EikenPolicy12345"}
+	
+	
+	[Start][Case]{"name": "EikenInfoAndSubmit", "id": "EikenInfoAndSubmit12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "EikenInfoAndSubmit", "id": "EikenInfoAndSubmit12345"}
+
+	[Start][Case]{"name": "VerifyEikenConfirmation", "id": "VerifyEikenConfirmation12345"}
+			[Start][Step]{"keyword_type": "get", "url": "http://hardcode_url", "params":["url"]}
+			//content output here
+			[End][Step]
+	[End][Case]{"name": "VerifyEikenConfirmation", "id": "VerifyEikenConfirmation12345"}
+
+[End][Suite]{"name": "EikenTestSuite", "id": "EikenTestSuite12345", "jobId" : "JIEM_PiLot",  "timestamp": "2325235"}
+

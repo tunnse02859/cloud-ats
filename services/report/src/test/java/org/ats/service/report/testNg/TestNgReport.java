@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBObject;
 
 public class TestNgReport extends AbstractEventTestCase {
 
@@ -191,7 +192,7 @@ public class TestNgReport extends AbstractEventTestCase {
     keywordProjectService.create(project);
 
     KeywordJob job = executorService.execute(project,
-        Arrays.asList(suiteRefFactory.create(fullExampleSuite.getId()), suiteRefFactory.create(acceptAlertSuite.getId())));
+        Arrays.asList(suiteRefFactory.create(fullExampleSuite.getId()), suiteRefFactory.create(acceptAlertSuite.getId())), new BasicDBObject());
 
     Assert.assertEquals(job.getStatus(), Status.Queued);
     Assert.assertNull(job.getTestVMachineId());

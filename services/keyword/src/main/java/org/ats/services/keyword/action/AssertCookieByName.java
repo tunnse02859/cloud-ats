@@ -27,9 +27,16 @@ public class AssertCookieByName extends AbstractAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.manage().getCookieNamed(").append(name).append(").getValue(), @value);\n");
-    
+    StringBuilder sb = new StringBuilder();
+   	sb.append("try { \n");
+   	sb.append(      negated ? "assertNotEquals(" : "assertEquals(");
+   	sb.append("     wd.manage().getCookieNamed(").append(name).append(").getValue(), @value);\n");
+   	sb.append("     System.out.println(\"[End][Step]\"); \n");
+   	sb.append("   } catch (AssertionError ae) { \n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertCookieByName.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
+   	sb.append("     throw ae ; \n");
+   	sb.append("   }\n");
     return Rythm.render(sb.toString(), value.transform());
   }
 

@@ -69,7 +69,7 @@ public class InitTenant extends AbstractEventTestCase {
   @Test
   public void testInit() throws CreateVMException {
     TenantReference tenantRef = tenantRefFactory.create("fsoft-testonly");
-    VMachine vm = openstackService.createTestVM(tenantRef, null, false);
+    VMachine vm = openstackService.createTestVM(tenantRef, null, false, false);
     openstackService.deallocateFloatingIp(vm);
     
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);
@@ -77,7 +77,7 @@ public class InitTenant extends AbstractEventTestCase {
     Assert.assertFalse(vm.hasUI());
     Assert.assertNull(vm.getPublicIp());
     
-    vm = openstackService.createTestVM(tenantRef, null, true);
+    vm = openstackService.createTestVM(tenantRef, null, true, false);
     openstackService.deallocateFloatingIp(vm);
     
     Assert.assertEquals(vm.getStatus(), VMachine.Status.Started);

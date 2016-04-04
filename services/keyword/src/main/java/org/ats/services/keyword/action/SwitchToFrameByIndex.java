@@ -22,7 +22,15 @@ public class SwitchToFrameByIndex extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder("wd = (FirefoxDriver) wd.switchTo().frame(@index);\n");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     wd = (FirefoxDriver) wd.switchTo().frame(@index);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_switchToFrameByIndex.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), index);
   }
 

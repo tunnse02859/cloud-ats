@@ -3,8 +3,11 @@
  */
 package org.ats.services.executor.event;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +19,9 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.ats.common.PageList;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
@@ -34,6 +40,13 @@ import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.report.KeywordReportService;
+import org.ats.services.keyword.report.SuiteReportService;
+import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.CaseReportReference;
+import org.ats.services.keyword.report.models.StepReport;
+import org.ats.services.keyword.report.models.StepReportReference;
+import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -50,9 +63,12 @@ import org.ats.services.vmachine.VMachineService;
 import akka.actor.UntypedActor;
 
 import com.google.inject.Inject;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -84,6 +100,11 @@ public class TrackingJobActor extends UntypedActor {
   @Inject JMeterScriptService jmeterService;
   
   @Inject BlobService blobService;
+  
+  @Inject KeywordReportService reportService;
+  
+  @Inject SuiteReportService suiteReportService;
+  
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -190,7 +211,7 @@ public class TrackingJobActor extends UntypedActor {
 
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
-
+      
       //Reset test vm status and release floating ip
     //  VMachine testVM = vmachineService.get(job.getTestVMachineId());
       List<VMachineReference> pages = job.getVMs();
@@ -237,7 +258,7 @@ public class TrackingJobActor extends UntypedActor {
       // create new test VM
       for (int i = 0; i < totalEngines - listVM.count(); i ++) {
         
-        VMachine testVM = iaasProvider.get().createTestVMAsync(project.getTenant(),  project.getSpace(),  false);
+        VMachine testVM = iaasProvider.get().createTestVMAsync(project.getTenant(),  project.getSpace(),  false, false);
         updateLog(job, "Created new VM "+ testVM);
         
         job.addVMachine(vmRefFactory.create(testVM.getId()));
@@ -435,12 +456,30 @@ public class TrackingJobActor extends UntypedActor {
       
     } else {
       updateLog(job, jkJob);
+      //parse log
+      byte[] logBytes = job.getLog().getBytes();
+      reportService.processLog(logBytes);
       
       //Download target resource
       
       //Zip report
-      SSHClient.execCommand(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
-          "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src", null, null);
+      String cmd =  "cd /home/cloudats/projects/"+job.getId()+" && tar -czvf resource.tar.gz target src pom.xml";
+      Session session = SSHClient.getSession(testVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      channel.setCommand(cmd);
+      channel.connect();
+      
+      while(true) {
+        if (channel.isClosed()) {
+          logger.info("Compress project target status: " + channel.getExitStatus());
+          break;
+        }
+      }
+      
+      channel.disconnect();
+      session.disconnect();
+      
+      
       ByteArrayOutputStream bosTarget = new ByteArrayOutputStream();
       SSHClient.getFile(testVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
           "/home/cloudats/projects/" + job.getId() + "/resource.tar.gz",  bosTarget);
@@ -453,13 +492,61 @@ public class TrackingJobActor extends UntypedActor {
       if (bos.size() > 0)
         job.put("report", new String(bos.toByteArray()));
       
-      if (bosTarget.size() > 0) 
-        job.put("raw_data", bosTarget.toByteArray());
+      //create raw_data file
+      if (bosTarget.size() > 0) {
+        GridFSInputFile project_file = blobService.create(bosTarget.toByteArray());
+        project_file.put("job_project_id", job.getId());
+        
+        blobService.save(project_file);
+      }
+      
       //End download result
-
       job.setStatus(AbstractJob.Status.Completed);
+      job.put("log", "");
       executorService.update(job);
       
+      //save log to file 
+      GridFSInputFile file = blobService.create(logBytes);
+      file.put("job_log_id", job.getId());
+      blobService.save(file);
+      // get raw data to tmp folder
+      String path = "/tmp/"+job.getProjectId().substring(0, 8);
+      File folder = new File(path);
+      if(!folder.exists()) {
+        folder.mkdir();
+      }
+      byte[] report = bosTarget.toByteArray();
+      FileOutputStream fileOut;
+      String filePath = null;
+      try {
+        filePath = path+"/resource-"+job.getId()+".tar.gz";
+        fileOut = new FileOutputStream(filePath);
+        fileOut.write(report);
+        fileOut.close();
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      }
+       catch (IOException e) {
+        e.printStackTrace();
+      }
+      
+      String destPath = path+"/images-"+job.getId();
+      // extract tar file
+      extractTarFile(filePath, destPath);
+      
+      File imagesFolder = new File(destPath);
+      
+      if (imagesFolder.listFiles() != null) {
+        for (File image : imagesFolder.listFiles()) {
+          
+          String name = image.getName();
+          int index = name.indexOf("_");
+          int last = name.lastIndexOf("_");
+          long timeStamp = Long.parseLong(name.substring(index + 1, last));
+          
+          saveImage(image, timeStamp, job.getId());
+        }
+      }
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
       vmachineService.update(testVM);
@@ -478,18 +565,88 @@ public class TrackingJobActor extends UntypedActor {
     }
   }
   
+  private void saveImage(File file, long timeStamp, String jobId) throws IOException {
+    
+    GridFSInputFile image = blobService.create(file);
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId));
+    while (suites.hasNext()) {
+      for (SuiteReport suite : suites.next()) {
+        List<CaseReportReference> cases = suite.getCases();
+        
+        for (CaseReportReference ref : cases) {
+          CaseReport caseReport = ref.get();
+          List<StepReportReference> steps = caseReport.getSteps();
+          for (StepReportReference step : steps) {
+            StepReport report = step.get();
+            if (timeStamp > report.getStartTime()) {
+              if (image.get("timestamp") == null) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    blobService.save(image);
+  }
+  
+  private void extractTarFile(String path, String destFolderPath) throws IOException {
+    //read tar file into tarachiveinputstream
+    TarArchiveInputStream tarFile = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(path))));
+    //read individual tar file
+    TarArchiveEntry entry = null;
+    int offset;
+    FileOutputStream outputFile = null;
+    File dest = new File(destFolderPath);
+    
+    if (!dest.exists()) {
+      dest.mkdirs();
+    }
+    
+    while ((entry = tarFile.getNextTarEntry()) != null) {
+      File file = null;
+      String name = entry.getName();
+      if (name.contains(".png") && name.contains("error_")) {
+        name = entry.getName();
+        int index = name.lastIndexOf("/");
+        name = name.substring(index);
+        file = new File(destFolderPath+name);
+        byte[] content = new byte [(int) entry.getSize()];
+        offset = 0;
+        tarFile.read(content, offset, content.length - offset);
+        // define output stream for writing the file
+        outputFile = new FileOutputStream(file);
+        outputFile.write(content);
+        outputFile.close();
+      }
+      
+    }
+    
+    tarFile.close();
+  }
+     
   private void doExecuteKeywordJob(KeywordJob job, KeywordProject project) throws Exception {
-
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
+    BasicDBObject options = job.getOptions();
+    String browser = options.getString("browser");
+    boolean isWindows = "ie".equals(browser);
+    
     VMachine testVM = job.getTestVMachineId() == null ? 
-        vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true) : vmachineService.get(job.getTestVMachineId());
+        (isWindows ? vmachineService.findOneWindowsAvailable(project.getTenant(), project.getSpace()) : 
+          vmachineService.getTestVMAvailabel(project.getTenant(), project.getSpace(), true)) : 
+          vmachineService.get(job.getTestVMachineId());
 
     if (testVM == null) {
       updateLog(job, "None VM available.");
       updateLog(job, "Creating new VM (about 4-8 minutes).... ");
       
       //We will create new test vm async
-      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true, isWindows);
       updateLog(job, "Created new VM " + testVM);
       
       job.setVMachineId(testVM.getId());
@@ -509,7 +666,7 @@ public class TrackingJobActor extends UntypedActor {
       return;
     } else if (testVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
+      String path = generatorService.generateKeyword("/tmp", job.getId(), true, job.getSuites(), project.getValueDelay(), project.getVersionSelenium());
 
       if(testVM.getPublicIp() == null) {
         testVM = iaasProvider.get().allocateFloatingIp(testVM);
@@ -530,7 +687,7 @@ public class TrackingJobActor extends UntypedActor {
 
       JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "/jenkins", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-          testVM.getPrivateIp() , "/home/cloudats/projects/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+          testVM.getPrivateIp() , (isWindows ? "C:/cygwin64/home/cloudats/projects/" : "/home/cloudats/projects/") + job.getId() + "/pom.xml", goalsBuilder.toString());
 
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
@@ -653,7 +810,7 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       updateLog(job, "Creating new VM (about 4-8 minitues).... ");
       
       //We will create new test vm async
-      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true);
+      testVM = iaasProvider.get().createTestVMAsync(project.getTenant(), project.getSpace(), true, false);
       updateLog(job, "Created new VM " + testVM);
       
       job.setVMachineId(testVM.getId());
@@ -735,4 +892,27 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       executorService.update(job);
     }
   }
+  
+  @SuppressWarnings("unused")
+  private void updateLogToFile(AbstractJob<?> job, JenkinsMavenJob jkJob) throws IOException {
+    int start = job.getLog() == null ? 0 : job.getLog().length();
+    if (job.getLog() != null) {
+      int _index = job.getLog().indexOf("Submitted Jenkins job");
+      if (_index != -1) {
+        _index += "Submitted Jenkins job\n".length();
+        start -= _index;
+      }
+    }
+    byte[] bytes = jkJob.getConsoleOutput(1, start); 
+    byte[] next = new byte[bytes.length - start];
+    System.arraycopy(bytes, start, next, 0, next.length);
+    
+    GridFSDBFile file = new GridFSDBFile();
+    if (next.length > 0) {
+      job.appendLog(new String(next));
+      executorService.update(job);
+    }
+  }
+  
+  
 }

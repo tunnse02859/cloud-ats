@@ -24,6 +24,11 @@ import org.ats.common.StringUtil;
 import org.ats.common.http.HttpClientFactory;
 import org.ats.common.http.HttpClientUtil;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.rythmengine.Rythm;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,7 +88,18 @@ public class JenkinsMavenJob {
     List<NameValuePair> list = new ArrayList<NameValuePair>();
     list.add(new BasicNameValuePair("start", String.valueOf(start)));
     HttpResponse res = client.execute(post, httpContext);
-    return HttpClientUtil.getContentBodyAsByteArray(res);
+    
+    String str = HttpClientUtil.getContentBodyAsString(res);
+    Document doc = Jsoup.parse(str);
+    StringBuilder sb = new StringBuilder();
+    for (Node node : doc.body().childNodes()) {
+      if (node instanceof TextNode) {
+        sb.append(node.attr("text"));
+      } else {
+        sb.append(((Element) node).text());
+      }
+    }
+    return sb.toString().getBytes("UTF-8");
   }
   
   public boolean isBuilding(int buildNumber) throws Exception {

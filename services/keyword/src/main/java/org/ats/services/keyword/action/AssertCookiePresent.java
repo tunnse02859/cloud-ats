@@ -26,10 +26,16 @@ public class AssertCookiePresent extends AbstractAction{
   }
   
   public String transform() throws IOException {
-    
-    StringBuilder sb = new StringBuilder(negated ? "assertFalse(" : "assertTrue(");
-    sb.append("(wd.manage().getCookieNamed(").append(name).append(") != null));\n");
-    
+    StringBuilder sb = new StringBuilder();
+   	sb.append("try { \n");
+   	sb.append(      negated ? "assertFalse(" : "assertTrue(");
+   	sb.append("     (wd.manage().getCookieNamed(").append(name).append(") != null));\n");
+   	sb.append("     System.out.println(\"[End][Step]\"); \n");
+   	sb.append("   } catch (AssertionError ae) { \n");
+   	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertCookiePresent.png\"));\n");
+   	sb.append("     ae.printStackTrace();\n");
+   	sb.append("     throw ae ; \n");
+   	sb.append("   }\n");
     return sb.toString();
   }
 

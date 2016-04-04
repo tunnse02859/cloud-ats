@@ -24,12 +24,19 @@ public class SetElementNotSelected extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    String template =
-        "if (wd.findElement(@locator).isSelected()) {\n" +
-        "      wd.findElement(@locator).click();\n" +
-        "    }\n";
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     if (wd.findElement(@locator).isSelected()) {\n");
+	sb.append("      wd.findElement(@locator).click();\n");
+	sb.append("     }\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_setElementNotSelected.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
-    return engine.render(template, locator.transform());
+    return engine.render(sb.toString(), locator.transform());
   }
 
   public String getAction() {

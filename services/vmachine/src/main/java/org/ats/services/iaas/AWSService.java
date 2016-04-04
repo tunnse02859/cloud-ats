@@ -83,6 +83,8 @@ class AWSService implements IaaSService {
   
   private String nonUIImage;
   
+  private String windowsImage;
+  
   private String securityGroup;
   
   private String subnet;
@@ -96,11 +98,13 @@ class AWSService implements IaaSService {
       @Named("org.ats.cloud.aws.image.system") String systemImage,
       @Named("org.ats.cloud.aws.image.ui") String uiImage,
       @Named("org.ats.cloud.aws.image.nonui") String nonUIImage,
+      @Named("org.ats.cloud.aws.image.windows") String windowsImage,
       @Named("org.ats.cloud.aws.securitygroup") String securityGroup,
       @Named("org.ats.cloud.aws.subnet") String subnet) {
     this.systemImage = systemImage;
     this.uiImage = uiImage;
     this.nonUIImage = nonUIImage;
+    this.windowsImage = windowsImage;
     this.securityGroup = securityGroup;
     this.subnet = subnet;
     this.client = new AmazonEC2Client(new AWSCredentials() {
@@ -150,7 +154,7 @@ class AWSService implements IaaSService {
   public VMachine createSystemVM(TenantReference tenant, SpaceReference space) throws CreateVMException {
     try {
       logger.log(Level.INFO, "Creating system vm for tenant " + tenant.getId());
-      return createVM(systemImage, InstanceType.T2Small, true, false, tenant, space);
+      return createVM(systemImage, InstanceType.T2Small, true, false, false, tenant, space);
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException(e.getMessage());
       ex.setStackTrace(e.getStackTrace());
@@ -164,10 +168,17 @@ class AWSService implements IaaSService {
   }
 
   @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
-    String imageId = hasUI ? uiImage : nonUIImage;
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
+    String imageId = null;
+    if (isWindows) {
+      imageId = windowsImage;
+    } else if (hasUI) {
+      imageId = uiImage;
+    } else {
+      imageId = nonUIImage;
+    }
     try {
-      return createVM(imageId, InstanceType.T2Small, false, hasUI, tenant, space);
+      return createVM(imageId, isWindows ? InstanceType.T2Medium : InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
     } catch (Exception e) {
       CreateVMException ex = new CreateVMException(e.getMessage());
       ex.setStackTrace(e.getStackTrace());
@@ -176,10 +187,17 @@ class AWSService implements IaaSService {
   }
   
   @Override
-  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
-    String imageId = hasUI ? uiImage : nonUIImage;
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
+    String imageId = null;
+    if (isWindows) {
+      imageId = windowsImage;
+    } else if (hasUI) {
+      imageId = uiImage;
+    } else {
+      imageId = nonUIImage;
+    }
     try {
-      VMachine vm = createVMAsync(imageId, InstanceType.T2Small, false, hasUI, tenant, space);
+      VMachine vm = createVMAsync(imageId, isWindows ? InstanceType.T2Medium : InstanceType.T2Small, false, hasUI, isWindows, tenant, space);
       Event event = eventFactory.create(vm, "initialize-vm");
       event.broadcast();
       return vm;
@@ -222,7 +240,7 @@ class AWSService implements IaaSService {
     return vm;
   }
   
-  private VMachine createVMAsync(String imageId, InstanceType instanceType, boolean system, boolean hasUI,TenantReference tenant, SpaceReference space) throws CreateVMException, InterruptedException {
+  private VMachine createVMAsync(String imageId, InstanceType instanceType, boolean system, boolean hasUI, boolean isWindows,TenantReference tenant, SpaceReference space) throws CreateVMException, InterruptedException {
     StringBuilder sb = new StringBuilder(tenant.getId()).append(system ? "-system" : "").append(hasUI ? "-ui-" : "-nonui-");
     sb.append(space == null ? "public" : space.getId());
     String serverName = sb.toString();
@@ -242,7 +260,7 @@ class AWSService implements IaaSService {
     Thread.sleep(5000); //sleep 5s to request stable
     
     for (Instance instance : runInstances.getReservation().getInstances()) {
-      vm = vmachineFactory.create(instance.getInstanceId(), tenant, space, system, hasUI,  null, instance.getPrivateIpAddress(), Status.Initializing);
+      vm = vmachineFactory.create(instance.getInstanceId(), tenant, space, system, hasUI,  isWindows, null, instance.getPrivateIpAddress(), Status.Initializing);
       
       CreateTagsRequest createTagRequest = new CreateTagsRequest();
       createTagRequest.withResources(vm.getId()).withTags(
@@ -298,22 +316,68 @@ class AWSService implements IaaSService {
       throw ex;
     }
     
+    boolean isWindows = vm.isWindows();
+    
     if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
       logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
       
-      try {
-        if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp()).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
-        logger.info("Created Jenkins slave by " + vm);
+      if (!isWindows) {
+        try {
+          if (!new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), false).join(5 * 60 * 1000)) throw new CreateVMException("Can not create jenkins slave for test vm");
+          logger.info("Created Jenkins slave by " + vm);
+          
+        } catch (Exception e) {
+          CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+          ex.setStackTrace(e.getStackTrace());
+          throw ex;
+        }
+      } else {
+        JenkinsSlave winSlave = new JenkinsSlave(jenkinsMaster, vm.getPrivateIp(), true);
+        try {
+          winSlave.join(5 * 1000);
+        } catch (Exception e) {
+          //No problem
+        }
+        //TODO: that is trick to reload jenkins slave configuration
+        String cmd = "/cygdrive/c/jenkin_slave/change_jenkinconfig.sh " + systemVM.getPrivateIp() + " " + vm.getPrivateIp();
+        Session session = SSHClient.getSession(vm.getPublicIp(), 22, "cloudats", "#CloudATS");              
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(cmd);
+        channel.connect();
         
-      } catch (Exception e) {
-        CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
-        ex.setStackTrace(e.getStackTrace());
-        throw ex;
+        while(true) {
+          if (channel.isClosed()) {
+            logger.info("Register Windows Jenkins Slave exit code: " + channel.getExitStatus());
+            break;
+          }
+        }
+        
+        channel.disconnect();
+        session.disconnect();
+        logger.info("Registered Windows Jenkins slave.");
+        //The vm will be restart
+        
+        if (SSHClient.checkEstablished(vm.getPublicIp(), 22, 300)) {
+          logger.log(Level.INFO, "Connection to  " + vm.getPublicIp() + " is established");
+          //wait jenkins slave available
+          String fetchUrl = jenkinsMaster.buildURL(new StringBuilder("computer/").append(vm.getPrivateIp()).append("/api/json").toString());
+          try {
+            if (!winSlave.waitJenkinsSlaveJoinUntil(System.currentTimeMillis(), 10 * 60 * 1000, fetchUrl)) throw new CreateVMException("Can not create jenkins slave for test vm");
+            logger.info("Created Jenkins slave by " + vm);
+            
+          } catch (Exception e) {
+            CreateVMException ex = new CreateVMException("The vm test can not join jenkins master");
+            ex.setStackTrace(e.getStackTrace());
+            throw ex;
+          }
+        } else {
+          throw new CreateVMException("Connection to VM can not established");
+        }
       }
       
     //register Guacamole vnc
       try {
-        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + " 5900 '#CloudATS' vnc 0";
+        String command = "sudo -S -p '' /etc/guacamole/manage_con.sh " + vm.getPrivateIp() + (isWindows ? " 3389 " : " 5900 ") + "'#CloudATS' "  + (isWindows ? "rdp" : "vnc")  +  " 0";
         Session session = SSHClient.getSession(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS");              
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(command);
@@ -368,9 +432,9 @@ class AWSService implements IaaSService {
     }
   }
   
-  private VMachine createVM(String imageId, InstanceType instanceType, boolean system, boolean hasUI,TenantReference tenant, SpaceReference space) throws Exception {
+  private VMachine createVM(String imageId, InstanceType instanceType, boolean system, boolean hasUI, boolean isWindows, TenantReference tenant, SpaceReference space) throws Exception {
     
-    VMachine vm = createVMAsync(imageId, instanceType, system, hasUI, tenant, space);
+    VMachine vm = createVMAsync(imageId, instanceType, system, hasUI, isWindows, tenant, space);
     
     logger.info("Waiting for instance's state is running");
     vm = waitUntilInstanceRunning(vm);

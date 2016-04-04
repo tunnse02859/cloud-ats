@@ -31,12 +31,20 @@ public class AssertElementStyle extends AbstractAction{
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.findElement(@locator).getCssValue(");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append(      negated ? "assertNotEquals(" : "assertEquals(");
+	sb.append("     wd.findElement(@locator).getCssValue(");
     sb.append(propertyName);
     sb.append("), ");
     sb.append(value);
     sb.append(");\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (AssertionError ae) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertElementStyle.png\"));\n");
+	sb.append("     ae.printStackTrace();\n");
+	sb.append("     throw ae ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform(),value.transform(),propertyName.transform());
   }
 

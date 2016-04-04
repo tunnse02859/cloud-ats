@@ -1,0 +1,57 @@
+{
+  "seleniumVersion": "2",
+  "formatVersion": 1,
+"steps" : [ 
+        {
+            "type" : "get",
+            "description" : "Navigate to the given URL.",
+            "url" : "http://vnexpress.net/",
+            "params" : [ 
+                "url"
+            ]
+        }, 
+        {
+            "type" : "clickElement",
+            "description" : "Click an element on the current page.",
+            "locator" : {
+                "type" : "xpath",
+                "value" : ".//*[@id='menu_web']//a[text()='Kinh doanh']"
+            },
+            "params" : [ 
+                "locator"
+            ]
+        }, 
+        {
+            "type" : "verifyCurrentUrl",
+            "description" : "Verifies that the current URL is the given value. If this is not the case, script execution will be marked as failed, but the script will continue running.",
+            "url" : "ABC",
+            "params" : [ 
+                "url"
+            ]
+        }, 
+        {
+            "type" : "verifyText",
+            "description" : "Verifies that the given element contains exactly the given text. If this is not the case, script execution will be marked as failed, but the script will continue running.",
+            "locator" : {
+                "type" : "xpath",
+                "value" : ".//*[@id='box_news_top']/div/div/div[1]/h1/a"
+            },
+            "text" : "TuDH2",
+            "params" : [ 
+                "locator", 
+                "text"
+            ]
+        }, 
+        {
+            "type" : "clickElement",
+            "description" : "Click an element on the current page.",
+            "locator" : {
+                "type" : "xpath",
+                "value" : ".//*[@id='box_news_top']/div/div/div[1]/h1/a"
+            },
+            "params" : [ 
+                "locator"
+            ]
+        }
+    ]
+   }

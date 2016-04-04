@@ -26,7 +26,16 @@ public class StoreCurrentUrl extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = wd.getCurrentUrl();\n");
+    
+    StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable)).append(" = \"\";\n");
+	sb.append("try { \n");
+	sb.append(variable).append(" = wd.getCurrentUrl();\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_storeCurrentUrl.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return sb.toString();
   }
 

@@ -23,9 +23,15 @@ public class DeleteCookie extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
+    sb.append("try { \n");
     sb.append("if (wd.manage().getCookieNamed(").append(name.transform()).append(") != null) {\n");
     sb.append("      wd.manage().deleteCookie(wd.manage().getCookieNamed(").append(name.transform()).append("));\n");
     sb.append("    }\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return sb.toString();
   }
 

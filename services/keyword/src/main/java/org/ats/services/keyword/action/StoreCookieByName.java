@@ -33,6 +33,7 @@ public class StoreCookieByName extends AbstractAction {
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder(factory.getVariable(DataType.STRING, variable));
     sb.append(" = wd.manage().getCookieNamed(").append(name).append(").getValue();\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
     return Rythm.render(sb.toString(), name.transform());
   }
 

@@ -28,8 +28,16 @@ public class DragToAndDropElement extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    String template = "new Actions(wd).dragAndDrop(wd.findElement(@source), wd.findElement(@destination)).build().perform();\n";
-    return Rythm.render(template, source.transform(), destination.transform());
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     new Actions(wd).dragAndDrop(wd.findElement(@source), wd.findElement(@destination)).build().perform();\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_dragToAndDropElement.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
+    return Rythm.render(sb.toString(), source.transform(), destination.transform());
   }
 
   public String getAction() {

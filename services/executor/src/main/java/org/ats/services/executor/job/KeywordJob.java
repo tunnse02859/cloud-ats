@@ -14,6 +14,7 @@ import org.ats.services.keyword.SuiteReference;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -30,6 +31,7 @@ public class KeywordJob extends AbstractJob<KeywordJob> {
       @Assisted("id") String id, 
       @Assisted("projectId") String projectId,
       @Assisted("suites") List<SuiteReference> suites,
+      @Assisted("options") BasicDBObject options,
       @Nullable @Assisted("vmachineId") String vmachineId, 
       @Assisted("status") Status status) {
     
@@ -42,6 +44,11 @@ public class KeywordJob extends AbstractJob<KeywordJob> {
       list.add(ref.toJSon());
     }
     this.put("suites", list);
+    this.put("options", options);
+  }
+
+  public BasicDBObject getOptions() {
+    return (BasicDBObject) this.get("options");
   }
 
   @Override

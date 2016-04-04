@@ -21,9 +21,18 @@ public class VerifyAlertPresent extends AbstractAction {
   
   @Override
   public String transform() throws IOException {
-    
-    StringBuilder sb = new StringBuilder("if (").append(negated ? "" : "!").append("isAlertPresent(wd)) {\n");
-    sb.append("      System.out.println(\"").append(negated ? "!" : "").append("verifyAlertPresent failed\");\n    }\n");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append("     if (").append(negated ? "!" : "").append("isAlertPresent(wd)) {\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("    } else {\n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertPresent.png\"));\n");
+    sb.append("    }\n");
+	sb.append("   } catch (Exception e) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyAlertPresent.png\"));\n");
+	sb.append("     e.printStackTrace();\n");
+	sb.append("     throw e ; \n");
+	sb.append("   }\n");
     return sb.toString();
   }
 

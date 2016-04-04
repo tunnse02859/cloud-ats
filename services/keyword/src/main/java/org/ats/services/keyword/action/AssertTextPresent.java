@@ -27,9 +27,16 @@ public class AssertTextPresent extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append(negated ? "assertFalse(" : "assertTrue(");
-    sb.append("wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
-    sb.append(");\n");
+	sb.append("try { \n");
+	sb.append(     negated ? "assertFalse(" : "assertTrue(");
+	sb.append("     wd.findElement(By.tagName(\"html\")).getText().contains(@text)");
+	sb.append(");\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (AssertionError ae) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertTextPresent.png\"));\n");
+	sb.append("     ae.printStackTrace();\n");
+	sb.append("     throw ae ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), text.transform());
   }
 

@@ -21,6 +21,7 @@ public interface VMachineFactory {
       @Assisted("space") SpaceReference space, 
       @Assisted("isSystem") boolean isSystem, 
       @Assisted("hasUI") boolean hasUI,
+      @Assisted("isWindows") boolean isWindows,
       @Assisted("public_ip") String publicIp,
       @Assisted("private_ip") String privateIp,
       @Assisted("status") Status status);

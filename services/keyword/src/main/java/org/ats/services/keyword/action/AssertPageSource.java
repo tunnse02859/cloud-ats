@@ -25,8 +25,16 @@ public class AssertPageSource extends AbstractAction {
   }
   
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.getPageSource(), ").append(source.transform()).append(");\n");
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append(     negated ? "assertNotEquals(" : "assertEquals(");
+	sb.append("     wd.getPageSource(), ").append(source.transform()).append(");\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (AssertionError ae) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertPageSource.png\"));\n");
+	sb.append("     ae.printStackTrace();\n");
+	sb.append("     throw ae ; \n");
+	sb.append("   }\n");
     return sb.toString();
   }
 

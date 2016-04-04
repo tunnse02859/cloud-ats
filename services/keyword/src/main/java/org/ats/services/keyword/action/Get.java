@@ -23,7 +23,16 @@ public class Get extends AbstractAction {
   }
 
   public String transform() throws IOException {
-    return Rythm.render("wd.get(@url);\n", url.transform());
+	  StringBuilder sb = new StringBuilder();
+		sb.append("try { \n");
+		sb.append("     wd.get(@url);\n");
+		sb.append("     System.out.println(\"[End][Step]\"); \n");
+		sb.append("   } catch (Exception e) { \n");
+		sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_get.png\"));\n");
+		sb.append("     e.printStackTrace();\n");
+		sb.append("     throw e ; \n");
+		sb.append("   }\n");
+    return Rythm.render(sb.toString(), url.transform());
   }
 
   public String getAction() {

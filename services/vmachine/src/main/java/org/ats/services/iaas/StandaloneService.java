@@ -63,7 +63,7 @@ public class StandaloneService implements IaaSService {
       HttpResponse response = HttpClientUtil.execute(HttpClientFactory.getInstance(), "http://ipinfo.io/ip");
       String publicAddress = HttpClientUtil.getContentBodyAsString(response).trim();
       
-      VMachine vm = vmachineFactory.create("standalone", tenant, space, true, false, publicAddress, "localhost", VMachine.Status.Started);
+      VMachine vm = vmachineFactory.create("standalone", tenant, space, true, false, false, publicAddress, "localhost", VMachine.Status.Started);
       vmachineService.create(vm);
       return vm;
     } catch (Exception e) {
@@ -73,13 +73,13 @@ public class StandaloneService implements IaaSService {
   }
 
   @Override
-  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+  public VMachine createTestVM(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
     VMachine vm = vmachineService.getSystemVM(tenant, space);
     return vm == null ? createSystemVMAsync(tenant, space) : vm;
   }
 
   @Override
-  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI) throws CreateVMException {
+  public VMachine createTestVMAsync(TenantReference tenant, SpaceReference space, boolean hasUI, boolean isWindows) throws CreateVMException {
     VMachine vm = vmachineService.getSystemVM(tenant, space);
     return vm == null ? createSystemVMAsync(tenant, space) : vm;
   }

@@ -35,6 +35,7 @@ public class VMachine extends AbstractEntity<VMachine> {
       @Assisted("space") @Nullable SpaceReference space, 
       @Assisted("isSystem") boolean isSystem, 
       @Assisted("hasUI") boolean hasUI,
+      @Assisted("isWindows") boolean isWindows,
       @Assisted("public_ip") @Nullable String publicIp,
       @Assisted("private_ip") @Nullable String privateIp,
       @Assisted("status") @Nullable Status status) {
@@ -44,6 +45,7 @@ public class VMachine extends AbstractEntity<VMachine> {
     this.put("space", space == null ? null : space.toJSon());
     this.put("system", isSystem);
     this.put("ui", hasUI);
+    this.put("windows", isWindows);
     this.put("public_ip", publicIp);
     this.put("private_ip", privateIp);
     this.put("status", status.toString());
@@ -59,6 +61,10 @@ public class VMachine extends AbstractEntity<VMachine> {
   
   public boolean hasUI() {
     return this.getBoolean("ui");
+  }
+  
+  public boolean isWindows() {
+    return this.getBoolean("windows");
   }
   
   public void setPublicIp(String publicIp) {

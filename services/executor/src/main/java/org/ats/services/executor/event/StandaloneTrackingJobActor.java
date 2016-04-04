@@ -336,7 +336,7 @@ public class StandaloneTrackingJobActor extends UntypedActor {
 
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      generatorService.generateKeyword("/tmp", job.getId(), false, job.getSuites(), project.getShowAction(), project.getValueDelay(), project.getVersionSelenium());
+      generatorService.generateKeyword("/tmp", job.getId(), false, job.getSuites(), project.getValueDelay(), project.getVersionSelenium());
       Runtime.getRuntime().exec("chmod 777 -R /tmp/" + job.getId());
       
       StringBuilder goalsBuilder = new StringBuilder("clean test");

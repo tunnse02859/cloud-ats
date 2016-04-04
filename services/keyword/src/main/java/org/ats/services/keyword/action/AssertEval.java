@@ -29,9 +29,16 @@ public class AssertEval extends  AbstractAction {
   }
   @Override
   public String transform() throws IOException {
-    StringBuilder sb = new StringBuilder(negated ? "assertNotEquals(" : "assertEquals(");
-    sb.append("wd.executeScript(@script), @value);\n");
-    
+    StringBuilder sb = new StringBuilder();
+	sb.append("try { \n");
+	sb.append(negated ? "assertNotEquals(" : "assertEquals(");
+	sb.append("     wd.executeScript(@script), @value);\n");
+	sb.append("     System.out.println(\"[End][Step]\"); \n");
+	sb.append("   } catch (AssertionError ae) { \n");
+	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_assertEval.png\"));\n");
+	sb.append("     ae.printStackTrace();\n");
+	sb.append("     throw ae ; \n");
+	sb.append("   }\n");
     return Rythm.render(sb.toString(), script.transform(), value.transform());
   }
 
