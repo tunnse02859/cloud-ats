@@ -94,8 +94,9 @@ public class KeywordReportService {
           dataSource = new ArrayList<String>();
           
           if (steps.size() > 0) {
-            if (steps.get(steps.size() - 1).get("isPass") == null){ 
-              steps.get(steps.size() -1).put("isPass", false);
+            StepReport step = steps.get(steps.size() - 1);
+            if (step.get("isPass") == null) {
+              step.put("isPass", false);
               cases.get(cases.size()-1).put("isPass", false);
             }
           }
@@ -122,8 +123,10 @@ public class KeywordReportService {
         }
         if (currentLine.contains("[End][Case]")) {
           caseReport.setSteps(listStepReportRef);
-          if (cases.get(cases.size() - 1).get("isPass") == null) {
-            cases.get(cases.size()-1).put("isPass", true);
+          CaseReport caze = cases.get(cases.size() -1);
+          
+          if (caze.get("isPass") == null) {
+            caze.put("isPass", true);
             listStepReportRef.clear();
           }
         }
@@ -139,8 +142,9 @@ public class KeywordReportService {
         if (currentLine.contains("[Start][Step]")) {
           
           if (steps.size() > 0) {
-            if (steps.get(steps.size() - 1).get("isPass") == null){ 
-              steps.get(steps.size() -1).put("isPass", false);
+            StepReport step = steps.get(steps.size() - 1);
+            if (step.get("isPass") == null){ 
+              step.put("isPass", false);
               cases.get(cases.size()-1).put("isPass", false);
             }
           }
@@ -208,8 +212,9 @@ public class KeywordReportService {
               cases.get(cases.size() - 1).setSteps(listStepReportRef);
             }
           }
-          if (steps.get(steps.size() - 1).get("isPass") == null) {
-            steps.get(steps.size() - 1).put("isPass", false);
+          StepReport step = steps.get(steps.size() - 1);
+          if (step.get("isPass") == null) {
+            step.put("isPass", false);
             cases.get(cases.size()-1).put("isPass", false);
           }
         }
@@ -222,9 +227,10 @@ public class KeywordReportService {
             && !currentLine.contains("[Start][Data]")
             && !currentLine.contains("[End][Data]")) {
           if (steps.size() > 0) {
-            if (steps.get(steps.size() -1).get("isPass") == null){
+            StepReport step = steps.get(steps.size() - 1);
+            if (step.get("isPass") == null){
               sb.append(currentLine);
-              steps.get(steps.size() - 1).put("output", sb.toString());
+              step.put("output", sb.toString());
             }
             
           }
