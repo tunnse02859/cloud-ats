@@ -91,8 +91,7 @@ public class AuthenticationController extends Controller {
       return status(401);
     }
     String password = json.get("password").asText();
-    JsonNode tenant = json.get("tenant");
-    String tenantId = tenant.get("_id").asText();
+    String tenantId = json.get("tenant").asText();
     
     String firstName = json.get("firstname").asText();
     String lastName = json.get("lastname").asText();
