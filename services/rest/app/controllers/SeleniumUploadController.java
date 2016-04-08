@@ -77,6 +77,7 @@ public class SeleniumUploadController extends Controller {
       return status(404);
 
     project.put("type", "Selenium Upload");
+    
     SeleniumUploadProject upload = seleniumUploadService.get(projectId, "raw");
     boolean rawExist = false;
     if (upload.getRawData() != null) {
@@ -104,7 +105,7 @@ public class SeleniumUploadController extends Controller {
       for (SeleniumUploadProject project : list.next()) {
         project.put("type", "keyword");
         project.put("upload_project", true);
-
+        project.put("created_date", project.getDate("created_date").getTime());
         BasicDBObject query = new BasicDBObject("project_id", project.getId())
             .append("status", AbstractJob.Status.Completed.toString());
         PageList<AbstractJob<?>> jobList = executorService

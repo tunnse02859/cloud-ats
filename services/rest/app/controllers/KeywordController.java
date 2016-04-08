@@ -118,6 +118,7 @@ public class KeywordController extends Controller {
         project.put("type", "keyword");
         project.put("totalSuites", suiteService.getSuites(project.getId()).count());
         project.put("totalCases", caseService.getCases(project.getId()).count());
+        project.put("created_date", project.getDate("created_date").getTime());
         
         BasicDBObject query = new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString());
         PageList<AbstractJob<?>> jobList = executorService.query(query, 1);

@@ -100,7 +100,7 @@ public class PerformanceController extends Controller {
       for (PerformanceProject project : list.next()) {
         project.put("type", "performance");
         project.put("totalScripts", jmeterService.getJmeterScripts(project.getId()).count());
-        
+        project.put("created_date", project.getDate("created_date").getTime());
         PageList<AbstractJob<?>> pages = executorService.query(new BasicDBObject("project_id", project.getId()).append("status", AbstractJob.Status.Completed.toString()));
         pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
         if (pages.count() > 0) {
