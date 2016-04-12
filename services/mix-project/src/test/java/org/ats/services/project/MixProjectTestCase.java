@@ -77,15 +77,9 @@ public class MixProjectTestCase {
     while (pers.hasNext()) {
       for (PerformanceProject project : pers.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
-        PageList<User> users = userService.query(new BasicDBObject("_id", object.getString("_id")));
-        String creator;
         
-        if (users.count() > 0) {
-          User user = userService.query(new BasicDBObject("_id", object.getString("_id"))).next().get(0);
-          creator = user.getFirstName() + " " + user.getLastName();
-        } else creator = "";
         
-        MixProject mp = mpFactory.create(project.getName(), null, project.getId(), null, creator);
+        MixProject mp = mpFactory.create(project.getName(), null, project.getId(), null, object.getString("_id"));
         mpService.create(mp);
       }
     }
@@ -98,15 +92,8 @@ public class MixProjectTestCase {
     while (keys.hasNext()) {
       for (KeywordProject project : keys.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
-        PageList<User> users = userService.query(new BasicDBObject("_id", object.getString("_id")));
-        String creator;
         
-        if (users.count() > 0) {
-          User user = userService.query(new BasicDBObject("_id", object.getString("_id"))).next().get(0);
-          creator = user.getFirstName() + " " + user.getLastName();
-        } else creator = "";
-        
-        MixProject mp = mpFactory.create(project.getString("name"), project.getId(), null, null, creator);
+        MixProject mp = mpFactory.create(project.getString("name"), project.getId(), null, null, object.getString("_id"));
         mpService.create(mp);
       }
     }
@@ -117,15 +104,8 @@ public class MixProjectTestCase {
     while (uploads.hasNext()) {
       for (SeleniumUploadProject project : uploads.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
-        PageList<User> users = userService.query(new BasicDBObject("_id", object.getString("_id")));
-        String creator;
         
-        if (users.count() > 0) {
-          User user = userService.query(new BasicDBObject("_id", object.getString("_id"))).next().get(0);
-          creator = user.getFirstName() + " " + user.getLastName();
-        } else creator = "";
-        
-        MixProject mp = mpFactory.create(project.getString("name"), null, null, project.getId(), creator);
+        MixProject mp = mpFactory.create(project.getString("name"), null, null, project.getId(), object.getString("_id"));
         mpService.create(mp);
       }
     }
