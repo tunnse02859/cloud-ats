@@ -79,12 +79,15 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
       context.setSpace(spaceService.get(spaceSource.getString("_id")));
     }
     
+    BasicDBObject object = (BasicDBObject) source.get("creator");
+    
     KeywordProject project = factory.create(context, (String) source.get("name"));
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));
     project.setStatus(source.get("status") == null ? Status.READY : Status.valueOf((String) source.get("status")));
-    
+   
+    project.put("creator", object);
     //transform custom keywords
     if (source.get("custom_keywords") == null) return project;
     
@@ -95,6 +98,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
       CustomKeyword customKeyword = customKeyFactory.create(project.getId(), name);
       customKeyword.put("_id", dbObj.get("_id"));
     }
+   
     project.put("custom_keywords", source.get("custom_keywords"));
     return project;
   }

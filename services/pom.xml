@@ -26,6 +26,7 @@
 		<module>report</module>
 		<module>selenium-upload</module>
 		<module>blob</module>
+		<module>mix-project</module>
   </modules>
 
 </project>

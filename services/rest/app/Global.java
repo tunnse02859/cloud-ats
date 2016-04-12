@@ -7,17 +7,18 @@ import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.KeywordUploadServiceModule;
+import org.ats.services.MixProjectModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
+import org.ats.services.data.DatabaseModule;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
 import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.iaas.VMachineServiceModule;
 import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.iaas.exception.InitializeTenantException;
-import org.ats.services.data.DatabaseModule;
-import org.ats.services.event.EventModule;
-import org.ats.services.event.EventService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.acl.UnAuthenticatedException;
@@ -86,7 +87,8 @@ public class Global extends GlobalSettings {
           new KeywordServiceModule(),
           new KeywordUploadServiceModule(),
           new BlobModule(),
-          new ReportModule());
+          new ReportModule(),
+          new MixProjectModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);

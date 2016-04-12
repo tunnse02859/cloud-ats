@@ -82,6 +82,7 @@ public class SeleniumUploadProjectService extends AbstractMongoCRUD<SeleniumUplo
     if(source.get("name_project_upload") != null) {
       project.setNameProjectUpload(source.get("name_project_upload").toString());
     }
+    project.put("creator", source.get("creator"));
     return project;
   }
 }

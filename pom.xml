@@ -102,13 +102,19 @@
 				<artifactId>report</artifactId>
 				<version>${cloudats.version}</version>
 			</dependency>
-
+			
 			<dependency>
 				<groupId>org.ats.services</groupId>
 				<artifactId>blob</artifactId>
 				<version>${cloudats.version}</version>
 			</dependency>
-
+			
+			<dependency>
+				<groupId>org.ats.services</groupId>
+				<artifactId>mix-project</artifactId>
+				<version>${cloudats.version}</version>
+			</dependency>
+			
 			<dependency>
 				<groupId>org.mongodb</groupId>
 				<artifactId>mongo-java-driver</artifactId>
