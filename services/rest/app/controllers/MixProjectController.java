@@ -76,7 +76,7 @@ public class MixProjectController extends Controller {
   public Result create() {
     
     JsonNode json = request().body().asJson();
-    String creator = json.get("creator").asText(); 
+    String creator = context.getUser().getEmail(); 
     String name = json.get("name").asText();
     
     PerformanceProject performance = performanceFactory.create(name);
@@ -91,7 +91,7 @@ public class MixProjectController extends Controller {
     MixProject mp = mixProjectFactory.create(UUID.randomUUID().toString(), name, keyword.getId(), performance.getId(), selenium.getId(), creator);
     mpService.create(mp);
     
-    return ok();
+    return ok(Json.parse(mp.toString()));
   }
   
   public Result delete(String id, String name, String password) {
