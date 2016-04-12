@@ -3,6 +3,8 @@
  */
 package org.ats.services.project;
 
+import java.util.UUID;
+
 import org.ats.common.PageList;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
@@ -78,8 +80,8 @@ public class MixProjectTestCase {
       for (PerformanceProject project : pers.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
         
-        
-        MixProject mp = mpFactory.create(project.getName(), null, project.getId(), null, object.getString("_id"));
+        String id = UUID.randomUUID().toString();
+        MixProject mp = mpFactory.create(id, project.getName(), null, project.getId(), null, object.getString("_id"));
         mpService.create(mp);
       }
     }
@@ -92,8 +94,8 @@ public class MixProjectTestCase {
     while (keys.hasNext()) {
       for (KeywordProject project : keys.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
-        
-        MixProject mp = mpFactory.create(project.getString("name"), project.getId(), null, null, object.getString("_id"));
+        String id = UUID.randomUUID().toString();
+        MixProject mp = mpFactory.create(id, project.getString("name"), project.getId(), null, null, object.getString("_id"));
         mpService.create(mp);
       }
     }
@@ -104,8 +106,8 @@ public class MixProjectTestCase {
     while (uploads.hasNext()) {
       for (SeleniumUploadProject project : uploads.next()) {
         BasicDBObject object = (BasicDBObject) project.get("creator");
-        
-        MixProject mp = mpFactory.create(project.getString("name"), null, null, project.getId(), object.getString("_id"));
+        String id = UUID.randomUUID().toString();
+        MixProject mp = mpFactory.create(id, project.getString("name"), null, null, project.getId(), object.getString("_id"));
         mpService.create(mp);
       }
     }

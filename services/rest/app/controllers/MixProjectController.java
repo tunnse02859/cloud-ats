@@ -3,6 +3,8 @@
  */
 package controllers;
 
+import java.util.UUID;
+
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.KeywordProject;
@@ -20,22 +22,21 @@ import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectFactory;
 import org.ats.services.upload.SeleniumUploadProjectService;
 
-import actions.CorsComposition.Cors;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
-
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
 
 /**
  * @author TrinhTV3
  *
  */
 
-@Cors
+@CorsComposition.Cors
 @Authenticated
 public class MixProjectController extends Controller {
   
@@ -87,26 +88,18 @@ public class MixProjectController extends Controller {
     SeleniumUploadProject selenium = seleniumFactory.create(context, name);
     seleniumService.create(selenium);
     
-    MixProject mp = mixProjectFactory.create(name, keyword.getId(), performance.getId(), selenium.getId(), creator);
+    MixProject mp = mixProjectFactory.create(UUID.randomUUID().toString(), name, keyword.getId(), performance.getId(), selenium.getId(), creator);
     mpService.create(mp);
     
     return ok();
   }
   
-  public Result delete() {
-    
-    JsonNode json = request().body().asJson();
-    System.out.println(json);
-    String password = json.get("password").asText();
-    String name = json.get("name").asText();
-    String id = json.get("_id").asText();
+  public Result delete(String id, String name, String password) {
     
     MixProject mp = mpService.get(id);
-    
     User user = context.getUser();
     
     if (!name.equals(mp.getName()) || !password.equals(user.getPassword())) {
-      
       return status(403);
     }
     

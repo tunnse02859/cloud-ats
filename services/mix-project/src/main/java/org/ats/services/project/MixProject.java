@@ -25,9 +25,9 @@ public class MixProject extends BasicDBObject {
   private static final long serialVersionUID = 1L;
   
   @Inject
-  MixProject(@Assisted("name")String name, @Nullable @Assisted("keyword_id") String keywordProjectId, @Nullable @Assisted("performance_id") String performanceProjectId, @Nullable @Assisted("selenium_id") String seleniumProjectId, @Assisted("creator") String creator) {
+  MixProject(@Assisted("_id") String id, @Assisted("name")String name, @Nullable @Assisted("keyword_id") String keywordProjectId, @Nullable @Assisted("performance_id") String performanceProjectId, @Nullable @Assisted("selenium_id") String seleniumProjectId, @Assisted("creator") String creator) {
     
-    this.put("_id", UUID.randomUUID().toString());
+    this.put("_id", id);
     this.put("name", name);
     this.put("keyword_id", keywordProjectId);
     this.put("performance_id", performanceProjectId);

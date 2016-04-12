@@ -39,8 +39,9 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
     String performanceId = (String) source.get("performance_id");
     String seleniumId = (String) source.get("selenium_id");
     String creator = (String) source.get("creator");
+    String _id = (String) source.get("_id");
     
-    MixProject mp = mpFactory.create(name, keywordId, performanceId, seleniumId, creator);
+    MixProject mp = mpFactory.create(_id, name, keywordId, performanceId, seleniumId, creator);
     mp.put("created_date", source.get("created_date"));
     
     return mp;
