@@ -17,8 +17,6 @@ import org.ats.services.data.MongoDBService;
 import org.ats.services.event.EventModule;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
-import org.ats.services.organization.UserService;
-import org.ats.services.organization.entity.User;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
@@ -49,8 +47,6 @@ public class MixProjectTestCase {
   
   private MixProjectFactory mpFactory;
   
-  private UserService userService;
-  
   @BeforeClass
   public void init() throws Exception {
     String host = "localhost";
@@ -68,7 +64,6 @@ public class MixProjectTestCase {
     this.seleniumService = injector.getInstance(SeleniumUploadProjectService.class);
     this.mpService = injector.getInstance(MixProjectService.class);
     this.mpFactory = injector.getInstance(MixProjectFactory.class);
-    this.userService = injector.getInstance(UserService.class);
     this.mongoService.getDatabase().getCollection("mix-project").drop();
   }
   

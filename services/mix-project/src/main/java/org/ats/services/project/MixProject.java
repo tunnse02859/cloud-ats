@@ -4,7 +4,6 @@
 package org.ats.services.project;
 
 import java.util.Date;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -34,6 +33,14 @@ public class MixProject extends BasicDBObject {
     this.put("selenium_id", seleniumProjectId);
     this.put("created_date", new Date());
     this.put("creator", creator);
+  }
+  
+  public void setId(String id) {
+    this.put("_id", id);
+  }
+  
+  public String getId() {
+    return this.getString("_id");
   }
   
   public void setName(String name) {

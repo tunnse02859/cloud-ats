@@ -111,4 +111,14 @@ public class MixProjectController extends Controller {
     return ok();
   }
   
+  public Result cloneProject(String id) {
+    
+    String name = request().getQueryString("name");
+    MixProject mp = mpService.cloneData(id, name);
+    mp.put("created_date", mp.getDate("created_date").getTime());
+    
+    return ok(Json.parse(mp.toString()));
+  }
+  
+  
 }
