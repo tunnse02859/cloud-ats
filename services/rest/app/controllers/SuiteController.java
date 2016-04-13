@@ -4,7 +4,9 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.ats.common.PageList;
 import org.ats.services.keyword.CaseReference;
@@ -13,6 +15,8 @@ import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -39,9 +43,13 @@ public class SuiteController extends Controller {
   
   @Inject ReferenceFactory<CaseReference> caseRefFactory;
   
+  @Inject MixProjectService mpService;
+  
   public Result list(String projectId) {
     
-    PageList<Suite> list = suiteService.getSuites(projectId);
+    MixProject mp = mpService.get(projectId);
+    
+    PageList<Suite> list = suiteService.getSuites(mp.getKeywordId());
     //list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();
@@ -113,9 +121,26 @@ public class SuiteController extends Controller {
   
   public Result delete(String projectId, String suiteId)  throws Exception {
     Suite suite = suiteService.get(suiteId);
-    if (suite == null || !projectId.equals(suite.getProjectId())) return status(404);
+    
+    MixProject mp = mpService.get(projectId);
+    if (suite == null || !mp.getKeywordId().equals(suite.getProjectId())) return status(404);
     
     suiteService.delete(suiteId);
     return status(200);
+  }
+  
+public Result cloneSuite(String projectId, String caseId) {
+    
+    String name = request().getQueryString("name");
+    
+    Suite suite = suiteService.get(caseId);
+    suite.put("name", name);
+    suite.put("_id", UUID.randomUUID().toString());
+    suite.put("created_date", new Date());
+    
+    suiteService.create(suite);
+    suite.put("created_date", suite.getDate("created_date").getTime());
+    
+    return ok(Json.parse(suite.toString()));
   }
 }

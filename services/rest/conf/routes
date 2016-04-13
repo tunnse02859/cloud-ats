@@ -77,6 +77,8 @@ GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController
 POST    /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.create(projectId)
 PUT     /api/v1/project/keyword/:projectId/suite    @controllers.SuiteController.update(projectId)
 DELETE  /api/v1/project/keyword/:projectId/suite/:suiteId    @controllers.SuiteController.delete(projectId, suiteId)
+GET		/api/v1/project/keyword/:projectId/suite/:suiteId/clone	@controllers.SuiteController.cloneSuite(projectId, suiteId)
+
 # Custom keyword controller
 
 GET     /api/v1/project/keyword/:projectId/customs  @controllers.CustomKeywordController.list(projectId)
