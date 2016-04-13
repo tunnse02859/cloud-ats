@@ -3,12 +3,17 @@
  */
 package controllers;
 
+import java.util.Date;
+import java.util.UUID;
+
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -33,9 +38,13 @@ public class CaseController extends Controller {
   
   @Inject CaseFactory caseFactory;
   
+  @Inject MixProjectService mpService;
+  
   public Result list(String projectId) {
     
-    PageList<Case> list = caseService.getCases(projectId);
+    MixProject mp = mpService.get(projectId);
+    
+    PageList<Case> list = caseService.getCases(mp.getKeywordId());
     list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();
@@ -88,10 +97,29 @@ public class CaseController extends Controller {
   }
   
   public Result delete(String projectId, String caseId)  throws Exception {
+    
+    MixProject mp = mpService.get(projectId);
+    
     Case caze = caseService.get(caseId);
-    if (caze == null || !projectId.equals(caze.getProjectId())) return status(404);
+    if (caze == null || !mp.getKeywordId().equals(caze.getProjectId())) return status(404);
     
     caseService.delete(caseId);
     return status(200);
   }
+  
+  public Result cloneCase(String projectId, String caseId) {
+    
+    String name = request().getQueryString("name");
+    
+    Case caze = caseService.get(caseId);
+    caze.put("name", name);
+    caze.put("_id", UUID.randomUUID().toString());
+    caze.put("created_date", new Date());
+    
+    caseService.create(caze);
+    caze.put("created_date", caze.getDate("created_date").getTime());
+    
+    return ok(Json.parse(caze.toString()));
+  }
+  
 }

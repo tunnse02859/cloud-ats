@@ -69,6 +69,7 @@ GET     /api/v1/project/keyword/:projectId/cases  @controllers.CaseController.li
 POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.create(projectId)
 PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.update(projectId)
 DELETE  /api/v1/project/keyword/:projectId/case/:caseId    @controllers.CaseController.delete(projectId, caseId)
+GET		/api/v1/project/keyword/:projectId/case/:caseId/clone	@controllers.CaseController.cloneCase(projectId, caseId)
 
 # Suite controller
 
