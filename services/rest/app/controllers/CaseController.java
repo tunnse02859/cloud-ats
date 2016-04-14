@@ -57,7 +57,9 @@ public class CaseController extends Controller {
   }
   
   public Result references(String projectId) {
-    PageList<Case> list = caseService.getCases(projectId);
+    
+    MixProject mp = mpService.get(projectId);
+    PageList<Case> list = caseService.getCases(mp.getKeywordId());
     ArrayNode array = Json.newObject().arrayNode();
     while(list.hasNext()) {
       for (Case caze : list.next()) {

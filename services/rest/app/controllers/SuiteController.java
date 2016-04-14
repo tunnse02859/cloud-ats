@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.ats.common.PageList;
+import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteFactory;
@@ -25,6 +26,7 @@ import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 
@@ -62,6 +64,10 @@ public class SuiteController extends Controller {
   }
 
   public Result create(String projectId) {
+    
+    MixProject mp = mpService.get(projectId);
+    projectId = mp.getKeywordId();
+    
     JsonNode data = request().body().asJson();
     
     String suiteName = data.get("name").asText();
@@ -129,7 +135,7 @@ public class SuiteController extends Controller {
     return status(200);
   }
   
-public Result cloneSuite(String projectId, String caseId) {
+  public Result cloneSuite(String projectId, String caseId) {
     
     String name = request().getQueryString("name");
     
@@ -142,5 +148,24 @@ public Result cloneSuite(String projectId, String caseId) {
     suite.put("created_date", suite.getDate("created_date").getTime());
     
     return ok(Json.parse(suite.toString()));
+  }
+
+  public Result get(String projectId, String suiteId) {
+    
+    Suite suite = suiteService.get(suiteId);
+    List<CaseReference> caseRef = suite.getCases();
+    
+    ArrayNode array = Json.newObject().arrayNode();
+    for (CaseReference ref : caseRef){
+      ObjectNode obj = Json.newObject();
+      Case caze = ref.get();
+      
+      obj.put("_id", caze.getId());
+      obj.put("name", caze.getName());
+      
+      array.add(obj);
+    }
+    
+    return ok(array);
   }
 }
