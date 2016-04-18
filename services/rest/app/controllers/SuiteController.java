@@ -97,11 +97,14 @@ public class SuiteController extends Controller {
   }
   
   public Result update(String projectId) throws Exception {
+    
+    MixProject mp = mpService.get(projectId);
+    
     JsonNode node = request().body().asJson();
     BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
     Suite suite = suiteService.transform(obj);
     Suite oldSuite = suiteService.get(suite.getId());
-    if (!projectId.equals(suite.getProjectId()) 
+    if (!mp.getKeywordId().equals(suite.getProjectId()) 
         || !suite.getId().equals(oldSuite.getId())
         || oldSuite == null) return status(400);
     
@@ -152,9 +155,10 @@ public class SuiteController extends Controller {
 
   public Result get(String projectId, String suiteId) {
     
+    ObjectNode object = Json.newObject();
+    
     Suite suite = suiteService.get(suiteId);
     List<CaseReference> caseRef = suite.getCases();
-    
     ArrayNode array = Json.newObject().arrayNode();
     for (CaseReference ref : caseRef){
       ObjectNode obj = Json.newObject();
@@ -165,7 +169,12 @@ public class SuiteController extends Controller {
       
       array.add(obj);
     }
+    object.put("cases", Json.parse(array.toString()));
+    object.put("_id", suiteId);
+    object.put("name", suite.getName());
+    object.put("init_driver", suite.getString("init_driver"));
+    object.put("project_id", suite.getProjectId());
     
-    return ok(array);
+    return ok(object);
   }
 }
