@@ -49,6 +49,8 @@ import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineService;
 
@@ -105,6 +107,8 @@ public class KeywordController extends Controller {
   @Inject VMachineService vmachineService;
    
   @Inject BlobService blobService;
+
+  @Inject MixProjectService mpService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -172,7 +176,8 @@ public class KeywordController extends Controller {
     return ok(StringUtil.readStream(stream));
   }
   public Result get(String projectId) {
-    KeywordProject project = keywordProjectService.get(projectId, "value_delay");
+	MixProject mp = mpService.get(projectId);
+    KeywordProject project = keywordProjectService.get(mp.getKeywordId(), "value_delay");
     if (project == null) return status(404);
     
     project.put("type", "keyword");
@@ -288,7 +293,9 @@ public class KeywordController extends Controller {
       suites.add(suiteRefFactory.create(sel.asText()));
     }
     
-    KeywordProject project = keywordProjectService.get(projectId, "value_delay");
+    MixProject mp = mpService.get(projectId);
+    KeywordProject project = keywordProjectService.get(mp.getKeywordId(), "value_delay");
+    
     if (project == null) return status(404);
     
     project.setVersionSelenium(seleniumVersion);
