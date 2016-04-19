@@ -184,7 +184,7 @@ public class KeywordController extends Controller {
     project.put("totalSuites", suiteService.getSuites(project.getId()).count());
     project.put("totalCases", caseService.getCases(project.getId()).count());
     
-    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", mp.getKeywordId()), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     if (jobList.totalPage() > 0) {
@@ -385,11 +385,10 @@ public class KeywordController extends Controller {
   }
   
   public Result listReport(String projectId) throws Exception {
-	  
     String indexRequest = request().getQueryString("index");
     BasicDBObject query = new BasicDBObject();
     BasicDBList andCondition = new BasicDBList();
-    andCondition.add(new BasicDBObject("project_id", projectId));
+    andCondition.add(new BasicDBObject("project_id",projectId));
     andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
     query.append("$and", andCondition);
     
@@ -497,7 +496,8 @@ public class KeywordController extends Controller {
    * @return 10 lastest job with suiteId
    */
   public Result getLastestJobWithSuiteId (String projectId, String jobId, String suiteId, String suite_report_id) {
-   
+	MixProject mp = mpService.get(projectId);
+	KeywordProject project = keywordProjectService.get(mp.getKeywordId(), "value_delay");
     ObjectNode object = Json.newObject();
     PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("suiteId", suiteId));
     suites.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
@@ -511,7 +511,7 @@ public class KeywordController extends Controller {
     
     BasicDBObject query = new BasicDBObject();
     BasicDBList andCondition = new BasicDBList();
-    andCondition.add(new BasicDBObject("project_id", projectId));
+    andCondition.add(new BasicDBObject("project_id", project.getId()));
     andCondition.add(new BasicDBObject("report", new BasicDBObject("$ne", null)));
     query.append("$and", andCondition);
     
