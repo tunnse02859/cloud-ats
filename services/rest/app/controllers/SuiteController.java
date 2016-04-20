@@ -113,35 +113,40 @@ public class SuiteController extends Controller {
   }
   
   public Result update(String projectId) throws Exception {
-    
-    MixProject mp = mpService.get(projectId);
-    
+
     JsonNode node = request().body().asJson();
-    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
-    Suite suite = suiteService.transform(obj);
-    Suite oldSuite = suiteService.get(suite.getId());
-    if (!mp.getKeywordId().equals(suite.getProjectId()) 
-        || !suite.getId().equals(oldSuite.getId())
-        || oldSuite == null) return status(400);
-    
-    if (suite.equals(oldSuite)) return status(204);
-    
-    if (!suite.getName().equals(oldSuite.getName())) {
+    Suite suite = suiteService.get(node.get("_id").asText());
+    if (suite == null) return status(404);
+    else {
+      String name = node.get("name").asText();
+      boolean mode = node.get("sequence_mode").asBoolean();
       
-      PageList<Suite> listSuites = suiteService.getSuites(projectId);
-      while(listSuites.hasNext()) {
-        for(Suite suiteElement : listSuites.next()) {
-          String oldSuiteName = suiteElement.getName();
-          if (oldSuiteName.equals(suite.getName())) {
-            return status(304);
-          }
+      //Update only suite info
+      if (node.get("cases") == null) {
+        if (suite.getName().equals(name) && suite.getMode() == mode) {
+          return status(204);
+        } else {
+          suite.put("name", name);
+          suite.put("sequence_mode", mode);
+          suiteService.update(suite);
+          
+          return status(200);
         }
       }
+      
+      suite.put("name", name);
+      suite.put("sequence_mode", mode);
+      
+      BasicDBList list = new BasicDBList();
+      ArrayNode cases = (ArrayNode) node.get("cases");
+      for (JsonNode caze : cases) {
+        list.add(new BasicDBObject("_id", caze.get("_id").asText()));
+      }
+      suite.put("cases", list);
+      suiteService.update(suite);
+      
+      return status(200);
     }
-    
-    suiteService.update(suite);
-    
-    return status(200);
   }
   
   public Result delete(String projectId, String suiteId)  throws Exception {
@@ -166,6 +171,11 @@ public class SuiteController extends Controller {
     suiteService.create(suite);
     suite.put("created_date", suite.getDate("created_date").getTime());
     
+    String email = suite.getCreator();
+    User user = userService.get(email);
+    BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+    suite.put("creator", userObj);
+    
     return ok(Json.parse(suite.toString()));
   }
 
@@ -189,6 +199,7 @@ public class SuiteController extends Controller {
     object.put("cases", array);
     object.put("_id", suiteId);
     object.put("name", suite.getName());
+    object.put("sequence_mode", suite.getMode());
 //    object.put("init_driver", suite.getString("init_driver"));
     object.put("project", Json.newObject().put("_id", projectId).put("name",  project.getName()));
     
