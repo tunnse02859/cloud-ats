@@ -70,9 +70,12 @@ public class CaseController extends Controller {
   }
   
   public Result create(String projectId) {
+    
+    MixProject mp = mpService.get(projectId);
+    
     JsonNode node = request().body().asJson();
     String caseName = node.get("name").asText();
-    Case caze = caseFactory.create(projectId, caseName, null);
+    Case caze = caseFactory.create(mp.getKeywordId(), caseName, null);
     for(JsonNode action:node.get("steps")) {
       caze.addAction(action); 
     }
@@ -122,6 +125,10 @@ public class CaseController extends Controller {
     caze.put("created_date", caze.getDate("created_date").getTime());
     
     return ok(Json.parse(caze.toString()));
+  }
+  
+  public Result get(String projectId, String caseId) {
+    return ok(Json.parse(caseService.get(caseId).toString()));
   }
   
 }

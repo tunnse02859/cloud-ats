@@ -9,6 +9,8 @@ import org.ats.services.keyword.CustomKeyword;
 import org.ats.services.keyword.CustomKeywordFactory;
 import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -33,8 +35,13 @@ public class CustomKeywordController extends Controller {
   
   @Inject CustomKeywordFactory customFactory;
   
+  @Inject MixProjectService mpService;
+  
   public Result list(String projectId) {
-    PageList<CustomKeyword> list = customService.getCustomKeywords(projectId);
+    
+    MixProject mp = mpService.get(projectId);
+    
+    PageList<CustomKeyword> list = customService.getCustomKeywords(mp.getKeywordId());
     list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     ArrayNode array = Json.newObject().arrayNode();

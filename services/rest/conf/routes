@@ -70,7 +70,7 @@ POST    /api/v1/project/keyword/:projectId/case   @controllers.CaseController.cr
 PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.update(projectId)
 DELETE  /api/v1/project/keyword/:projectId/case/:caseId    @controllers.CaseController.delete(projectId, caseId)
 GET		/api/v1/project/keyword/:projectId/case/:caseId/clone	@controllers.CaseController.cloneCase(projectId, caseId)
-
+GET		/api/v1/project/keyword/:projectId/case/:caseId		@controllers.CaseController.get(projectId, caseId)
 # Suite controller
 
 GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController.list(projectId)
