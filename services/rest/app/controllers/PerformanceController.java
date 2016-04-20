@@ -39,6 +39,8 @@ import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 import org.ats.services.vmachine.VMachine;
 import org.ats.services.vmachine.VMachineReference;
 import org.ats.services.vmachine.VMachineService;
@@ -88,6 +90,8 @@ public class PerformanceController extends Controller {
   @Inject VMachineService vmachineService;
   
   @Inject IaaSServiceProvider iaasProvider;
+  
+  @Inject MixProjectService mpService;
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
@@ -149,8 +153,8 @@ public class PerformanceController extends Controller {
   }
   
   public Result get(String projectId) {
-    
-    PerformanceProject project = projectService.get(projectId);
+	MixProject mp = mpService.get(projectId);
+    PerformanceProject project = projectService.get(mp.getPerformanceId());
     if (project == null) return status(404);
     
     PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", project.getId()), 1);

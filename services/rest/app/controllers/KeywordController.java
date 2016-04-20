@@ -504,7 +504,7 @@ public class KeywordController extends Controller {
     List<SuiteReport> listSuites = suites.next();
     
     ArrayNode suiteArray = Json.newObject().arrayNode();
-    for (int i = 0; i < listSuites.size() && i < 10; i ++) {
+    for (int i = 0; i < listSuites.size() && i < 5; i ++) {
       SuiteReport report = listSuites.get(i);
       suiteArray.add(Json.parse(report.toString()));
     }
