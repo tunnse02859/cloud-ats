@@ -7,6 +7,8 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 
+import org.ats.services.OrganizationContext;
+
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.mongodb.BasicDBObject;
@@ -18,10 +20,9 @@ import com.mongodb.BasicDBObject;
 
 public class MixProject extends BasicDBObject {
   
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
+  
+  @Inject OrganizationContext context;
   
   @Inject
   MixProject(@Assisted("_id") String id, @Assisted("name")String name, @Nullable @Assisted("keyword_id") String keywordProjectId, @Nullable @Assisted("performance_id") String performanceProjectId, @Nullable @Assisted("selenium_id") String seleniumProjectId, @Assisted("creator") String creator) {

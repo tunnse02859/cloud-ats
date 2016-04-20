@@ -262,7 +262,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -276,7 +276,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(acceptAlertSuite);
     
     project.setVersionSelenium("2.47.1");
@@ -310,7 +310,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -324,7 +324,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);
@@ -359,7 +359,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExampleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExampleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -373,7 +373,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlertWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlertWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);
@@ -407,7 +407,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     String initGoogleDriver = "System.setProperty(\"webdriver.chrome.driver\", \"/home/haint/chromedriver\");\n wd = new ChromeDriver();";
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", initGoogleDriver,cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", initGoogleDriver, cases, context.getUser().getEmail());
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -424,7 +424,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     String initFireFoxDriverWithVersion = "System.setProperty(\"webdriver.firefox.bin\", \"/home/haint/data/firefox-41.0.2/firefox\");\n" +
     "wd = new FirefoxDriver();";
     
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", initFireFoxDriverWithVersion,  cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", initFireFoxDriverWithVersion,  cases, context.getUser().getEmail());
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);

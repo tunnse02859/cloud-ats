@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -34,6 +35,9 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
   
   @Inject
   private ReferenceFactory<CaseReference> caseRefFactory;
+  
+  @Inject 
+  private OrganizationContext context;
   
   @Inject
   private SuiteFactory suiteFactory;
@@ -72,8 +76,8 @@ public class SuiteService extends AbstractMongoCRUD<Suite> {
         list.add(caseRef);
       }
     }
-    
-    Suite suite = suiteFactory.create(obj.getString("project_id"), obj.getString("name"), obj.getString("init_driver"), list);
+    String creator = source.get("creator") == null ? context.getUser().getEmail() : (String) source.get("creator");
+    Suite suite = suiteFactory.create(obj.getString("project_id"), obj.getString("name"), obj.getString("init_driver"), list, creator);
 
     suite.put("_id", source.get("_id"));
     

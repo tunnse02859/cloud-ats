@@ -128,6 +128,7 @@ DELETE	/api/v1/project/performance/:scriptId/csv/deletetemp		@controllers.FileCo
 
 # Mix project controller
 GET     /api/v1/projects											@controllers.MixProjectController.list()
+GET     /api/v1/project/:id                                         @controllers.MixProjectController.get(id)
 POST	/api/v1/project												@controllers.MixProjectController.create()
 DELETE	/api/v1/project/:id/:name/:pass								@controllers.MixProjectController.delete(id, name, pass)
 GET		/api/v1/project/clone/:id								@controllers.MixProjectController.cloneProject(id)

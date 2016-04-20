@@ -10,6 +10,7 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.User;
 import org.ats.services.performance.PerformanceProject;
@@ -30,6 +31,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 /**
  * @author TrinhTV3
@@ -58,6 +60,8 @@ public class MixProjectController extends Controller {
   
   @Inject OrganizationContext context;
   
+  @Inject UserService userService;
+  
   public Result list() {
     
     ArrayNode array = Json.newObject().arrayNode();
@@ -66,6 +70,10 @@ public class MixProjectController extends Controller {
     while (list.hasNext()) {
       for (MixProject project : list.next()) {
         project.put("created_date", project.getDate("created_date").getTime());
+        String email = project.getCreator();
+        User user = userService.get(email);
+        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        project.put("creator", userObj);
         array.add(Json.parse(project.toString()));
       }
     }
@@ -73,10 +81,19 @@ public class MixProjectController extends Controller {
     
   }
   
+  public Result get(String id) {
+    MixProject project = mpService.get(id);
+    project.put("created_date", project.getDate("created_date").getTime());
+    String email = project.getCreator();
+    User user = userService.get(email);
+    BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+    project.put("creator", userObj);
+    return ok(Json.parse(project.toString()));
+  }
+  
   public Result create() {
     
     JsonNode json = request().body().asJson();
-    String creator = context.getUser().getEmail(); 
     String name = json.get("name").asText();
     
     PerformanceProject performance = performanceFactory.create(name);
@@ -88,7 +105,7 @@ public class MixProjectController extends Controller {
     SeleniumUploadProject selenium = seleniumFactory.create(context, name);
     seleniumService.create(selenium);
     
-    MixProject mp = mixProjectFactory.create(UUID.randomUUID().toString(), name, keyword.getId(), performance.getId(), selenium.getId(), creator);
+    MixProject mp = mixProjectFactory.create(UUID.randomUUID().toString(), name, keyword.getId(), performance.getId(), selenium.getId(), context.getUser().getEmail());
     mpService.create(mp);
     
     return ok(Json.parse(mp.toString()));

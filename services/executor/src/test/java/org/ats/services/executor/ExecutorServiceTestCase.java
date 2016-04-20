@@ -259,7 +259,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite fullExampleSuite= suiteFactory.create(project.getId(), "FullExample", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(fullExampleSuite);
     
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
@@ -272,7 +272,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
 
-    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite acceptAlertSuite = suiteFactory.create(project.getId(), "AcceptAlert", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(acceptAlertSuite);
     
     keywordProjectService.create(project);

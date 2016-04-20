@@ -8,13 +8,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseReference;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
@@ -28,6 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -47,20 +52,31 @@ public class SuiteController extends Controller {
   
   @Inject MixProjectService mpService;
   
+  @Inject OrganizationContext context;
+  
+  @Inject UserService userService;
+  
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
+    mp.put("created_date", mp.getDate("created_date").getTime());
     
     PageList<Suite> list = suiteService.getSuites(mp.getKeywordId());
-    //list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
-    ArrayNode array = Json.newObject().arrayNode();
+    BasicDBList array = new BasicDBList();
     while(list.hasNext()) {
       for (Suite suite : list.next()) {
-        array.add(Json.parse(suite.toString()));
+        String email = suite.getCreator();
+        User user = userService.get(email);
+        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        suite.put("creator", userObj);
+        suite.put("created_date", suite.getCreatedDate().getTime());
+        array.add(suite);
       }
     }
-    return ok(array);
+    mp.put("suites", array);
+    return ok(Json.parse(mp.toString()));
   }
 
   public Result create(String projectId) {
@@ -88,7 +104,7 @@ public class SuiteController extends Controller {
       list.add(caseRefFactory.create(testCase.get("_id").asText()));
     }
     
-    Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, list);
+    Suite suite = suiteFactory.create(projectId, suiteName, SuiteFactory.DEFAULT_INIT_DRIVER, list, context.getUser().getEmail());
     suiteService.create(suite);
     suite.setMode(sequenceMode);
     suiteService.update(suite);
@@ -157,6 +173,7 @@ public class SuiteController extends Controller {
     
     ObjectNode object = Json.newObject();
     
+    MixProject project = mpService.get(projectId);
     Suite suite = suiteService.get(suiteId);
     List<CaseReference> caseRef = suite.getCases();
     ArrayNode array = Json.newObject().arrayNode();
@@ -169,11 +186,11 @@ public class SuiteController extends Controller {
       
       array.add(obj);
     }
-    object.put("cases", Json.parse(array.toString()));
+    object.put("cases", array);
     object.put("_id", suiteId);
     object.put("name", suite.getName());
-    object.put("init_driver", suite.getString("init_driver"));
-    object.put("project_id", suite.getProjectId());
+//    object.put("init_driver", suite.getString("init_driver"));
+    object.put("project", Json.newObject().put("_id", projectId).put("name",  project.getName()));
     
     return ok(object);
   }

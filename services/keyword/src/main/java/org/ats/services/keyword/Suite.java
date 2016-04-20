@@ -34,12 +34,14 @@ public class Suite extends AbstractTemplate {
   Suite(@Assisted("projectId") String projectId, 
       @Assisted("suiteName") String suiteName, 
       @Assisted("initDriver") String initDriver,
-      @Assisted("cases") List<CaseReference> cases) {
+      @Assisted("cases") List<CaseReference> cases,
+      @Assisted("creator") String creator) {
     
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", suiteName);
     this.put("init_driver", initDriver);
     this.put("created_date", new Date());
+    this.put("creator", creator);
     
     BasicDBList list = new BasicDBList();
     for (CaseReference caze : cases) {
@@ -95,6 +97,10 @@ public class Suite extends AbstractTemplate {
   
   public String transform() throws IOException {
     return transform(null, 0, false);
+  }
+  
+  public String getCreator() {
+    return this.getString("creator");
   }
   
   public String transform(String jobId, int valueDelay,boolean sequenceMode) throws IOException {

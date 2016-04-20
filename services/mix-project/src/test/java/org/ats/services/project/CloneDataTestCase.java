@@ -235,7 +235,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create(keyword.getId(), "FullExamle", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create(keyword.getId(), "FullExamle", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     suiteService.create(suite);
     
     //custom keyword

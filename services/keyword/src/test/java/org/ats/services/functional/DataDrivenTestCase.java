@@ -12,6 +12,7 @@ import java.util.List;
 import org.ats.common.StringUtil;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.KeywordServiceModule;
+import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.data.DatabaseModule;
 import org.ats.services.data.MongoDBService;
@@ -55,6 +56,8 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
   
   private AuthenticationService<User> authService;
   
+  private OrganizationContext context;
+  
   private DataDrivenService drivenService;
   
   private DataDrivenFactory drivenFactory;
@@ -94,6 +97,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     this.caseRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<CaseReference>>(){}));
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
+    this.context = injector.getInstance(OrganizationContext.class);
     
     this.mongoService = injector.getInstance(MongoDBService.class);
     this.mongoService.dropDatabase();
@@ -164,7 +168,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", "Google", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "Google", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     
     try {
       String output = suite.transform();
@@ -209,7 +213,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     cases.add(caseRefFactory.create(caze.getId()));
     
-    Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "GoogleWithOptions", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     
     try {
       String output = suite.transform(null, 3, false);
@@ -267,7 +271,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     caseService.create(caze2);
     cases.add(caseRefFactory.create(caze2.getId()));
     
-    Suite suite = suiteFactory.create("fake", "GoogleMultiCasesWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "GoogleMultiCasesWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     
     try {
       String output = suite.transform(null, 3, true);
@@ -325,7 +329,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     caseService.create(caze2);
     cases.add(caseRefFactory.create(caze2.getId()));
     
-    Suite suite = suiteFactory.create("fake", "GoogleWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases);
+    Suite suite = suiteFactory.create("fake", "GoogleWithPriovity", SuiteFactory.DEFAULT_INIT_DRIVER, cases, context.getUser().getEmail());
     
     try {
       String output = suite.transform(null, 3, true);

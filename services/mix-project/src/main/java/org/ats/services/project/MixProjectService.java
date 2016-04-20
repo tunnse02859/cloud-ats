@@ -86,7 +86,7 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
       per.put("name", name);
       per.put("created_date", new Date());
       per.put("_id", UUID.randomUUID().toString());
-      per.put("creator", new BasicDBObject("_id", context.getUser().getEmail()));
+      per.put("creator", new BasicDBObject("_id", context.getUser()));
 
       performanceService.create(per);
         
