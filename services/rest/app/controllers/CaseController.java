@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.services.datadriven.DataDriven;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseService;
@@ -128,7 +129,14 @@ public class CaseController extends Controller {
   }
   
   public Result get(String projectId, String caseId) {
-    return ok(Json.parse(caseService.get(caseId).toString()));
+    
+    Case caze = caseService.get(caseId);
+    if (caze.getDataDriven() != null) {
+      DataDriven data = caze.getDataDriven().get();
+      caze.put("data_source", data.getDataSource());
+      caze.put("data_name", data.getName());
+    }
+    return ok(Json.parse(caze.toString()));
   }
   
 }
