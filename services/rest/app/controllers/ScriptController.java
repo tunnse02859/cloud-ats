@@ -17,9 +17,12 @@ import org.ats.services.performance.CSV;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterFactory;
 import org.ats.services.performance.JMeterSampler;
+import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptService;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -51,10 +54,12 @@ public class ScriptController extends Controller {
   @Inject 
   private BlobService fileService;
   
+  @Inject MixProjectService mpService;
+  
   public Result list(String projectId) {
-     
+	MixProject mp = mpService.get(projectId);
     ArrayNode array = Json.newObject().arrayNode();
-    PageList<JMeterScript> pages = service.getJmeterScripts(projectId);
+    PageList<JMeterScript> pages = service.getJmeterScripts(mp.getPerformanceId());
     List<JMeterScript> list;
     while (pages.hasNext()) {
       list = pages.next();

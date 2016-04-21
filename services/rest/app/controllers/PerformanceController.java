@@ -195,7 +195,7 @@ public class PerformanceController extends Controller {
     }
     project.put("totalJob", totalJob);
     project.put("type", "performance");
-    project.put("totalScripts", jmeterService.getJmeterScripts(projectId).count());
+    project.put("totalScripts", jmeterService.getJmeterScripts(project.getId()).count());
     return ok(Json.parse(project.toString()));
   }
   
