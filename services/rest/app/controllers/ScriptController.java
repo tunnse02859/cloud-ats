@@ -73,7 +73,7 @@ public class ScriptController extends Controller {
   }
   
   public Result createByFile(String projectId) {
-    
+	MixProject mp = mpService.get(projectId);
     MultipartFormData body = request().body().asMultipartFormData();
     MultipartFormData.FilePart file = body.getFile("file");
     String name = body.asFormUrlEncoded().get("name")[0];
@@ -84,7 +84,7 @@ public class ScriptController extends Controller {
     }
      
       try {
-        JMeterScript script = jmeterFactory.createRawJmeterScript(projectId, name, StringUtil.readStream(new FileInputStream(file.getFile())));
+        JMeterScript script = jmeterFactory.createRawJmeterScript(mp.getPerformanceId(), name, StringUtil.readStream(new FileInputStream(file.getFile())));
         script.setNumberThreads(100);
         script.setNumberEngines(1);
         script.setRamUp(5);
@@ -97,7 +97,8 @@ public class ScriptController extends Controller {
   }
   
   public Result createBySamplers(String projectId) {
-    
+	MixProject mp = mpService.get(projectId);
+	
     JsonNode data = request().body().asJson();
     int i = 0;
     // configuration information for script
@@ -166,12 +167,12 @@ public class ScriptController extends Controller {
       i ++;
       
     }
-    JMeterScript script = jmeterFactory.createJmeterScript(scriptName, loops, users, ramup, false, duration, projectId, arraySamplers);
+    JMeterScript script = jmeterFactory.createJmeterScript(scriptName, loops, users, ramup, false, duration, mp.getPerformanceId(), arraySamplers);
     script.setNumberEngines(number_engines);
     
     service.create(script);
     
-    return ok(Json.parse(script.toString()));
+    return status(201, Json.parse(script.toString()));
   }
   
   public Result get(String projectId, String id) {
