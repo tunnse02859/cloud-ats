@@ -115,7 +115,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     
     PerformanceProject performanceProject = null;
     try {
-      performanceProject = factory.create("Test Performance");
+      performanceProject = factory.create("Test Performance", "");
       Assert.fail();
     } catch (IllegalStateException e) {
 
@@ -127,7 +127,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     Assert.assertNotNull(this.context.getSpace());
     
     try {
-      performanceProject = factory.create("Test Performance");
+      performanceProject = factory.create("Test Performance", "");
     } catch (IllegalStateException e) {
       e.printStackTrace();
       Assert.fail();
@@ -148,7 +148,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    PerformanceProject performanceProject = factory.create("Test Performance");
+    PerformanceProject performanceProject = factory.create("Test Performance", "");
     service.create(performanceProject);
     
     JMeterFactory factory = new JMeterFactory();
@@ -168,7 +168,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    PerformanceProject performanceProject = factory.create("Test Performance");
+    PerformanceProject performanceProject = factory.create("Test Performance", "");
     service.create(performanceProject);
     
     JMeterFactory factory = new JMeterFactory();

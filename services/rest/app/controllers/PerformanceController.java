@@ -147,7 +147,7 @@ public class PerformanceController extends Controller {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
     
-    PerformanceProject project = projectFactory.create(name);
+    PerformanceProject project = projectFactory.create(name, "");
     projectService.create(project);
     return ok(project.getId());
   }

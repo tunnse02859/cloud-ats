@@ -74,7 +74,7 @@ public class SeleniumUploadProjectService extends AbstractMongoCRUD<SeleniumUplo
       context.setSpace(spaceService.get(spaceSource.getString("_id")));
     }
     
-    SeleniumUploadProject project = factory.create(context, (String) source.get("name"));
+    SeleniumUploadProject project = factory.create(context, (String) source.get("name"), source.get("mix_id") != null ? (String) source.get("mix_id") : "");
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

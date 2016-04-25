@@ -204,7 +204,7 @@ public class KeywordController extends Controller {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
     int valueDelay = json.get("valueDelay").asInt();
-    KeywordProject project = keywordProjectFactory.create(context, name);
+    KeywordProject project = keywordProjectFactory.create(context, name, "");
     project.setValueDelay(valueDelay);
     keywordProjectService.create(project);
     return status(201, project.getId());

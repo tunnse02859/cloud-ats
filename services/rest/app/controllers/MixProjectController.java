@@ -96,16 +96,21 @@ public class MixProjectController extends Controller {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
     
-    PerformanceProject performance = performanceFactory.create(name);
+    String id = UUID.randomUUID().toString();
+    
+    PerformanceProject performance = performanceFactory.create(name, id);
+    performance.put("mix_id", id);
     performanceService.create(performance);
     
-    KeywordProject keyword = keywordFactory.create(context, name);
+    KeywordProject keyword = keywordFactory.create(context, name, id);
+    keyword.put("mix_id", id);
     keywordService.create(keyword);
     
-    SeleniumUploadProject selenium = seleniumFactory.create(context, name);
+    SeleniumUploadProject selenium = seleniumFactory.create(context, name, id);
+    selenium.put("mix_id", id);
     seleniumService.create(selenium);
     
-    MixProject mp = mixProjectFactory.create(UUID.randomUUID().toString(), name, keyword.getId(), performance.getId(), selenium.getId(), context.getUser().getEmail());
+    MixProject mp = mixProjectFactory.create(id, name, keyword.getId(), performance.getId(), selenium.getId(), context.getUser().getEmail());
     mpService.create(mp);
     
     return ok(Json.parse(mp.toString()));

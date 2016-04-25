@@ -127,6 +127,7 @@ public class DashboardController extends Controller {
           object.put("F", numberOfFailedCase);
           object.put("S", 0);
           object.put("_id", project.getId());
+          object.put("mix_id", project.getMixId());
           insert(listRecentProject, object, "created_date", true, 10, true);
         }
       }
@@ -194,6 +195,7 @@ public class DashboardController extends Controller {
             
             double errorPercentCoverage = errorPercent / numberOfScript;
             if (errorPercentCoverage != 0 ) {
+              object.put("mix_id", project.getMixId());
               object.put("samples", numberOfSamples);
               object.put("error_percent", errorPercentCoverage);
               object.put("users", numberOfUser);
@@ -250,6 +252,7 @@ public class DashboardController extends Controller {
         object.put("_id", project.getId());
         object.put("name", project.getString("name"));
         object.put("numberCase", count);
+        object.put("mix_id", project.getMixId());
         insertByNumberOfCase(topBiggestKeyword, object, 5);
       }
     }
@@ -386,6 +389,7 @@ public class DashboardController extends Controller {
           object.put("name", project.getString("name"));
           object.put("created_date", formater.format(keywordJob.getCreatedDate()));
           object.put("_id", project.getId());
+          object.put("mix_id", project.getMixId());
           int totalCases = numberOfFailedCase + numberOfPassedCase;
           double percentPass = (numberOfPassedCase * 100.0) / totalCases;
           double percentFail = (numberOfFailedCase * 100.0) /totalCases; 

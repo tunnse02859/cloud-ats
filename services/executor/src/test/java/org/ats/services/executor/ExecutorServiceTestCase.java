@@ -188,7 +188,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   @Test
   public void testExecutePerformanceProject() throws Exception {
-    PerformanceProject project = perfFactory.create("Test Performance");
+    PerformanceProject project = perfFactory.create("Test Performance", "");
     
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler loginPost = factory.createHttpPost("Login codeproject post", 
@@ -246,7 +246,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   @Test
   public void testExecuteKeywordProject() throws Exception {
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
@@ -298,7 +298,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   @Test
   public void testExecutorKeywordUpload() throws Exception {
-    SeleniumUploadProject uploadProject = uploadProjectFactory.create(context, "Upload Project");
+    SeleniumUploadProject uploadProject = uploadProjectFactory.create(context, "Upload Project", "");
     
     FileInputStream fis = null;
     File uploadFile = new File("/executor/src/test/resources/TestGithubUpload.zip");

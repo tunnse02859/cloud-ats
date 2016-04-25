@@ -159,7 +159,7 @@ public class TestNgReport extends AbstractEventTestCase {
   @Test
   public void testParseTestNgContent() throws Exception {
 
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
 
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));

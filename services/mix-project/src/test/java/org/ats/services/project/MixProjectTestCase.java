@@ -78,6 +78,9 @@ public class MixProjectTestCase {
         String id = UUID.randomUUID().toString();
         MixProject mp = mpFactory.create(id, project.getName(), null, project.getId(), null, object.getString("_id"));
         mpService.create(mp);
+        
+        project.put("mix_id", id);
+        performanceProjectService.update(project);
       }
     }
     
@@ -92,6 +95,9 @@ public class MixProjectTestCase {
         String id = UUID.randomUUID().toString();
         MixProject mp = mpFactory.create(id, project.getString("name"), project.getId(), null, null, object.getString("_id"));
         mpService.create(mp);
+        
+        project.put("mix_id", id);
+        keywordProjectService.update(project);
       }
     }
     Assert.assertEquals(mpService.list().count(), numberKeys + numberPers);
@@ -104,9 +110,13 @@ public class MixProjectTestCase {
         String id = UUID.randomUUID().toString();
         MixProject mp = mpFactory.create(id, project.getString("name"), null, null, project.getId(), object.getString("_id"));
         mpService.create(mp);
+        
+        project.put("mix_id", id);
+        seleniumService.update(project);
       }
     }
     Assert.assertEquals(mpService.list().count(), numberKeys + numberPers + numberUploads);
+    
   }
   
 }

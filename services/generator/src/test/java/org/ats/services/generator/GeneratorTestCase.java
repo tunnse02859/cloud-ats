@@ -176,7 +176,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   @Test
   public void testGeneratePerformanceProject() throws IOException {
 
-    PerformanceProject project = perfFactory.create("Test Performance");
+    PerformanceProject project = perfFactory.create("Test Performance", "");
     
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler loginPost = factory.createHttpPost("Login codeproject post", 
@@ -248,7 +248,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   @Test
   public void testGenerateKeywordProjectWithVersionSelenium() throws IOException {
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
@@ -296,7 +296,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   @Test
   public void testGenerateKeywordProject() throws IOException {
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
@@ -342,7 +342,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   @Test
   public void testGenerateKeywordProjectWithOptions() throws IOException {
     
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
     
     project.setValueDelay(3);
     project.setVersionSelenium("2.45.0");
@@ -391,7 +391,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
   
   @Test
   public void testGenerateKeywordProjectWithBrowserVersion() throws IOException {
-    KeywordProject project = keywordProjectFactory.create(context, "Full Example");
+    KeywordProject project = keywordProjectFactory.create(context, "Full Example", "");
     
     ObjectMapper m = new ObjectMapper();
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));

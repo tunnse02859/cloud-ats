@@ -42,7 +42,7 @@ public class SeleniumUploadProject extends AbstractEntity<SeleniumUploadProject>
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       @Assisted("context") OrganizationContext context,
-      @Assisted("name") String name) {
+      @Assisted("name") String name, @Assisted("mix_id") String mix_id) {
     this.tenantRefFactory = tenantRefFactory;
     this.userRefFactory = userRefFactory;
     this.spaceRefFactory = spaceRefFactory;
@@ -52,6 +52,7 @@ public class SeleniumUploadProject extends AbstractEntity<SeleniumUploadProject>
     
     User user = context.getUser();
     this.put("name", name);
+    this.put("mix_id", mix_id);
     this.put("creator", new BasicDBObject("_id", user.getEmail()));
     
     if(context.getSpace() != null) {
@@ -63,6 +64,14 @@ public class SeleniumUploadProject extends AbstractEntity<SeleniumUploadProject>
     this.setActive(true);
     this.put("_id", UUID.randomUUID().toString());
     setStatus(Status.READY);
+  }
+  
+  public void setMixId(String id) {
+    this.put("mix_id", id);
+  }
+  
+  public String getMixId() {
+    return this.getString("mix_id");
   }
   
   public void setNameProjectUpload(String name) {

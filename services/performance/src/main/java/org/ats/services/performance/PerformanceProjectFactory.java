@@ -12,5 +12,5 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface PerformanceProjectFactory {
   
-  public PerformanceProject create(@Assisted("name") String name);
+  public PerformanceProject create(@Assisted("name") String name, @Assisted("mix_id") String mix_id);
 }

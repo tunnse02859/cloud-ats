@@ -73,7 +73,7 @@ public class PerformanceProjectService extends AbstractMongoCRUD<PerformanceProj
     }
     
     BasicDBObject object = (BasicDBObject) source.get("creator");
-    PerformanceProject project = factory.create((String) source.get("name"));
+    PerformanceProject project = factory.create((String) source.get("name"), source.get("mix_id") != null ? (String) source.get("mix_id") : "");
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

@@ -46,7 +46,7 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       @Assisted("context") OrganizationContext context,
-      @Assisted("name") String name) {
+      @Assisted("name") String name, @Assisted("mix_id") String mix_id) {
     
     this.tenantRefFactory = tenantRefFactory;
     this.userRefFactory = userRefFactory;
@@ -57,6 +57,7 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
     
     User user = context.getUser();
     this.put("name", name);
+    this.put("mix_id", mix_id);
     this.put("creator", new BasicDBObject("_id", user.getEmail()));
     
     if (context.getSpace() != null) {
@@ -76,6 +77,14 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
   
   public Status getStatus() {
     return this.get("status") != null ? Status.valueOf(this.getString("status")) : Status.READY;
+  }
+  
+  public void setMixId(String id) {
+    this.put("mix_id", id);
+  }
+  
+  public String getMixId() {
+    return this.getString("mix_id");
   }
   
   public void setStatus(Status status) {

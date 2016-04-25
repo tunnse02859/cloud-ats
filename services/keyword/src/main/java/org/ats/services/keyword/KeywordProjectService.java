@@ -81,7 +81,8 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
     
     BasicDBObject object = (BasicDBObject) source.get("creator");
     
-    KeywordProject project = factory.create(context, (String) source.get("name"));
+    
+    KeywordProject project = factory.create(context, (String) source.get("name"), source.get("mix_id") != null ? (String) source.get("mix_id") : "");
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));

@@ -173,15 +173,15 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     //create performance project
-    PerformanceProject performance = performanceFactory.create("performance");
+    PerformanceProject performance = performanceFactory.create("performance", "");
     performanceProjectService.create(performance);
     
     //create keyword project
-    KeywordProject keyword = keywordFactory.create(context, "keyword");
+    KeywordProject keyword = keywordFactory.create(context, "keyword", "");
     keywordProjectService.create(keyword);
     
     //create selenium project
-    SeleniumUploadProject selenium = seleniumFactory.create(context, "selenium");
+    SeleniumUploadProject selenium = seleniumFactory.create(context, "selenium", "");
     seleniumService.create(selenium);
     
     //create mix project

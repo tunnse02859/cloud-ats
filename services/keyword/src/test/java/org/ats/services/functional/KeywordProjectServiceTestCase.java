@@ -155,7 +155,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     KeywordProject project = null;
 
     try {
-      project = funcFactory.create(context, "Jira Automation");
+      project = funcFactory.create(context, "Jira Automation", "fake");
       Assert.fail();
     } catch (IllegalStateException e) {
 
@@ -168,7 +168,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertNotNull(this.context.getTenant());
 
     try {
-      project = funcFactory.create(context, "Jira Automation");
+      project = funcFactory.create(context, "Jira Automation", "fake");
     } catch (IllegalStateException e) {
       e.printStackTrace();
       Assert.fail();
@@ -190,7 +190,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create(context, "Jira Automation");
+    KeywordProject project = funcFactory.create(context, "Jira Automation", "fake");
     funcService.create(project);
     
     ObjectMapper m = new ObjectMapper();
@@ -233,7 +233,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create(context, "Jira Automation");
+    KeywordProject project = funcFactory.create(context, "Jira Automation", "fake");
     String projectId = project.getId();
     
     ObjectMapper m = new ObjectMapper();

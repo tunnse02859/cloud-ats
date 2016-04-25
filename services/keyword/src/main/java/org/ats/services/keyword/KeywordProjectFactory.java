@@ -16,6 +16,6 @@ public interface KeywordProjectFactory {
   
   public static final String DEFAULT_INIT_VERSION_SELENIUM = "2.48.2";
   
-  public KeywordProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name);
+  public KeywordProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name, @Assisted("mix_id") String mix_id);
   
 }

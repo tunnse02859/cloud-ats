@@ -136,7 +136,7 @@ public class TestJmeterReport extends AbstractEventTestCase {
   @Test
   public void testParseJtlContent() throws Exception {
 
-    PerformanceProject project = perfFactory.create("Test Performance");
+    PerformanceProject project = perfFactory.create("Test Performance", "");
 
     JMeterFactory factory = new JMeterFactory();
     JMeterSampler loginPost = factory.createHttpPost("Login codeproject post",

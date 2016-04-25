@@ -39,7 +39,7 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       OrganizationContext context,
-      @Assisted("name") String name) {
+      @Assisted("name") String name, @Assisted("mix_id") String mix_id) {
     
     this.tenantRefFactory = tenantRefFactory;
     this.userRefFactory = userRefFactory;
@@ -51,7 +51,7 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
     User user = context.getUser();
     this.put("name", name);
     this.put("creator", new BasicDBObject("_id", user.getEmail()));
-    
+    this.put("mix_id", mix_id);
     if (context.getSpace() != null) {
       this.put("space", new BasicDBObject("_id", context.getSpace().getId()));
     }
@@ -70,6 +70,14 @@ public class PerformanceProject extends AbstractEntity<PerformanceProject> {
   
   public String getId() {
     return this.getString("_id");
+  }
+  
+  public void setMixId(String id) {
+    this.put("mix_id", id);
+  }
+  
+  public String getMixId() {
+    return this.getString("mix_id");
   }
   
   public Status getStatus() {

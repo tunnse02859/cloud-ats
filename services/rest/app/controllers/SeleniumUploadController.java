@@ -172,7 +172,7 @@ public class SeleniumUploadController extends Controller {
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
-    SeleniumUploadProject project = projectFactory.create(context, name);
+    SeleniumUploadProject project = projectFactory.create(context, name, "");
     seleniumUploadService.create(project);
     return status(201, project.getId());
   }

@@ -141,7 +141,7 @@ private AuthenticationService<User> authService;
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    PerformanceProject performanceProject = factory.create("Test Performance");
+    PerformanceProject performanceProject = factory.create("Test Performance","");
     service.create(performanceProject);
     
     JMeterFactory factory = new JMeterFactory();
