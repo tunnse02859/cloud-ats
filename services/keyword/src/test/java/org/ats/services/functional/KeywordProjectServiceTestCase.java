@@ -199,7 +199,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
@@ -208,7 +208,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     cases.add(caseRefFactory.create(caze.getId()));
     
     //an other case
-    caze = caseFactory.create(project.getId(), "test2", null);
+    caze = caseFactory.create(project.getId(), "test2", null, "haint@cloudats.net");
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     

@@ -14,5 +14,8 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface CaseFactory {
 
-  public Case create(@Assisted("projectId") String projectId, @Assisted("name") String name, @Assisted("dataDriven") DataDrivenReference ref);
+  public Case create(@Assisted("projectId") String projectId, 
+      @Assisted("name") String name,
+      @Assisted("dataDriven") DataDrivenReference ref,
+      @Assisted("creator") String creator);
 }

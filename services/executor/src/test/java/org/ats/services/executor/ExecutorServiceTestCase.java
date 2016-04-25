@@ -252,7 +252,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
     JsonNode stepsNode = rootNode.get("steps");
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -265,7 +265,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
     stepsNode = rootNode.get("steps");
     cases.clear();
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }

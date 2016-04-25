@@ -222,7 +222,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create(keyword.getId(), "testcase", null);
+    Case caze = caseFactory.create(keyword.getId(), "testcase", null, "haint@cloudats.net");
     
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
@@ -231,7 +231,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     cases.add(caseRefFactory.create(caze.getId()));
     
     //test case 2
-    caze = caseFactory.create(keyword.getId(), "testcase2", null);
+    caze = caseFactory.create(keyword.getId(), "testcase2", null, "haint@cloudats.net");
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     

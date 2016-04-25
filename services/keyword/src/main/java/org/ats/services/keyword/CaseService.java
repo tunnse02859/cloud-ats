@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.datadriven.DataDrivenReference;
 import org.ats.services.organization.base.AbstractMongoCRUD;
@@ -50,6 +51,9 @@ public class CaseService extends AbstractMongoCRUD<Case>{
   @Inject
   private CaseFactory caseFactory;
   
+  @Inject 
+  private OrganizationContext context;
+  
   @Inject
   CaseService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
@@ -77,7 +81,8 @@ public class CaseService extends AbstractMongoCRUD<Case>{
       driven = drivenRefFactory.create(json.getString("_id"));
     }
     
-    Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven);
+    String creator = source.get("creator") == null ? context.getUser().getEmail() : (String) source.get("creator");
+    Case caze = caseFactory.create(dbObj.getString("project_id"), dbObj.getString("name"), driven, creator);
     caze.put("_id", dbObj.get("_id"));
     
     Object date = dbObj.get("created_date");

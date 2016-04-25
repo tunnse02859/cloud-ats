@@ -120,6 +120,7 @@ public class SuiteController extends Controller {
     else {
       String name = node.get("name").asText();
       boolean mode = node.get("sequence_mode").asBoolean();
+      if (suite.getCreator() == null) suite.put("creator", context.getUser().getEmail());
       
       //Update only suite info
       if (node.get("cases") == null) {

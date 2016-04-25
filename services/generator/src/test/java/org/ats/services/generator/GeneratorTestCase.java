@@ -255,7 +255,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -269,7 +269,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     stepsNode = rootNode.get("steps");
     cases.clear();
     
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -303,7 +303,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -317,7 +317,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     stepsNode = rootNode.get("steps");
     cases.clear();
     
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -352,7 +352,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -366,7 +366,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     stepsNode = rootNode.get("steps");
     cases.clear();
     
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -398,7 +398,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -414,7 +414,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     stepsNode = rootNode.get("steps");
     cases.clear();
     
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }

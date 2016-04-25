@@ -160,7 +160,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create("fake", "test", dataRef);
+    Case caze = caseFactory.create("fake", "test", dataRef, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -205,7 +205,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create("fake", "test", dataRef);
+    Case caze = caseFactory.create("fake", "test", dataRef, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -251,7 +251,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create("fake", "test", dataRef);
+    Case caze = caseFactory.create("fake", "test", dataRef, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -264,7 +264,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     JsonNode stepsNode2 = rootNode2.get("steps");
     
-    Case caze2 = caseFactory.create("fake", "test2", null);
+    Case caze2 = caseFactory.create("fake", "test2", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode2) {
       caze2.addAction(json);
     }
@@ -309,7 +309,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
-    Case caze = caseFactory.create("fake", "test", dataRef);
+    Case caze = caseFactory.create("fake", "test", dataRef, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -322,7 +322,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     
     JsonNode stepsNode2 = rootNode2.get("steps");
     
-    Case caze2 = caseFactory.create("fake", "test2", dataRef);
+    Case caze2 = caseFactory.create("fake", "test2", dataRef, "haint@cloudats.net");
     for (JsonNode json : stepsNode2) {
       caze2.addAction(json);
     }

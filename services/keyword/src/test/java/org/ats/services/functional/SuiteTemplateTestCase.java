@@ -174,7 +174,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
 
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create("fake", "test", null);
+    Case caze = caseFactory.create("fake", "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -207,7 +207,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     List<CaseReference> cases = new ArrayList<CaseReference>();
     
     //case1
-    Case caze = caseFactory.create("fake", "test", null);
+    Case caze = caseFactory.create("fake", "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -219,7 +219,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     JsonNode rootNode2 = m.readTree(new File("src/test/resources/" + jsonFile2));
     
     JsonNode stepsNode2 = rootNode2.get("steps");
-    Case caze2 = caseFactory.create("fake", "test2", null);
+    Case caze2 = caseFactory.create("fake", "test2", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode2) {
       caze2.addAction(json);
     }
@@ -250,7 +250,7 @@ public class SuiteTemplateTestCase extends AbstractEventTestCase {
     JsonNode stepsNode = rootNode.get("steps");
 
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create("fake", "test", null);
+    Case caze = caseFactory.create("fake", "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }

@@ -9,10 +9,13 @@ import java.util.UUID;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.datadriven.DataDriven;
+import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.User;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
 
@@ -24,6 +27,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -41,6 +45,10 @@ public class CaseController extends Controller {
   
   @Inject MixProjectService mpService;
   
+  @Inject OrganizationContext context;
+  
+  @Inject UserService userService;
+  
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -48,13 +56,19 @@ public class CaseController extends Controller {
     PageList<Case> list = caseService.getCases(mp.getKeywordId());
     list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
-    ArrayNode array = Json.newObject().arrayNode();
+    BasicDBList array = new BasicDBList();
     while(list.hasNext()) {
       for (Case caze : list.next()) {
-        array.add(Json.parse(caze.toString()));
+        String email = caze.getCreator();
+        User user = userService.get(email);
+        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        caze.put("creator", userObj);
+        caze.put("created_date", caze.getCreatedDate().getTime());
+        array.add(caze);
       }
     }
-    return ok(array);
+    mp.put("cases", array);
+    return ok(Json.parse(mp.toString()));
   }
   
   public Result references(String projectId) {
@@ -76,7 +90,7 @@ public class CaseController extends Controller {
     
     JsonNode node = request().body().asJson();
     String caseName = node.get("name").asText();
-    Case caze = caseFactory.create(mp.getKeywordId(), caseName, null);
+    Case caze = caseFactory.create(mp.getKeywordId(), caseName, null, context.getUser().getEmail());
     for(JsonNode action:node.get("steps")) {
       caze.addAction(action); 
     }
@@ -131,11 +145,13 @@ public class CaseController extends Controller {
   public Result get(String projectId, String caseId) {
     
     Case caze = caseService.get(caseId);
-    if (caze.getDataDriven() != null) {
-      DataDriven data = caze.getDataDriven().get();
-      caze.put("data_source", data.getDataSource());
-      caze.put("data_name", data.getName());
-    }
+//    if (caze.getDataDriven() != null) {
+//      DataDriven data = caze.getDataDriven().get();
+//      caze.put("data_source", data.getDataSource());
+//      caze.put("data_name", data.getName());
+//    }
+    MixProject project = mpService.get(projectId);
+    caze.put("project", project.getName());
     return ok(Json.parse(caze.toString()));
   }
   

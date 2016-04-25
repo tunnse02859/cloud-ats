@@ -166,7 +166,7 @@ public class TestNgReport extends AbstractEventTestCase {
     
     JsonNode stepsNode = rootNode.get("steps");
     List<CaseReference> cases = new ArrayList<CaseReference>();
-    Case caze = caseFactory.create(project.getId(), "test", null);
+    Case caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
@@ -179,7 +179,7 @@ public class TestNgReport extends AbstractEventTestCase {
     rootNode = m.readTree(new File("src/test/resources/acceptAlert.json"));
     stepsNode = rootNode.get("steps");
     cases.clear();
-    caze = caseFactory.create(project.getId(), "test", null);
+    caze = caseFactory.create(project.getId(), "test", null, "haint@cloudats.net");
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
