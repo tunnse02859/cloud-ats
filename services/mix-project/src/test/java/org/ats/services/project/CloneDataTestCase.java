@@ -190,7 +190,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     
     //create upload jmx script file
     String jmeterContent = StringUtil.readStream(new FileInputStream("src/test/resources/test.jmx"));
-    JMeterScript script = jmeterFactory.createRawJmeterScript(performance.getId(), "Test Script", jmeterContent);
+    JMeterScript script = jmeterFactory.createRawJmeterScript(performance.getId(), "Test Script", "haint@cloudats.net", jmeterContent);
     script.setLoops(2);
     script.setNumberEngines(2);
     script.setRamUp(5);
@@ -204,12 +204,12 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     
     JMeterScript jmeter = jmeterFactory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,performance.getId(), 
+        1, 100, 5, false, 0,performance.getId(), "haint@cloudats.net",
         loginPost);
     jmeter.setNumberEngines(4);
     JMeterScript newJMeter = jmeterFactory.createJmeterScript(
         "New Script",
-        1, 100, 5, false, 0, performance.getId(), 
+        1, 100, 5, false, 0, performance.getId(), "haint@cloudats.net",
         loginPost);
     
     newJMeter.setNumberEngines(5);

@@ -192,17 +192,17 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     
     JMeterScript loginScript = factory.createJmeterScript(
         "Login",
-        1, 20, 5, false, 0, project.getId(), 
+        1, 20, 5, false, 0, project.getId(), "haint@cloudats.net",
         loginPost);
     loginScript.setNumberEngines(2);
     jmeterService.create(loginScript);
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
-        "GotoArticle", 1, 20, 5, false, 0, project.getId(), gotoArticle);
+        "GotoArticle", 1, 20, 5, false, 0, project.getId(), "haint@cloudats.net", gotoArticle);
     gotoArticleScript.setNumberEngines(1);
     jmeterService.create(gotoArticleScript);
     
-    JMeterScript rawScript = factory.createRawJmeterScript(project.getId(), "rawUpload",
+    JMeterScript rawScript = factory.createRawJmeterScript(project.getId(), "haint@cloudats.net", "rawUpload",
         StringUtil.readStream(new FileInputStream("src/test/resources/multiple_thread_group.jmx")));
     
     rawScript.setNumberEngines(1);
@@ -211,7 +211,7 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     rawScript.setLoops(2);
     jmeterService.create(rawScript);
     
-    JMeterScript rawCsvScript = factory.createRawJmeterScript(project.getId(), "rawUpload",
+    JMeterScript rawCsvScript = factory.createRawJmeterScript(project.getId(), "rawUpload","haint@cloudats.net",
         StringUtil.readStream(new FileInputStream("src/test/resources/multiple_thread_group.jmx")));
     
     rawCsvScript.setNumberEngines(1);

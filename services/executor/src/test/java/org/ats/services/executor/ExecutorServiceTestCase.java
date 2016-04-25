@@ -208,14 +208,14 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     JMeterScript loginScript = factory.createJmeterScript(
         "LoginCodeProject",
-        1, 20, 5, false, 0, project.getId(), 
+        1, 20, 5, false, 0, project.getId(), "haint@cloudats.net",
         loginPost);
     loginScript.setNumberEngines(1);
     jmeterService.create(loginScript);
     
     JMeterScript gotoArticleScript = factory.createJmeterScript(
         "GoToArticle", 
-        1, 20, 5, false, 0, project.getId(), 
+        1, 20, 5, false, 0, project.getId(), "haint@cloudats.net",
         gotoArticle, google);
     gotoArticleScript.setNumberEngines(2);
     jmeterService.create(gotoArticleScript);

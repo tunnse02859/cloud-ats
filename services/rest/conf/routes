@@ -114,6 +114,7 @@ POST	/api/v1/project/performance/:projectId/script				@controllers.ScriptControl
 GET		/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptController.get(projectId, id)
 DELETE	/api/v1/project/performance/:projectId/script/:id			@controllers.ScriptController.delete(projectId, id)
 PUT		/api/v1/project/performance/:projectId/script				@controllers.ScriptController.update(projectId)
+GET		/api/v1/project/performance/:projectId/script/:scriptId/clone	@controllers.ScriptController.cloneScript(projectId, scriptId)
 
 # Dashboard controller
 GET		/api/v1/dashboard/summary									@controllers.DashboardController.summary()

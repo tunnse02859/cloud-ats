@@ -145,11 +145,11 @@ public class TestJmeterReport extends AbstractEventTestCase {
 
     JMeterSampler gotoArticle = factory.createHttpGet("Go to top article", "http://www.codeproject.com/script/Articles/TopArticles.aspx?ta_so=5", null, 0);
 
-    JMeterScript loginScript = factory.createJmeterScript("LoginCodeProject", 1, 20, 5, false, 0, project.getId(), loginPost);
+    JMeterScript loginScript = factory.createJmeterScript("LoginCodeProject", 1, 20, 5, false, 0, project.getId(), "haint@cloudats.net", loginPost);
 
     jmeterService.create(loginScript);
 
-    JMeterScript gotoArticleScript = factory.createJmeterScript("GoToArticle", 1, 20, 5, false, 0, project.getId(),gotoArticle);
+    JMeterScript gotoArticleScript = factory.createJmeterScript("GoToArticle", 1, 20, 5, false, 0, project.getId(), "haint@cloudats.net", gotoArticle);
 
     jmeterService.create(gotoArticleScript);
 

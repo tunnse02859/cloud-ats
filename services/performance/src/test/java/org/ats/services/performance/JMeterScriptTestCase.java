@@ -117,7 +117,7 @@ private AuthenticationService<User> authService;
     JMeterSampler signoutRequest = factory.createHttpGet("Signout", "http://localhost:9000/signout", null, 0);
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,projectId, 
+        1, 100, 5, false, 0,projectId, "haint@cloudats.net",
         signinRequest, loginPost, oRequest, signoutRequest);
     
     jmeter.setName("Test Script");
@@ -151,7 +151,7 @@ private AuthenticationService<User> authService;
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,performanceProject.getId(), 
+        1, 100, 5, false, 0,performanceProject.getId(), "haint@cloudats.net",
         loginPost);
     jmeter.setNumberEngines(4);
     jmeterService.create(jmeter);

@@ -32,15 +32,16 @@ public class JMeterScript extends BasicDBObject {
    * The constructor for raw jmeter script upload
    * @param project_id the project id
    */
-  JMeterScript(String project_id, String name, String raw_content) {
+  JMeterScript(String project_id, String name, String creator, String raw_content) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("project_id", project_id);
     this.put("name", name);
     this.put("raw", true);
     this.put("raw_content", raw_content);
+    this.put("creator", creator);
   }
 
-  JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String project_id, List<JMeterSampler>  samplers) {
+  JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String project_id, String creator, List<JMeterSampler>  samplers) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("name", testName);
     this.put("loops", loops);
@@ -48,6 +49,7 @@ public class JMeterScript extends BasicDBObject {
     this.put("ram_up", ramUp);
     this.put("scheduler", scheduler);
     this.put("duration", duration);
+    this.put("creator", creator);
     this.samplers.addAll(samplers);
     
     BasicDBList list = new BasicDBList();
@@ -59,7 +61,11 @@ public class JMeterScript extends BasicDBObject {
     this.put("project_id", project_id);
     this.put("raw", false);
   }
-
+  
+  public String getCreator() {
+    return this.getString("creator");
+  }
+  
   public boolean isRaw() {
     return this.getBoolean("raw");
   }

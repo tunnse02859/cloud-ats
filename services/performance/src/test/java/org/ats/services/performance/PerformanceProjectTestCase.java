@@ -152,7 +152,7 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     service.create(performanceProject);
     
     JMeterFactory factory = new JMeterFactory();
-    JMeterScript script = factory.createRawJmeterScript(performanceProject.getId(), "Test Script", jmeterContent);
+    JMeterScript script = factory.createRawJmeterScript(performanceProject.getId(), "Test Script", "haint@cloudats.net", jmeterContent);
     
     jmeterService.create(script);
     PageList<JMeterScript> pages = jmeterService.getJmeterScripts(performanceProject.getId());
@@ -178,12 +178,12 @@ public class PerformanceProjectTestCase extends AbstractEventTestCase{
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0,performanceProject.getId(), 
+        1, 100, 5, false, 0,performanceProject.getId(), "haint@cloudats.net",
         loginPost);
     jmeter.setNumberEngines(4);
     JMeterScript newJMeter = factory.createJmeterScript(
         "New Script",
-        1, 100, 5, false, 0, performanceProject.getId(), 
+        1, 100, 5, false, 0, performanceProject.getId(), "haint@cloudats.net",
         loginPost);
     newJMeter.setNumberEngines(5);
     jmeterService.create(jmeter, newJMeter);

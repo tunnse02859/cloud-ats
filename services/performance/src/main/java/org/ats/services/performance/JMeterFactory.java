@@ -33,16 +33,16 @@ public class JMeterFactory {
     return Rythm.render(template, params);
   }
   
-  public JMeterScript createJmeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String projectId, JMeterSampler... samplers) {
+  public JMeterScript createJmeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String projectId, String creator, JMeterSampler... samplers) {
     List<JMeterSampler> list = new ArrayList<JMeterSampler>();
     for (JMeterSampler sampler : samplers) {
       list.add(sampler);
     }
-    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, projectId, list);
+    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, projectId, creator, list);
   }
   
-  public JMeterScript createRawJmeterScript(String projectId, String name, String rawContent) {
-    return new JMeterScript(projectId, name, rawContent);
+  public JMeterScript createRawJmeterScript(String projectId, String name, String creator, String rawContent) {
+    return new JMeterScript(projectId, name, creator, rawContent);
   }
   
   public String createArguments(JMeterArgument... arguments) throws IOException {

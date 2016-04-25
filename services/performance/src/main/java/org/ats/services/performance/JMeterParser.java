@@ -158,6 +158,6 @@ public class JMeterParser {
     }
     // End find samplers
     
-    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, getProjectId(), samplers);
+    return new JMeterScript(testName, loops, numberThreads, ramUp, scheduler, duration, getProjectId(), "", samplers);
   }
 }

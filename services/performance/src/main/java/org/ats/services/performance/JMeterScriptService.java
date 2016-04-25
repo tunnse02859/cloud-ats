@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.ats.services.performance.JMeterSampler.Method;
@@ -31,7 +32,9 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
 
   /** .*/
   private final String COL_NAME = "performance-jmeter-script";
-
+  
+  @Inject OrganizationContext context;
+  
   @Inject
   JMeterScriptService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
@@ -49,9 +52,9 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
   @Override
   public JMeterScript transform(DBObject source) {
     BasicDBObject obj = (BasicDBObject) source;
-    
+    String creator = source.get("creator") == null ? context.getUser().getEmail() : (String) source.get("creator");
     if (source.get("raw") != null && obj.getBoolean("raw")) {
-      JMeterScript script = new JMeterScript(obj.getString("project_id"), obj.getString("name"), obj.getString("raw_content"));
+      JMeterScript script = new JMeterScript(obj.getString("project_id"), obj.getString("name"), creator, obj.getString("raw_content"));
       script.put("_id", obj.getString("_id"));
       script.setLoops(obj.getInt("loops"));
       script.setNumberThreads(obj.getInt("number_threads"));
@@ -108,7 +111,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
         throw new RuntimeException(e);
       }
     }
-    JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, projectId, samplers);
+    JMeterScript script = new JMeterScript(name, loops, number_threads, ram_up, scheduler, duration, projectId, creator, samplers);
     script.setNumberEngines(obj.get("number_engines") != null ? obj.getInt("number_engines") : 1);
     script.put("_id", source.get("_id"));
     return script;

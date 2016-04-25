@@ -40,7 +40,7 @@ public class JMeterParserTestCase {
     
     JMeterScript jmeter = factory.createJmeterScript(
         "Test Name",
-        1, 100, 5, false, 0, projectId,
+        1, 100, 5, false, 0, projectId, "haint@cloudats.net",
         signinRequest, loginPost, oRequest, signoutRequest);
     
     this.source = jmeter.transform();

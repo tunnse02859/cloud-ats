@@ -4,20 +4,25 @@
 package controllers;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
 import org.ats.service.blob.BlobService;
+import org.ats.services.OrganizationContext;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.User;
 import org.ats.services.performance.CSV;
 import org.ats.services.performance.JMeterArgument;
 import org.ats.services.performance.JMeterFactory;
 import org.ats.services.performance.JMeterSampler;
-import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.JMeterSampler.Method;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptService;
@@ -56,6 +61,10 @@ public class ScriptController extends Controller {
   
   @Inject MixProjectService mpService;
   
+  @Inject UserService userService;
+  
+  @Inject OrganizationContext context;
+  
   public Result list(String projectId) {
 	MixProject mp = mpService.get(projectId);
     ArrayNode array = Json.newObject().arrayNode();
@@ -84,7 +93,7 @@ public class ScriptController extends Controller {
     }
      
       try {
-        JMeterScript script = jmeterFactory.createRawJmeterScript(mp.getPerformanceId(), name, StringUtil.readStream(new FileInputStream(file.getFile())));
+        JMeterScript script = jmeterFactory.createRawJmeterScript(mp.getPerformanceId(), name, context.getUser().getEmail(), StringUtil.readStream(new FileInputStream(file.getFile())));
         script.setNumberThreads(100);
         script.setNumberEngines(1);
         script.setRamUp(5);
@@ -167,7 +176,7 @@ public class ScriptController extends Controller {
       i ++;
       
     }
-    JMeterScript script = jmeterFactory.createJmeterScript(scriptName, loops, users, ramup, false, duration, mp.getPerformanceId(), arraySamplers);
+    JMeterScript script = jmeterFactory.createJmeterScript(scriptName, loops, users, ramup, false, duration, mp.getPerformanceId(), context.getUser().getEmail(), arraySamplers);
     script.setNumberEngines(number_engines);
     
     service.create(script);
@@ -264,6 +273,45 @@ public class ScriptController extends Controller {
     
     service.update(script);
     return status(202);
+  }
+  
+  public Result cloneScript(String projectId, String scriptId) throws IOException {
+    
+    String name = request().getQueryString("name");
+    
+    JMeterScript script = service.get(scriptId);
+    
+    // start to create new script
+    String id = UUID.randomUUID().toString();
+    
+    script.put("name", name);
+    script.put("_id", id);
+    script.put("created_date", new Date());
+    
+    service.create(script);
+    
+    // start to create new csv file for this cloned script
+    List<GridFSDBFile> files = fileService.find(new BasicDBObject("script_id", scriptId));
+    for (GridFSDBFile file : files) {
+      String file_id = UUID.randomUUID().toString();
+      
+      GridFSInputFile newFile = fileService.create(file.getInputStream());
+      newFile.put("_id", file_id);
+      newFile.put("script_id", id);
+      newFile.put("filename", file.getFilename());
+      
+      fileService.save(newFile);
+      script.addCSVFiles(new CSV(newFile.getId().toString(), newFile.getFilename()));
+    }
+    
+    script.put("created_date", script.getDate("created_date").getTime());
+    
+    String email = script.getCreator();
+    User user = userService.get(email);
+    BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+    script.put("creator", userObj);
+    
+    return ok(Json.parse(script.toString()));
   }
   
 }
