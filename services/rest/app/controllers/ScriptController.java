@@ -177,12 +177,15 @@ public class ScriptController extends Controller {
   
   public Result get(String projectId, String id) {
     
+    MixProject project =mpService.get(projectId);
+    
     JMeterScript script = service.get(id, "number_threads", "number_engines", "ram_up", "loops");
     if (script == null) return notFound();
     List<GridFSDBFile> files = fileService.find(new BasicDBObject("script_id", id));
     for (GridFSDBFile file : files) {
       script.addCSVFiles(new CSV(file.getId().toString(), file.getFilename()));
     }
+    script.put("projectName", project.getName());
     return status(200, Json.parse(script.toString()));
   }
   
