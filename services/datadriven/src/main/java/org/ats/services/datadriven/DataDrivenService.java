@@ -3,6 +3,7 @@
  */
 package org.ats.services.datadriven;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.ats.services.data.MongoDBService;
@@ -44,7 +45,8 @@ public class DataDrivenService extends AbstractMongoCRUD<DataDriven> {
   
   @Override
   public DataDriven transform(DBObject source) {
-    DataDriven driven = drivenFactory.create((String) source.get("name"), (String) source.get("data_source"));
+    String id = source.get("mix_id") == null ? UUID.randomUUID().toString() : (String)source.get("mix_id");
+    DataDriven driven = drivenFactory.create(id, (String) source.get("name"), (String) source.get("data_source"));
     driven.put("created_date", source.get("created_date"));
     driven.put("active", source.get("active"));
     driven.put("_id", source.get("_id"));

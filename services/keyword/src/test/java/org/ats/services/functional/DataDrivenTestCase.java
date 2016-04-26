@@ -145,7 +145,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    DataDriven data = drivenFactory.create("fake", "userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
     
     Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
     Assert.assertEquals(data.getSpace().getId(), this.space.getId());
@@ -190,7 +190,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    DataDriven data = drivenFactory.create("fake", "userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
     
     Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
     Assert.assertEquals(data.getSpace().getId(), this.space.getId());
@@ -235,7 +235,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    DataDriven data = drivenFactory.create("fake", "userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
     
     Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
     Assert.assertEquals(data.getSpace().getId(), this.space.getId());
@@ -293,7 +293,7 @@ public class DataDrivenTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    DataDriven data = drivenFactory.create("userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
+    DataDriven data = drivenFactory.create("fake", "userSource", StringUtil.readStream(new FileInputStream("src/test/resources/data.json")));
     
     Assert.assertEquals(data.getCreator().getId(), "haint@cloud-ats.net");
     Assert.assertEquals(data.getSpace().getId(), this.space.getId());

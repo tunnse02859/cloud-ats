@@ -12,5 +12,5 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface DataDrivenFactory {
 
-  public DataDriven create(@Assisted("name") String name, @Assisted("dataSource") String dataSource);
+  public DataDriven create(@Assisted("mix_id") String projectId, @Assisted("name") String name, @Assisted("dataSource") String dataSource);
 }

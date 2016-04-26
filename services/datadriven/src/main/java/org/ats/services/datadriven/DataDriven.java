@@ -40,7 +40,7 @@ public class DataDriven extends AbstractEntity<DataDriven> {
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
       OrganizationContext context,
-      @Assisted("name") String name, @Assisted("dataSource") String dataSource) {
+      @Assisted("mix_id") String projectId, @Assisted("name") String name, @Assisted("dataSource") String dataSource) {
     
     if (context == null || context.getUser() == null) 
       throw new IllegalStateException("You need logged in system to creat new data driven");
@@ -55,6 +55,7 @@ public class DataDriven extends AbstractEntity<DataDriven> {
     this.put("tenant", user.getTanent().toJSon());
     
     this.put("_id", UUID.randomUUID().toString());
+    this.put("mix_id", projectId);
     this.put("name", name);
     this.put("data_source", dataSource);
     this.put("created_date", new Date());

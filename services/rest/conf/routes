@@ -24,7 +24,7 @@ GET     /api/v1/user/go/:spaceId        @controllers.UserController.goTo(spaceId
 
 # DataDriven controller
 GET		/api/v1/datas					@controllers.DataDrivenController.list()
-POST    /api/v1/data                    @controllers.DataDrivenController.create()
+POST    /api/v1/data/:projectId         @controllers.DataDrivenController.create(projectId)
 GET		/api/v1/data/:id		        @controllers.DataDrivenController.get(id)
 PUT     /api/v1/data                    @controllers.DataDrivenController.update()
 DELETE	/api/v1/data			    @controllers.DataDrivenController.delete()

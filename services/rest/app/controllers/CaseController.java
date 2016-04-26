@@ -52,7 +52,7 @@ public class CaseController extends Controller {
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
-    
+
     PageList<Case> list = caseService.getCases(mp.getKeywordId());
     list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     

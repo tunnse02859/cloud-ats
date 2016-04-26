@@ -89,12 +89,12 @@ public class DataDrivenController extends Controller {
     return status(200, arrayData);
   }
   
-  public Result create() {
+  public Result create(String projectId) {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
     String caseId = json.get("caseId").asText();
     JsonNode dataset = json.get("dataset");
-    DataDriven driven = dataDrivenFactory.create(name, dataset.toString());
+    DataDriven driven = dataDrivenFactory.create(projectId, name, dataset.toString());
     dataDrivenService.create(driven);
     
     if ("null".equals(caseId)) {
@@ -165,7 +165,7 @@ public class DataDrivenController extends Controller {
       BufferedReader br = new BufferedReader(new FileReader(file));
       
       ArrayNode array = readBufferByOpenCSV(br);
-      DataDriven data = dataDrivenFactory.create(fileName, array.toString());
+      DataDriven data = dataDrivenFactory.create(projectId, fileName, array.toString());
       dataDrivenService.create(data);
       
       return ok(Json.parse(data.toString()));
@@ -215,7 +215,7 @@ public class DataDrivenController extends Controller {
           }
           dataset.add(obj);
         }
-        dataDriven = dataDrivenFactory.create(fileName, dataset.toString());
+        dataDriven = dataDrivenFactory.create(projectId, fileName, dataset.toString());
         dataDrivenService.create(dataDriven);
         
         if ("null".equals(caseId)) {

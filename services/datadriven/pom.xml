@@ -33,6 +33,11 @@
 			<groupId>org.ats.services</groupId>
 			<artifactId>organization</artifactId>
 		</dependency>
+		
+		<dependency>
+      <groupId>org.ats.services</groupId>
+      <artifactId>blob</artifactId>
+    </dependency>
 
 		<dependency>
 			<groupId>org.ats.services</groupId>
