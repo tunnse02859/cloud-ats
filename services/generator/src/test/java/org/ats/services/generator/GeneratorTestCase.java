@@ -418,6 +418,13 @@ public class GeneratorTestCase  extends AbstractEventTestCase {
     for (JsonNode json : stepsNode) {
       caze.addAction(json);
     }
+    
+    rootNode = m.readTree(new File("src/test/resources/custom.json"));
+    stepsNode = rootNode.get("steps");
+    for (JsonNode json : stepsNode) {
+      caze.addAction(json);
+    }
+    
     caseService.create(caze);
     cases.add(caseRefFactory.create(caze.getId()));
     

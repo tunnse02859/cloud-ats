@@ -32,19 +32,15 @@ import static org.openqa.selenium.OutputType.*;
 public class TestVNEpress {
 
   private RemoteWebDriver wd;
-  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-  long time = 0 ;
   
   @BeforeClass
   public void beforeClass() throws Exception {
-  time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-  System.out.println("[Start][Suite]{\"name\": \"TestVNEpress\", \"id\": \"9cdc5daf-2b6c-438a-8991-96e4a574692e\", \"jobId\" : \"\", \"timestamp\": \""+time+"\"}");
+  System.out.println("[Start][Suite]{\"name\": \"TestVNEpress\", \"id\": \"8498333f-3281-4c76-8890-a452f9f91487\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
    
   @AfterClass
   public void afterClass() throws Exception {
-  time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-  System.out.println("[End][Suite]{\"name\": \"TestVNEpress\", \"id\": \"9cdc5daf-2b6c-438a-8991-96e4a574692e\", \"jobId\" : \"\", \"timestamp\": \""+time+"\"}");
+  System.out.println("[End][Suite]{\"name\": \"TestVNEpress\", \"id\": \"8498333f-3281-4c76-8890-a452f9f91487\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
 
   @BeforeMethod
@@ -61,68 +57,67 @@ public class TestVNEpress {
   
   
   @Test
-  public void test9d403762() throws Exception {
-    time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"9d403762-59a1-4676-b01b-ac46dfad0b0a\", \"timeStamp\": \""+time+"\"} "); 
-    System.out.println("[Start][Step]{\"keyword_type\":\"get \",\"url\":\"http://vnexpress.net/\",\"params\":[\"url\"]} "); 
+  public void testbdb97c8d() throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"bdb97c8d-3b4b-42cf-9ddb-36d539354ab6\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"get \",\"url\":\"http://vnexpress.net/\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try {
 wd.get("http://vnexpress.net/");
 System.out.println("[End][Step]");
 } catch (Exception e) {
-time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+time+"_get.png"));
+wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_get.png"));
 e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='menu_web']//a[text()='Kinh doanh']\"},\"params\":[\"locator\"]} "); 
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='menu_web']//a[text()='Kinh doanh']\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
 wd.findElement(By.xpath(".//*[@id='menu_web']//a[text()='Kinh doanh']")).click();
 System.out.println("[End][Step]");
 } catch (Exception e) {
-time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+time+"_clickElement.png"));
+wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_clickElement.png"));
 e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[Start][Step]{\"keyword_type\":\"verifyCurrentUrl \",\"url\":\"ABC\",\"params\":[\"url\"]} "); 
-         time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-try { 
-     if (     wd.getCurrentUrl().equals("ABC")) {
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"verifyCurrentUrl \",\"url\":\"ABC\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
+    try { 
      System.out.println("Actual URL : "+wd.getCurrentUrl()); 
+     if (     wd.getCurrentUrl().equals("ABC")) {
      System.out.println("[End][Step]"); 
     } else {
-     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+time+"_verifyCurrentUrl.png"));
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyCurrentUrl.png"));
     }
    } catch (Exception e) { 
-     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+time+"_verifyCurrentUrl.png"));
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyCurrentUrl.png"));
      e.printStackTrace();
      throw e ; 
    }
 
-    System.out.println("[Start][Step]{\"keyword_type\":\"verifyText \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='box_news_top']/div/div/div[1]/h1/a\"},\"text\":\"TuDH2\",\"params\":[\"locator\", \"text\"]} "); 
-         time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-try { 
-     if (wd.findElement(By.xpath(".//*[@id='box_news_top']/div/div/div[1]/h1/a")).getText().equals("TuDH2")) {
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"verifyText \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='box_news_top']/div/div/div[1]/h1/a\"},\"text\":\"TuDH2\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
     System.out.println("Actual Text : "+wd.findElement(By.xpath(".//*[@id='box_news_top']/div/div/div[1]/h1/a")).getText()); 
+     if (wd.findElement(By.xpath(".//*[@id='box_news_top']/div/div/div[1]/h1/a")).getText().equals("TuDH2")) {
     System.out.println("[End][Step]"); 
     } else {
-     wd.getScreenshotAs(FILE).renameTo(new File("target/error"+time+"verifyText.png"));
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyText.png"));
     }
    } catch (Exception e) { 
-     wd.getScreenshotAs(FILE).renameTo(new File("target/error"+time+"verifyText.png"));
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyText.png"));
      e.printStackTrace();
      throw e ; 
    }
 
-    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='box_news_top']/div/div/div[1]/h1/a\"},\"params\":[\"locator\"]} "); 
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"xpath\",\"value\":\".//*[@id='box_news_top']/div/div/div[1]/h1/a\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
 wd.findElement(By.xpath(".//*[@id='box_news_top']/div/div/div[1]/h1/a")).click();
 System.out.println("[End][Step]");
 } catch (Exception e) {
-time = dateFormat.parse(dateFormat.format(new Date())).getTime();
-wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+time+"_clickElement.png"));
+wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_clickElement.png"));
 e.printStackTrace();
 throw e ;
 }

@@ -1,0 +1,86 @@
+{
+  "steps" : [ 
+        {
+            "type" : "get",
+            "description" : "Navigate to the given URL.",
+            "url" : "${url}",
+            "params" : [ 
+                "url"
+            ]
+        }, 
+        {
+            "type" : "setElementText",
+            "description" : "Set the text content of the given element.",
+            "locator" : {
+                "type" : "id",
+                "value" : "username"
+            },
+            "text" : "${username}",
+            "params" : [ 
+                "locator", 
+                "text"
+            ]
+        }, 
+        {
+            "type" : "setElementText",
+            "description" : "Set the text content of the given element.",
+            "locator" : {
+                "type" : "id",
+                "value" : "password"
+            },
+            "text" : "${password}",
+            "params" : [ 
+                "locator", 
+                "text"
+            ]
+        }, 
+        {
+            "type" : "clickElement",
+            "description" : "Click an element on the current page.",
+            "locator" : {
+                "type" : "xpath",
+                "value" : "//*[@id='loginForm']/table/tbody//input[@value='Login']"
+            },
+            "params" : [ 
+                "locator"
+            ]
+        }, 
+        {
+            "_id" : "c6db25d7-2326-46db-a8c7-6c988e65d357",
+            "project_id" : "3e9740bd-a91c-4241-810a-38b354780728",
+            "name" : "aCuong",
+            "steps" : [ 
+                {
+                    "type" : "get",
+                    "description" : "Navigate to the given URL.",
+                    "url" : "http://vnexpress.net",
+                    "params" : [ 
+                        "url"
+                    ]
+                }, 
+                {
+                    "type" : "clickElement",
+                    "description" : "Click an element on the current page.",
+                    "locator" : {
+                        "type" : "id",
+                        "value" : ""
+                    },
+                    "params" : [ 
+                        "locator"
+                    ]
+                }, 
+                {
+                    "type" : "mouseOverElement",
+                    "description" : "Move the mouse cursor over the given element.",
+                    "locator" : {
+                        "type" : "id",
+                        "value" : ""
+                    },
+                    "params" : [ 
+                        "locator"
+                    ]
+                }
+            ]
+        }
+    ]  
+}

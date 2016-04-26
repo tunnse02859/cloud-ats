@@ -135,8 +135,8 @@ public class SuiteController extends Controller {
         }
       }
       
-      suite.put("name", name);
-      suite.put("sequence_mode", mode);
+//      suite.put("name", name);
+//      suite.put("sequence_mode", mode);
       
       BasicDBList list = new BasicDBList();
       ArrayNode cases = (ArrayNode) node.get("cases");

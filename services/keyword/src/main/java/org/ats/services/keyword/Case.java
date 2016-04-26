@@ -118,7 +118,6 @@ public class Case extends AbstractTemplate {
   }
   
   public String transform(int valueDelay, boolean sequenceMode, int order) throws IOException {
-	String str = "";
 	List<String> listParams = new ArrayList<String>();
 	StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;
@@ -176,195 +175,205 @@ public class Case extends AbstractTemplate {
     }
     
     for (JsonNode json : actions) {
-      AbstractAction action = actionFactory.createAction(json);
-      
-      if (action == null) continue;
-      
-      //If show action is true, show action in log
-        
-        String type = "\\\"keyword_type\\\":\\\""+json.get("type").asText()+" \\\",";
-        String locator = "";
-        String text = "";
-        String url = "";
-        String targetLocator = "";
-        String variable = "";
-        String source = "";
-        String title = "";
-        String attributeName = "";
-        String propertyName = "";
-        String name = "";
-        String options = "";
-        String file = "";
-        String identifier = "";
-        String index = "";
-        String script = "";
-        String value = "";
-        String temp = "";
-        String waitTime = "";
-        String locationType = "";
-        JsonNode locatorNode = null;
-        
-        if (json.get("locator") != null) {
-          locatorNode = json.get("locator");
-          locationType = locatorNode.get("type").toString().split("\"")[1];
-          temp = locatorNode.get("value").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
-          listParams.add("\\\"locator\\\"");
+      if (json.has("steps")) {
+        for (JsonNode step : json.get("steps")) {
+          transform(step, sb, listParams, valueDelayTransform, delayTime, actionPause);
         }
-        
-        if (json.get("text") != null) {
-          temp =  json.get("text").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          text = "\\\"text\\\":"+ "\\\""+temp+"\\\",";
-          listParams.add("\\\"text\\\"");
-        }
-        
-        if (json.get("waitTime") != null) {
-        	waitTime = "\\\"waittime\\\":"+"\\\""+json.get("waitTime").asLong()+"ms\\\",";
-        	listParams.add("\\\"waittime\\\"");
-        }
-        
-        if (json.get("url") != null) {
-          temp = json.get("url").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          url = "\\\"url\\\":"+ "\\\""+temp+"\\\",";
-          listParams.add("\\\"url\\\"");
-        }
-        
-        if (json.get("targetLocator") != null) {
-          locatorNode = json.get("targetLocator");
-          locationType = json.get("type").toString().split("\"")[1];
-          temp = locatorNode.get("value").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          targetLocator = "\\\"targetLocator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
-          listParams.add("\\\"targetLocator\\\"");
-        }
-        
-        if (json.get("variable") != null) {
-          temp = json.get("variable").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          variable = "\\\"variable\\\":"+ "\\\""+temp+"\\\",";
-          listParams.add("\\\"variable\\\"");
-        }
-        
-        if (json.get("source") != null) {
-          temp = json.get("source").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          source = "\\\"source\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"source\\\"");
-        }
-        
-        if (json.get("title") != null) {
-          temp = json.get("title").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          title = "\\\"title\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"title\\\"");
-        }
-        
-        if (json.get("attributeName") != null) {
-          temp = json.get("attributeName").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          attributeName = "\\\"attribute_name\\\":"+ "\\\""+temp+"\\\",";
-          listParams.add("\\\"attribute_name\\\"");
-        }
-        
-        if (json.get("propertyName") != null) {
-          temp = json.get("propertyName").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          propertyName = "\\\"property_name\\\":" + "\\\""+temp+"\\\",";
-          listParams.add("\\\"property_name\\\"");
-        }
-        
-        if (json.get("options") != null) {
-          temp = json.get("options").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          options = "\\\"options\\\":"+ "\\\""+temp+"\\\",";
-          listParams.add("\\\"options\\\"");
-        }
-        
-        if (json.get("name") != null) {
-          temp = json.get("name").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          name = "\\\"name\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"name\\\"");
-        }
-        
-        if (json.get("file") != null) {
-          temp = json.get("file").asText();
-          file = "\\\"file\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"file\\\"");
-        }
-        
-        if (json.get("identifier") != null) {
-          temp = json.get("identifier").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          identifier = "\\\"identifier\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"identifier\\\"");
-        }
-        
-        if (json.get("index") != null) {
-        	index = "\\\"index\\\":"+"\\\""+json.get("index").asInt()+"\\\",";
-        	listParams.add("\\\"index\\\"");
-        }
-        
-        if (json.get("script") != null) {
-          temp = json.get("script").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          script = "\\\"script\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"script\\\"");
-        }
-        
-        if(json.get("value") != null) {
-          temp = json.get("value").asText();
-          if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
-          value = "\\\"value\\\":"+"\\\""+temp+"\\\",";
-          listParams.add("\\\"value\\\"");
-        }
-        
-        str = new StringBuilder() 
-        .append(type)
-        .append(locator)
-        .append(targetLocator)
-        .append(url)
-        .append(text)
-        .append(script)
-        .append(name)
-        .append(source)
-        .append(title)
-        .append(options)
-        .append(propertyName)
-        .append(attributeName)
-        .append(variable)
-        .append(value)
-        .append(file)
-        .append(waitTime)
-        .append(identifier)
-        .append(index).toString() ;
-        sb.append("\n");
-        sb.append("    System.out.println(\"[Start][Step]{");
-        sb.append(str);
-        sb.append("\\\"timestamp\\\": \\\"\"+System.currentTimeMillis()+\"\\\",");
-        sb.append("\\\"params\\\":"+listParams.toString()+"} \"); \n");
-        
-        sb.append("    ");
-        sb.append(action.transform());
-        sb.append("\n");
-        if(valueDelayTransform != 0) {
-          sb.append("    System.out.println(\"");
-          sb.append(delayTime);
-          sb.append("\");\n");
-          sb.append(actionPause.transform());
-        }
-        
-        listParams.clear();
-      
+      } else {
+        transform(json, sb, listParams, valueDelayTransform, delayTime, actionPause);
+      }
     }
+    
     if(isUseDataProvider) {
     	sb.append("System.out.println(\"[End][Data]\"); \n");
     }
     sb.append("    System.out.println(\"[End][Case]\"); \n");
     sb.append("  }");
     return sb.toString();
+  }
+  
+  private void transform(JsonNode json, StringBuilder sb, List<String> listParams, int valueDelayTransform, String delayTime, AbstractAction actionPause) throws IOException {
+    AbstractAction action = actionFactory.createAction(json);
+    
+    if (action == null) return;
+    
+    //If show action is true, show action in log
+      
+      String type = "\\\"keyword_type\\\":\\\""+json.get("type").asText()+" \\\",";
+      String locator = "";
+      String text = "";
+      String url = "";
+      String targetLocator = "";
+      String variable = "";
+      String source = "";
+      String title = "";
+      String attributeName = "";
+      String propertyName = "";
+      String name = "";
+      String options = "";
+      String file = "";
+      String identifier = "";
+      String index = "";
+      String script = "";
+      String value = "";
+      String temp = "";
+      String waitTime = "";
+      String locationType = "";
+      JsonNode locatorNode = null;
+      
+      if (json.get("locator") != null) {
+        locatorNode = json.get("locator");
+        locationType = locatorNode.get("type").toString().split("\"")[1];
+        temp = locatorNode.get("value").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        locator = "\\\"locator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
+        listParams.add("\\\"locator\\\"");
+      }
+      
+      if (json.get("text") != null) {
+        temp =  json.get("text").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        text = "\\\"text\\\":"+ "\\\""+temp+"\\\",";
+        listParams.add("\\\"text\\\"");
+      }
+      
+      if (json.get("waitTime") != null) {
+        waitTime = "\\\"waittime\\\":"+"\\\""+json.get("waitTime").asLong()+"ms\\\",";
+        listParams.add("\\\"waittime\\\"");
+      }
+      
+      if (json.get("url") != null) {
+        temp = json.get("url").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        url = "\\\"url\\\":"+ "\\\""+temp+"\\\",";
+        listParams.add("\\\"url\\\"");
+      }
+      
+      if (json.get("targetLocator") != null) {
+        locatorNode = json.get("targetLocator");
+        locationType = json.get("type").toString().split("\"")[1];
+        temp = locatorNode.get("value").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        targetLocator = "\\\"targetLocator\\\":{\\\"type\\\":\\\""+locationType+"\\\",\\\"value\\\":\\\"" +temp.replace("\"", "\\\\\"")+"\\\"},";
+        listParams.add("\\\"targetLocator\\\"");
+      }
+      
+      if (json.get("variable") != null) {
+        temp = json.get("variable").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        variable = "\\\"variable\\\":"+ "\\\""+temp+"\\\",";
+        listParams.add("\\\"variable\\\"");
+      }
+      
+      if (json.get("source") != null) {
+        temp = json.get("source").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        source = "\\\"source\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"source\\\"");
+      }
+      
+      if (json.get("title") != null) {
+        temp = json.get("title").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        title = "\\\"title\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"title\\\"");
+      }
+      
+      if (json.get("attributeName") != null) {
+        temp = json.get("attributeName").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        attributeName = "\\\"attribute_name\\\":"+ "\\\""+temp+"\\\",";
+        listParams.add("\\\"attribute_name\\\"");
+      }
+      
+      if (json.get("propertyName") != null) {
+        temp = json.get("propertyName").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        propertyName = "\\\"property_name\\\":" + "\\\""+temp+"\\\",";
+        listParams.add("\\\"property_name\\\"");
+      }
+      
+      if (json.get("options") != null) {
+        temp = json.get("options").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        options = "\\\"options\\\":"+ "\\\""+temp+"\\\",";
+        listParams.add("\\\"options\\\"");
+      }
+      
+      if (json.get("name") != null) {
+        temp = json.get("name").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        name = "\\\"name\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"name\\\"");
+      }
+      
+      if (json.get("file") != null) {
+        temp = json.get("file").asText();
+        file = "\\\"file\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"file\\\"");
+      }
+      
+      if (json.get("identifier") != null) {
+        temp = json.get("identifier").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        identifier = "\\\"identifier\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"identifier\\\"");
+      }
+      
+      if (json.get("index") != null) {
+        index = "\\\"index\\\":"+"\\\""+json.get("index").asInt()+"\\\",";
+        listParams.add("\\\"index\\\"");
+      }
+      
+      if (json.get("script") != null) {
+        temp = json.get("script").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        script = "\\\"script\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"script\\\"");
+      }
+      
+      if(json.get("value") != null) {
+        temp = json.get("value").asText();
+        if (temp.indexOf("\"") != -1) temp = temp.replace("\"", "\\\"");
+        value = "\\\"value\\\":"+"\\\""+temp+"\\\",";
+        listParams.add("\\\"value\\\"");
+      }
+      
+      String str = new StringBuilder() 
+      .append(type)
+      .append(locator)
+      .append(targetLocator)
+      .append(url)
+      .append(text)
+      .append(script)
+      .append(name)
+      .append(source)
+      .append(title)
+      .append(options)
+      .append(propertyName)
+      .append(attributeName)
+      .append(variable)
+      .append(value)
+      .append(file)
+      .append(waitTime)
+      .append(identifier)
+      .append(index).toString() ;
+      sb.append("\n");
+      sb.append("    System.out.println(\"[Start][Step]{");
+      sb.append(str);
+      sb.append("\\\"timestamp\\\": \\\"\"+System.currentTimeMillis()+\"\\\",");
+      sb.append("\\\"params\\\":"+listParams.toString()+"} \"); \n");
+      
+      sb.append("    ");
+      sb.append(action.transform());
+      sb.append("\n");
+      if(valueDelayTransform != 0) {
+        sb.append("    System.out.println(\"");
+        sb.append(delayTime);
+        sb.append("\");\n");
+        sb.append(actionPause.transform());
+      }
+      
+      listParams.clear();
   }
 }

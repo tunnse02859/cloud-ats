@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
-import org.ats.services.datadriven.DataDriven;
 import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
@@ -29,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -99,21 +99,49 @@ public class CaseController extends Controller {
   }
   
   public Result update(String projectId) throws Exception {
+    
     JsonNode node = request().body().asJson();
-    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
+    Case caze = caseService.get(node.get("_id").asText());
+    if (caze == null) return status(404);
+    else {
+      String name = node.get("name").asText();
+      if (caze.getCreator() == null) caze.put("creator", context.getUser().getEmail());
+      
+      //Update only case info
+      if (node.get("steps") == null) {
+        if (caze.getName().equals(name)) return status(204);
+        else {
+          caze.put("name", name);
+          caseService.update(caze);
+          return status(200);
+        }
+      }
+      
+      ArrayNode steps = (ArrayNode) node.get("steps");
+      BasicDBList list = new BasicDBList();
+      for (JsonNode step : steps) {
+        list.add(JSON.parse(step.toString()));
+      }
+      caze.put("steps",  list);
+      caseService.update(caze);
+      
+      return status(200);
+    }
     
-    Case caze = caseService.transform(obj);
-    Case oldCase = caseService.get(caze.getId());
+//    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
+//    
+//    Case caze = caseService.transform(obj);
+//    Case oldCase = caseService.get(caze.getId());
+//    
+//    if (!projectId.equals(caze.getProjectId()) 
+//        || !caze.getId().equals(oldCase.getId())
+//        || oldCase == null) return status(400);
+//    
+//    if (caze.equals(oldCase)) return status(204);
+//    
+//    caseService.update(caze);
     
-    if (!projectId.equals(caze.getProjectId()) 
-        || !caze.getId().equals(oldCase.getId())
-        || oldCase == null) return status(400);
-    
-    if (caze.equals(oldCase)) return status(204);
-    
-    caseService.update(caze);
-    
-    return status(200);
+//    return status(200);
   }
   
   public Result delete(String projectId, String caseId)  throws Exception {
