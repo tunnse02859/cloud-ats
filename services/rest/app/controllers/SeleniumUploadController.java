@@ -23,6 +23,8 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectFactory;
 import org.ats.services.upload.SeleniumUploadProjectService;
@@ -66,26 +68,29 @@ public class SeleniumUploadController extends Controller {
   
   @Inject ReportService reportService;
   
+  @Inject MixProjectService mpService;
+  
   private static final int BUFFER_SIZE = 4096;
 
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
   public Result get(String projectId) {
-    SeleniumUploadProject project = seleniumUploadService.get(projectId);
+	MixProject mp = mpService.get(projectId);
+    SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId());
 
     if (project == null)
       return status(404);
 
     project.put("type", "Selenium Upload");
     
-    SeleniumUploadProject upload = seleniumUploadService.get(projectId, "raw");
+    SeleniumUploadProject upload = seleniumUploadService.get(mp.getSeleniumId(), "raw");
     boolean rawExist = false;
     if (upload.getRawData() != null) {
       rawExist = true;
     }
     project.put("raw_exist", rawExist);
     PageList<AbstractJob<?>> jobList = executorService.query(
-        new BasicDBObject("project_id", projectId), 1);
+        new BasicDBObject("project_id", mp.getSeleniumId()), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
         .build());
 
