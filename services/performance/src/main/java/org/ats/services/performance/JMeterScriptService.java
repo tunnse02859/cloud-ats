@@ -59,6 +59,7 @@ public class JMeterScriptService extends AbstractMongoCRUD<JMeterScript> {
       script.setLoops(obj.getInt("loops"));
       script.setNumberThreads(obj.getInt("number_threads"));
       script.setRamUp(obj.getInt("ram_up"));
+      script.put("created_date", source.get("created_date"));
       script.setNumberEngines(obj.getInt("number_engines"));
       return script;
     }

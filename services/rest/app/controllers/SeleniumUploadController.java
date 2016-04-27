@@ -163,7 +163,8 @@ public class SeleniumUploadController extends Controller {
   }
 
   public Result run(String projectId) throws Exception {
-    SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
+	MixProject mp = mpService.get(projectId);
+    SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId(), "raw");
     if (project == null)
       return status(404);
 
@@ -202,8 +203,9 @@ public class SeleniumUploadController extends Controller {
   }
 
   public Result listReport(String projectId) {
+	MixProject mp = mpService.get(projectId);
     PageList<AbstractJob<?>> jobList = executorService.query(
-        new BasicDBObject("project_id", projectId), 1);
+        new BasicDBObject("project_id", mp.getSeleniumId()), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
         .build());
     ArrayNode array = Json.newObject().arrayNode();
@@ -231,8 +233,9 @@ public class SeleniumUploadController extends Controller {
   }
 
   public Result download(String projectId, String jobId) {
+	MixProject mp = mpService.get(projectId);
     AbstractJob<?> absJob = executorService.get(jobId,"raw_report");
-    String path = "/tmp/"+projectId.substring(0, 8);
+    String path = "/tmp/"+mp.getSeleniumId().substring(0, 8);
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
@@ -269,6 +272,7 @@ public class SeleniumUploadController extends Controller {
   }
 
   public Result upload(String projectId) {
+	MixProject mp = mpService.get(projectId);
     MultipartFormData body = request().body().asMultipartFormData();
     MultipartFormData.FilePart typeFile = body.getFile("file");
     if (typeFile != null) {
@@ -279,7 +283,7 @@ public class SeleniumUploadController extends Controller {
       byte[] bFile = new byte[(int) file.length()];
 
       // delete file pom.xml if it's exist before uncompress
-      String destDirectoryPath = "/tmp/" + projectId.substring(0, 8);
+      String destDirectoryPath = "/tmp/" + mp.getSeleniumId().substring(0, 8);
       File tempFolder = new File(destDirectoryPath);
       if (tempFolder.exists()) deleteFolder(tempFolder);
       
@@ -314,7 +318,7 @@ public class SeleniumUploadController extends Controller {
         zipIn.close();
 
         // Check format of file upload
-        File folder = new File("/tmp/" + projectId.substring(0, 8));
+        File folder = new File("/tmp/" + mp.getSeleniumId().substring(0, 8));
         File[] listOfFiles = folder.listFiles();
 
         for (File item : listOfFiles) {
@@ -332,7 +336,7 @@ public class SeleniumUploadController extends Controller {
         fileInputStream.read(bFile);
         fileInputStream.close();
 
-        SeleniumUploadProject project = seleniumUploadService.get(projectId);
+        SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId());
         if (project.getRawData() != null) {
           project.setRawData(null);
         }
@@ -351,13 +355,13 @@ public class SeleniumUploadController extends Controller {
   }
   
   public Result stop(String projectId) throws IOException {
-    
-    SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
+	MixProject mp = mpService.get(projectId);
+    SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId(), "raw");
     if (project == null) return status(404);
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     
-    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", mp.getSeleniumId()), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     AbstractJob<?> lastJob = jobList.next().get(0);

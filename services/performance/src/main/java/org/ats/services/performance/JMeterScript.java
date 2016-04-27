@@ -6,6 +6,7 @@ package org.ats.services.performance;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ public class JMeterScript extends BasicDBObject {
     this.put("raw", true);
     this.put("raw_content", raw_content);
     this.put("creator", creator);
+    this.put("created_date", new Date());
   }
 
   JMeterScript(String testName, int loops, int numberThreads, int ramUp, boolean scheduler, int duration, String project_id, String creator, List<JMeterSampler>  samplers) {
@@ -50,6 +52,7 @@ public class JMeterScript extends BasicDBObject {
     this.put("scheduler", scheduler);
     this.put("duration", duration);
     this.put("creator", creator);
+    this.put("created_date", new Date());
     this.samplers.addAll(samplers);
     
     BasicDBList list = new BasicDBList();
