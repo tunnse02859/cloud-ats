@@ -5,12 +5,8 @@ package org.ats.services.keyword;
 
 import java.util.logging.Logger;
 
-import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.keyword.KeywordProject.Status;
-import org.ats.services.organization.SpaceService;
-import org.ats.services.organization.TenantService;
-import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 
 import com.google.inject.Inject;
@@ -34,18 +30,6 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   private KeywordProjectFactory factory;
   
   @Inject
-  private OrganizationContext context;
-  
-  @Inject
-  private TenantService tenantService;
-  
-  @Inject
-  private SpaceService spaceService;
-  
-  @Inject
-  private UserService userService;
-  
-  @Inject
   private CustomKeywordFactory customKeyFactory;
   
   @Inject
@@ -65,30 +49,13 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   
   @Override
   public KeywordProject transform(DBObject source) {
-    //rebuild context
-    if (context.getTenant() == null) {
-      BasicDBObject tenantSource = (BasicDBObject) source.get("tenant");
-      context.setTenant(tenantService.get(tenantSource.getString("_id")));
-    }
-    if (context.getUser() == null) {
-      BasicDBObject userSource = (BasicDBObject) source.get("creator");
-      context.setUser(userService.get(userSource.getString("_id")));
-    }
-    if (context.getSpace() == null && source.get("space") != null) {
-      BasicDBObject spaceSource = (BasicDBObject) source.get("space");
-      context.setSpace(spaceService.get(spaceSource.getString("_id")));
-    }
-    
-    BasicDBObject object = (BasicDBObject) source.get("creator");
-    
-    
-    KeywordProject project = factory.create(context, (String) source.get("name"), source.get("mix_id") != null ? (String) source.get("mix_id") : "");
+    KeywordProject project = factory.create((String) source.get("name"), source.get("mix_id") != null ? (String) source.get("mix_id") : "");
     project.put("created_date", source.get("created_date"));
     project.put("active", source.get("active"));
     project.put("_id", source.get("_id"));
     project.setStatus(source.get("status") == null ? Status.READY : Status.valueOf((String) source.get("status")));
    
-    project.put("creator", object);
+    project.put("creator", source.get("creator"));
     //transform custom keywords
     if (source.get("custom_keywords") == null) return project;
     

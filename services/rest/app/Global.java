@@ -133,6 +133,8 @@ public class Global extends GlobalSettings {
     AuthenticationService<User> service = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
 
     User user = service.findByAuthToken(token);
+    
+    
     if (user == null) {
       context.setUser(null);
       context.setSpace(null);

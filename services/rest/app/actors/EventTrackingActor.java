@@ -5,6 +5,7 @@ package actors;
 
 import java.text.SimpleDateFormat;
 
+import org.ats.services.OrganizationContext;
 import org.ats.services.event.Event;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.KeywordJob;
@@ -14,6 +15,9 @@ import org.ats.services.iaas.AzureService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
@@ -46,16 +50,26 @@ public class EventTrackingActor extends UntypedActor {
   
   @Inject IaaSServiceProvider iaasProvider;
   
+  @Inject OrganizationContext context;
+  
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
   @Override
   public void onReceive(Object obj) throws Exception {
+    
     if (obj instanceof Event) {
       Event event = (Event) obj;
       try {
         if ("keyword-job-tracking".equals(event.getName())) {
           
           KeywordJob job = (KeywordJob) event.getSource();
+          
+          User user = (User) job.get("user");
+          Space space = job.get("space") != null ? (Space) job.get("space") : null;
+          Tenant tenant = (Tenant) job.get("tenant");
+          context.setUser(user);
+          context.setSpace(space);
+          context.setTenant(tenant);
           
           //Cleanup blod data in this job
           job.put("raw_data", null);
@@ -82,7 +96,8 @@ public class EventTrackingActor extends UntypedActor {
           }
           
           job.put("project_status", project.getStatus().toString());
-          eventController.send(project.getCreator().get(), job);
+          eventController.send(context.getUser(), job);
+          System.out.println(context.getUser());
           
         } else if ("performance-job-tracking".equals(event.getName())) {
           
@@ -93,7 +108,7 @@ public class EventTrackingActor extends UntypedActor {
           PerformanceProject project = perfService.get(job.getProjectId());
           job.put("project_status", project.getStatus().toString());
           job.put("runningTime", formater.format(job.getCreatedDate()));
-          eventController.send(project.getCreator().get(), job);
+          eventController.send(context.getUser(), job);
           
         } else if ("upload-job-tracking".equals(event.getName())) {
           SeleniumUploadJob job = (SeleniumUploadJob) event.getSource();

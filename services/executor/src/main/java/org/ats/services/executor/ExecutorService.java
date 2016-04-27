@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
@@ -71,6 +72,9 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
 
   @Inject
   private EventFactory eventFactory;
+  
+  @Inject
+  private OrganizationContext context;
 
   private final String COL_NAME = "job";
 
@@ -102,6 +106,10 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, options, null, Status.Queued);
     create(job);
 
+    job.put("user", context.getUser());
+    job.put("space", context.getSpace());
+    job.put("tenant", context.getTenant());
+    
     Event event = eventFactory.create(job, "keyword-job-tracking");
     event.broadcast();
     return job;

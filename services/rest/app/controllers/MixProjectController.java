@@ -102,7 +102,7 @@ public class MixProjectController extends Controller {
     performance.put("mix_id", id);
     performanceService.create(performance);
     
-    KeywordProject keyword = keywordFactory.create(context, name, id);
+    KeywordProject keyword = keywordFactory.create(name, id);
     keyword.put("mix_id", id);
     keywordService.create(keyword);
     

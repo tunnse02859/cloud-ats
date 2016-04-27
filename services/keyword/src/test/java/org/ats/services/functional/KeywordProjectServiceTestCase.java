@@ -155,7 +155,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     KeywordProject project = null;
 
     try {
-      project = funcFactory.create(context, "Jira Automation", "fake");
+      project = funcFactory.create("Jira Automation", "fake");
       Assert.fail();
     } catch (IllegalStateException e) {
 
@@ -168,7 +168,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     Assert.assertNotNull(this.context.getTenant());
 
     try {
-      project = funcFactory.create(context, "Jira Automation", "fake");
+      project = funcFactory.create("Jira Automation", "fake");
     } catch (IllegalStateException e) {
       e.printStackTrace();
       Assert.fail();
@@ -176,7 +176,6 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     
     Assert.assertNotNull(project);
     Assert.assertEquals(project.getCreator().getId(), "haint@cloud-ats.net");
-    Assert.assertEquals(project.getSpace().getId(), this.space.getId());
     
     funcService.create(project);
     Assert.assertEquals(funcService.count(), 1);
@@ -190,7 +189,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create(context, "Jira Automation", "fake");
+    KeywordProject project = funcFactory.create("Jira Automation", "fake");
     funcService.create(project);
     
     ObjectMapper m = new ObjectMapper();
@@ -233,7 +232,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     this.authService.logIn("haint@cloud-ats.net", "12345");
     this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
     
-    KeywordProject project = funcFactory.create(context, "Jira Automation", "fake");
+    KeywordProject project = funcFactory.create("Jira Automation", "fake");
     String projectId = project.getId();
     
     ObjectMapper m = new ObjectMapper();

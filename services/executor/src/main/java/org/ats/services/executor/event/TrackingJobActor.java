@@ -27,6 +27,7 @@ import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.service.blob.BlobService;
+import org.ats.services.OrganizationContext;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.executor.ExecutorService;
@@ -47,6 +48,9 @@ import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.StepReport;
 import org.ats.services.keyword.report.models.StepReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -105,6 +109,8 @@ public class TrackingJobActor extends UntypedActor {
   
   @Inject SuiteReportService suiteReportService;
   
+  @Inject OrganizationContext context;
+  
   
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
@@ -114,6 +120,12 @@ public class TrackingJobActor extends UntypedActor {
       Event event = (Event) obj;
       if ("keyword-job-tracking".equals(event.getName())) {
         KeywordJob job = (KeywordJob) event.getSource();
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
         processKeywordJob(job);
       } else if ("performance-job-tracking".equals(event.getName())) {
         PerformanceJob job = (PerformanceJob) event.getSource();

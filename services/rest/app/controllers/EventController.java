@@ -83,7 +83,6 @@ public class EventController extends Controller {
     }
     
     String token = authenService.createToken(user);
-    
     List<EventSource> events = pool.get(token);
     if (events == null) return ;
     
@@ -99,7 +98,6 @@ public class EventController extends Controller {
         event.send(EventSource.Event.event(Json.parse(job.toString())));
       } catch (Exception e) {
         e.printStackTrace();
-        System.out.println(job);
       }
     }
   }

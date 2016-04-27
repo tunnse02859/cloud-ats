@@ -177,7 +177,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     performanceProjectService.create(performance);
     
     //create keyword project
-    KeywordProject keyword = keywordFactory.create(context, "keyword", "");
+    KeywordProject keyword = keywordFactory.create("keyword", "");
     keywordProjectService.create(keyword);
     
     //create selenium project

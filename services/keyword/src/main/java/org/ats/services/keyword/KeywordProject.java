@@ -45,7 +45,7 @@ public class KeywordProject extends AbstractEntity<KeywordProject> {
   KeywordProject(ReferenceFactory<TenantReference> tenantRefFactory, 
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
-      @Assisted("context") OrganizationContext context,
+      OrganizationContext context,
       @Assisted("name") String name, @Assisted("mix_id") String mix_id) {
     
     this.tenantRefFactory = tenantRefFactory;

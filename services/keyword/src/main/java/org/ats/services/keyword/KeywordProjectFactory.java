@@ -3,8 +3,6 @@
  */
 package org.ats.services.keyword;
 
-import org.ats.services.OrganizationContext;
-
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -16,6 +14,6 @@ public interface KeywordProjectFactory {
   
   public static final String DEFAULT_INIT_VERSION_SELENIUM = "2.48.2";
   
-  public KeywordProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name, @Assisted("mix_id") String mix_id);
+  public KeywordProject create(@Assisted("name") String name, @Assisted("mix_id") String mix_id);
   
 }

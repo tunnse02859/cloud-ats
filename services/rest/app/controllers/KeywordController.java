@@ -204,7 +204,7 @@ public class KeywordController extends Controller {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
     int valueDelay = json.get("valueDelay").asInt();
-    KeywordProject project = keywordProjectFactory.create(context, name, "");
+    KeywordProject project = keywordProjectFactory.create(name, "");
     project.setValueDelay(valueDelay);
     keywordProjectService.create(project);
     return status(201, project.getId());
@@ -257,6 +257,7 @@ public class KeywordController extends Controller {
   }
   
   public Result run(String projectId) throws Exception {
+    
     JsonNode data = request().body().asJson();
     JsonNode jsonSuites = data.get("suites");
     JsonNode jsonOptions = data.get("options");
