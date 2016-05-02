@@ -203,9 +203,8 @@ public class SeleniumUploadController extends Controller {
   }
 
   public Result listReport(String projectId) {
-	MixProject mp = mpService.get(projectId);
     PageList<AbstractJob<?>> jobList = executorService.query(
-        new BasicDBObject("project_id", mp.getSeleniumId()), 1);
+        new BasicDBObject("project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false)
         .build());
     ArrayNode array = Json.newObject().arrayNode();
@@ -228,7 +227,6 @@ public class SeleniumUploadController extends Controller {
         }
       }
     }
-    
     return ok(array);
   }
 
