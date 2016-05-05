@@ -349,13 +349,12 @@ public class SeleniumUploadController extends Controller {
   }
   
   public Result stop(String projectId) throws IOException {
-	MixProject mp = mpService.get(projectId);
-    SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId(), "raw");
+    SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
     if (project == null) return status(404);
     
     VMachine jenkinsVM = vmachineService.getSystemVM(project.getTenant(), project.getSpace());
     
-    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", mp.getSeleniumId()), 1);
+    PageList<AbstractJob<?>> jobList = executorService.query(new BasicDBObject("project_id", projectId), 1);
     jobList.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
     AbstractJob<?> lastJob = jobList.next().get(0);

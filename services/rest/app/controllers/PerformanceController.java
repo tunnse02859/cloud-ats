@@ -286,7 +286,6 @@ public class PerformanceController extends Controller {
       ArrayNode array = Json.newObject().arrayNode();
       try {
         PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, script.getId());
-        System.out.println(pages.count());
         while (pages.hasNext()) {
           
           List<Report> list = pages.next();
