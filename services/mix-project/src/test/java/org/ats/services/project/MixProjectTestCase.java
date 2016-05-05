@@ -4,6 +4,7 @@
 package org.ats.services.project;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,9 @@ import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.User;
+import org.ats.services.performance.JMeterScript;
+import org.ats.services.performance.JMeterScriptReference;
+import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
@@ -64,6 +68,8 @@ public class MixProjectTestCase  {
   
   private AuthenticationService<User> authService;
   
+  private JMeterScriptService scriptService;
+  
   @BeforeClass
   public void init() throws Exception {
     String host = "localhost";
@@ -83,7 +89,7 @@ public class MixProjectTestCase  {
     this.seleniumService = injector.getInstance(SeleniumUploadProjectService.class);
     this.mpService = injector.getInstance(MixProjectService.class);
     this.mpFactory = injector.getInstance(MixProjectFactory.class);
-
+    this.scriptService = injector.getInstance(JMeterScriptService.class);
     //    
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
   }
@@ -116,6 +122,28 @@ public class MixProjectTestCase  {
     for (DataDriven data : holder) {
       dataService.update(data);
     }
+  }
+  
+  @Test
+  public void migrateDataScripts() {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
+    
+    PageList<JMeterScript> list = scriptService.list();
+    List<JMeterScript> holder = new ArrayList<JMeterScript>();
+    
+    while (list.hasNext()) {
+    	for (JMeterScript script : list.next()) {
+    		
+    		 if (script.get("created_date") == null) {
+    			script.put("created_date",new Date());
+    			holder.add(script);
+    		}
+    	}
+    }
+    for (JMeterScript jMeterScript : holder) {
+    	scriptService.update(jMeterScript);
+		
+	}
   }
   
   @Test
