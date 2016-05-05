@@ -97,11 +97,17 @@ public class EventTrackingActor extends UntypedActor {
           
           job.put("project_status", project.getStatus().toString());
           eventController.send(context.getUser(), job);
-          System.out.println(context.getUser());
           
         } else if ("performance-job-tracking".equals(event.getName())) {
           
           PerformanceJob job = (PerformanceJob) event.getSource();
+          
+          User user = (User) job.get("user");
+          Space space = job.get("space") != null ? (Space) job.get("space") : null;
+          Tenant tenant = (Tenant) job.get("tenant");
+          context.setUser(user);
+          context.setSpace(space);
+          context.setTenant(tenant);
           
           //if (job.getStatus() ==  AbstractJob.Status.Queued) return;
           
@@ -112,6 +118,13 @@ public class EventTrackingActor extends UntypedActor {
           
         } else if ("upload-job-tracking".equals(event.getName())) {
           SeleniumUploadJob job = (SeleniumUploadJob) event.getSource();
+          
+          User user = (User) job.get("user");
+          Space space = job.get("space") != null ? (Space) job.get("space") : null;
+          Tenant tenant = (Tenant) job.get("tenant");
+          context.setUser(user);
+          context.setSpace(space);
+          context.setTenant(tenant);
           
           //Cleanup blod data in this job
           job.put("raw_report", null);

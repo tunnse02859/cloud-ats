@@ -41,7 +41,7 @@ public class SeleniumUploadProject extends AbstractEntity<SeleniumUploadProject>
   public SeleniumUploadProject(ReferenceFactory<TenantReference> tenantRefFactory,
       ReferenceFactory<UserReference> userRefFactory,
       ReferenceFactory<SpaceReference> spaceRefFactory,
-      @Assisted("context") OrganizationContext context,
+      OrganizationContext context,
       @Assisted("name") String name, @Assisted("mix_id") String mix_id) {
     this.tenantRefFactory = tenantRefFactory;
     this.userRefFactory = userRefFactory;

@@ -298,7 +298,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
   
   @Test
   public void testExecutorKeywordUpload() throws Exception {
-    SeleniumUploadProject uploadProject = uploadProjectFactory.create(context, "Upload Project", "");
+    SeleniumUploadProject uploadProject = uploadProjectFactory.create("Upload Project", "");
     
     FileInputStream fis = null;
     File uploadFile = new File("/executor/src/test/resources/TestGithubUpload.zip");

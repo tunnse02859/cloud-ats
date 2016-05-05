@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.ats.common.PageList;
+import org.ats.common.StringUtil;
 import org.ats.common.ssh.SSHClient;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
@@ -120,18 +121,36 @@ public class TrackingJobActor extends UntypedActor {
       Event event = (Event) obj;
       if ("keyword-job-tracking".equals(event.getName())) {
         KeywordJob job = (KeywordJob) event.getSource();
+        
         User user = (User) job.get("user");
         Space space = job.get("space") != null ? (Space) job.get("space") : null;
         Tenant tenant = (Tenant) job.get("tenant");
         context.setUser(user);
         context.setSpace(space);
         context.setTenant(tenant);
+        
         processKeywordJob(job);
       } else if ("performance-job-tracking".equals(event.getName())) {
         PerformanceJob job = (PerformanceJob) event.getSource();
+        
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
+        
         processPerformanceJob(job);
       } else  if ("upload-job-tracking".equals(event.getName())) {
         SeleniumUploadJob job = (SeleniumUploadJob) event.getSource();
+        
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
+        
         processUploadJob(job);
       }
     }
@@ -213,7 +232,6 @@ public class TrackingJobActor extends UntypedActor {
         
         SSHClient.getFile(systemVM.getPublicIp(), 22, "cloudats", "#CloudATS", 
             "/home/cloudats/projects/" + job.getId() + "/target/" + ref.getId() + ".jtl",  bos);
-        
         if (bos.size() > 0) {
           list.add(new BasicDBObject("_id", ref.getId()).append("content", new String(bos.toByteArray())));
         }

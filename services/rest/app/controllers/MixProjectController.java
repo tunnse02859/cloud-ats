@@ -106,13 +106,14 @@ public class MixProjectController extends Controller {
     keyword.put("mix_id", id);
     keywordService.create(keyword);
     
-    SeleniumUploadProject selenium = seleniumFactory.create(context, name, id);
+    SeleniumUploadProject selenium = seleniumFactory.create(name, id);
     selenium.put("mix_id", id);
     seleniumService.create(selenium);
     
     MixProject mp = mixProjectFactory.create(id, name, keyword.getId(), performance.getId(), selenium.getId(), context.getUser().getEmail());
     mpService.create(mp);
     
+    mp.put("created_date", mp.getDate("created_date").getTime());
     return ok(Json.parse(mp.toString()));
   }
   
@@ -137,6 +138,10 @@ public class MixProjectController extends Controller {
     
     String name = request().getQueryString("name");
     MixProject mp = mpService.cloneData(id, name);
+    
+    User user = context.getUser();
+    BasicDBObject userObj = new BasicDBObject("email", user.getEmail()).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+    mp.put("creator", userObj);
     mp.put("created_date", mp.getDate("created_date").getTime());
     
     return ok(Json.parse(mp.toString()));

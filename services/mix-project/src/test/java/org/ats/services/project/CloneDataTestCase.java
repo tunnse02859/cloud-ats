@@ -181,7 +181,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     keywordProjectService.create(keyword);
     
     //create selenium project
-    SeleniumUploadProject selenium = seleniumFactory.create(context, "selenium", "");
+    SeleniumUploadProject selenium = seleniumFactory.create("selenium", "");
     seleniumService.create(selenium);
     
     //create mix project

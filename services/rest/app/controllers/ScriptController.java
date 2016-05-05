@@ -74,7 +74,13 @@ public class ScriptController extends Controller {
       list = pages.next();
       
       for (JMeterScript script : list) {
-        array.add(Json.parse(service.get(script.getId(), "number_engines", "number_threads").toString()));
+        
+        String email = script.getCreator();
+        User user = userService.get(email);
+        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        script.put("creator", userObj);
+        script.put("created_date", script.getDate("created_date").getTime());
+        array.add(Json.parse(script.toString()));
       }
     }
     
@@ -207,7 +213,6 @@ public class ScriptController extends Controller {
   public Result update(String projectId) {
     
     JsonNode data = request().body().asJson();
-    
     BasicDBObject obj = Json.fromJson(data, BasicDBObject.class);
     
     JMeterScript script = service.transform(obj);
@@ -217,7 +222,7 @@ public class ScriptController extends Controller {
     script.setLoops(data.get("loops").asInt());
     
     JMeterScript oldScript = service.get(script.getId(), "number_threads", "number_engines", "ram_up", "loops");
-    
+    script.put("created_date", oldScript.getDate("created_date"));
     // handle csv files
     List<GridFSDBFile> listCSV = fileService.find(new BasicDBObject("script_id", script.getId()));
     int countFileChange = 0;

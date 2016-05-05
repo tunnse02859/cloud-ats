@@ -92,6 +92,10 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     PerformanceJob job = perfFactory.create(projectHash, project.getId(), scripts, null, Status.Queued);
     create(job);
     
+    job.put("user", context.getUser());
+    job.put("space", context.getSpace());
+    job.put("tenant", context.getTenant());
+    
     Event event = eventFactory.create(job, "performance-job-tracking");
     event.broadcast();
     
@@ -122,7 +126,11 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     SeleniumUploadJob job = keywordUploadFactory.create(projectHash, project.getId(), null, Status.Queued);
     create(job);
-
+    
+    job.put("user", context.getUser());
+    job.put("space", context.getSpace());
+    job.put("tenant", context.getTenant());
+    
     Event event = eventFactory.create(job, "upload-job-tracking");
     event.broadcast();
     return job;

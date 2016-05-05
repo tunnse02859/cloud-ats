@@ -3,8 +3,6 @@
  */
 package org.ats.services.upload;
 
-import org.ats.services.OrganizationContext;
-
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -13,5 +11,5 @@ import com.google.inject.assistedinject.Assisted;
  * Sep 17, 2015
  */
 public interface SeleniumUploadProjectFactory {
-  public SeleniumUploadProject create(@Assisted("context") OrganizationContext context, @Assisted("name") String name, @Assisted("mix_id") String mix_id);
+  public SeleniumUploadProject create(@Assisted("name") String name, @Assisted("mix_id") String mix_id);
 }

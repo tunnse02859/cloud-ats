@@ -110,7 +110,7 @@ public class SeleniumUploadProjectServiceTestCase extends AbstractEventTestCase{
     SeleniumUploadProject project = null;
 
     try {
-      project = funcFactory.create(context, "Upload project", "");
+      project = funcFactory.create("Upload project", "");
       Assert.fail();
     } catch (IllegalStateException e) {
 
@@ -123,7 +123,7 @@ public class SeleniumUploadProjectServiceTestCase extends AbstractEventTestCase{
     Assert.assertNotNull(this.context.getTenant());
 
     try {
-      project = funcFactory.create(context, "Upload project", "");
+      project = funcFactory.create("Upload project", "");
     } catch (IllegalStateException e) {
       e.printStackTrace();
       Assert.fail();

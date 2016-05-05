@@ -259,7 +259,8 @@ public class PerformanceController extends Controller {
       scripts.add(ref);
     }
     
-    PerformanceProject project = projectService.get(projectId);
+    MixProject mp = mpService.get(projectId);
+    PerformanceProject project = projectService.get(mp.getPerformanceId());
     if (project == null) {
       return status(404);
     }
@@ -281,17 +282,15 @@ public class PerformanceController extends Controller {
     PerformanceJob job = (PerformanceJob) executorService.get(jobId);
     
     ArrayNode totals = Json.newObject().arrayNode();
-    
     for (JMeterScriptReference script : job.getScripts()) {
       ArrayNode array = Json.newObject().arrayNode();
-      
       try {
         PageList<Report> pages = reportService.getList(jobId, Type.PERFORMANCE, script.getId());
+        System.out.println(pages.count());
         while (pages.hasNext()) {
-          List<Report> list = pages.next();
           
+          List<Report> list = pages.next();
           for (Report report : list) {
-            
             if (report.getScriptId() != null) {
               report.put("script_name", script.get() != null ? script.get().getName() : report.getScriptId());
             }

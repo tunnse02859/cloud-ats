@@ -18,7 +18,6 @@ import org.ats.common.PageList;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
 import org.ats.service.report.ReportService;
-import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.SeleniumUploadJob;
@@ -54,9 +53,6 @@ public class SeleniumUploadController extends Controller {
 
   @Inject
   private SeleniumUploadProjectFactory projectFactory;
-
-  @Inject
-  private OrganizationContext context;
 
   @Inject
   private SeleniumUploadProjectService seleniumUploadService;
@@ -178,7 +174,7 @@ public class SeleniumUploadController extends Controller {
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
-    SeleniumUploadProject project = projectFactory.create(context, name, "");
+    SeleniumUploadProject project = projectFactory.create(name, "");
     seleniumUploadService.create(project);
     return status(201, project.getId());
   }
