@@ -215,7 +215,8 @@ public class KeywordController extends Controller {
     String id = data.get("id").asText();
     String name = data.get("name").asText();
     int valueDelay = data.get("valueDelay").asInt();
-    KeywordProject project = keywordProjectService.get(id, "value_delay");
+    MixProject mp = mpService.get(id);
+    KeywordProject project = keywordProjectService.get(mp.getKeywordId(), "value_delay");
     
     if (name.equals(project.getString("name"))) {
       if((project.getValueDelay() == valueDelay)) {

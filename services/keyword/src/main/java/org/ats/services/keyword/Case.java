@@ -368,12 +368,14 @@ public class Case extends AbstractTemplate {
       sb.append(action.transform());
       sb.append("\n");
       if(valueDelayTransform != 0) {
-        sb.append("    System.out.println(\"");
-        sb.append(delayTime);
-        sb.append("\");\n");
-        sb.append(actionPause.transform());
-      }
-      
+    	  sb.append("try {\n");
+    	  sb.append(" Thread.sleep(");
+    	  sb.append(delayTime).append(");\n");
+    	  sb.append(" } catch (Exception e) {\n ");
+    	  sb.append("     e.printStackTrace();\n");
+    	  sb.append("     throw new RuntimeException(e);\n");
+    	  sb.append("}\n");
+        }
       listParams.clear();
   }
 }

@@ -23,8 +23,8 @@ public class Pause extends AbstractAction {
     StringBuilder sb = new StringBuilder();
     sb.append("try {\n");
     sb.append(" Thread.sleep(");
-    sb.append(waitTime).append("l);\n");
-    sb.append("     System.out.println(\"[End][Step]\"); \n");
+    sb.append(waitTime).append(");\n");
+    sb.append("    System.out.println(\"[End][Step]\"); \n");
     sb.append(" } catch (Exception e) {\n ");
     sb.append("     e.printStackTrace();\n");
     sb.append("     throw new RuntimeException(e);\n");
