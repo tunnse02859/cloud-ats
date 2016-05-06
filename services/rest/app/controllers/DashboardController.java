@@ -16,6 +16,7 @@ import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.service.report.Report;
 import org.ats.service.report.ReportService;
+import org.ats.service.report.ReportService.Type;
 import org.ats.services.OrganizationContext;
 import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
@@ -160,11 +161,8 @@ public class DashboardController extends Controller {
         if (jobList.totalPage() > 0) {
           
           AbstractJob<?> lastJob = jobList.next().get(0);
-          
           PerformanceJob job = (PerformanceJob) executorService.get(lastJob.getId());
-          
           double errorPercent = 0;
-          
           int numberOfUser = 0;
           int numberOfScript = job.getScripts().size();
           int numberOfSamples = 0;
@@ -172,7 +170,12 @@ public class DashboardController extends Controller {
           for (JMeterScriptReference script : job.getScripts()) {
             try {
               pages = reportService.query(new BasicDBObject("performane_job_id", lastJob.getId()).append("script_id", script.getId()).append("label", "*SummaryReport*"));
-              if (pages.totalPage() > 0) {
+              
+              int totalPage = pages.totalPage();
+              if (totalPage == 0) {
+                pages = reportService.getList(job.getId(), Type.PERFORMANCE, script.getId());
+              }
+              if (totalPage > 0) {
                 object = Json.newObject();
                 List<Report> list = pages.next();
                 Report report = list.get(0);

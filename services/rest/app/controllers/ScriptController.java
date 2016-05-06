@@ -38,6 +38,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
@@ -66,10 +67,12 @@ public class ScriptController extends Controller {
   @Inject OrganizationContext context;
   
   public Result list(String projectId) {
-	MixProject mp = mpService.get(projectId);
-    ArrayNode array = Json.newObject().arrayNode();
+    
+    MixProject mp = mpService.get(projectId);
     PageList<JMeterScript> pages = service.getJmeterScripts(mp.getPerformanceId());
     List<JMeterScript> list;
+    
+    BasicDBList array = new BasicDBList();
     while (pages.hasNext()) {
       list = pages.next();
       
@@ -80,11 +83,13 @@ public class ScriptController extends Controller {
         BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
         script.put("creator", userObj);
         script.put("created_date", script.getDate("created_date").getTime());
-        array.add(Json.parse(script.toString()));
+        array.add(script);
       }
     }
     
-    return ok(array);
+    mp.put("project_name", mp.getName());
+    mp.put("scripts", array);
+    return ok(Json.parse(mp.toString()));
   }
   
   public Result createByFile(String projectId) {

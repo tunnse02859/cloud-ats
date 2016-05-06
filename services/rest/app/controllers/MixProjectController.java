@@ -113,6 +113,10 @@ public class MixProjectController extends Controller {
     MixProject mp = mixProjectFactory.create(id, name, keyword.getId(), performance.getId(), selenium.getId(), context.getUser().getEmail());
     mpService.create(mp);
     
+    User user = context.getUser();
+    BasicDBObject userObj = new BasicDBObject("email", user.getEmail()).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+    
+    mp.put("creator", userObj);
     mp.put("created_date", mp.getDate("created_date").getTime());
     return ok(Json.parse(mp.toString()));
   }
