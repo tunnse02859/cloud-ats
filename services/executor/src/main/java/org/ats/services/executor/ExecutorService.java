@@ -84,7 +84,7 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     this.logger = logger;
   }
 
-  public PerformanceJob execute(PerformanceProject project, List<JMeterScriptReference> scripts) throws Exception {
+  public PerformanceJob execute(PerformanceProject project, List<JMeterScriptReference> scripts, int engines, int users, int ram_up, int loops) throws Exception {
     project.setStatus(PerformanceProject.Status.RUNNING);
     perfService.update(project);
     
@@ -95,6 +95,10 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
     job.put("user", context.getUser());
     job.put("space", context.getSpace());
     job.put("tenant", context.getTenant());
+    job.put("number_threads", users);
+    job.put("number_engines", engines);
+    job.put("ram_up", ram_up);
+    job.put("loops", loops);
     
     Event event = eventFactory.create(job, "performance-job-tracking");
     event.broadcast();

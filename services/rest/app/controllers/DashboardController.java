@@ -33,6 +33,7 @@ import org.ats.services.keyword.report.models.CaseReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
@@ -161,7 +162,7 @@ public class DashboardController extends Controller {
         if (jobList.totalPage() > 0) {
           
           AbstractJob<?> lastJob = jobList.next().get(0);
-          PerformanceJob job = (PerformanceJob) executorService.get(lastJob.getId());
+          PerformanceJob job = (PerformanceJob) executorService.get(lastJob.getId(), "number_threads", "number_engines", "loops", "ram_up");
           double errorPercent = 0;
           int numberOfUser = 0;
           int numberOfScript = job.getScripts().size();
@@ -174,20 +175,30 @@ public class DashboardController extends Controller {
               int totalPage = pages.totalPage();
               if (totalPage == 0) {
                 pages = reportService.getList(job.getId(), Type.PERFORMANCE, script.getId());
+                totalPage = pages.totalPage();
               }
               if (totalPage > 0) {
+                
+                JMeterScript jmeter = script.get();
                 object = Json.newObject();
                 List<Report> list = pages.next();
                 Report report = list.get(0);
-                numberOfUser += script.get().getNumberThreads();
+                if (job.get("number_threads") != null) {
+                  numberOfUser = job.getInt("number_threads");
+                  object.put("ram_up", job.getInt("ram_up"));
+                  object.put("loops", job.getInt("loops"));
+                  object.put("number_engines", job.getInt("number_engines"));
+                } else if (jmeter != null) {
+                  numberOfUser += jmeter.getNumberThreads();
+                  object.put("ram_up", jmeter.getRamUp());
+                  object.put("loops", jmeter.getLoops());
+                  object.put("number_engines", jmeter.getNumberEngines());
+                }
+                
                 errorPercent += report.getSummaryReport().getErrorPercent();
                 numberOfSamples += report.getSummaryReport().getSamples();
-                
                 object.put("_id", project.getId());
                 object.put("projectName", project.getName());
-                object.put("ram_up", script.get().getRamUp());
-                object.put("loops", script.get().getLoops());
-                object.put("number_engines", script.get().getNumberEngines());
               }
             } catch (Exception e) {
               e.printStackTrace();

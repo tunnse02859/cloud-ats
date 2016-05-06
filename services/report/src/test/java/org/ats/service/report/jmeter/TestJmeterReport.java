@@ -156,7 +156,7 @@ public class TestJmeterReport extends AbstractEventTestCase {
     perfService.create(project);
 
     PerformanceJob job = executorService.execute(project,
-        Arrays.asList(jmeterScriptRef.create(loginScript.getId()), jmeterScriptRef.create(gotoArticleScript.getId())));
+        Arrays.asList(jmeterScriptRef.create(loginScript.getId()), jmeterScriptRef.create(gotoArticleScript.getId())), 0, 0, 0, 0);
 
     Assert.assertEquals(job.getStatus(), Status.Queued);
     Assert.assertNull(job.getTestVMachineId());

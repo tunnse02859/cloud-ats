@@ -34,6 +34,7 @@ import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
@@ -249,13 +250,27 @@ public class PerformanceController extends Controller {
     
     List<JMeterScriptReference> scripts = new ArrayList<JMeterScriptReference>(); 
     JMeterScriptReference ref;
+    
+    int totalEngine = 0;
+    int totalUsers = 0;
+    int loops = 0;
+    int ram_up = 0;
     for (JsonNode json : data) {
       
       ref = jmeterReferenceFactory.create(json.asText());
+      JMeterScript script = jmeterService.get(ref.getId());
       
-      if (jmeterService.get(ref.getId()) == null) {
+      if (script == null) {
         return status(400);
       }
+      
+      int numberEngine = script.getNumberEngines();
+      totalEngine = Math.max(totalEngine, numberEngine);
+      
+      totalUsers += (numberEngine * script.getNumberThreads());
+      loops += script.getLoops();
+      ram_up += script.getRamUp();
+      
       scripts.add(ref);
     }
     
@@ -269,12 +284,12 @@ public class PerformanceController extends Controller {
       return status(204);
     }
     
-    PerformanceJob job = executorService.execute(project, scripts);
+    PerformanceJob job = executorService.execute(project, scripts, totalEngine, totalUsers, ram_up, loops);
     
     ObjectNode node = (ObjectNode) Json.parse(job.toString());
     node.put("created_date", formater.format(job.getCreatedDate()));
     
-    return status(200, node);
+    return status(200, "");
   }
   
   public Result report(String projectId, String jobId) {

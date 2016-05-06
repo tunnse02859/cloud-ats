@@ -224,7 +224,7 @@ public class ExecutorServiceTestCase extends AbstractEventTestCase {
     
     PerformanceJob job = executorService.execute(project, Arrays.asList(
         jmeterScriptRef.create(loginScript.getId()),
-        jmeterScriptRef.create(gotoArticleScript.getId())));
+        jmeterScriptRef.create(gotoArticleScript.getId())), 0, 0, 0, 0);
     
     Assert.assertEquals(job.getStatus(), Status.Queued);
     Assert.assertNull(job.getTestVMachineId());
