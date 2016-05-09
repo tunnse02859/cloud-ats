@@ -25,10 +25,27 @@ import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.organization.FeatureService;
+import org.ats.services.organization.RoleService;
+import org.ats.services.organization.SpaceService;
+import org.ats.services.organization.TenantService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Feature;
+import org.ats.services.organization.entity.Feature.Action;
+import org.ats.services.organization.entity.Role;
+import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.FeatureFactory;
+import org.ats.services.organization.entity.fatory.PermissionFactory;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.fatory.RoleFactory;
+import org.ats.services.organization.entity.fatory.SpaceFactory;
+import org.ats.services.organization.entity.fatory.TenantFactory;
+import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.JMeterScript;
-import org.ats.services.performance.JMeterScriptReference;
 import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
@@ -70,6 +87,29 @@ public class MixProjectTestCase  {
   
   private JMeterScriptService scriptService;
   
+  /** .*/
+  private FeatureService featureService;
+  private FeatureFactory featureFactory;
+
+  /** .*/
+  private RoleService roleService;
+  private RoleFactory roleFactory;
+  private PermissionFactory permFactory;
+  
+  /** .*/
+  private SpaceService spaceService;
+  private SpaceFactory spaceFactory;
+  private ReferenceFactory<SpaceReference> spaceRefFactory;
+
+  /** .*/
+  private UserService userService;
+  private UserFactory userFactory;
+  
+  /** .*/
+  private TenantService tenantService;
+  private TenantFactory tenantFactory;
+  private ReferenceFactory<TenantReference> tenantRefFactory;
+  
   @BeforeClass
   public void init() throws Exception {
     String host = "localhost";
@@ -90,6 +130,26 @@ public class MixProjectTestCase  {
     this.mpService = injector.getInstance(MixProjectService.class);
     this.mpFactory = injector.getInstance(MixProjectFactory.class);
     this.scriptService = injector.getInstance(JMeterScriptService.class);
+    
+    this.featureService = injector.getInstance(FeatureService.class);
+    this.featureFactory = injector.getInstance(FeatureFactory.class);
+    
+    this.roleService = injector.getInstance(RoleService.class);
+    this.roleFactory = injector.getInstance(RoleFactory.class);
+    this.permFactory = injector.getInstance(PermissionFactory.class);
+    
+    this.spaceService = injector.getInstance(SpaceService.class);
+    this.spaceFactory = injector.getInstance(SpaceFactory.class);
+    this.spaceRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<SpaceReference>>(){}));
+
+    this.userService = injector.getInstance(UserService.class);
+    this.userFactory = injector.getInstance(UserFactory.class);
+    
+    this.tenantService = injector.getInstance(TenantService.class);
+    this.tenantFactory = injector.getInstance(TenantFactory.class);
+    this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+
+    
     //    
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
   }
@@ -215,4 +275,59 @@ public class MixProjectTestCase  {
     
   }
   
+  @Test
+  public void initRoleFeature() {
+    
+    this.mongoService.getDatabase().getCollection("org-role").drop();
+    this.mongoService.getDatabase().getCollection("org-feature").drop();
+    Space unit = spaceFactory.create("BU11");
+    unit.setTenant(tenantRefFactory.create("fsoft"));
+    
+    Feature tenant = featureFactory.create("tenant");
+    tenant.addAction(new Action("manageSpaces"), new Action("viewSpaces"), 
+        new Action("grantPermission"));
+    featureService.create(tenant);
+    
+    Feature space = featureFactory.create("space");
+    space.addAction(new Action("updateSpace"), new Action("manageProjects"), 
+        new Action("viewProjects"), new Action("grantPermission"));
+    featureService.create(space);
+    
+    Feature project = featureFactory.create("project");
+    project.addAction(new Action("manageFunctional"), new Action("viewFunctional"), 
+        new Action("uploadProject"), new Action("managePerformance"), 
+        new Action("viewPerformance"), new Action("grantPermission"));
+    featureService.create(project);
+    
+    Role tenantAdmin = roleFactory.create("tenantAdmin");
+    tenantAdmin.setSpace(spaceRefFactory.create(unit.getId()));
+    tenantAdmin.addPermission(permFactory.create
+        ("tenant,space,project:manageSpaces,viewSpaces,grantPermission,updateSpace,"
+            + "manageProjects,viewProjects,grantPermission,viewFunctional,viewPerformance"
+            + "@*:*"));
+    roleService.create(tenantAdmin);
+    
+    Role spaceAdmin = roleFactory.create("spaceAdmin");
+    spaceAdmin.setSpace(spaceRefFactory.create(unit.getId()));
+    spaceAdmin.addPermission(permFactory.create("space,project:updateSpace,manageProjects,"
+        + "viewProjects,grantPermission,viewFunctional,viewPerformance@*:*"));
+    roleService.create(spaceAdmin);
+    
+    Role projectAdmin = roleFactory.create("projectAdmin");
+    projectAdmin.setSpace(spaceRefFactory.create(unit.getId()));
+    projectAdmin.addPermission(permFactory.create("project:manageFunctional,viewFunctional,"
+        + "uploadProject,managePerformance,viewPerformance,grantPermission@*:*"));
+    roleService.create(projectAdmin);
+    
+    Role scripter = roleFactory.create("scripter");
+    scripter.setSpace(spaceRefFactory.create(unit.getId()));
+    scripter.addPermission(permFactory.create("project:manageFunctional,viewFunctional,uploadProject,managePerformance,viewPerformance@*:*"));
+    roleService.create(scripter);
+    
+    Role visitor = roleFactory.create("visitor");
+    visitor.setSpace(spaceRefFactory.create(unit.getId()));
+    visitor.addPermission(permFactory.create("project:viewFunctional,viewPerformance@*:*"));
+    roleService.create(visitor);
+    
+  }
 }
