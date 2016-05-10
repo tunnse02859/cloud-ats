@@ -110,13 +110,8 @@ public class DataDrivenController extends Controller {
   }
   
   public Result get(String id) {
-    
     DataDriven driven = dataDrivenService.get(id);
-    ObjectNode json = Json.newObject();
-    
-    json.put("data", Json.parse(driven.toString()));
-    
-    return ok(json);
+    return ok(Json.parse(driven.toString()));
   }
   
   public Result delete() {

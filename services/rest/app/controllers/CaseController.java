@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
+import org.ats.services.datadriven.DataDriven;
 import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseService;
@@ -107,6 +108,13 @@ public class CaseController extends Controller {
       String name = node.get("name").asText();
       if (caze.getCreator() == null) caze.put("creator", context.getUser().getEmail());
       
+      //Update data driven
+      if (node.get("data_driven") != null) {
+        caze.put("data_driven",  new BasicDBObject("_id", node.get("data_driven").asText()));
+      } else {
+        caze.remove("data_driven");
+      }
+      
       //Update only case info
       if (node.get("steps") == null) {
         if (caze.getName().equals(name)) return status(204);
@@ -173,11 +181,11 @@ public class CaseController extends Controller {
   public Result get(String projectId, String caseId) {
     
     Case caze = caseService.get(caseId);
-//    if (caze.getDataDriven() != null) {
-//      DataDriven data = caze.getDataDriven().get();
-//      caze.put("data_source", data.getDataSource());
-//      caze.put("data_name", data.getName());
-//    }
+    if (caze.getDataDriven() != null) {
+      DataDriven data = caze.getDataDriven().get();
+      if (data != null)
+        caze.put("data_driven", new BasicDBObject("_id", data.getId()).append("name", data.getName()));
+    }
     MixProject project = mpService.get(projectId);
     caze.put("project", project.getName());
     return ok(Json.parse(caze.toString()));
