@@ -35,6 +35,7 @@ import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
@@ -280,8 +281,18 @@ public class MixProjectTestCase  {
     
     this.mongoService.getDatabase().getCollection("org-role").drop();
     this.mongoService.getDatabase().getCollection("org-feature").drop();
+    
     Space unit = spaceFactory.create("BU11");
     unit.setTenant(tenantRefFactory.create("fsoft"));
+    spaceService.create(unit);
+    
+    Space unit2 = spaceFactory.create("Z8");
+    unit2.setTenant(tenantRefFactory.create("fsoft"));
+    spaceService.create(unit2);
+    
+    Space unit3 = spaceFactory.create("GNC");
+    unit3.setTenant(tenantRefFactory.create("fsoft"));
+    spaceService.create(unit3);
     
     Feature tenant = featureFactory.create("tenant");
     tenant.addAction(new Action("manageSpaces"), new Action("viewSpaces"), 
@@ -316,18 +327,23 @@ public class MixProjectTestCase  {
     Role projectAdmin = roleFactory.create("projectAdmin");
     projectAdmin.setSpace(spaceRefFactory.create(unit.getId()));
     projectAdmin.addPermission(permFactory.create("project:manageFunctional,viewFunctional,"
-        + "uploadProject,managePerformance,viewPerformance,grantPermission@*:*"));
+        + "uploadProject,managePerformance,viewPerformance,manageDataDriven,grantPermission@*:*"));
     roleService.create(projectAdmin);
     
     Role scripter = roleFactory.create("scripter");
     scripter.setSpace(spaceRefFactory.create(unit.getId()));
-    scripter.addPermission(permFactory.create("project:manageFunctional,viewFunctional,uploadProject,managePerformance,viewPerformance@*:*"));
+    scripter.addPermission(permFactory.create("project:manageFunctional,viewFunctional,uploadProject,managePerformance,viewPerformance,manageDataDriven@*:*"));
     roleService.create(scripter);
     
     Role visitor = roleFactory.create("visitor");
     visitor.setSpace(spaceRefFactory.create(unit.getId()));
     visitor.addPermission(permFactory.create("project:viewFunctional,viewPerformance@*:*"));
     roleService.create(visitor);
+    
+    User user = userService.get("trinhtv3@cloud-ats.net");
+    user.joinSpace(spaceRefFactory.create(unit.getId()));
+    user.put("isTenantAdmin", true);
+    userService.update(user);
     
   }
 }

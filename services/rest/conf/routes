@@ -134,5 +134,7 @@ POST	/api/v1/project												@controllers.MixProjectController.create()
 DELETE	/api/v1/project/:id/:name/:pass								@controllers.MixProjectController.delete(id, name, pass)
 GET		/api/v1/project/clone/:id								@controllers.MixProjectController.cloneProject(id)
 
+#Space controller
+GET		/api/v1/spaces												@controllers.SpaceController.list()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

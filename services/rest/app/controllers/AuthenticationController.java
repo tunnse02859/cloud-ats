@@ -141,10 +141,13 @@ public class AuthenticationController extends Controller {
   
   public Result current() {
     ObjectNode json = Json.newObject();
-    
-    if (context.getUser() != null)
-      json.put("user", Json.parse(context.getUser().toString()));
-    
+    User user = null;
+    if (context.getUser() != null) {
+      user = userService.get(context.getUser().getEmail(), "isTenantAdmin");
+      if (user != null) {
+        json.put("user", Json.parse(user.toString()));
+      }
+    }
     if (context.getTenant() != null) 
       json.put("tenant", Json.parse(context.getTenant().toString()));
     
