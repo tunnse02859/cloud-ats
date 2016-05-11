@@ -23,11 +23,11 @@ GET     /api/v1/user/spaces             @controllers.UserController.spaces()
 GET     /api/v1/user/go/:spaceId        @controllers.UserController.goTo(spaceId)
 
 # DataDriven controller
-GET		/api/v1/datas					@controllers.DataDrivenController.list()
+GET		/api/v1/datas/:projectId        @controllers.DataDrivenController.list(projectId)
 POST    /api/v1/data/:projectId         @controllers.DataDrivenController.create(projectId)
 GET		/api/v1/data/:id		        @controllers.DataDrivenController.get(id)
 PUT     /api/v1/data                    @controllers.DataDrivenController.update()
-DELETE	/api/v1/data			    @controllers.DataDrivenController.delete()
+DELETE	/api/v1/data	    		    @controllers.DataDrivenController.delete()
 POST	/api/v1/data/:projectId/upload/:caseId	@controllers.DataDrivenController.upload(projectId,caseId)
 #######################################################################################################
 

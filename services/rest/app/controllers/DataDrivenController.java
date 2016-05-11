@@ -8,10 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.datadriven.DataDriven;
@@ -22,9 +21,11 @@ import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
-import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
+import org.ats.services.project.MixProject;
+import org.ats.services.project.MixProjectService;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -66,27 +68,43 @@ public class DataDrivenController extends Controller {
   @Inject
   ReferenceFactory<DataDrivenReference> dataRefFactory;
   
+  @Inject 
+  MixProjectService mpService;
+  
   @Inject
   CaseService caseService;
   
-  public Result list() {
+  public Result list(String projectId) {
     
-    Tenant currentTenant = context.getTenant();
-    PageList<DataDriven> pages = dataDrivenService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
-    ArrayNode arrayData = Json.newObject().arrayNode();
+    MixProject mp = mpService.get(projectId);
     
+    PageList<DataDriven> pages = dataDrivenService.query(new BasicDBObject("mix_id", projectId));
+    pages.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
+    
+    BasicDBList array = new BasicDBList();
     while (pages.hasNext()) {
-      List<DataDriven> list = pages.next();
-      
-      for (DataDriven data : list) {
-    	ObjectNode obj = Json.newObject();
-    	obj.put("_id", data.getId());
-    	obj.put("name", data.getName());
-    	obj.put("data_source", data.getDataSource());
-        arrayData.add(obj);
+      for (DataDriven data : pages.next()) {
+        User user = data.getCreator().get();
+        BasicDBObject userObj = new BasicDBObject("email", user.getEmail()).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        BasicDBObject obj = new BasicDBObject();
+        obj.put("_id", data.getId());
+        obj.put("name", data.getName());
+        obj.put("creator", userObj);
+        obj.put("created_date", data.getDate("created_date").getTime());
+        ArrayNode dataSource = (ArrayNode) Json.parse(data.getDataSource());
+        int row = dataSource.size();
+        obj.put("row", row);
+        if (row > 0) {
+          JsonNode node = dataSource.get(0);
+          obj.put("column", node.size());
+        }
+        array.add(obj);
       }
     }
-    return status(200, arrayData);
+    
+    mp.put("datum", array);
+    
+    return ok(Json.parse(mp.toString()));
   }
   
   public Result create(String projectId) {
@@ -111,6 +129,9 @@ public class DataDrivenController extends Controller {
   
   public Result get(String id) {
     DataDriven driven = dataDrivenService.get(id);
+    String projectId = driven.getString("mix_id");
+    MixProject mp = mpService.get(projectId);
+    driven.put("projectName", mp.getName());
     return ok(Json.parse(driven.toString()));
   }
   
@@ -151,97 +172,36 @@ public class DataDrivenController extends Controller {
   
   public Result upload(String projectId,String caseId) throws FileNotFoundException {
     
-    if ("null".equals(projectId)) {
-      MultipartFormData body = request().body().asMultipartFormData();
-      MultipartFormData.FilePart typeFile = body.getFile("file");
-      String fileName = typeFile.getFilename();
-      File file = typeFile.getFile();
-      
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      
-      ArrayNode array = readBufferByOpenCSV(br);
-      DataDriven data = dataDrivenFactory.create(projectId, fileName, array.toString());
-      dataDrivenService.create(data);
-      
-      return ok(Json.parse(data.toString()));
-    }
-    //Get file csv upload
     MultipartFormData body = request().body().asMultipartFormData();
     MultipartFormData.FilePart typeFile = body.getFile("file");
-    DataDriven dataDriven = null ;
-    if(typeFile != null) {
-      File file = typeFile.getFile();
-      BufferedReader br = null;
-      String fullName = typeFile.getFilename();
-      int lengthName = fullName.split("\\.").length;
-      String fileName = typeFile.getFilename().split("\\.")[lengthName-2];
+    String fileName = typeFile.getFilename();
+    File file = typeFile.getFile();
     
-      //Get params of data driven
-      JsonNode paramsNode = Json.parse(body.asFormUrlEncoded().get("params")[0]);
-      List<String> listParams;
-      listParams = new ArrayList<String>();
-      Iterator<JsonNode> iterator = paramsNode.iterator();
-      String line = "";
-      
-      while(iterator.hasNext()) {
-        JsonNode element = iterator.next();
-        String param = element.get("param").toString().split("\"")[1];
-        listParams.add(param);
-      }
-      
-      try {
-        br = new BufferedReader(new FileReader(file));
-        int count = listParams.size();
-        int numberOfLine = -1;
-        ObjectNode obj = null;
-        ArrayNode dataset = Json.newObject().arrayNode();
-        while((line = br.readLine()) != null) {
-          String contentLine [] = line.split(",");
-          
-          numberOfLine ++;
-          //Except the first line which contain name of params
-          if(numberOfLine == 0) continue;
-          
-          obj = Json.newObject();
-          for(int i = 0; i < count; i++) {
-            String key = listParams.get(i);
-            String value = contentLine[i];
-            obj.put(key, value);
-          }
-          dataset.add(obj);
-        }
-        dataDriven = dataDrivenFactory.create(projectId, fileName, dataset.toString());
-        dataDrivenService.create(dataDriven);
-        
-        if ("null".equals(caseId)) {
-          return status(200, Json.parse(dataDriven.toString()));
-        }
-        
-        String drivenId = dataDriven.getId();
-        Case caze = caseService.get(caseId);
-        
-        if(caze.getDataDriven() != null) {
-          caze.setDataDriven(null);
-        }
-        
-        caze.setDataDriven(dataRefFactory.create(drivenId));
-        caseService.update(caze);
-        
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      } finally {
-        if (br != null) {
-          try {
-            br.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        }
-      }
+    BufferedReader br = new BufferedReader(new FileReader(file));
+    ArrayNode array = readBufferByOpenCSV(br);
+    DataDriven data = dataDrivenFactory.create(projectId, fileName, array.toString());
+    
+    if ("null".equals(projectId)) {
+      return ok(Json.parse(data.toString()));
+    } else {
+      dataDrivenService.create(data);
     }
-    return ok(Json.parse(dataDriven.toString()));
+ 
+    if ("null".equals(caseId)) {
+      return status(200, Json.parse(data.toString()));
+    }
+        
+    String drivenId = data.getId();
+    Case caze = caseService.get(caseId);
+
+    if(caze.getDataDriven() != null) {
+      caze.setDataDriven(null);
+    }
+
+    caze.setDataDriven(dataRefFactory.create(drivenId));
+    caseService.update(caze);
+    
+    return ok(Json.parse(data.toString()));
   }
   @SuppressWarnings("resource")
   private ArrayNode readBufferByOpenCSV(BufferedReader br) {
