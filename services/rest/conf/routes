@@ -27,8 +27,17 @@ GET		/api/v1/datas/:projectId        @controllers.DataDrivenController.list(proj
 POST    /api/v1/data/:projectId         @controllers.DataDrivenController.create(projectId)
 GET		/api/v1/data/:id		        @controllers.DataDrivenController.get(id)
 PUT     /api/v1/data                    @controllers.DataDrivenController.update()
-DELETE	/api/v1/data	    		    @controllers.DataDrivenController.delete()
+DELETE	/api/v1/data			    	@controllers.DataDrivenController.delete()
 POST	/api/v1/data/:projectId/upload/:caseId	@controllers.DataDrivenController.upload(projectId,caseId)
+#######################################################################################################
+
+# Acl
+GET		/api/v1/acl/spaces					@controllers.SpaceController.list()
+POST	/api/v1/acl/space				 	@controllers.SpaceController.create()
+GET		/api/v1/acl/space/:spaceId			@controllers.SpaceController.get(spaceId)
+PUT		/api/v1/acl/space					@controllers.SpaceController.update()
+DELETE	/api/v1/acl/space/:spaceId			@controllers.SpaceController.delete(spaceId)
+GET		/api/v1/acl/space/					@controllers.SpaceController.listUser()
 #######################################################################################################
 
 # Keyword project controller 
