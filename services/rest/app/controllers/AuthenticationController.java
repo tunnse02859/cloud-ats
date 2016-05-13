@@ -10,10 +10,12 @@ import org.ats.services.OrganizationContext;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
 import play.Logger;
@@ -26,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -145,6 +148,14 @@ public class AuthenticationController extends Controller {
     if (context.getUser() != null) {
       user = userService.get(context.getUser().getEmail());
       if (user != null) {
+        BasicDBList perms = new BasicDBList();
+        for (RoleReference roleRef : user.getRoles()) {
+          Role role = roleRef.get();
+          for (Role.Permission perm : role.getPermissions()) {
+            perms.add(perm.getRule());
+          }
+        }
+        user.put("perms", perms);
         json.put("user", Json.parse(user.toString()));
       }
     }
