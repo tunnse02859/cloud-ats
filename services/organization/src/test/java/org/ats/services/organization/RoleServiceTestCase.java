@@ -72,17 +72,8 @@ public class RoleServiceTestCase extends AbstractTestCase {
   @Test
   public void testCRUD() {
     Role role = factory.create("Role 1");
-    try {
-      role.addPermission(permFactory.create("feature1:action1@tenant:space"), 
+    role.addPermission(permFactory.create("feature1:action1@tenant:space"), 
           permFactory.create("*:*@tenant:space"), permFactory.create("feature1:action1@tenant:*"));
-      Assert.fail();
-    } catch (IllegalStateException e) {
-      
-      role.setSpace(spaceFactory.create("space"));
-      
-      role.addPermission(permFactory.create("feature1:action1@tenant:space"), 
-          permFactory.create("*:*@tenant:space"), permFactory.create("feature1:action1@tenant:*"));
-    }
     service.create(role);
     
     role = service.get(role.getId());

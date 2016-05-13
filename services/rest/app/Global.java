@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.ats.service.BlobModule;
@@ -19,15 +22,26 @@ import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.iaas.VMachineServiceModule;
 import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.iaas.exception.InitializeTenantException;
+import org.ats.services.organization.FeatureService;
+import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.UnAuthenticatedException;
 import org.ats.services.organization.acl.UnAuthorizationException;
 import org.ats.services.organization.base.AuthenticationService;
+import org.ats.services.organization.entity.Feature;
+import org.ats.services.organization.entity.Feature.Action;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.FeatureFactory;
+import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
+import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
@@ -36,7 +50,6 @@ import play.GlobalSettings;
 import play.Play;
 import play.libs.F;
 import play.libs.F.Promise;
-import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestHeader;
@@ -103,6 +116,8 @@ public class Global extends GlobalSettings {
         initializeTenant(injector, "fsoft");
       }
       
+      initializePolicy(injector);
+      
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -117,7 +132,7 @@ public class Global extends GlobalSettings {
   }
   
   @Override
-  public Action<?> onRequest(Request request, Method actionMethod) {
+  public play.mvc.Action<?> onRequest(Request request, Method actionMethod) {
     
     OrganizationContext context = injector.getInstance(OrganizationContext.class);
     String token = request.getHeader(AuthenticationService.AUTH_TOKEN_HEADER);
@@ -185,4 +200,46 @@ public class Global extends GlobalSettings {
     iaasService.initTenant(tenantRefFactory.create(tenant.getId()));
   }
   
+  private void initializePolicy(Injector injector) throws IOException {
+    BufferedReader reader = new BufferedReader(new FileReader("conf/policy.conf"));
+    
+    UserService userService = injector.getInstance(UserService.class);
+    UserFactory userFactory = injector.getInstance(UserFactory.class);
+    RoleService roleService = injector.getInstance(RoleService.class);
+    RoleFactory roleFactory = injector.getInstance(RoleFactory.class);
+    ReferenceFactory<RoleReference> roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
+    ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    PermissionFactory permFactory = injector.getInstance(PermissionFactory.class);
+    FeatureService featureService = injector.getInstance(FeatureService.class);
+    FeatureFactory featureFactory = injector.getInstance(FeatureFactory.class);
+    
+    User root = userService.get("root@cloudats.net");
+    if (root == null) {
+      root = userFactory.create("root@cloudats.net", "The", "God");
+      root.setTenant(tenantRefFactory.create("fsoft"));
+      root.setPassword("QWerty");
+      Role role = roleFactory.create("root");
+      role.addPermission(permFactory.create("*:*@fsoft:*"));
+      roleService.create(role);
+      root.addRole(roleRefFactory.create(role.getId()));
+      userService.create(root);
+    }
+    
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+      String[] array = line.split(":");
+      String f = array[0];
+      String a = array[1];
+      Feature feature = featureService.get(f);
+      if (feature == null) {
+        feature = featureFactory.create(f);
+        feature.addAction(new Action(a));
+        featureService.create(feature);
+      } else {
+        if (!feature.hasAction(new Action(a))) feature.addAction(new Action(a));
+        featureService.update(feature);
+      }
+    }
+    reader.close();
+  }
 }

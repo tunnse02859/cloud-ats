@@ -35,7 +35,6 @@ import org.ats.services.organization.entity.Feature;
 import org.ats.services.organization.entity.Feature.Action;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
-import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.FeatureFactory;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
