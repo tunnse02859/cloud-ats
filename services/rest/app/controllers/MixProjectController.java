@@ -121,10 +121,11 @@ public class MixProjectController extends Controller {
     return ok(Json.parse(mp.toString()));
   }
   
-  public Result delete(String id, String name, String password) {
+  public Result delete(String id, String name) {
     
     MixProject mp = mpService.get(id);
     User user = context.getUser();
+    String password = request().body().asText();
     
     if (!name.equals(mp.getName()) || !password.equals(user.getPassword())) {
       return status(403);

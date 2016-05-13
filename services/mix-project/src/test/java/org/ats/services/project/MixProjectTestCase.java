@@ -44,6 +44,7 @@ import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.fatory.SpaceFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.JMeterScript;
@@ -95,6 +96,7 @@ public class MixProjectTestCase  {
   /** .*/
   private RoleService roleService;
   private RoleFactory roleFactory;
+  private ReferenceFactory<RoleReference> roleRefFactory;
   private PermissionFactory permFactory;
   
   /** .*/
@@ -150,7 +152,8 @@ public class MixProjectTestCase  {
     this.tenantFactory = injector.getInstance(TenantFactory.class);
     this.tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
 
-    
+    this.roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
+
     //    
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
   }
@@ -343,6 +346,7 @@ public class MixProjectTestCase  {
     User user = userService.get("trinhtv3@cloud-ats.net");
     user.joinSpace(spaceRefFactory.create(unit.getId()));
     user.put("isTenantAdmin", true);
+    user.addRole(roleRefFactory.create(tenantAdmin.getId()));
     userService.update(user);
     
   }
