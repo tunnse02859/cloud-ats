@@ -52,40 +52,34 @@ public class TenantAdminController extends Controller {
   
   public Result list(){
     
-    User user = context.getUser();
-    user = userService.get(user.getEmail(), "isTenantAdmin");
-    if (user.getBoolean("isTenantAdmin")) {
-      
-      ObjectNode object = Json.newObject();
-      BasicDBList listSpace = new BasicDBList();
-      PageList<Space> spaces = spaceService.query(new BasicDBObject("tenant", new BasicDBObject("_id", context.getTenant().getId())));
-      while (spaces.hasNext()) {
-        for (Space space : spaces.next()) {
-          listSpace.add(space);
-        }
+    ObjectNode object = Json.newObject();
+    BasicDBList listSpace = new BasicDBList();
+    PageList<Space> spaces = spaceService.query(new BasicDBObject("tenant", new BasicDBObject("_id", context.getTenant().getId())));
+    while (spaces.hasNext()) {
+      for (Space space : spaces.next()) {
+        listSpace.add(space);
       }
-      BasicDBList listUsers = new BasicDBList();
-      PageList<User> users = userService.query(new BasicDBObject("isTenantAdmin", true).append("tenant", new BasicDBObject("_id", context.getTenant().getId())));
-      while (users.hasNext()) {
-        for (User u : users.next()) {
-          StringBuilder builder = new StringBuilder();
-          for (RoleReference ref : u.getRoles()) {
-            Role role = roleService.get(ref.getId());
-            for (Permission per : role.getPermissions()) {
-              builder.append(per.getRule());
-            }
-          }
-          u.put("permission", builder.toString());
-          listUsers.add(u);
-        }
-      }
-      
-      object.put("spaces", Json.parse(listSpace.toString()));
-      object.put("users", Json.parse(listUsers.toString()));
-      
-      return ok(object);
     }
-    return ok();
+    BasicDBList listUsers = new BasicDBList();
+    PageList<User> users = userService.query(new BasicDBObject("isTenantAdmin", true).append("tenant", new BasicDBObject("_id", context.getTenant().getId())));
+    while (users.hasNext()) {
+      for (User u : users.next()) {
+        StringBuilder builder = new StringBuilder();
+        for (RoleReference ref : u.getRoles()) {
+          Role role = roleService.get(ref.getId());
+          for (Permission per : role.getPermissions()) {
+            builder.append(per.getRule());
+          }
+        }
+        u.put("permission", builder.toString());
+        listUsers.add(u);
+      }
+    }
+
+    object.put("spaces", Json.parse(listSpace.toString()));
+    object.put("users", Json.parse(listUsers.toString()));
+
+    return ok(object);
   }
   
   public Result search(String text) {
