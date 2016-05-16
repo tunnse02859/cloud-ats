@@ -1,7 +1,9 @@
 package controllers;
 
+import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.RoleService;
+import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Role;
@@ -18,7 +20,9 @@ import play.mvc.Result;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
 
 
 @CorsComposition.Cors
@@ -32,6 +36,9 @@ public class RoleController extends Controller{
 
 	@Inject
 	RoleService roleService;
+	
+	@Inject
+	SpaceService spaceService;
 
 	@Inject
 	ReferenceFactory<TenantReference> tenantReference;
@@ -44,10 +51,29 @@ public class RoleController extends Controller{
 	
 	@Inject
 	PermissionFactory permissionFactory;
-
+	
 	public Result list() {
-		
-		return ok();
+		ArrayNode array = Json.newObject().arrayNode();
+		PageList<Role> roles = roleService.list();
+		while(roles.hasNext()){
+			for (Role role : roles.next()) {
+				array.add(Json.parse(role.toString()));
+			}
+		}
+		return ok(array);
+	}
+	
+	public Result get(String roleId) {
+		ArrayNode array = Json.newObject().arrayNode();
+		PageList<Role> roles = roleService.query(new BasicDBObject("_id",
+				roleId));
+		while (roles.hasNext()) {
+			for (Role role : roles.next()) {
+				array.add(Json.parse(role.toString()));
+			}
+		}
+
+		return ok(array);
 	}
 
 

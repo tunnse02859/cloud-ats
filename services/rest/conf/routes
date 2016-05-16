@@ -41,6 +41,7 @@ GET		/api/v1/acl/space/					@controllers.SpaceController.listUser()
 
 # Acl/role
 GET		/api/v1/acl/roles					@controllers.RoleController.list()
+GET		/api/v1/acl/role/:roleId					@controllers.RoleController.get(roleId)
 POST	/api/v1/acl/role				 	@controllers.RoleController.create()
 
 #######################################################################################################

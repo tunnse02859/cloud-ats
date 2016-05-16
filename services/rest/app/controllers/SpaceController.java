@@ -42,22 +42,16 @@ public class SpaceController extends Controller {
 	ReferenceFactory<TenantReference> tenantReference;
 
 	public Result list() {
-
-		User user = context.getUser();
-		user = userService.get(user.getEmail(), "isSpaceGrant");
-		if (user.getBoolean("isSpaceGrant")) {
-			ArrayNode array = Json.newObject().arrayNode();
-			PageList<Space> spaces = spaceService.query(new BasicDBObject(
-					"tenant", new BasicDBObject("_id", context.getTenant().getId())));
-			while (spaces.hasNext()) {
-				for (Space space : spaces.next()) {
-					array.add(Json.parse(space.toString()));
-				}
+		ArrayNode array = Json.newObject().arrayNode();
+		PageList<Space> spaces = spaceService.query(new BasicDBObject("tenant",
+				new BasicDBObject("_id", context.getTenant().getId())));
+		while (spaces.hasNext()) {
+			for (Space space : spaces.next()) {
+				array.add(Json.parse(space.toString()));
 			}
-
-			return ok(array);
 		}
-		return ok();
+
+		return ok(array);
 	}
 	public Result listUser() {
 		ArrayNode listUser = Json.newObject().arrayNode();
@@ -65,50 +59,36 @@ public class SpaceController extends Controller {
 				"tenant", new BasicDBObject("_id", context.getTenant().getId())));
 		while (users.hasNext()){
 			for (User us : users.next()) {
-				ObjectNode object = Json.newObject();
-				object.put("email", us.getEmail());
-				listUser.add(object);
+				listUser.add(Json.parse(us.toString()));
 			}
 		}
 		return ok(listUser);
 	}
 
 	public Result get(String spaceId) {
-		User user = context.getUser();
-		user = userService.get(user.getEmail(), "isSpaceGrant");
-		if (user.getBoolean("isSpaceGrant")) {
-			ArrayNode array = Json.newObject().arrayNode();
-			PageList<Space> spaces = spaceService.query(new BasicDBObject(
-					"_id", spaceId));
-			while (spaces.hasNext()) {
-				for (Space space : spaces.next()) {
-					space.put("created_date", space.getDate("created_date").getTime());
-					array.add(Json.parse(space.toString()));
-				}
+		ArrayNode array = Json.newObject().arrayNode();
+		PageList<Space> spaces = spaceService.query(new BasicDBObject("_id",
+				spaceId));
+		while (spaces.hasNext()) {
+			for (Space space : spaces.next()) {
+				space.put("created_date", space.getDate("created_date")
+						.getTime());
+				array.add(Json.parse(space.toString()));
 			}
-
-			return ok(array);
 		}
-		ArrayNode listUserGrant = Json.newObject().arrayNode();
-		return ok();
+
+		return ok(array);
 	}
 
 	public Result create() {
-		User user = context.getUser();
-		user = userService.get(user.getEmail(), "isSpaceAdmin");
-		if (user.getBoolean("isSpaceAdmin")) {
-			JsonNode node = request().body().asJson();
-			String spaceName = node.get("name").asText();
-			String desc = node.get("desc").asText();
-			Space space = spaceFactory.create(spaceName);
-			space.setDescription(desc);
-			space.setTenant(tenantReference.create(context.getTenant().getId()));
-			spaceService.create(space);
-			return status(201, Json.parse(space.toString()));
-		} else {
-			return status(404);
-		}
-		
+		JsonNode node = request().body().asJson();
+		String spaceName = node.get("name").asText();
+		String desc = node.get("desc").asText();
+		Space space = spaceFactory.create(spaceName);
+		space.setDescription(desc);
+		space.setTenant(tenantReference.create(context.getTenant().getId()));
+		spaceService.create(space);
+		return status(201, Json.parse(space.toString()));
 	}
 
 	public Result update() {
@@ -126,16 +106,12 @@ public class SpaceController extends Controller {
 	}
 
 	public Result delete(String spaceId) {
-		User user = context.getUser();
-		user = userService.get(user.getEmail(), "isSpaceAdmin");
-		if (user.getBoolean("isSpaceAdmin")) {
-			Space space = spaceService.get(spaceId);
-			if (space == null)
-				return status(404);
-			spaceService.delete(spaceId);
-			return status(200);
-		} else {
+		System.out.println("ID:"+spaceId);
+		Space space = spaceService.get(spaceId);
+		if (space == null)
 			return status(404);
-		}
+		spaceService.delete(spaceId);
+		return status(200);
+
 	}
 }
