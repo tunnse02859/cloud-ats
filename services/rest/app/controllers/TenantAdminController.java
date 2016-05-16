@@ -61,7 +61,14 @@ public class TenantAdminController extends Controller {
       }
     }
     BasicDBList listUsers = new BasicDBList();
-    PageList<User> users = userService.query(new BasicDBObject("isTenantAdmin", true).append("tenant", new BasicDBObject("_id", context.getTenant().getId())));
+    BasicDBObject query = new BasicDBObject();
+    BasicDBList andCondition = new BasicDBList();
+    andCondition.add(new BasicDBObject("tenant", new BasicDBObject("_id", context.getTenant().getId())));
+    andCondition.add(new BasicDBObject("roles", new BasicDBObject("$ne", null)));
+    query.append("$and", andCondition);
+    
+    PageList<User> users = userService.query(query);
+    
     while (users.hasNext()) {
       for (User u : users.next()) {
         StringBuilder builder = new StringBuilder();
@@ -83,6 +90,7 @@ public class TenantAdminController extends Controller {
   }
   
   public Result search(String text) {
+
     PageList<User> users = userService.search(text);
     
     ArrayNode array = Json.newObject().arrayNode();
@@ -114,5 +122,23 @@ public class TenantAdminController extends Controller {
   public Result addAdmin() {
     JsonNode json = request().body().asJson();
     return ok(json);
+  }
+  
+  public Result update() {
+    JsonNode json = request().body().asJson();
+    String id = json.get("_id").asText();
+    String name = json.get("name").asText();
+    
+    Space space = spaceService.get(id);
+    space.put("name", name);
+    spaceService.update(space);
+    return ok(Json.parse(space.toString()));
+  }
+  
+  public Result deleteRole() {
+    String id = request().body().asText();
+    roleService.delete(id);
+    
+    return ok();
   }
 }

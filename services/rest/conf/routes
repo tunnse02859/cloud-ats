@@ -155,5 +155,7 @@ DELETE	/api/v1/space												@controllers.TenantAdminController.delete()
 POST	/api/v1/space/:name											@controllers.TenantAdminController.create(name)
 GET		/api/v1/user/search/:text									@controllers.TenantAdminController.search(text)									
 POST	/api/v1/tenant/admin										@controllers.TenantAdminController.addAdmin()
+PUT		/api/v1/space												@controllers.TenantAdminController.update()
+DELETE  /api/v1/tenant/admin/role									@controllers.TenantAdminController.deleteRole()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
