@@ -9,9 +9,11 @@ import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 
@@ -44,6 +46,9 @@ public class RoleController extends Controller{
 	@Inject
 	ReferenceFactory<TenantReference> tenantReference;
 	
+	@Inject 
+	ReferenceFactory<RoleReference> roleReferenceFactory;
+	
 	@Inject
 	ReferenceFactory<SpaceReference> spaceReference;
 	
@@ -62,6 +67,37 @@ public class RoleController extends Controller{
 			}
 		}
 		return ok(array);
+	}
+	
+	public Result listUser(String roleId) {
+		ArrayNode array = Json.newObject().arrayNode();
+		
+		PageList<User> users = userService.findIn("roles", roleReferenceFactory.create(roleId));
+		
+		while(users.hasNext()){
+			for (User user : users.next()) {
+				array.add(Json.parse(user.toString()));
+			}
+		}
+		return ok(array);
+	}
+	
+	public Result addUser() {
+		JsonNode node = request().body().asJson();
+		String userId = node.get("userId").asText();
+		String roleId = node.get("roleId").asText();
+		User user = userService.get(userId);
+		user.addRole(roleReferenceFactory.create(roleId));
+		userService.update(user);
+
+		return status(201);
+	}
+	public Result removeUser(String roleId, String userId) {
+		User user = userService.get(userId);
+		user.removeRole(roleReferenceFactory.create(roleId));
+		userService.update(user);
+
+		return status(201);
 	}
 	
 	public Result get(String roleId) {
