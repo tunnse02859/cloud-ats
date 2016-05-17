@@ -8,6 +8,7 @@ import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
@@ -64,42 +65,89 @@ public class RoleController extends Controller{
 	}
 	
 	public Result get(String roleId) {
-		ArrayNode array = Json.newObject().arrayNode();
-		PageList<Role> roles = roleService.query(new BasicDBObject("_id",
-				roleId));
-		while (roles.hasNext()) {
-			for (Role role : roles.next()) {
-				array.add(Json.parse(role.toString()));
-			}
-		}
-
-		return ok(array);
+		
+		Role role = roleService.get(roleId);
+		return ok(Json.parse(role.toString()));
 	}
 
 
 	public Result create() {
+		
 		JsonNode node = request().body().asJson();
 		String roleName = node.get("name").asText();
 		String spaceId = node.get("spaceId").asText();
-		boolean tenantView = node.get("tenant").get("view").asBoolean();
-		boolean tenantManage = node.get("tenant").get("manage").asBoolean();
-		boolean tenantGrant = node.get("tenant").get("grant").asBoolean();
-		boolean spaceView = node.get("space").get("view").asBoolean();
-		boolean spaceManage = node.get("space").get("manage").asBoolean();
-		boolean spaceGrant = node.get("space").get("grant").asBoolean();
-		boolean projectView = node.get("project").get("manage").asBoolean();
-		boolean projectManageFunc = node.get("project").get("manageFunction").asBoolean();
-		boolean projectViewFunc = node.get("project").get("viewFunction").asBoolean();
-		boolean projectUploadSele= node.get("project").get("uploadSelenium").asBoolean();
-		boolean projectManageData = node.get("project").get("manageData").asBoolean();
-		boolean projectManagePerf = node.get("project").get("managePerformance").asBoolean();
-		boolean projectViewPerf = node.get("project").get("viewPerformance").asBoolean();
-		boolean projectGrantPerm= node.get("project").get("grantPermisson").asBoolean();
-		
-		
+		Tenant tenant = context.getTenant();
 		Role role = roleFactory.create(roleName);
-//		role.setSpace(spaceReference.create("spaceId"));
-		role.addPermission(permissionFactory.create("isTeantView:"+tenantView));
+		role.setSpace(spaceReference.create(spaceId));
+		
+		boolean tenantView = node.get("permissions").get("viewSpaces").asBoolean();
+		if (tenantView) {
+			role.addPermission(permissionFactory.create("tenant:view_spaces@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean tenantManage = node.get("permissions").get("manageSpaces").asBoolean();
+		if (tenantManage) {
+			role.addPermission(permissionFactory.create("tenant:manage_spaces@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean tenantGrant = node.get("permissions").get("grantTenant").asBoolean();
+		if (tenantGrant) {
+			role.addPermission(permissionFactory.create("tenant:grant_permission@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean spaceView = node.get("permissions").get("viewProjects").asBoolean();
+		if (spaceView) {
+			role.addPermission(permissionFactory.create("space:view_projects@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean spaceManage = node.get("permissions").get("manageProjects").asBoolean();
+		if (spaceManage) {
+			role.addPermission(permissionFactory.create("space:manage_projects@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean spaceUpdate = node.get("permissions").get("updateSpace").asBoolean();
+		if (spaceUpdate) {
+			role.addPermission(permissionFactory.create("space:update_space@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean spaceGrant = node.get("permissions").get("grantSpace").asBoolean();
+		if (spaceGrant) {
+			role.addPermission(permissionFactory.create("space:grant_premission@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectManageFunc = node.get("permissions").get("manageFunction").asBoolean();
+		if (projectManageFunc) {
+			role.addPermission(permissionFactory.create("project:manage_functional@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectViewFunc = node.get("permissions").get("viewFunction").asBoolean();
+		if (projectViewFunc) {
+			role.addPermission(permissionFactory.create("project:view_functional@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectUploadSele= node.get("permissions").get("uploadSelenium").asBoolean();
+		if (projectUploadSele) {
+			role.addPermission(permissionFactory.create("project:upload_selenium@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectManageData = node.get("permissions").get("manageData").asBoolean();
+		if (projectManageData) {
+			role.addPermission(permissionFactory.create("project:manage_data@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectManagePerf = node.get("permissions").get("managePerformance").asBoolean();
+		if (projectManagePerf) {
+			role.addPermission(permissionFactory.create("project:manage_performance@" + tenant.getId() + ":" + spaceId));
+		}
+		
+		boolean projectViewPerf = node.get("permissions").get("viewPerformance").asBoolean();
+		if (projectViewPerf) {
+			role.addPermission(permissionFactory.create("project:view_performance@" + tenant.getId() + ":" + spaceId));
+		}
+		boolean projectGrantPerm= node.get("permissions").get("grantPermisson").asBoolean();
+		if (projectGrantPerm) {
+			role.addPermission(permissionFactory.create("project:grant_permission@" + tenant.getId() + ":" + spaceId));
+		}
 		
 		roleService.create(role);
 		
