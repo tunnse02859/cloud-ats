@@ -42,10 +42,9 @@ GET		/api/v1/acl/space/					@controllers.SpaceController.listUser()
 # Acl/role
 GET		/api/v1/acl/roles					@controllers.RoleController.list()
 GET		/api/v1/acl/listUser/:roleId		@controllers.RoleController.listUser(roleId)
-POST	/api/v1/acl/role/add/user			@controllers.RoleController.addUser()
-DELETE	/api/v1/acl/role/:roleId/remove/user/:userId		@controllers.RoleController.removeUser(roleId, userId)
 GET		/api/v1/acl/role/:roleId			@controllers.RoleController.get(roleId)
-POST	/api/v1/acl/role				 	@controllers.RoleController.create()
+POST	/api/v1/acl/role				 	@controllers.RoleController.update()
+DELETE	/api/v1/acl/role/:roleId			@controllers.RoleController.delete(roleId)
 
 #######################################################################################################
 

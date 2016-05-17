@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.RoleService;
@@ -82,39 +85,49 @@ public class RoleController extends Controller{
 		return ok(array);
 	}
 	
-	public Result addUser() {
-		JsonNode node = request().body().asJson();
-		String userId = node.get("userId").asText();
-		String roleId = node.get("roleId").asText();
-		User user = userService.get(userId);
-		user.addRole(roleReferenceFactory.create(roleId));
-		userService.update(user);
-
-		return status(201);
-	}
-	public Result removeUser(String roleId, String userId) {
-		User user = userService.get(userId);
-		user.removeRole(roleReferenceFactory.create(roleId));
-		userService.update(user);
-
-		return status(201);
-	}
-	
 	public Result get(String roleId) {
 		
 		Role role = roleService.get(roleId);
 		return ok(Json.parse(role.toString()));
 	}
+	public Result delete(String roleId){
+		roleService.delete(roleId);
+		PageList<User> users = userService.findIn("roles", roleReferenceFactory.create(roleId));
+		List<User> listUser = new ArrayList<User>();
+		while(users.hasNext()){
+			for (User user : users.next()) {
+				user.removeRole(roleReferenceFactory.create(roleId));
+				listUser.add(user);
+			}
+		}
+		for (User user : listUser) {
+			userService.update(user);
+		}
+		return status(201);
+	}
 
-
-	public Result create() {
+	public Result update() {
 		
 		JsonNode node = request().body().asJson();
 		String roleName = node.get("name").asText();
 		String spaceId = node.get("spaceId").asText();
+		JsonNode array = node.get("listUser");
 		Tenant tenant = context.getTenant();
-		Role role = roleFactory.create(roleName);
-		role.setSpace(spaceReference.create(spaceId));
+		String roleId = node.get("_id") == null ? null : node.get("_id").asText();
+		
+		Role role;
+		if (roleId == null) {
+			role = roleFactory.create(roleName);
+			role.setSpace(spaceReference.create(spaceId));
+			roleId = role.getId();
+		} else {
+			role = roleService.get(roleId);
+		}
+		for (JsonNode jsonNode : array) {
+			User user = userService.get(jsonNode.get("_id").asText());
+			user.addRole(roleReferenceFactory.create(role.getId()));
+			userService.update(user);
+		}
 		
 		boolean tenantView = node.get("permissions").get("viewSpaces").asBoolean();
 		if (tenantView) {
@@ -184,8 +197,12 @@ public class RoleController extends Controller{
 		if (projectGrantPerm) {
 			role.addPermission(permissionFactory.create("project:grant_permission@" + tenant.getId() + ":" + spaceId));
 		}
+		if (roleId == null) {
+			roleService.create(role);
+		} else {
+			roleService.update(role);
+		}
 		
-		roleService.create(role);
 		
 		return status(201, Json.parse(role.toString()));
 		
