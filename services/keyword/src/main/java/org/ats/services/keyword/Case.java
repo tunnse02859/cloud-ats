@@ -369,8 +369,8 @@ public class Case extends AbstractTemplate {
       sb.append("\n");
       if(valueDelayTransform != 0) {
     	  sb.append("try {\n");
-    	  sb.append(" Thread.sleep(");
-    	  sb.append(delayTime).append(");\n");
+    	  sb.append(" Thread.sleep(\"");
+    	  sb.append(delayTime).append("\");\n");
     	  sb.append(" } catch (Exception e) {\n ");
     	  sb.append("     e.printStackTrace();\n");
     	  sb.append("     throw new RuntimeException(e);\n");
