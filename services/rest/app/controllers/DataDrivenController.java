@@ -203,6 +203,22 @@ public class DataDrivenController extends Controller {
     
     return ok(Json.parse(data.toString()));
   }
+  
+  public Result rename() {
+    
+    JsonNode json = request().body().asJson();
+    String id = json.get("_id").asText();
+    String name = json.get("name").asText();
+    
+    DataDriven data = dataDrivenService.get(id);
+    if (name.equals(data.getName())) return status(204); 
+    
+    data.put("name", name);
+    dataDrivenService.update(data);
+    
+    return ok();
+  }
+  
   @SuppressWarnings("resource")
   private ArrayNode readBufferByOpenCSV(BufferedReader br) {
     ArrayNode array = null;

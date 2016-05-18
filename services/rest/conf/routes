@@ -29,6 +29,7 @@ GET		/api/v1/data/:id		        @controllers.DataDrivenController.get(id)
 PUT     /api/v1/data                    @controllers.DataDrivenController.update()
 DELETE	/api/v1/data			    	@controllers.DataDrivenController.delete()
 POST	/api/v1/data/:projectId/upload/:caseId	@controllers.DataDrivenController.upload(projectId,caseId)
+PUT     /api/v1/data/rename                     @controllers.DataDrivenController.rename()
 #######################################################################################################
 
 # Acl/space
@@ -88,6 +89,7 @@ PUT     /api/v1/project/keyword/:projectId/case   @controllers.CaseController.up
 DELETE  /api/v1/project/keyword/:projectId/case/:caseId    @controllers.CaseController.delete(projectId, caseId)
 GET		/api/v1/project/keyword/:projectId/case/:caseId/clone	@controllers.CaseController.cloneCase(projectId, caseId)
 GET		/api/v1/project/keyword/:projectId/case/:caseId		@controllers.CaseController.get(projectId, caseId)
+PUT     /api/v1/project/keyword/:projectId/case/rename   	@controllers.CaseController.rename(projectId)
 # Suite controller
 
 GET     /api/v1/project/keyword/:projectId/suites   @controllers.SuiteController.list(projectId)

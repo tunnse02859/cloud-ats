@@ -191,4 +191,17 @@ public class CaseController extends Controller {
     return ok(Json.parse(caze.toString()));
   }
   
+  public Result rename(String projectId) {
+    
+    JsonNode json = request().body().asJson();
+    String caseId = json.get("_id").asText();
+    String caseName = json.get("name").asText();
+    Case caze = caseService.get(caseId);
+    
+    if (caseName.equals(caze.getName())) return status(204);
+    caze.setName(caseName);
+    caseService.update(caze);
+    return ok();
+    
+  }
 }
