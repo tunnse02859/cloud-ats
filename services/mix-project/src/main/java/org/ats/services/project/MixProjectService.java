@@ -3,8 +3,13 @@
  */
 package org.ats.services.project;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -22,6 +27,7 @@ import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.keyword.Suite;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScript;
 import org.ats.services.performance.JMeterScriptService;
 import org.ats.services.performance.PerformanceProject;
@@ -67,6 +73,8 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
   
   @Inject CustomKeywordService customService;
   
+  @Inject ReferenceFactory<CaseReference> caseRefFactory;
+  
   @Inject
   public MixProjectService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
@@ -88,8 +96,6 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
       per.put("_id", UUID.randomUUID().toString());
       per.put("creator", new BasicDBObject("_id", context.getUser()));
 
-      performanceService.create(per);
-        
       PageList<JMeterScript> scripts = jmeterService.query(new BasicDBObject("project_id", mp.getPerformanceId()));
       while (scripts.hasNext()) {
         for (JMeterScript script : scripts.next()) {
@@ -111,7 +117,9 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
 
         }
       }
-
+      
+      performanceService.create(per);
+      
       mp.setPerformanceId(per.getId());
     }
     
@@ -124,9 +132,14 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
       keyword.put("_id", UUID.randomUUID().toString());
       keyword.put("creator", new BasicDBObject("_id", context.getUser().getEmail()));
 
-      keywordService.create(keyword);
-        
       PageList<Suite> suites = suiteService.query(new BasicDBObject("project_id", mp.getKeywordId()));
+      
+      List<Case> caseHolder = new ArrayList<Case>();
+      List<Suite> suiteHolder = new ArrayList<Suite>();
+      
+      Set<String> set = new HashSet<String>();
+      Map<String, String> map = new HashMap<String, String>();
+      
       while (suites.hasNext()) {
         for (Suite suite : suites.next()) {
           suite.put("created_date", new Date());
@@ -136,29 +149,63 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
           suite.removeField("cases");
           for (CaseReference ref : cases) {
             Case caze = ref.get();
-            caze.put("created_date", new Date());
-            caze.put("_id", UUID.randomUUID().toString());
-            caze.put("project_id", keyword.getId());
-            caseService.create(caze);
-            list.add(new BasicDBObject("_id", caze.getId()));
+            String newCaseId = UUID.randomUUID().toString();
+            if (!set.contains(caze.getId())) {
+              set.add(caze.getId());
+              map.put(caze.getId(), newCaseId);
+              
+              caze.put("created_date", new Date());
+              caze.put("_id", newCaseId);
+              caze.put("project_id", keyword.getId());
+              caseHolder.add(caze);
+              list.add(caseRefFactory.create(newCaseId).toJSon());
+            } else list.add(caseRefFactory.create(map.get(caze.getId())).toJSon());
+            
           }
 
           suite.put("cases", list);
           suite.put("_id", UUID.randomUUID().toString());
           suite.put("project_id", keyword.getId());
-          suiteService.create(suite);
-
+          suiteHolder.add(suite);
         }
       }
       
+      PageList<Case> listCases = caseService.query(new BasicDBObject("project_id", mp.getKeywordId()));
+      
+      while (listCases.hasNext()) {
+        for (Case caze : listCases.next()) {
+          if (!set.contains(caze.getId())) {
+            caze.put("created_date", new Date());
+            caze.put("_id", UUID.randomUUID());
+            caze.put("project_id", keyword.getId());
+            caseHolder.add(caze);
+            
+          }
+        }
+      }
+      
+      for (Suite suite : suiteHolder) {
+        suiteService.create(suite);
+      }
+      
+      for (Case caze : caseHolder) {
+        caseService.create(caze);
+      }
+      
+      List<CustomKeyword> customHolder = new ArrayList<CustomKeyword>();
       PageList<CustomKeyword> customs = customService.query(new BasicDBObject("project_id", mp.getKeywordId()));
       while (customs.hasNext()) {
         for (CustomKeyword custom : customs.next()) {
           custom.put("_id", UUID.randomUUID().toString());
           custom.put("project_id", keyword.getId());
-          customService.create(custom);
         }
       }
+      
+      for (CustomKeyword custom : customHolder) {
+        customService.create(custom);
+      }
+      
+      keywordService.create(keyword);
       
       mp.setKeywordId(keyword.getId());
     }

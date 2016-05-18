@@ -211,6 +211,7 @@ public class MixProjectTestCase  {
   
   @Test
   public void migrate() {
+    this.authService.logIn("haint@cloud-ats.net", "12345");
     this.mongoService.getDatabase().getCollection("mix-project").drop();
     
     PageList<PerformanceProject> pers = performanceProjectService.list();
@@ -278,7 +279,7 @@ public class MixProjectTestCase  {
     
   }
   
-  @Test
+  
   public void initRoleFeature() {
     
     this.mongoService.getDatabase().getCollection("org-role").drop();
