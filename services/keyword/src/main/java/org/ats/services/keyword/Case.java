@@ -123,11 +123,9 @@ public class Case extends AbstractTemplate {
     boolean isUseDataProvider = getDataDriven() != null;
     int valueDelayTransform = valueDelay*1000;
     
-    String delayTime = "";
     ObjectMapper mapper = new ObjectMapper(); 
     JsonNode nodePause = mapper.readTree("{\"type\":\"pause\",\"waitTime\":\""+valueDelayTransform+"\"}");
     AbstractAction actionPause = actionFactory.createAction(nodePause);
-    delayTime = "[INFO] Waiting "+ valueDelay + "(s) ";
     
     if(isUseDataProvider) {
       
@@ -177,10 +175,10 @@ public class Case extends AbstractTemplate {
     for (JsonNode json : actions) {
       if (json.has("steps")) {
         for (JsonNode step : json.get("steps")) {
-          transform(step, sb, listParams, valueDelayTransform, delayTime, actionPause);
+          transform(step, sb, listParams, valueDelayTransform, actionPause);
         }
       } else {
-        transform(json, sb, listParams, valueDelayTransform, delayTime, actionPause);
+        transform(json, sb, listParams, valueDelayTransform, actionPause);
       }
     }
     
@@ -192,7 +190,7 @@ public class Case extends AbstractTemplate {
     return sb.toString();
   }
   
-  private void transform(JsonNode json, StringBuilder sb, List<String> listParams, int valueDelayTransform, String delayTime, AbstractAction actionPause) throws IOException {
+  private void transform(JsonNode json, StringBuilder sb, List<String> listParams, int valueDelayTransform, AbstractAction actionPause) throws IOException {
     AbstractAction action = actionFactory.createAction(json);
     
     if (action == null) return;
@@ -369,8 +367,8 @@ public class Case extends AbstractTemplate {
       sb.append("\n");
       if(valueDelayTransform != 0) {
     	  sb.append("try {\n");
-    	  sb.append(" Thread.sleep(\"");
-    	  sb.append(delayTime).append("\");\n");
+    	  sb.append(" Thread.sleep(");
+    	  sb.append(valueDelayTransform).append(");\n");
     	  sb.append(" } catch (Exception e) {\n ");
     	  sb.append("     e.printStackTrace();\n");
     	  sb.append("     throw new RuntimeException(e);\n");
