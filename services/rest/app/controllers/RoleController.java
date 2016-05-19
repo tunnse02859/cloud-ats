@@ -116,18 +116,21 @@ public class RoleController extends Controller{
 		Tenant tenant = context.getTenant();
 		String roleId = node.get("_id") == null ? null : node.get("_id").asText();
 		
-		Role role;
+		Role role ;
 		if (roleId == null) {
 			role = roleFactory.create(roleName);
 			role.setSpace(spaceReference.create(spaceId));
 			roleId = role.getId();
 		} else {
 			role = roleService.get(roleId);
+			role.setSpace(spaceReference.create(spaceId));
 		}
 		for (JsonNode jsonUser : listUser) {
 			User user = userService.get(jsonUser.get("_id").asText());
-			user.addRole(roleReferenceFactory.create(role.getId()));
-			userService.update(user);
+			if(user.hasRole(roleReferenceFactory.create(role.getId()))){
+				user.addRole(roleReferenceFactory.create(role.getId()));
+				userService.update(user);
+			}
 		}
 		for (JsonNode jsonPerm : listPerm) {
 			if (!role.hasPermisison(permissionFactory.create(jsonPerm.get("rule").asText() + tenant.getId() + ":" + spaceId))) {
@@ -135,7 +138,6 @@ public class RoleController extends Controller{
 			}
 		}
 		if (roleId == null) {
-			
 			roleService.create(role);
 		} else {
 			roleService.update(role);
