@@ -127,7 +127,7 @@ public class RoleController extends Controller{
 		}
 		for (JsonNode jsonUser : listUser) {
 			User user = userService.get(jsonUser.get("_id").asText());
-			if(user.hasRole(roleReferenceFactory.create(role.getId()))){
+			if(!user.hasRole(roleReferenceFactory.create(role.getId()))){
 				user.addRole(roleReferenceFactory.create(role.getId()));
 				userService.update(user);
 			}
