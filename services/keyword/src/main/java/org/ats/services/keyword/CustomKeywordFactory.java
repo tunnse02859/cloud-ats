@@ -11,5 +11,5 @@ import com.google.inject.assistedinject.Assisted;
  * Aug 3, 2015
  */
 public interface CustomKeywordFactory {
-  public CustomKeyword create(@Assisted("projectId") String projectId, @Assisted("name") String name);
+  public CustomKeyword create(@Assisted("projectId") String projectId, @Assisted("name") String name, @Assisted("creator") String creator);
 }

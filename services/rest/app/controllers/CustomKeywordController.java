@@ -5,10 +5,13 @@ package controllers;
 
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.keyword.CustomKeyword;
 import org.ats.services.keyword.CustomKeywordFactory;
 import org.ats.services.keyword.CustomKeywordService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.User;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
 
@@ -20,7 +23,9 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -37,27 +42,38 @@ public class CustomKeywordController extends Controller {
   
   @Inject MixProjectService mpService;
   
+  @Inject UserService userService;
+  
+  @Inject OrganizationContext context;
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
-    
+
     PageList<CustomKeyword> list = customService.getCustomKeywords(mp.getKeywordId());
     list.setSortable(new MapBuilder<String, Boolean>("created_date", false).build());
     
-    ArrayNode array = Json.newObject().arrayNode();
+    BasicDBList array = new BasicDBList();
     while(list.hasNext()) {
-      for (CustomKeyword caze : list.next()) {
-        array.add(Json.parse(caze.toString()));
+      for (CustomKeyword custom : list.next()) {
+        String email = custom.getCreator();
+        User user = userService.get(email);
+        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+        custom.put("creator", userObj);
+        custom.put("created_date", custom.getDate("created_date").getTime());
+        array.add(custom);
       }
     }
-    return ok(array);
+    mp.put("customs", array);
+    return ok(Json.parse(mp.toString()));
   }
   
   public Result create(String projectId) {
+    
+    MixProject mp = mpService.get(projectId);
+    
     JsonNode data = request().body().asJson();
     String name = data.get("name").asText();
-    
-    CustomKeyword keyword = customFactory.create(projectId, name);
+    CustomKeyword keyword = customFactory.create(mp.getKeywordId(), name, context.getUser().getEmail());
     for (JsonNode step : data.get("steps")) {
       keyword.addAction(step);
     }
@@ -66,27 +82,53 @@ public class CustomKeywordController extends Controller {
   }
   
   public Result update(String projectId) {
+
     JsonNode node = request().body().asJson();
-    BasicDBObject obj = Json.fromJson(node, BasicDBObject.class);
-    
-    CustomKeyword keyword = customService.transform(obj);
-    CustomKeyword oldKeyword = customService.get(keyword.getId());
-    
-    if (!projectId.equals(keyword.getProjectId()) 
-        || !keyword.getId().equals(oldKeyword.getId())
-        || oldKeyword == null) return status(400);
-    
-    if (keyword.equals(oldKeyword)) return status(204);
-    
-    customService.update(keyword);
-    return status(200);
+    CustomKeyword custom = customService.get(node.get("_id").asText());
+    if (custom == null) return status(404);
+    else {
+      String name = node.get("name").asText();
+      if (custom.getCreator() == null) custom.put("creator", context.getUser().getEmail());
+      
+      //Update only group keyword info
+      if (node.get("steps") == null) {
+        if (custom.getName().equals(name)) return status(204);
+        else {
+          custom.put("name", name);
+          customService.update(custom);
+          return status(200);
+        }
+      }
+      
+      ArrayNode steps = (ArrayNode) node.get("steps");
+      BasicDBList list = new BasicDBList();
+      for (JsonNode step : steps) {
+        list.add(JSON.parse(step.toString()));
+      }
+      custom.put("steps",  list);
+      customService.update(custom);
+      
+      return status(200);
+    }
   }
   
   public Result delete(String projectId, String keywordId)  throws Exception {
+    
+    MixProject mp = mpService.get(projectId);
+    
     CustomKeyword keyword = customService.get(keywordId);
-    if (keyword == null || !projectId.equals(keyword.getProjectId())) return status(404);
+    if (keyword == null || !mp.getKeywordId().equals(keyword.getProjectId())) return status(404);
     
     customService.delete(keywordId);
     return status(200);
   }
+  
+  public Result get(String projectId, String customId) {
+    
+    CustomKeyword custom = customService.get(customId);
+    MixProject project = mpService.get(projectId);
+    custom.put("project", project.getName());
+    return ok(Json.parse(custom.toString()));
+  }
+  
 }

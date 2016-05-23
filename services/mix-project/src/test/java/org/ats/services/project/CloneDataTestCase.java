@@ -239,7 +239,7 @@ public class CloneDataTestCase extends AbstractEventTestCase {
     suiteService.create(suite);
     
     //custom keyword
-    CustomKeyword customKeyword = customFactory.create(keyword.getId(), "custom_keyword");
+    CustomKeyword customKeyword = customFactory.create(keyword.getId(), "custom_keyword", "fake");
     for (JsonNode json : stepsNode) {
       customKeyword.addAction(json);
     }

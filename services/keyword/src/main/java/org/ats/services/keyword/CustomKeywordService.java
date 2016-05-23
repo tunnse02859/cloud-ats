@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.ats.common.PageList;
+import org.ats.services.OrganizationContext;
 import org.ats.services.data.MongoDBService;
 import org.ats.services.organization.base.AbstractMongoCRUD;
 import org.joda.time.format.DateTimeFormatter;
@@ -37,6 +38,9 @@ public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
   private CustomKeywordFactory customKeywordFactory;
   
   @Inject 
+  private OrganizationContext context;
+  
+  @Inject 
   CustomKeywordService(MongoDBService mongo, Logger logger) {
     this.col = mongo.getDatabase().getCollection(COL_NAME);
     this.logger = logger;
@@ -55,8 +59,10 @@ public class CustomKeywordService extends AbstractMongoCRUD<CustomKeyword>{
     BasicDBObject dbObject = (BasicDBObject) source;
     ObjectMapper mapper = new ObjectMapper();
     
-    CustomKeyword cutomKeyword = customKeywordFactory.create(dbObject.getString("project_id"), dbObject.getString("name"));
+    String creator = source.get("creator") == null ? context.getUser().getEmail() : (String) source.get("creator");
+    CustomKeyword cutomKeyword = customKeywordFactory.create(dbObject.getString("project_id"), dbObject.getString("name"), creator);
     cutomKeyword.put("_id", dbObject.get("_id"));
+    
     Object date = dbObject.get("created_date");
     if (date instanceof Date) {
       cutomKeyword.put("created_date", date);

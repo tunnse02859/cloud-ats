@@ -27,12 +27,13 @@ public class CustomKeyword extends BasicDBObject {
   private List<JsonNode> actions = new ArrayList<JsonNode>();
   
   @Inject
-  private CustomKeyword(@Assisted("projectId") String projectId, @Assisted("name") String name) {
+  private CustomKeyword(@Assisted("projectId") String projectId, @Assisted("name") String name, @Assisted("creator") String creator) {
     this.put("_id", UUID.randomUUID().toString());
     this.put("project_id", projectId);
     this.put("name", name);
     this.put("created_date", new Date());
     this.put("steps", null);
+    this.put("creator", creator);
     
   }
   
@@ -46,6 +47,14 @@ public class CustomKeyword extends BasicDBObject {
   
   public String getName() {
     return this.getString("name");
+  }
+  
+  public void setCreator(String creator) {
+    this.put("creator", creator);
+  }
+  
+  public String getCreator() {
+    return this.getString("creator");
   }
   
   public String getProjectId() {

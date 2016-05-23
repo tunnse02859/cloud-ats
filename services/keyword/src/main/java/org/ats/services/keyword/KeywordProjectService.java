@@ -11,7 +11,6 @@ import org.ats.services.organization.base.AbstractMongoCRUD;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -28,9 +27,6 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
   
   @Inject
   private KeywordProjectFactory factory;
-  
-  @Inject
-  private CustomKeywordFactory customKeyFactory;
   
   @Inject
   KeywordProjectService(MongoDBService mongo, Logger logger) {
@@ -57,17 +53,7 @@ public class KeywordProjectService extends AbstractMongoCRUD<KeywordProject>{
    
     project.put("creator", source.get("creator"));
     //transform custom keywords
-    if (source.get("custom_keywords") == null) return project;
     
-    BasicDBList list = (BasicDBList) source.get("custom_keywords");
-    for (Object obj : list) {
-      BasicDBObject dbObj = (BasicDBObject) obj;
-      String name = dbObj.getString("name");
-      CustomKeyword customKeyword = customKeyFactory.create(project.getId(), name);
-      customKeyword.put("_id", dbObj.get("_id"));
-    }
-   
-    project.put("custom_keywords", source.get("custom_keywords"));
     return project;
   }
 

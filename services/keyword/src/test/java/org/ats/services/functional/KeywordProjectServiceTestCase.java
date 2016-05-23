@@ -239,7 +239,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     JsonNode rootNode = m.readTree(new File("src/test/resources/full_example.json"));
     JsonNode stepsNode = rootNode.get("steps");
     
-    CustomKeyword customKeyword = customFactory.create(projectId, "custom_keyword");
+    CustomKeyword customKeyword = customFactory.create(projectId, "custom_keyword", "fake");
     for (JsonNode json : stepsNode) {
       customKeyword.addAction(json);
     }
@@ -262,7 +262,7 @@ public class KeywordProjectServiceTestCase extends AbstractEventTestCase {
     
     String actions = "[{\"type\":\"get\",\"url\":\"http://saucelabs.com/test/guinea-pig/\"}, {\"type\":\"clickElement\",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"}}]";
     JsonNode stepsNode2 = m.readTree(actions);
-    customKeyword = customFactory.create(projectId, "custom_keyword");
+    customKeyword = customFactory.create(projectId, "custom_keyword", "fake");
     for(JsonNode json : stepsNode2) {
       customKeyword.addAction(json);
     }
