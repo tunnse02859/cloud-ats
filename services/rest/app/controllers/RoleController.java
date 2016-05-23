@@ -10,7 +10,6 @@ import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.Role;
-import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.PermissionFactory;
@@ -28,7 +27,6 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
-import com.mongodb.BasicDBObject;
 
 
 @CorsComposition.Cors
@@ -79,6 +77,7 @@ public class RoleController extends Controller{
 		
 		while(users.hasNext()){
 			for (User user : users.next()) {
+				user.removeField("password");
 				array.add(Json.parse(user.toString()));
 			}
 		}

@@ -4,19 +4,24 @@
 package controllers;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
+import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.base.AuthenticationService;
 import org.ats.services.organization.entity.Role;
+import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.TenantReference;
+import org.bson.BSONObject;
 
 import play.Logger;
 import play.libs.Json;
@@ -29,6 +34,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -46,6 +53,9 @@ public class AuthenticationController extends Controller {
   
   @Inject
   private TenantService tenantService;
+  
+  @Inject
+  private SpaceService spaceService;
   
   @Inject
   private UserFactory userFactory;
@@ -131,16 +141,28 @@ public class AuthenticationController extends Controller {
     
     while (list.hasNext()) {
       List<Tenant> listUser = list.next();
-      
       for (Tenant tenant : listUser) {
-        ObjectNode json = Json.newObject();
-        json.put("_id", tenant.getId());
-        array.add(json);
+        ObjectNode jsonTenant = Json.newObject();
+        jsonTenant.put("_id", tenant.getId());
+        array.add(jsonTenant);
       }
     }
     
     return ok(array);
   }
+  
+//  public Result spaces(String tenantId){
+//	  PageList<Space> listSpace = spaceService.query(new BasicDBObject("tenant", new BasicDBObject("_id", tenantId)));
+//	  ArrayNode jsonSpace = Json.newObject().arrayNode();
+//	  while(listSpace.hasNext()) {
+//      	List<Space> spaces = listSpace.next();
+//      	for (Space space : spaces) {
+//              jsonSpace.add(Json.parse(space.toString()));
+// 		}
+//      }
+//	  return ok(jsonSpace);
+//	  
+//  }
   
   public Result current() {
     ObjectNode json = Json.newObject();
