@@ -6,6 +6,7 @@ package controllers;
 import org.ats.common.MapBuilder;
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
+import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CustomKeyword;
 import org.ats.services.keyword.CustomKeywordFactory;
 import org.ats.services.keyword.CustomKeywordService;
@@ -129,6 +130,22 @@ public class CustomKeywordController extends Controller {
     MixProject project = mpService.get(projectId);
     custom.put("project", project.getName());
     return ok(Json.parse(custom.toString()));
+  }
+  
+  public Result rename(String projectId) {
+    
+    JsonNode json = request().body().asJson();
+    String customId = json.get("_id").asText();
+    String customName = json.get("name").asText();
+    
+    CustomKeyword custom = customService.get(customId);
+    if (customName.equals(custom.getName())) return status(204);
+    custom.setName(customName);
+    
+    customService.update(custom);
+    
+    return ok();
+    
   }
   
 }

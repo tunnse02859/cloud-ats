@@ -103,6 +103,7 @@ POST    /api/v1/project/keyword/:projectId/custom   @controllers.CustomKeywordCo
 PUT		/api/v1/project/keyword/:projectId/custom	@controllers.CustomKeywordController.update(projectId)
 DELETE	/api/v1/project/keyword/:projectId/custom/:customKeywordId	@controllers.CustomKeywordController.delete(projectId, customKeywordId)
 GET		/api/v1/project/keyword/:projectId/custom/:customKeywordId	@controllers.CustomKeywordController.get(projectId, customKeywordId)
+PUT     /api/v1/project/keyword/:projectId/custom/rename   	@controllers.CustomKeywordController.rename(projectId)
 # Event tracking
 
 GET     /api/v1/event/close/:token   @controllers.EventController.close(token)
