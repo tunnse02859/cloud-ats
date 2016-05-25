@@ -52,14 +52,19 @@ import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectService;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.gson.JsonObject;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -206,6 +211,25 @@ public class MixProjectTestCase  {
     for (JMeterScript jMeterScript : holder) {
     	scriptService.update(jMeterScript);
 		
+	}
+  }
+  
+  @Test 
+  public void migrateSpaceInProject(){
+	this.authService.logIn("haint@cloud-ats.net", "12345");
+	PageList<MixProject> list = mpService.list();
+	List<MixProject> listHolder = new ArrayList<MixProject>();
+	  while (list.hasNext()) {
+	    for (MixProject project : list.next()) {
+	      BasicDBObject space = new BasicDBObject();
+	      space.put("_id","0e675315-ebf2-4224-b538-f5f6c571b54f");
+	      project.put("space", space);
+	      listHolder.add(project);
+	    }
+	  }
+	  
+	  for (MixProject mixProject : listHolder) {
+		  mpService.update(mixProject);
 	}
   }
   

@@ -122,8 +122,16 @@ public class RoleController extends Controller{
 			roleId = role.getId();
 		} else {
 			role = roleService.get(roleId);
+			role.setName(roleName);
 			role.setSpace(spaceReference.create(spaceId));
 		}
+		PageList<User> users = userService.findIn("roles", roleReferenceFactory.create(roleId));
+		  while (users.hasNext()) {
+			for (User user : users.next()) {
+				user.removeRole(roleReferenceFactory.create(roleId));
+				userService.update(user);
+			}
+		  }
 		for (JsonNode jsonUser : listUser) {
 			User user = userService.get(jsonUser.get("_id").asText());
 			if(!user.hasRole(roleReferenceFactory.create(role.getId()))){

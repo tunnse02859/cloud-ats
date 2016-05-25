@@ -8,6 +8,8 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import org.ats.services.OrganizationContext;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.SpaceReference;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -22,10 +24,15 @@ public class MixProject extends BasicDBObject {
   
   private static final long serialVersionUID = 1L;
   
+  @Inject ReferenceFactory<SpaceReference> spaceFactory;
+  
   @Inject OrganizationContext context;
   
   @Inject
-  MixProject(@Assisted("_id") String id, @Assisted("name")String name, @Nullable @Assisted("keyword_id") String keywordProjectId, @Nullable @Assisted("performance_id") String performanceProjectId, @Nullable @Assisted("selenium_id") String seleniumProjectId, @Assisted("creator") String creator) {
+  MixProject(@Assisted("_id") String id, @Assisted("name")String name,
+		  @Nullable @Assisted("keyword_id") String keywordProjectId,
+		  @Nullable @Assisted("performance_id") String performanceProjectId,
+		  @Nullable @Assisted("selenium_id") String seleniumProjectId, @Assisted("creator") String creator) {
     
     this.put("_id", id);
     this.put("name", name);
@@ -83,4 +90,14 @@ public class MixProject extends BasicDBObject {
   public String getCreator() {
     return this.getString("creator");
   }
+  
+  public void setSpace(SpaceReference space) {
+	this.put("space", space.toJSon());
+  }
+
+  public SpaceReference getSpace() {
+	Object obj = this.get("space");
+	return obj == null ? null : spaceFactory.create(((BasicDBObject) obj).getString("_id"));
+  }
+  
 }

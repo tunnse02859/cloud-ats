@@ -240,6 +240,7 @@ public class MixProjectService extends AbstractMongoCRUD<MixProject> {
     
     MixProject mp = mpFactory.create(_id, name, keywordId, performanceId, seleniumId, creator);
     mp.put("created_date", source.get("created_date"));
+    mp.put("space", source.get("space"));
     
     return mp;
   }

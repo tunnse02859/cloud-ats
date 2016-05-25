@@ -13,6 +13,9 @@ import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.User;
+import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
+import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectFactory;
 import org.ats.services.performance.PerformanceProjectService;
@@ -62,6 +65,10 @@ public class MixProjectController extends Controller {
   
   @Inject UserService userService;
   
+  @Inject ReferenceFactory<SpaceReference> spaceReferenceFactory;
+  
+  @Inject ReferenceFactory<RoleReference> roleReferenceFactory;
+  
   public Result list() {
     
     ArrayNode array = Json.newObject().arrayNode();
@@ -69,12 +76,15 @@ public class MixProjectController extends Controller {
     PageList<MixProject> list = mpService.list();
     while (list.hasNext()) {
       for (MixProject project : list.next()) {
-        project.put("created_date", project.getDate("created_date").getTime());
-        String email = project.getCreator();
-        User user = userService.get(email);
-        BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
-        project.put("creator", userObj);
-        array.add(Json.parse(project.toString()));
+    	if(context.getUser().getEmail().equals("root@cloudats.net")||
+    			context.getSpace().getId().equals(project.getSpace().getId())){
+    		project.put("created_date", project.getDate("created_date").getTime());
+            String email = project.getCreator();
+            User user = userService.get(email);
+            BasicDBObject userObj = new BasicDBObject("email", email).append("first_name", user.getFirstName()).append("last_name", user.getLastName());
+            project.put("creator", userObj);
+            array.add(Json.parse(project.toString()));
+    	}
       }
     }
     return ok(array);
@@ -118,6 +128,8 @@ public class MixProjectController extends Controller {
     
     mp.put("creator", userObj);
     mp.put("created_date", mp.getDate("created_date").getTime());
+    
+    mp.setSpace(spaceReferenceFactory.create(context.getSpace().getId()));
     return ok(Json.parse(mp.toString()));
   }
   
