@@ -139,10 +139,10 @@ public class RoleController extends Controller{
 				userService.update(user);
 			}
 		}
+		
+		role.remove("permissions");
 		for (JsonNode jsonPerm : listPerm) {
-			if (!role.hasPermisison(permissionFactory.create(jsonPerm.get("rule").asText() + tenant.getId() + ":" + spaceId))) {
-				role.addPermission(permissionFactory.create(jsonPerm.get("rule").asText() + tenant.getId() + ":" + spaceId));
-			}
+			role.addPermission(permissionFactory.create(jsonPerm.get("rule").asText() + tenant.getId() + ":" + spaceId));
 		}
 		if (roleId == null) {
 			roleService.create(role);

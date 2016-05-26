@@ -8,8 +8,10 @@ import java.util.List;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
+import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 
 import play.libs.Json;
@@ -20,6 +22,7 @@ import actions.CorsComposition;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
+import com.mongodb.BasicDBList;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -62,6 +65,18 @@ public class UserController extends Controller {
     
     OrganizationContext context = spaceService.goTo(spaceRefFactory.create(spaceId));
     ObjectNode json = Json.newObject();
+    
+    BasicDBList perms = new BasicDBList();
+    User user = context.getUser();
+	for (RoleReference roleRef : user.getRoles()) {
+		Role role = roleRef.get();
+		for (Role.Permission perm : role.getPermissions()) {
+			perms.add(perm.getRule());
+		}
+	}
+	user.put("perms", perms);
+	json.put("user", Json.parse(user.toString()));	
+        
     json.put("user", Json.parse(context.getUser().toString()));
     json.put("tenant", Json.parse(context.getTenant().toString()));
     json.put("space", Json.parse(context.getSpace().toString()));
