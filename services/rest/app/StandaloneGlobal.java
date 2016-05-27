@@ -2,19 +2,22 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
 import org.ats.common.PageList;
-import org.ats.common.http.HttpClientFactory;
-import org.ats.common.http.HttpClientUtil;
 import org.ats.service.ReportModule;
 import org.ats.services.DataDrivenModule;
 import org.ats.services.ExecutorModule;
 import org.ats.services.GeneratorModule;
 import org.ats.services.KeywordServiceModule;
 import org.ats.services.KeywordUploadServiceModule;
+import org.ats.services.MixProjectModule;
 import org.ats.services.OrganizationContext;
 import org.ats.services.OrganizationServiceModule;
 import org.ats.services.PerformanceServiceModule;
+import org.ats.services.data.DatabaseModule;
+import org.ats.services.event.EventModule;
+import org.ats.services.event.EventService;
+import org.ats.services.executor.ExecutorService;
+import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.iaas.VMachineServiceModule;
@@ -22,13 +25,9 @@ import org.ats.services.iaas.exception.CreateVMException;
 import org.ats.services.iaas.exception.InitializeTenantException;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
-import org.ats.services.data.DatabaseModule;
-import org.ats.services.event.EventModule;
-import org.ats.services.event.EventService;
-import org.ats.services.executor.ExecutorService;
-import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.TenantService;
+import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.UnAuthenticatedException;
 import org.ats.services.organization.acl.UnAuthorizationException;
 import org.ats.services.organization.base.AuthenticationService;
@@ -102,7 +101,8 @@ public class StandaloneGlobal extends GlobalSettings {
           new ExecutorModule(),
           new KeywordServiceModule(),
           new KeywordUploadServiceModule(),
-          new ReportModule());
+          new ReportModule(),
+          new MixProjectModule());
 
       //start event service
       EventService eventService = injector.getInstance(EventService.class);
@@ -110,18 +110,19 @@ public class StandaloneGlobal extends GlobalSettings {
       eventService.addActor(EventTrackingActor.class, "server-bus");
       eventService.start();
       
+      OrganizationContext context = injector.getInstance(OrganizationContext.class);
       //hardcode to initialize fsoft tenant
       TenantService tenantService = injector.getInstance(TenantService.class);
+      
+      UserService userService = injector.getInstance(UserService.class);
       Tenant fsoft = tenantService.get("FPT Software");
       if (fsoft == null) {
         initializeTenant(injector, "FPT Software");
       } else {
-        HttpResponse response = HttpClientUtil.execute(HttpClientFactory.getInstance(), "http://ipinfo.io/ip");
-        String publicAddress = HttpClientUtil.getContentBodyAsString(response).trim();
         VMachineService vmService = injector.getInstance(VMachineService.class);
         ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
         VMachine vm = vmService.getSystemVM(tenantRefFactory.create(fsoft.getId()), null);
-        vm.setPublicIp(publicAddress);
+        vm.setPublicIp("localhost");
         vm.setStatus(VMachine.Status.Started);
         vmService.update(vm);
         
@@ -139,11 +140,19 @@ public class StandaloneGlobal extends GlobalSettings {
         while(result.hasNext()) {
           List<AbstractJob<?>> page = result.next();
           for (AbstractJob<?> job : page) {
+            
+            job = execService.get(job.getId(), "user", "tenant", "space");
             holder.add(job);
             AbstractJob.Type type = AbstractJob.Type.valueOf((String) job.get("type"));
             String projectId = job.getProjectId();
+            
+            BasicDBObject obj = (BasicDBObject) job.get("user");
+            User user = userService.transform(obj);
+            context.setUser(user);
+            
             switch (type) {
               case Keyword:
+                
                 KeywordProject kPrj = keywordService.get(projectId);
                 kPrj.setStatus(KeywordProject.Status.READY);
                 keywordService.update(kPrj);

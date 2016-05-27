@@ -271,7 +271,7 @@ public class KeywordController extends Controller {
     
     StringBuilder initDriver = new StringBuilder();
     if ("firefox".equals(browser)) {
-      initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"/home/cloudats/firefox-store/").append(browserVersion).append("/firefox\");\n");
+      initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"C:\\\\Program Files (x86)\\\\Mozilla Firefox\\\\firefox\");\n");
       initDriver.append("wd = new FirefoxDriver();");
     } else if ("chrome".equals(browser)) {
       initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"/home/cloudats/chromedriver\");\n wd = new ChromeDriver();");

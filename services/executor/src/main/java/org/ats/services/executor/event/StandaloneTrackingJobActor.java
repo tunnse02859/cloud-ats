@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import org.ats.common.StringUtil;
 import org.ats.common.ArchiveUtils;
+import org.ats.common.PageList;
+import org.ats.common.StringUtil;
 import org.ats.jenkins.JenkinsMaster;
 import org.ats.jenkins.JenkinsMavenJob;
+import org.ats.service.blob.BlobService;
+import org.ats.services.OrganizationContext;
 import org.ats.services.event.Event;
 import org.ats.services.event.EventFactory;
 import org.ats.services.executor.ExecutorService;
@@ -29,6 +32,16 @@ import org.ats.services.generator.GeneratorService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.keyword.KeywordProject;
 import org.ats.services.keyword.KeywordProjectService;
+import org.ats.services.keyword.report.KeywordReportService;
+import org.ats.services.keyword.report.SuiteReportService;
+import org.ats.services.keyword.report.models.CaseReport;
+import org.ats.services.keyword.report.models.CaseReportReference;
+import org.ats.services.keyword.report.models.StepReport;
+import org.ats.services.keyword.report.models.StepReportReference;
+import org.ats.services.keyword.report.models.SuiteReport;
+import org.ats.services.organization.entity.Space;
+import org.ats.services.organization.entity.Tenant;
+import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -47,6 +60,7 @@ import akka.actor.UntypedActor;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -77,6 +91,14 @@ public class StandaloneTrackingJobActor extends UntypedActor {
   
   @Inject JMeterScriptService jmeterService;
   
+  @Inject BlobService blobService;
+  
+  @Inject KeywordReportService reportService;
+  
+  @Inject SuiteReportService suiteReportService;
+  
+  @Inject OrganizationContext context;
+  
   ConcurrentHashMap<String, JenkinsMavenJob> cache = new ConcurrentHashMap<String, JenkinsMavenJob>();
   
   @Override
@@ -85,12 +107,36 @@ public class StandaloneTrackingJobActor extends UntypedActor {
       Event event = (Event) obj;
       if ("keyword-job-tracking".equals(event.getName())) {
         KeywordJob job = (KeywordJob) event.getSource();
+        
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
+        
         processKeywordJob(job);
       } else if ("performance-job-tracking".equals(event.getName())) {
         PerformanceJob job = (PerformanceJob) event.getSource();
+        
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
+        
         processPerformanceJob(job);
       } else  if ("upload-job-tracking".equals(event.getName())) {
         SeleniumUploadJob job = (SeleniumUploadJob) event.getSource();
+        
+        User user = (User) job.get("user");
+        Space space = job.get("space") != null ? (Space) job.get("space") : null;
+        Tenant tenant = (Tenant) job.get("tenant");
+        context.setUser(user);
+        context.setSpace(space);
+        context.setTenant(tenant);
+        
         processUploadJob(job);
       }
     }
@@ -276,13 +322,12 @@ public class StandaloneTrackingJobActor extends UntypedActor {
     VMachine systemVM = vmachineService.getSystemVM(tenant, space);
     VMachine testVM = vmachineService.get(job.getTestVMachineId());
     
-    JenkinsMaster jkMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "jenkins", 8080);
+    JenkinsMaster jkMaster = new JenkinsMaster(systemVM.getPublicIp(), "http", "", 8080);
     JenkinsMavenJob jkJob = cache.get(job.getId());
     if (jkJob == null) {
       jkJob = new JenkinsMavenJob(jkMaster, job.getId(), null, null, null);
       cache.put(job.getId(), jkJob);
     }
-    
     boolean isBuilding = jkJob.isBuilding(1, System.currentTimeMillis(), 60 * 1000);
     if (isBuilding) {
       
@@ -296,21 +341,58 @@ public class StandaloneTrackingJobActor extends UntypedActor {
     } else {
       updateLog(job, jkJob);
       
+      //process log
+      byte[] logBytes = job.getLog().getBytes();
+      reportService.processLog(logBytes);
+      
       //Download target resource
       
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      ArchiveUtils.gzipCompress("/tmp/" + job.getId(), bos);
+      ArchiveUtils.gzipCompress("c:\\tmp\\" + job.getId(), bos);
       if (bos.size() > 0) 
         job.put("raw_data", bos.toByteArray());
       
       //Download result
-      String report = StringUtil.readStream(new FileInputStream("/tmp/" + job.getId() + "/target/surefire-reports/testng-results.xml"));
+      String report = StringUtil.readStream(new FileInputStream("c:\\tmp\\" + job.getId() + "\\target\\surefire-reports\\testng-results.xml"));
       if (report.length() > 0)
         job.put("report", report);
       //End download result
-
+      
+      //create raw_data file
+      if (bos.size() > 0) {
+        GridFSInputFile project_file = blobService.create(bos.toByteArray());
+        project_file.put("job_project_id", job.getId());
+        
+        blobService.save(project_file);
+      }
+      
       job.setStatus(AbstractJob.Status.Completed);
       executorService.update(job);
+      
+    //save log to file 
+      GridFSInputFile file = blobService.create(logBytes);
+      file.put("job_log_id", job.getId());
+      blobService.save(file);
+      // get raw data to tmp folder
+      String path = "C:\\tmp";
+      
+      String destPath = path + "\\"+ job.getId()+ "\\images";
+      // extract tar file
+      getImages(path + "\\"+job.getId()+"\\target", destPath);
+      
+      File imagesFolder = new File(destPath);
+      
+      if (imagesFolder.listFiles() != null) {
+        for (File image : imagesFolder.listFiles()) {
+          
+          String name = image.getName();
+          int index = name.indexOf("_");
+          int last = name.lastIndexOf("_");
+          long timeStamp = Long.parseLong(name.substring(index + 1, last));
+          
+          saveImage(image, timeStamp, job.getId());
+        }
+      }
       
       //Reset vm status and release floating ip
       testVM.setStatus(VMachine.Status.Started);
@@ -336,14 +418,14 @@ public class StandaloneTrackingJobActor extends UntypedActor {
 
     if (jenkinsVM.getStatus() == VMachine.Status.Started) {
       updateLog(job, "Generating keyword project");
-      generatorService.generateKeyword("/tmp", job.getId(), false, job.getSuites(), project.getValueDelay(), project.getVersionSelenium());
-      Runtime.getRuntime().exec("chmod 777 -R /tmp/" + job.getId());
+      generatorService.generateKeyword("c:\\tmp", job.getId(), false, job.getSuites(), project.getValueDelay(), project.getVersionSelenium());
+      Runtime.getRuntime().exec("chmod 777 -R c:\\tmp\\" + job.getId());
       
       StringBuilder goalsBuilder = new StringBuilder("clean test");
 
-      JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "jenkins", 8080);
+      JenkinsMaster jenkinsMaster = new JenkinsMaster(jenkinsVM.getPublicIp(), "http", "", 8080);
       JenkinsMavenJob jenkinsJob = new JenkinsMavenJob(jenkinsMaster, job.getId(), 
-          "master" , "/tmp/" + job.getId() + "/pom.xml", goalsBuilder.toString());
+          "master" , "\\tmp\\" + job.getId() + "\\pom.xml", goalsBuilder.toString());
 
       jenkinsJob.submit();
       updateLog(job, "Submitted Jenkins job");
@@ -509,4 +591,63 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
       executorService.update(job);
     }
   }
+  
+  private void saveImage(File file, long timeStamp, String jobId) throws IOException {
+    
+    GridFSInputFile image = blobService.create(file);
+    PageList<SuiteReport> suites = suiteReportService.query(new BasicDBObject("jobId", jobId));
+    while (suites.hasNext()) {
+      for (SuiteReport suite : suites.next()) {
+        List<CaseReportReference> cases = suite.getCases();
+        
+        for (CaseReportReference ref : cases) {
+          CaseReport caseReport = ref.get();
+          List<StepReportReference> steps = caseReport.getSteps();
+          for (StepReportReference step : steps) {
+            StepReport report = step.get();
+            if (timeStamp > report.getStartTime()) {
+              if (image.get("timestamp") == null) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              } else if (Long.parseLong(image.get("timestamp").toString()) < report.getStartTime()) {
+                image.put("timestamp", report.getStartTime());
+                image.put("step_report_id", report.getId());
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    blobService.save(image);
+  }
+  
+  private void getImages(String originPath, String destPath) throws IOException {
+    
+    File dir = new File(originPath);
+    FileOutputStream outputFile = null;
+    
+    File dest = new File(destPath);
+    if (!dest.exists()) {
+      dest.mkdirs();
+    }
+    
+    File[] directoryListing = dir.listFiles();
+    if (directoryListing != null) {
+      for (File child : directoryListing) {
+        File file = null;
+        String name = child.getName();
+        if (name.contains(".png") && name.contains("error_")) {
+          file = new File(destPath+"\\"+name);
+          
+          byte[] bFile = new byte[(int) child.length()];
+          // define output stream for writing the file
+          outputFile = new FileOutputStream(file);
+          outputFile.write(bFile);
+          outputFile.close();
+        }
+      }
+    } 
+  }
+  
 }
