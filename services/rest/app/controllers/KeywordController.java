@@ -274,9 +274,9 @@ public class KeywordController extends Controller {
       initDriver.append("System.setProperty(\"webdriver.firefox.bin\", \"C:\\\\Program Files (x86)\\\\Mozilla Firefox\\\\firefox\");\n");
       initDriver.append("wd = new FirefoxDriver();");
     } else if ("chrome".equals(browser)) {
-      initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"/home/cloudats/chromedriver\");\n wd = new ChromeDriver();");
+      initDriver.append("System.setProperty(\"webdriver.chrome.driver\", \"C:/browsersDriver/chromedriver.exe\");\n wd = new ChromeDriver();");
     } else if ("ie".equals(browser)) {
-      initDriver.append("System.setProperty(\"webdriver.ie.driver\", \"C:/jenkin_slave/IEDriverServer32.exe\");\n wd = new InternetExplorerDriver();");
+      initDriver.append("System.setProperty(\"webdriver.ie.driver\", \"C:/browsersDriver/IEDriverServer.exe\");\n wd = new InternetExplorerDriver();");
     }
     
     for (JsonNode sel : jsonSuites) {
@@ -610,30 +610,13 @@ public class KeywordController extends Controller {
       
     }
     // show screenshot image
-    String path = "/tmp/"+projectId.substring(0, 8);
+    String path = "C:\\tmp\\";
     File folder = new File(path);
     if(!folder.exists()) {
       folder.mkdir();
     }
-    GridFSDBFile file = blobService.findOne(new BasicDBObject("job_project_id", jobId));
     
-    byte[] report = IOUtils.toByteArray(file.getInputStream());
-    // write data to temporary file
-    FileOutputStream fileOut;
-    try {
-      fileOut = new FileOutputStream(path+"/resource-"+jobId+".tar.gz");
-      fileOut.write(report);
-      fileOut.close();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-     catch (IOException e) {
-      e.printStackTrace();
-    }
-    // unzip file
-    ArchiveUtils.gzipDecompress(new File(path+"/resource-"+jobId+".tar.gz"), new File(path+"/resource-"+jobId));
-    
-    InputStream stream = new FileInputStream(path+"/resource-"+jobId+"/"+key);
+    InputStream stream = new FileInputStream(path + jobId+ "\\target\\" + key);
     
     byte[] image = IOUtils.toByteArray(stream);
     return ok(image);

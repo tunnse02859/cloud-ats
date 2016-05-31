@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.ats.common.ArchiveUtils;
 import org.ats.common.PageList;
 import org.ats.common.StringUtil;
@@ -640,7 +641,7 @@ private void doTrackingUploadJob(SeleniumUploadJob job, SeleniumUploadProject pr
         if (name.contains(".png") && name.contains("error_")) {
           file = new File(destPath+"\\"+name);
           
-          byte[] bFile = new byte[(int) child.length()];
+          byte[] bFile = FileUtils.readFileToByteArray(child);
           // define output stream for writing the file
           outputFile = new FileOutputStream(file);
           outputFile.write(bFile);

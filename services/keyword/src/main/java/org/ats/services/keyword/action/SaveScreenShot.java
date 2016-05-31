@@ -23,7 +23,7 @@ public class SaveScreenShot extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-    sb.append("wd.getScreenshotAs(FILE).renameTo(new File(");
+    sb.append("wd.getScreenshotAs(FILE).renameTo(new File(\"target/\"+");
     sb.append(file);
     sb.append("));\n");
     sb.append("     System.out.println(\"[End][Step]\"); \n");
