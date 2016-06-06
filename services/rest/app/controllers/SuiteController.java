@@ -18,6 +18,7 @@ import org.ats.services.keyword.SuiteFactory;
 import org.ats.services.keyword.SuiteService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.project.MixProject;
@@ -56,8 +57,8 @@ public class SuiteController extends Controller {
   
   @Inject UserService userService;
   
+  @Authorized(feature="project", action="view_functional")
   public Result list(String projectId) {
-    
     MixProject mp = mpService.get(projectId);
     mp.put("created_date", mp.getDate("created_date").getTime());
     
@@ -78,7 +79,8 @@ public class SuiteController extends Controller {
     mp.put("suites", array);
     return ok(Json.parse(mp.toString()));
   }
-
+  
+  @Authorized(feature="project", action="manage_functional")
   public Result create(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -112,6 +114,7 @@ public class SuiteController extends Controller {
     return status(201, Json.parse(suite.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result update(String projectId) throws Exception {
 
     JsonNode node = request().body().asJson();
@@ -150,6 +153,7 @@ public class SuiteController extends Controller {
     }
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result delete(String projectId, String suiteId)  throws Exception {
     Suite suite = suiteService.get(suiteId);
     
@@ -160,6 +164,7 @@ public class SuiteController extends Controller {
     return status(200);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result cloneSuite(String projectId, String caseId) {
     
     String name = request().getQueryString("name");

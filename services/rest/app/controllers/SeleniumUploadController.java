@@ -22,6 +22,7 @@ import org.ats.services.executor.ExecutorService;
 import org.ats.services.executor.job.AbstractJob;
 import org.ats.services.executor.job.SeleniumUploadJob;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
 import org.ats.services.upload.SeleniumUploadProject;
@@ -125,7 +126,8 @@ public class SeleniumUploadController extends Controller {
     }
     return ok(array);
   }
-
+  
+  @Authorized(feature="project", action="upload_selenium")
   public Result update() {
     JsonNode data = request().body().asJson();
     String id = data.get("id").asText();
@@ -142,7 +144,8 @@ public class SeleniumUploadController extends Controller {
 
     return status(202, id);
   }
-
+  
+  @Authorized(feature="project", action="upload_selenium")
   public Result delete() {
 
     String id = request().body().asText();
@@ -157,7 +160,8 @@ public class SeleniumUploadController extends Controller {
 
     return status(200);
   }
-
+  
+  @Authorized(feature="project", action="upload_selenium")
   public Result run(String projectId) throws Exception {
 	MixProject mp = mpService.get(projectId);
     SeleniumUploadProject project = seleniumUploadService.get(mp.getSeleniumId(), "raw");
@@ -170,7 +174,8 @@ public class SeleniumUploadController extends Controller {
     SeleniumUploadJob job = executorService.execute(project);
     return status(201, Json.parse(job.toString()));
   }
-
+  
+  @Authorized(feature="project", action="upload_selenium")
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
@@ -264,7 +269,8 @@ public class SeleniumUploadController extends Controller {
     }
     folder.delete();
   }
-
+  
+  @Authorized(feature="project", action="upload_selenium")
   public Result upload(String projectId) {
 	MixProject mp = mpService.get(projectId);
     MultipartFormData body = request().body().asMultipartFormData();
@@ -348,6 +354,7 @@ public class SeleniumUploadController extends Controller {
     }
   }
   
+  @Authorized(feature="project", action="upload_selenium")
   public Result stop(String projectId) throws IOException {
     SeleniumUploadProject project = seleniumUploadService.get(projectId, "raw");
     if (project == null) return status(404);

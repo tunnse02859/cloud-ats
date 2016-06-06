@@ -41,6 +41,7 @@ import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.fatory.RoleFactory;
 import org.ats.services.organization.entity.fatory.TenantFactory;
 import org.ats.services.organization.entity.fatory.UserFactory;
+import org.ats.services.organization.entity.reference.FeatureReference;
 import org.ats.services.organization.entity.reference.RoleReference;
 import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
@@ -209,9 +210,13 @@ public class Global extends GlobalSettings {
     RoleFactory roleFactory = injector.getInstance(RoleFactory.class);
     ReferenceFactory<RoleReference> roleRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<RoleReference>>(){}));
     ReferenceFactory<TenantReference> tenantRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<TenantReference>>(){}));
+    ReferenceFactory<FeatureReference> featureRefFactory = injector.getInstance(Key.get(new TypeLiteral<ReferenceFactory<FeatureReference>>(){}));
     PermissionFactory permFactory = injector.getInstance(PermissionFactory.class);
     FeatureService featureService = injector.getInstance(FeatureService.class);
     FeatureFactory featureFactory = injector.getInstance(FeatureFactory.class);
+    
+    TenantService tenantService = injector.getInstance(TenantService.class);
+    Tenant fsoft = tenantService.get("fsoft");
     
     User root = userService.get("root@cloudats.net");
     if (root == null) {
@@ -235,11 +240,15 @@ public class Global extends GlobalSettings {
         feature = featureFactory.create(f);
         feature.addAction(new Action(a));
         featureService.create(feature);
+        fsoft.addFeature(featureRefFactory.create(feature.getId()));
       } else {
+    	FeatureReference featureRef = featureRefFactory.create(feature.getId());
         if (!feature.hasAction(new Action(a))) feature.addAction(new Action(a));
         featureService.update(feature);
+        if (!fsoft.hasFeature(featureRef)) fsoft.addFeature(featureRef);
       }
     }
+    tenantService.update(fsoft);
     reader.close();
   }
 }

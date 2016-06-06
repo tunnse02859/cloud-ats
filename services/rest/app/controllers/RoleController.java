@@ -9,6 +9,7 @@ import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.Role;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.User;
@@ -64,7 +65,12 @@ public class RoleController extends Controller{
 		PageList<Role> roles = roleService.list();
 		while(roles.hasNext()){
 			for (Role role : roles.next()) {
-				array.add(Json.parse(role.toString()));
+				if (role.hasPermisison(permissionFactory.create("*:*@fsoft:*"))) {
+					array.add(Json.parse(role.toString()));
+				} else if(context.getUser().getEmail().equals("root@cloudats.net")||
+		    		context.getSpace().getId().equals(role.getSpace().getId())){
+					array.add(Json.parse(role.toString()));
+				}
 			}
 		}
 		return ok(array);
@@ -89,6 +95,7 @@ public class RoleController extends Controller{
 		Role role = roleService.get(roleId);
 		return ok(Json.parse(role.toString()));
 	}
+	@Authorized(feature="*", action="grant_permission")
 	public Result delete(String roleId){
 		roleService.delete(roleId);
 		PageList<User> users = userService.findIn("roles", roleReferenceFactory.create(roleId));
@@ -104,7 +111,8 @@ public class RoleController extends Controller{
 		}
 		return status(201);
 	}
-
+	
+	@Authorized(feature="*", action="grant_permission")
 	public Result update() {
 		
 		JsonNode node = request().body().asJson();
@@ -118,6 +126,7 @@ public class RoleController extends Controller{
 		Role role ;
 		if (roleId == null) {
 			role = roleFactory.create(roleName);
+			role.setName(context.getUser().getEmail());
 			role.setSpace(spaceReference.create(spaceId));
 			roleId = role.getId();
 		} else {

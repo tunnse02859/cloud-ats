@@ -2,9 +2,11 @@ package controllers;
 
 import org.ats.common.PageList;
 import org.ats.services.OrganizationContext;
+import org.ats.services.organization.RoleService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.Space;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
@@ -44,31 +46,39 @@ public class SpaceController extends Controller {
 	
 	@Inject
 	ReferenceFactory<SpaceReference> spaceReference;
-
+	
+	@Inject
+	RoleService roleService;
+	
+	@Authorized(feature="*", action="view_spaces")
 	public Result list() {
 		ArrayNode listSpace = Json.newObject().arrayNode();
 		PageList<Space> spaces = spaceService.query(new BasicDBObject("tenant",
 				new BasicDBObject("_id", context.getTenant().getId())));
 		while (spaces.hasNext()) {
 			for (Space space : spaces.next()) {
-				BasicDBList listUser = new BasicDBList();
-				PageList<User> users = userService.findUsersInSpace(spaceReference.create(space.getId()));
-				while(users.hasNext()){
-					for (User user : users.next()) {
-						user.removeField("password");
-						listUser.add(user);
+				if(context.getUser().getEmail().equals("root@cloudats.net")||
+		    			context.getSpace().getId().equals(space.getId())){
+					BasicDBList listUser = new BasicDBList();
+					PageList<User> users = userService.findUsersInSpace(spaceReference.create(space.getId()));
+					while(users.hasNext()){
+						for (User user : users.next()) {
+							user.removeField("password");
+							listUser.add(user);
+						}
 					}
+					space.put("listUser", listUser);
+					space.put("created_date", space.getDate("created_date")
+							.getTime());
+					listSpace.add(Json.parse(space.toString()));
 				}
-				space.put("listUser", listUser);
-				space.put("created_date", space.getDate("created_date")
-						.getTime());
-				listSpace.add(Json.parse(space.toString()));
 			}
 		}
 
 		return ok(listSpace);
 	}
-
+	
+	@Authorized(feature="space", action="update_space")
 	public Result update() {
 		JsonNode node = request().body().asJson();
 		String spaceId = node.get("_id") == null ? null : node.get("_id").asText();
@@ -109,7 +119,8 @@ public class SpaceController extends Controller {
 	    }
 	    return status(201,  Json.parse(space.toString()));
 	}
-
+	
+	@Authorized(feature="tenant", action="manage_spaces")
 	public Result delete(String spaceId) {
 		Space space = spaceService.get(spaceId);
 		if (space == null)

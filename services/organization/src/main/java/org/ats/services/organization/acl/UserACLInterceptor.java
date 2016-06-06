@@ -66,7 +66,6 @@ public class UserACLInterceptor implements MethodInterceptor {
     List<Permission> cache = new ArrayList<Permission>();
     
     for (RoleReference roleRef : user.getRoles()) {
-      
       Role role = roleRef.get();
       if (!role.isActive()) continue;
 

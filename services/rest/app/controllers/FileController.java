@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import org.ats.service.blob.BlobService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 
 import play.libs.Json;
 import play.mvc.Controller;
@@ -51,6 +52,7 @@ public class FileController extends Controller {
     return ok(Json.parse(array.toString()));
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result uploadCSVData(String scriptId) throws IOException {
     
     MultipartFormData body = request().body().asMultipartFormData();
@@ -92,12 +94,14 @@ public class FileController extends Controller {
     return ok(array);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result deleteCSVData(String scriptId, String csvId) {
     
     blobService.deleteById(csvId);
     return ok();
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result updateTempCSVData(String scriptId, String csvId) throws IOException {
     
     MultipartFormData body = request().body().asMultipartFormData();

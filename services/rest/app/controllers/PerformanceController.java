@@ -32,6 +32,7 @@ import org.ats.services.executor.job.PerformanceJob;
 import org.ats.services.iaas.IaaSService;
 import org.ats.services.iaas.IaaSServiceProvider;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.performance.JMeterScript;
@@ -96,6 +97,7 @@ public class PerformanceController extends Controller {
   
   private SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy HH:mm");
   
+  @Authorized(feature="project", action="view_performance")
   public Result list() {
     Tenant currentTenant = context.getTenant();
     PageList<PerformanceProject> list = projectService.query(new BasicDBObject("tenant", new BasicDBObject("_id", currentTenant.getId())));
@@ -143,6 +145,7 @@ public class PerformanceController extends Controller {
     return log.isEmpty() ? status(404) : status(200, log);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result create() {
     
     JsonNode json = request().body().asJson();
@@ -200,6 +203,7 @@ public class PerformanceController extends Controller {
     return ok(Json.parse(project.toString()));
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result update() {
     
     JsonNode data = request().body().asJson();
@@ -218,6 +222,7 @@ public class PerformanceController extends Controller {
     return status(202, id);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result delete() {
     
     String id = request().body().asText();
@@ -244,6 +249,7 @@ public class PerformanceController extends Controller {
     return status(200);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result run(String projectId) throws Exception {
     
     JsonNode data = request().body().asJson();
@@ -331,7 +337,8 @@ public class PerformanceController extends Controller {
     return status(200, Json.parse(report.toString()));
   }
   
-public Result stopProject(String projectId) throws IOException, JSchException, InterruptedException {
+  @Authorized(feature="project", action="manage_performance")
+  public Result stopProject(String projectId) throws IOException, JSchException, InterruptedException {
     
     PerformanceProject project = projectService.get(projectId);
     

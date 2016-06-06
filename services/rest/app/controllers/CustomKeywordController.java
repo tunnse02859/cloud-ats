@@ -12,6 +12,7 @@ import org.ats.services.keyword.CustomKeywordFactory;
 import org.ats.services.keyword.CustomKeywordService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
@@ -68,6 +69,7 @@ public class CustomKeywordController extends Controller {
     return ok(Json.parse(mp.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result create(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -82,6 +84,7 @@ public class CustomKeywordController extends Controller {
     return status(201, Json.parse(keyword.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result update(String projectId) {
 
     JsonNode node = request().body().asJson();
@@ -113,6 +116,7 @@ public class CustomKeywordController extends Controller {
     }
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result delete(String projectId, String keywordId)  throws Exception {
     
     MixProject mp = mpService.get(projectId);
@@ -132,6 +136,7 @@ public class CustomKeywordController extends Controller {
     return ok(Json.parse(custom.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result rename(String projectId) {
     
     JsonNode json = request().body().asJson();

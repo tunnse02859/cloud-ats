@@ -67,6 +67,14 @@ public class Role  extends AbstractEntity<Role> {
     return this.getString("desc");
   }
   
+  public void setCreator(String email) {
+	this.put("creator", email);
+  }
+
+  public String getCreator() {
+	return this.getString("creator");
+  }
+  
   public void setSpace(SpaceReference space) {
     this.put("space", space.toJSon());
   }

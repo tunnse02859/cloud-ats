@@ -18,6 +18,7 @@ import org.ats.service.blob.BlobService;
 import org.ats.services.OrganizationContext;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.performance.CSV;
 import org.ats.services.performance.JMeterArgument;
@@ -65,6 +66,7 @@ public class ScriptController extends Controller {
   
   @Inject OrganizationContext context;
   
+  @Authorized(feature="project", action="view_performance")
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -91,6 +93,7 @@ public class ScriptController extends Controller {
     return ok(Json.parse(mp.toString()));
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result createByFile(String projectId) {
 	MixProject mp = mpService.get(projectId);
     MultipartFormData body = request().body().asMultipartFormData();
@@ -115,6 +118,7 @@ public class ScriptController extends Controller {
       }
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result createBySamplers(String projectId) {
 	MixProject mp = mpService.get(projectId);
 	
@@ -214,6 +218,7 @@ public class ScriptController extends Controller {
      return status(202);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result update(String projectId) {
     
     JsonNode data = request().body().asJson();
@@ -284,6 +289,7 @@ public class ScriptController extends Controller {
     return status(202);
   }
   
+  @Authorized(feature="project", action="manage_performance")
   public Result cloneScript(String projectId, String scriptId) throws IOException {
     
     String name = request().getQueryString("name");

@@ -222,7 +222,7 @@ public class MixProjectTestCase  {
 	  while (list.hasNext()) {
 	    for (MixProject project : list.next()) {
 	      BasicDBObject space = new BasicDBObject();
-	      space.put("_id","0e675315-ebf2-4224-b538-f5f6c571b54f");
+	      space.put("_id","07ac154b-b84e-4021-ab23-331721422ce0");
 	      project.put("space", space);
 	      listHolder.add(project);
 	    }

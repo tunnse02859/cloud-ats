@@ -47,6 +47,7 @@ import org.ats.services.keyword.report.models.StepReport;
 import org.ats.services.keyword.report.models.StepReportReference;
 import org.ats.services.keyword.report.models.SuiteReport;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.Tenant;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.project.MixProject;
@@ -199,7 +200,8 @@ public class KeywordController extends Controller {
     
     return ok(Json.parse(project.toString()));
   }
-
+  
+  @Authorized(feature="project", action="manage_functional")
   public Result create() {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
@@ -210,6 +212,7 @@ public class KeywordController extends Controller {
     return status(201, project.getId());
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result update() {
     JsonNode data = request().body().asJson();
     String id = data.get("id").asText();
@@ -230,6 +233,7 @@ public class KeywordController extends Controller {
     return status(202, id);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result delete() {
     
     String id = request().body().asText();
@@ -257,6 +261,7 @@ public class KeywordController extends Controller {
     return status(200);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result run(String projectId) throws Exception {
     
     JsonNode data = request().body().asJson();
@@ -432,6 +437,7 @@ public class KeywordController extends Controller {
     return ok(array);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result stopProject(String projectId) throws IOException {
     
     KeywordProject project = keywordProjectService.get(projectId);

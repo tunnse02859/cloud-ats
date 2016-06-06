@@ -21,6 +21,7 @@ import org.ats.services.keyword.Case;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.SpaceService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.SpaceReference;
@@ -107,6 +108,7 @@ public class DataDrivenController extends Controller {
     return ok(Json.parse(mp.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result create(String projectId) {
     JsonNode json = request().body().asJson();
     String name = json.get("name").asText();
@@ -135,6 +137,7 @@ public class DataDrivenController extends Controller {
     return ok(Json.parse(driven.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result delete() {
     
     String id = request().body().asText();
@@ -154,6 +157,7 @@ public class DataDrivenController extends Controller {
     return status(200);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result update() {
     JsonNode json = request().body().asJson();
     String id = json.get("id").asText();
@@ -170,6 +174,7 @@ public class DataDrivenController extends Controller {
     return status(200, Json.parse(driven.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result upload(String projectId,String caseId) throws FileNotFoundException {
     
     MultipartFormData body = request().body().asMultipartFormData();
@@ -204,6 +209,7 @@ public class DataDrivenController extends Controller {
     return ok(Json.parse(data.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result rename() {
     
     JsonNode json = request().body().asJson();

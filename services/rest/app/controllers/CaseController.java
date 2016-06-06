@@ -15,6 +15,7 @@ import org.ats.services.keyword.CaseFactory;
 import org.ats.services.keyword.CaseService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
@@ -50,6 +51,7 @@ public class CaseController extends Controller {
   
   @Inject UserService userService;
   
+  @Authorized(feature="project", action="view_functional")
   public Result list(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -85,6 +87,7 @@ public class CaseController extends Controller {
     return ok(array);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result create(String projectId) {
     
     MixProject mp = mpService.get(projectId);
@@ -99,6 +102,7 @@ public class CaseController extends Controller {
     return status(201, Json.parse(caze.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result update(String projectId) throws Exception {
     
     JsonNode node = request().body().asJson();
@@ -152,6 +156,7 @@ public class CaseController extends Controller {
 //    return status(200);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result delete(String projectId, String caseId)  throws Exception {
     
     MixProject mp = mpService.get(projectId);
@@ -163,6 +168,7 @@ public class CaseController extends Controller {
     return status(200);
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result cloneCase(String projectId, String caseId) {
     
     String name = request().getQueryString("name");
@@ -191,6 +197,7 @@ public class CaseController extends Controller {
     return ok(Json.parse(caze.toString()));
   }
   
+  @Authorized(feature="project", action="manage_functional")
   public Result rename(String projectId) {
     
     JsonNode json = request().body().asJson();

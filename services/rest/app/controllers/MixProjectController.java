@@ -12,6 +12,7 @@ import org.ats.services.keyword.KeywordProjectFactory;
 import org.ats.services.keyword.KeywordProjectService;
 import org.ats.services.organization.UserService;
 import org.ats.services.organization.acl.Authenticated;
+import org.ats.services.organization.acl.Authorized;
 import org.ats.services.organization.entity.User;
 import org.ats.services.organization.entity.fatory.ReferenceFactory;
 import org.ats.services.organization.entity.reference.RoleReference;
@@ -101,6 +102,7 @@ public class MixProjectController extends Controller {
     return ok(Json.parse(project.toString()));
   }
   
+  @Authorized(feature="space", action="manage_projects")
   public Result create() {
     
     JsonNode json = request().body().asJson();
@@ -133,6 +135,7 @@ public class MixProjectController extends Controller {
     return ok(Json.parse(mp.toString()));
   }
   
+  @Authorized(feature="space", action="manage_projects")
   public Result delete(String id, String name) {
     
     MixProject mp = mpService.get(id);
@@ -151,6 +154,7 @@ public class MixProjectController extends Controller {
     return ok();
   }
   
+  @Authorized(feature="space", action="manage_projects")
   public Result cloneProject(String id) {
     
     String name = request().getQueryString("name");
