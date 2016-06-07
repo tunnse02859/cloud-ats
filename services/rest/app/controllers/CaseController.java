@@ -3,7 +3,11 @@
  */
 package controllers;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.UUID;
 
 import org.ats.common.MapBuilder;
@@ -18,14 +22,20 @@ import org.ats.services.organization.acl.Authenticated;
 import org.ats.services.organization.entity.User;
 import org.ats.services.project.MixProject;
 import org.ats.services.project.MixProjectService;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Http.MultipartFormData;
 import actions.CorsComposition;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -91,12 +101,39 @@ public class CaseController extends Controller {
     
     JsonNode node = request().body().asJson();
     String caseName = node.get("name").asText();
+    
     Case caze = caseFactory.create(mp.getKeywordId(), caseName, null, context.getUser().getEmail());
     for(JsonNode action:node.get("steps")) {
       caze.addAction(action); 
     }
     caseService.create(caze);
     return status(201, Json.parse(caze.toString()));
+  }
+  
+  public Result uploadCase(String projectId, String caseId) throws JsonProcessingException, IOException {
+	Case caze = caseService.get(caseId);
+	MultipartFormData body = request().body().asMultipartFormData();
+	MultipartFormData.FilePart typeFile = body.getFile("file");
+	File file = typeFile.getFile();
+	
+	ObjectMapper mapper = new ObjectMapper();
+	JsonNode node = mapper.readTree(file);
+	ArrayNode steps = (ArrayNode) node.get("steps");
+    BasicDBList list = new BasicDBList();
+    for (JsonNode step : steps) {
+    	ArrayNode params = Json.newObject().arrayNode();
+    	Iterator<String> i = step.fieldNames();
+    	while(i.hasNext()) {
+    		String fieldName = i.next();
+    		if (!"type".equals(fieldName)) params.add(fieldName);
+    	}
+    	((ObjectNode) step).put("params", params);
+    	list.add(JSON.parse(step.toString()));
+    }
+    caze.put("steps",  list);
+//    caseService.update(caze);
+	
+	return status(201, Json.parse(caze.toString()));
   }
   
   public Result update(String projectId) throws Exception {
