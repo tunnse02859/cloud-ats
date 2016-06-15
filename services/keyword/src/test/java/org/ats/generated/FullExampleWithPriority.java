@@ -33,7 +33,7 @@ public class FullExampleWithPriority {
 
   @BeforeClass
   public void setUp() throws Exception {
-    System.out.println("[Start][Suite]{\"name\": \"FullExampleWithPriority\", \"id\": \"1cdf2871-dfe6-4744-b6c5-b4b30182d0c8\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+    System.out.println("[Start][Suite]{\"name\": \"FullExampleWithPriority\", \"id\": \"361bc7df-5ad2-42ea-be6f-f6ec1554a903\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
     wd = new FirefoxDriver();
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
@@ -41,14 +41,14 @@ public class FullExampleWithPriority {
    
   @AfterClass
   public void tearDown() throws Exception {
-    System.out.println("[End][Suite]{\"name\": \"FullExampleWithPriority\", \"id\": \"1cdf2871-dfe6-4744-b6c5-b4b30182d0c8\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+    System.out.println("[End][Suite]{\"name\": \"FullExampleWithPriority\", \"id\": \"361bc7df-5ad2-42ea-be6f-f6ec1554a903\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
     wd.quit();
   }
   
   
   @Test(priority = 1)
-  public void testf06703b6() throws Exception {
-    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"f06703b6-eef0-47cd-8a95-b987ceb37dc1\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+  public void test7d4b903f() throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"7d4b903f-61d6-479c-95e8-73761adf7ce6\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"get \",\"url\":\"http://saucelabs.com/test/guinea-pig/\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try {
@@ -230,7 +230,7 @@ throw e ;
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"not ${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try { 
     System.out.println("Actual Text : "+wd.findElement(By.id("i_am_an_id")).getText()); 
-     if (!wd.findElement(By.id("i_am_an_id")).getText().equals("not \" + text + \"")) {
+     if (!wd.findElement(By.id("i_am_an_id")).getText().equals("not " + text + "")) {
     System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyText.png"));
@@ -255,7 +255,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"not ${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.id("i_am_an_id")).getText(), "not \" + text + \"");
+assertNotEquals( wd.findElement(By.id("i_am_an_id")).getText(), "not " + text + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertText.png"));
@@ -304,7 +304,7 @@ text_present = "I am another div";
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTextPresent \",\"text\":\"not ${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
-     if (!wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \"")) {
+     if (!wd.findElement(By.tagName("html")).getText().contains("not " + text_present + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyTextPresent.png"));
@@ -329,7 +329,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertTextPresent \",\"text\":\"not ${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
-assertFalse( wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \""));
+assertFalse( wd.findElement(By.tagName("html")).getText().contains("not " + text_present + ""));
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertTextPresent.png"));
@@ -366,7 +366,7 @@ body_text = wd.findElement(By.tagName("html")).getText();
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyBodyText \",\"text\":\"not ${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
-     if (!     wd.findElement(By.tagName("html")).getText().equals("not \" + body_text + \"")) {
+     if (!     wd.findElement(By.tagName("html")).getText().equals("not " + body_text + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyBodyText.png"));
@@ -391,7 +391,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertBodyText \",\"text\":\"not ${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.tagName("html")).getText(), "not \" + body_text + \"");
+assertNotEquals( wd.findElement(By.tagName("html")).getText(), "not " + body_text + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertBodyText.png"));
@@ -418,7 +418,7 @@ if (wd.getPageSource().equals(page_source)) {
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyPageSource \",\"source\":\"<!-- --> ${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try {
-if (!wd.getPageSource().equals("<!-- --> \" + page_source + \"")) {
+if (!wd.getPageSource().equals("<!-- --> " + page_source + "")) {
      System.out.println("[End][Step]"); 
     }
  } catch (Exception e) { 
@@ -440,7 +440,7 @@ assertEquals(     wd.getPageSource(), page_source);
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertPageSource \",\"source\":\"<!-- --> ${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try { 
-assertNotEquals(     wd.getPageSource(), "<!-- --> \" + page_source + \"");
+assertNotEquals(     wd.getPageSource(), "<!-- --> " + page_source + "");
      System.out.println("[End][Step]"); 
    } catch (AssertionError ae) { 
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertPageSource.png"));
@@ -464,7 +464,7 @@ System.out.println("[End][Step]");
 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"print \",\"text\":\"${cookie};\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
-    System.out.println("\" + cookie + \";");
+    System.out.println("" + cookie + ";");
 System.out.println("[End][Step]");
 
 
@@ -492,7 +492,7 @@ assertTrue(     (wd.manage().getCookieNamed("test_cookie") != null));
 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCookieByName \",\"name\":\"test_cookie\",\"value\":\"not ${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
-    if (!wd.manage().getCookieNamed("test_cookie").getValue().equals("not \" + cookie + \"")) {
+    if (!wd.manage().getCookieNamed("test_cookie").getValue().equals("not " + cookie + "")) {
      System.out.println("[End][Step]"); 
     }
 
@@ -510,7 +510,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCookieByName \",\"name\":\"test_cookie\",\"value\":\"not ${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
     try {
-assertNotEquals( wd.manage().getCookieNamed("test_cookie").getValue(), "not \" + cookie + \"");
+assertNotEquals( wd.manage().getCookieNamed("test_cookie").getValue(), "not " + cookie + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertCookieByName.png"));
@@ -593,7 +593,7 @@ assertFalse(     (wd.manage().getCookieNamed("test_cookie") != null));
 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"saveScreenshot \",\"file\":\"/tmp/screen.png\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"file\"]} "); 
-    wd.getScreenshotAs(FILE).renameTo(new File("/tmp/screen.png"));
+    wd.getScreenshotAs(FILE).renameTo(new File("target/"+"/tmp/screen.png"));
      System.out.println("[End][Step]"); 
 
 
@@ -741,7 +741,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"not ${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try { 
-     if (!     wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not \" + link_href + \"")) {
+     if (!     wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not " + link_href + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyElementAttribute.png"));
@@ -755,7 +755,7 @@ throw ae ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"not ${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not \" + link_href + \"");
+assertNotEquals( wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not " + link_href + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertElementAttribute.png"));
@@ -852,11 +852,23 @@ throw e ;
      throw e ; 
    }
 
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"checkBoxElement \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"text\":\"true\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
+if("true".equals("true")){     wd.findElement(By.id("comments")).click();
+    }
+     System.out.println("[End][Step]"); 
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_checkBoxElement.png"));
+     e.printStackTrace();
+     throw e ; 
+   }
+
     System.out.println("[End][Case]"); 
   }
   @Test(priority = 2)
-  public void test2357dd432() throws Exception {
-    System.out.println("[Start][Case]{\"name\": \"test2\", \"id\": \"357dd432-adb3-4315-89cc-946973a424ab\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+  public void test27383ca67() throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test2\", \"id\": \"7383ca67-a84f-471b-ac85-507d9ffcd2ca\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"get \",\"url\":\"https://insight.fsoft.com.vn/jira/secure/Dashboard.jspa\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try {
@@ -930,8 +942,8 @@ throw e ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"pause \",\"waittime\":\"2000ms\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"waittime\"]} "); 
     try {
- Thread.sleep(2000l);
-     System.out.println("[End][Step]"); 
+ Thread.sleep(2000);
+    System.out.println("[End][Step]"); 
  } catch (Exception e) {
       e.printStackTrace();
      throw new RuntimeException(e);

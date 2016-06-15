@@ -63,8 +63,11 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   
   @BeforeClass
   public void init() throws Exception {
+    String host = "localhost";
+    String name = "cloud-ats-v1";
+    int port = 27017;
     this.injector = Guice.createInjector(
-        new DatabaseModule(), 
+        new DatabaseModule(host, port, name), 
         new EventModule(),
         new OrganizationServiceModule(),
         new DataDrivenModule(),
@@ -72,7 +75,7 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
         );
     
     this.mongoService = injector.getInstance(MongoDBService.class);
-    this.mongoService.dropDatabase();
+    //this.mongoService.dropDatabase();
     
     this.authService = injector.getInstance(Key.get(new TypeLiteral<AuthenticationService<User>>(){}));
     //keyword
@@ -95,27 +98,32 @@ public class KeywordReportTestCase extends AbstractEventTestCase {
   
   @BeforeMethod
   public void setup() throws Exception {
-    this.tenant = tenantFactory.create("Fsoft");
-    this.tenantService.create(this.tenant);
-
-    this.space = spaceFactory.create("FSU1.BU11");
-    this.space.setTenant(tenantRefFactory.create(this.tenant.getId()));
-    this.spaceService.create(this.space);
-
-    this.user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
-    this.user.setTenant(tenantRefFactory.create(this.tenant.getId()));
-    this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
-    this.user.setPassword("12345");
-    this.userService.create(this.user);
+//    this.tenant = tenantFactory.create("Fsoft");
+//    this.tenantService.create(this.tenant);
+//
+//    this.space = spaceFactory.create("FSU1.BU11");
+//    this.space.setTenant(tenantRefFactory.create(this.tenant.getId()));
+//    this.spaceService.create(this.space);
+//
+//    this.user = userFactory.create("haint@cloud-ats.net", "Hai", "Nguyen");
+//    this.user.setTenant(tenantRefFactory.create(this.tenant.getId()));
+//    this.user.joinSpace(spaceRefFactory.create(this.space.getId()));
+//    this.user.setPassword("12345");
+//    this.userService.create(this.user);
     
     this.authService.logIn("haint@cloud-ats.net", "12345");
-    this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
+    //this.spaceService.goTo(spaceRefFactory.create(this.space.getId()));
   }
   
   @AfterMethod
   public void tearDown() {
     this.authService.logOut();
    // this.mongoService.dropDatabase();
+  }
+  
+  @Test
+  public void testDebug() throws Exception {
+    keywordReportService.processLog(new FileInputStream("src/test/resources/debug.log"));
   }
   
   /**

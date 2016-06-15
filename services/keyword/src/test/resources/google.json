@@ -25,7 +25,79 @@
     {
       "type": "pause",
       "waitTime": "3000"
-    }
+    },
+    {
+        "type": "loopor",
+        "times": 3,
+        "variables": [
+          {"name" : "OrderId"}, 
+          {"name" : "UserName"}, 
+          {"name" : "Password"}
+         ],
+        "actions": [
+          {
+            "type": "sendKeysToElement",
+            "locator": {
+              "type": "id",
+              "value": "${OrderId}" 
+            },
+            "text": "${UserName}"
+          },
+          {
+            "type": "sendKeysToElement",
+            "locator": {
+              "type": "id",
+              "value": "Password"
+            },
+            "text": "${Password}"
+          },
+          {
+            "type": "clickElement",
+            "locator": {
+              "type": "id",
+              "value": "Submit"
+            }
+          }
+        ]
+    },
+    {
+            "type" : "loopor",
+            "params" : [ 
+                "times", 
+                "variables", 
+                "actions"
+            ],
+            "actions" : [ 
+                {
+                    "type" : "sendKeysToElement",
+                    "params" : [ 
+                        "locator", 
+                        "text"
+                    ],
+                    "locator" : {
+                        "type" : "xpath",
+                        "value" : "//*[@id=\"lst-ib\"]"
+                    },
+                    "text" : "${textSearch}"
+                }, 
+                {
+                    "type" : "clickElement",
+                    "params" : [ 
+                        "locator"
+                    ],
+                    "locator" : {
+                        "type" : "name",
+                        "value" : "btnG"
+                    }
+                }
+            ],
+            "variables" : [ 
+                {
+                    "name" : "textSearch"
+                }
+            ],
+            "times" : 3
+        }
   ],
   "data": {
     "configs": {

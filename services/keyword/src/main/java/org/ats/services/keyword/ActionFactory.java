@@ -3,6 +3,8 @@
  */
 package org.ats.services.keyword;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.ats.services.keyword.action.AbstractAction;
@@ -25,6 +27,7 @@ import org.ats.services.keyword.action.AssertPageSource;
 import org.ats.services.keyword.action.AssertText;
 import org.ats.services.keyword.action.AssertTextPresent;
 import org.ats.services.keyword.action.AssertTitle;
+import org.ats.services.keyword.action.CheckBoxElement;
 import org.ats.services.keyword.action.ClearSelections;
 import org.ats.services.keyword.action.ClickAndHoldElement;
 import org.ats.services.keyword.action.ClickElement;
@@ -36,6 +39,7 @@ import org.ats.services.keyword.action.DragToAndDropElement;
 import org.ats.services.keyword.action.Get;
 import org.ats.services.keyword.action.GoBack;
 import org.ats.services.keyword.action.GoForward;
+import org.ats.services.keyword.action.Loopor;
 import org.ats.services.keyword.action.MouseOverElement;
 import org.ats.services.keyword.action.Pause;
 import org.ats.services.keyword.action.Print;
@@ -95,6 +99,7 @@ import org.ats.services.keyword.locator.TagNameLocator;
 import org.ats.services.keyword.locator.XPathLocator;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
@@ -956,7 +961,37 @@ public class ActionFactory {
           return dbObj;
         }
       };
-      
+    
+    case "checkBoxElement":
+      locator = parseLocator(json.get("locator"));
+      text = toValue(json.get("text").asText());
+      return new CheckBoxElement(locator, text) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
+    case "loopor":
+      int times = json.get("times").asInt();
+      ArrayNode params = (ArrayNode) json.get("variables");
+      List<String> paramHolder = new ArrayList<String>();
+      for (JsonNode param : params) {
+        paramHolder.add(param.get("name").asText());
+      }
+      ArrayNode steps = (ArrayNode) json.get("actions");
+      List<JsonNode> stepHolder = new ArrayList<JsonNode>();
+      for (JsonNode step : steps) {
+        stepHolder.add(step);
+      }
+      return new Loopor(times, paramHolder, stepHolder, this) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
+
     default:
       logger.warning("Unsupported keyword: " + type);
       return null;
@@ -969,12 +1004,13 @@ public class ActionFactory {
       str = str.substring(2, str.length() - 1);
       return new Value(str, isVariable);
     } else if (str.indexOf("${") != -1 && str.lastIndexOf("}") != -1 ) {
+      str = str.replace("\"", "\\\"");
       int start = str.indexOf("${");
       int end = str.indexOf("}");
       String variable = str.substring(start + 2, end);
-      StringBuilder sb = new StringBuilder(str.substring(0, start)).append("\" + ");
-      sb.append(variable).append(" + \"").append(str.substring(end + 1));
-      return toValue(sb.toString());
+      StringBuilder sb = new StringBuilder("\"").append(str.substring(0, start)).append("\" + ");
+      sb.append(variable).append(" + \"").append(str.substring(end + 1)).append("\"");
+      return new Value(sb.toString(), true);
     }
     return new Value(str, false);
   }

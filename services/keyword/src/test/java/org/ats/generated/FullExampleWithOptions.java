@@ -33,7 +33,7 @@ public class FullExampleWithOptions {
 
   @BeforeClass
   public void setUp() throws Exception {
-    System.out.println("[Start][Suite]{\"name\": \"FullExampleWithOptions\", \"id\": \"b7931596-d4db-4a96-a954-8b3229053059\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+    System.out.println("[Start][Suite]{\"name\": \"FullExampleWithOptions\", \"id\": \"62c6d3cb-e13a-4f1c-a37c-2de4f2ac25ae\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
     wd = new FirefoxDriver();
     wd.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
     wd.manage().window().maximize();
@@ -41,14 +41,14 @@ public class FullExampleWithOptions {
    
   @AfterClass
   public void tearDown() throws Exception {
-    System.out.println("[End][Suite]{\"name\": \"FullExampleWithOptions\", \"id\": \"b7931596-d4db-4a96-a954-8b3229053059\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+    System.out.println("[End][Suite]{\"name\": \"FullExampleWithOptions\", \"id\": \"62c6d3cb-e13a-4f1c-a37c-2de4f2ac25ae\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
     wd.quit();
   }
   
   
   @Test(priority = 1)
-  public void testdc371deb() throws Exception {
-    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"dc371deb-1147-407d-a602-e5bfae82ead2\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+  public void test9c82cf33() throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"9c82cf33-9024-4bd6-a4e9-b4c943abf912\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
 
     System.out.println("[Start][Step]{\"keyword_type\":\"get \",\"url\":\"http://saucelabs.com/test/guinea-pig/\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try {
@@ -60,14 +60,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
@@ -79,14 +77,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeTitle \",\"variable\":\"title\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\"]} "); 
     String title = "";
@@ -99,14 +95,12 @@ title = wd.getTitle();
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTitle \",\"title\":\"${title}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"title\"]} "); 
     try { 
@@ -122,14 +116,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTitle \",\"title\":\"asdf\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"title\"]} "); 
     try { 
@@ -145,14 +137,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertTitle \",\"title\":\"${title}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"title\"]} "); 
     try { 
@@ -164,14 +154,12 @@ assertEquals(     wd.getTitle(), title);
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertTitle \",\"title\":\"asdf\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"title\"]} "); 
     try { 
@@ -183,14 +171,12 @@ assertNotEquals(     wd.getTitle(), "asdf");
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeCurrentUrl \",\"variable\":\"url\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\"]} "); 
     String url = "";
@@ -203,14 +189,12 @@ url = wd.getCurrentUrl();
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCurrentUrl \",\"url\":\"${url}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try { 
@@ -226,14 +210,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCurrentUrl \",\"url\":\"http://google.com\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try { 
@@ -249,14 +231,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCurrentUrl \",\"url\":\"${url}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try { 
@@ -268,14 +248,12 @@ assertEquals(     wd.getCurrentUrl(), url);
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCurrentUrl \",\"url\":\"http://google.com\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"url\"]} "); 
     try { 
@@ -287,14 +265,12 @@ assertNotEquals(     wd.getCurrentUrl(), "http://google.com");
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"variable\":\"text\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"variable\"]} "); 
     String text = "";
@@ -307,14 +283,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try { 
@@ -330,19 +304,17 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"not ${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try { 
     System.out.println("Actual Text : "+wd.findElement(By.id("i_am_an_id")).getText()); 
-     if (!wd.findElement(By.id("i_am_an_id")).getText().equals("not \" + text + \"")) {
+     if (!wd.findElement(By.id("i_am_an_id")).getText().equals("not " + text + "")) {
     System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyText.png"));
@@ -353,14 +325,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try {
@@ -372,18 +342,16 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertText \",\"locator\":{\"type\":\"id\",\"value\":\"i_am_an_id\"},\"text\":\"not ${text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.id("i_am_an_id")).getText(), "not \" + text + \"");
+assertNotEquals( wd.findElement(By.id("i_am_an_id")).getText(), "not " + text + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertText.png"));
@@ -391,14 +359,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeTextPresent \",\"text\":\"I am another div\",\"variable\":\"text_is_present\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\", \"variable\"]} "); 
     boolean text_is_present = true;
@@ -411,14 +377,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"store \",\"text\":\"I am another div\",\"variable\":\"text_present\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\", \"variable\"]} "); 
     String text_present = "";
@@ -431,14 +395,12 @@ text_present = "I am another div";
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTextPresent \",\"text\":\"${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
@@ -453,18 +415,16 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTextPresent \",\"text\":\"not ${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
-     if (!wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \"")) {
+     if (!wd.findElement(By.tagName("html")).getText().contains("not " + text_present + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyTextPresent.png"));
@@ -475,14 +435,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertTextPresent \",\"text\":\"${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
@@ -494,18 +452,16 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertTextPresent \",\"text\":\"not ${text_present}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
-assertFalse( wd.findElement(By.tagName("html")).getText().contains("not \" + text_present + \""));
+assertFalse( wd.findElement(By.tagName("html")).getText().contains("not " + text_present + ""));
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertTextPresent.png"));
@@ -513,14 +469,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeBodyText \",\"variable\":\"body_text\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\"]} "); 
     String body_text = "";
@@ -533,14 +487,12 @@ body_text = wd.findElement(By.tagName("html")).getText();
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyBodyText \",\"text\":\"${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
@@ -555,18 +507,16 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyBodyText \",\"text\":\"not ${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
-     if (!     wd.findElement(By.tagName("html")).getText().equals("not \" + body_text + \"")) {
+     if (!     wd.findElement(By.tagName("html")).getText().equals("not " + body_text + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyBodyText.png"));
@@ -577,14 +527,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertBodyText \",\"text\":\"${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
@@ -596,18 +544,16 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertBodyText \",\"text\":\"not ${body_text}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.tagName("html")).getText(), "not \" + body_text + \"");
+assertNotEquals( wd.findElement(By.tagName("html")).getText(), "not " + body_text + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertBodyText.png"));
@@ -615,27 +561,23 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storePageSource \",\"variable\":\"page_source\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\"]} "); 
     String page_source = wd.getPageSource();
      System.out.println("[End][Step]"); 
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyPageSource \",\"source\":\"${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try {
@@ -647,18 +589,16 @@ if (wd.getPageSource().equals(page_source)) {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyPageSource \",\"source\":\"<!-- --> ${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try {
-if (!wd.getPageSource().equals("<!-- --> \" + page_source + \"")) {
+if (!wd.getPageSource().equals("<!-- --> " + page_source + "")) {
      System.out.println("[End][Step]"); 
     }
  } catch (Exception e) { 
@@ -666,14 +606,12 @@ if (!wd.getPageSource().equals("<!-- --> \" + page_source + \"")) {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertPageSource \",\"source\":\"${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try { 
@@ -685,18 +623,16 @@ assertEquals(     wd.getPageSource(), page_source);
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertPageSource \",\"source\":\"<!-- --> ${page_source}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"source\"]} "); 
     try { 
-assertNotEquals(     wd.getPageSource(), "<!-- --> \" + page_source + \"");
+assertNotEquals(     wd.getPageSource(), "<!-- --> " + page_source + "");
      System.out.println("[End][Step]"); 
    } catch (AssertionError ae) { 
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertPageSource.png"));
@@ -704,79 +640,67 @@ assertNotEquals(     wd.getPageSource(), "<!-- --> \" + page_source + \"");
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"addCookie \",\"name\":\"test_cookie\",\"options\":\"path=/,max_age=100000000\",\"value\":\"this-is-a-cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"options\", \"name\", \"value\"]} "); 
     wd.manage().addCookie(new Cookie.Builder("test_cookie", "this-is-a-cookie").path("/").expiresOn(new Date(new Date().getTime() + 100000000000l)).build());
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeCookiePresent \",\"name\":\"test_cookie\",\"variable\":\"cookie_is_present\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\", \"name\"]} "); 
     boolean cookie_is_present = (wd.manage().getCookieNamed("test_cookie") != null);
      System.out.println("[End][Step]"); 
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeCookieByName \",\"name\":\"test_cookie\",\"variable\":\"cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"variable\", \"name\"]} "); 
     String cookie = wd.manage().getCookieNamed("test_cookie").getValue();
 System.out.println("[End][Step]");
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"print \",\"text\":\"${cookie};\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
-    System.out.println("\" + cookie + \";");
+    System.out.println("" + cookie + ";");
 System.out.println("[End][Step]");
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCookiePresent \",\"name\":\"test_cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\"]} "); 
     if ((wd.manage().getCookieNamed("test_cookie") != null)) {
      System.out.println("[End][Step]"); 
     }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCookiePresent \",\"name\":\"test_cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\"]} "); 
     try { 
@@ -788,42 +712,36 @@ assertTrue(     (wd.manage().getCookieNamed("test_cookie") != null));
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCookieByName \",\"name\":\"test_cookie\",\"value\":\"${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
     if (wd.manage().getCookieNamed("test_cookie").getValue().equals(cookie)) {
      System.out.println("[End][Step]"); 
     }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCookieByName \",\"name\":\"test_cookie\",\"value\":\"not ${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
-    if (!wd.manage().getCookieNamed("test_cookie").getValue().equals("not \" + cookie + \"")) {
+    if (!wd.manage().getCookieNamed("test_cookie").getValue().equals("not " + cookie + "")) {
      System.out.println("[End][Step]"); 
     }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCookieByName \",\"name\":\"test_cookie\",\"value\":\"${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
     try {
@@ -835,18 +753,16 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCookieByName \",\"name\":\"test_cookie\",\"value\":\"not ${cookie}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\", \"value\"]} "); 
     try {
-assertNotEquals( wd.manage().getCookieNamed("test_cookie").getValue(), "not \" + cookie + \"");
+assertNotEquals( wd.manage().getCookieNamed("test_cookie").getValue(), "not " + cookie + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertCookieByName.png"));
@@ -854,14 +770,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"deleteCookie \",\"name\":\"test_cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\"]} "); 
     try { 
@@ -874,28 +788,24 @@ if (wd.manage().getCookieNamed("test_cookie") != null) {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyCookiePresent \",\"name\":\"test_cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\"]} "); 
     if (!(wd.manage().getCookieNamed("test_cookie") != null)) {
      System.out.println("[End][Step]"); 
     }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertCookiePresent \",\"name\":\"test_cookie\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"name\"]} "); 
     try { 
@@ -907,14 +817,12 @@ assertFalse(     (wd.manage().getCookieNamed("test_cookie") != null));
      throw ae ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"refresh \",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[]} "); 
     try { 
@@ -926,14 +834,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"goBack \",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[]} "); 
     try { 
@@ -945,14 +851,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"goForward \",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[]} "); 
     try { 
@@ -964,14 +868,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"goBack \",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[]} "); 
     try { 
@@ -983,40 +885,34 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"saveScreenshot \",\"file\":\"/tmp/screen.png\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"file\"]} "); 
-    wd.getScreenshotAs(FILE).renameTo(new File("/tmp/screen.png"));
+    wd.getScreenshotAs(FILE).renameTo(new File("target/"+"/tmp/screen.png"));
      System.out.println("[End][Step]"); 
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"print \",\"text\":\"this is some debug text\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     System.out.println("this is some debug text");
 System.out.println("[End][Step]");
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"variable\":\"element_is_selected\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"variable\"]} "); 
     boolean element_is_selected = true;
@@ -1029,14 +925,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"setElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try { 
@@ -1050,14 +944,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try { 
@@ -1072,14 +964,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
@@ -1091,14 +981,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"setElementNotSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try { 
@@ -1112,14 +1000,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try { 
@@ -1134,14 +1020,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementSelected \",\"locator\":{\"type\":\"id\",\"value\":\"unchecked_checkbox\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
@@ -1153,14 +1037,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"variable\":\"link_href\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"variable\", \"attribute_name\"]} "); 
     String link_href = "";
@@ -1173,14 +1055,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try { 
@@ -1195,14 +1075,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try {
@@ -1214,14 +1092,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"sendKeysToElement \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"text\":\"w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
     try { 
@@ -1234,18 +1110,16 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"not ${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try { 
-     if (!     wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not \" + link_href + \"")) {
+     if (!     wd.findElement(By.linkText("i am a link")).getAttribute("href").equals("not " + link_href + "")) {
      System.out.println("[End][Step]"); 
     } else {
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_verifyElementAttribute.png"));
@@ -1256,18 +1130,16 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementAttribute \",\"locator\":{\"type\":\"link text\",\"value\":\"i am a link\"},\"attribute_name\":\"href\",\"value\":\"not ${link_href}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"attribute_name\", \"value\"]} "); 
     try {
-assertNotEquals( wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not \" + link_href + \"");
+assertNotEquals( wd.findElement(By.linkText("i am a link")).getAttribute("href"), "not " + link_href + "");
 System.out.println("[End][Step]");
 } catch (AssertionError ae) {
 wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_assertElementAttribute.png"));
@@ -1275,14 +1147,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"storeElementValue \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"variable\":\"comments\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"variable\"]} "); 
     String comments = "";
@@ -1295,14 +1165,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementValue \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"value\":\"w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"value\"]} "); 
     try { 
@@ -1318,14 +1186,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementValue \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"value\":\"w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"value\"]} "); 
     try {
@@ -1337,14 +1203,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyElementValue \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"value\":\"not w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"value\"]} "); 
     try { 
@@ -1360,14 +1224,12 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"assertElementValue \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"value\":\"not w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"value\"]} "); 
     try {
@@ -1379,14 +1241,12 @@ ae.printStackTrace();
 throw ae ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"submitElement \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
     try {
@@ -1398,14 +1258,12 @@ e.printStackTrace();
 throw e ;
 }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
-     System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
 
     System.out.println("[Start][Step]{\"keyword_type\":\"verifyTextPresent \",\"text\":\"w00t\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"text\"]} "); 
     try { 
@@ -1420,14 +1278,30 @@ try {
      throw e ; 
    }
 
-    System.out.println("[INFO] Waiting 5(s) ");
-try {
- Thread.sleep(5000l);
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"checkBoxElement \",\"locator\":{\"type\":\"id\",\"value\":\"comments\"},\"text\":\"true\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
+if("true".equals("true")){     wd.findElement(By.id("comments")).click();
+    }
      System.out.println("[End][Step]"); 
- } catch (Exception e) {
-      e.printStackTrace();
-     throw new RuntimeException(e);
-}
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_checkBoxElement.png"));
+     e.printStackTrace();
+     throw e ; 
+   }
+
+  try {
+    Thread.sleep(5000);
+  } catch (Exception e) {
+     e.printStackTrace();
+    throw new RuntimeException(e);
+  }
     System.out.println("[End][Case]"); 
   }
 

@@ -242,6 +242,11 @@ public class KeywordReportService {
         int index = report.getSteps().size();
         Case caze = caseService.get(report.getCaseId());
         List<JsonNode> full_step = caze.getActions();
+        
+        if (full_step.size() < index) {
+          full_step = buildFullSteps(caze);
+        }
+        
         List<JsonNode> skipped_step = full_step.subList(index, full_step.size());
         
         BasicDBList list = new BasicDBList();
@@ -291,6 +296,24 @@ public class KeywordReportService {
     }
   }
   
+  private List<JsonNode> buildFullSteps(Case caze) {
+    List<JsonNode> holder = new ArrayList<JsonNode>();
+    for (JsonNode step : caze.getActions()) {
+      ArrayNode actions = (ArrayNode) (step.get("actions") != null ? step.get("actions") : null);
+      if (actions == null) {
+        holder.add(step);
+      } else {
+        int times = step.get("times").asInt();
+        for (int i = 0; i < times; i++) {
+          for (JsonNode action : actions) {
+            holder.add(action);
+          }
+        }
+      }
+    }
+    return holder;
+  }
+
   public void processLog(byte[] bytes) throws IOException {
     InputStream is = new ByteArrayInputStream(bytes);
     processLog(is);

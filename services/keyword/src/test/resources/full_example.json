@@ -538,6 +538,14 @@
     {
         "type": "verifyTextPresent",
         "text": "w00t"
+    },
+    {
+        "type": "checkBoxElement",
+        "text": "true",
+        "locator": {
+            "type": "id",
+            "value": "comments"
+        }
     }
   ]
 }
