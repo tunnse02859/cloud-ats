@@ -35,12 +35,12 @@ public class Google {
   
   @BeforeClass
   public void beforeClass() throws Exception {
-  System.out.println("[Start][Suite]{\"name\": \"Google\", \"id\": \"4401e6ea-14a7-4131-8d33-0399934d108f\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+  System.out.println("[Start][Suite]{\"name\": \"Google\", \"id\": \"c1b969b0-e33d-4382-a25c-48fc347f1ee0\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
    
   @AfterClass
   public void afterClass() throws Exception {
-  System.out.println("[End][Suite]{\"name\": \"Google\", \"id\": \"4401e6ea-14a7-4131-8d33-0399934d108f\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+  System.out.println("[End][Suite]{\"name\": \"Google\", \"id\": \"c1b969b0-e33d-4382-a25c-48fc347f1ee0\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
 
   @BeforeMethod
@@ -55,10 +55,10 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSourcef476a03e")
-  public static Object[][] userSourcef476a03e() throws Exception {
+  @DataProvider(name = "userSource72081f2a")
+  public static Object[][] userSource72081f2a() throws Exception {
     ObjectMapper obj = new ObjectMapper();
-    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\"},	{\"username\":\"foo1\"}]");
+    JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\", \"UserName\": \"aaa\", \"Password\": \"bbb\", \"OrderId\": \"ccc\", \"textSearch\":\"aaa||bbb||ccc\"},	{\"username\":\"__blank__\", \"UserName\": \"aaa\", \"Password\": \"bbb\", \"OrderId\": \"ccc\", \"textSearch\":\"aaa||bbb||ccc\"}]");
 
     JsonNode[][] objData = new JsonNode[rootNode.size()][];
     for(int i=0; i<rootNode.size(); i++) {
@@ -66,15 +66,43 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSourcef476a03e")
-  public void testf476a03e(JsonNode data) throws Exception {
-    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"f476a03e-f4ff-4ba6-9055-970b4f24882f\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+  @Test (dataProvider = "userSource72081f2a")
+  public void test72081f2a(JsonNode data) throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"72081f2a-b320-47f4-b716-c5c0b5dd1068\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
     System.out.println("[Start][Data]"+data.toString()); 
     Object data_username = data.get("username");
     String username = null;
     if (data_username != null) {
         username = data_username.toString();
         username = username.substring(1, username.length() - 1).replace("\\\"","\"");
+    }
+
+    Object data_UserName = data.get("UserName");
+    String UserName = null;
+    if (data_UserName != null) {
+        UserName = data_UserName.toString();
+        UserName = UserName.substring(1, UserName.length() - 1).replace("\\\"","\"");
+    }
+
+    Object data_Password = data.get("Password");
+    String Password = null;
+    if (data_Password != null) {
+        Password = data_Password.toString();
+        Password = Password.substring(1, Password.length() - 1).replace("\\\"","\"");
+    }
+
+    Object data_OrderId = data.get("OrderId");
+    String OrderId = null;
+    if (data_OrderId != null) {
+        OrderId = data_OrderId.toString();
+        OrderId = OrderId.substring(1, OrderId.length() - 1).replace("\\\"","\"");
+    }
+
+    Object data_textSearch = data.get("textSearch");
+    String textSearch = null;
+    if (data_textSearch != null) {
+        textSearch = data_textSearch.toString();
+        textSearch = textSearch.substring(1, textSearch.length() - 1).replace("\\\"","\"");
     }
 
 
@@ -97,7 +125,9 @@ throw e ;
    } catch (Exception e) { 
      wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_sendKeysToElement.png"));
      e.printStackTrace();
-     throw e ; 
+     if ("__blank__".equals(username)) {
+     System.out.println("[End][Step]");
+     } else throw e;
    }
 
 
@@ -114,12 +144,95 @@ throw e ;
 
     System.out.println("[Start][Step]{\"keyword_type\":\"pause \",\"waittime\":\"3000ms\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"waittime\"]} "); 
     try {
- Thread.sleep(3000l);
-     System.out.println("[End][Step]"); 
+ Thread.sleep(3000);
+    System.out.println("[End][Step]"); 
  } catch (Exception e) {
       e.printStackTrace();
      throw new RuntimeException(e);
 }
+
+try {
+String[] array_OrderId = OrderId.split("\\|\\|");
+String[] array_UserName = UserName.split("\\|\\|");
+String[] array_Password = Password.split("\\|\\|");
+for(int i = 0; i < 3; i++){
+OrderId = array_OrderId[i];
+UserName = array_UserName[i];
+Password = array_Password[i];
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"sendKeysToElement \",\"locator\":{\"type\":\"id\",\"value\":\"${OrderId}\"},\"text\":\"${UserName}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
+     wd.findElement(By.id(OrderId)).click();
+     wd.findElement(By.id(OrderId)).sendKeys(UserName);
+     System.out.println("[End][Step]"); 
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_sendKeysToElement.png"));
+     e.printStackTrace();
+     if ("__blank__".equals(UserName)) {
+     System.out.println("[End][Step]");
+     } else throw e;
+   }
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"sendKeysToElement \",\"locator\":{\"type\":\"id\",\"value\":\"Password\"},\"text\":\"${Password}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
+     wd.findElement(By.id("Password")).click();
+     wd.findElement(By.id("Password")).sendKeys(Password);
+     System.out.println("[End][Step]"); 
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_sendKeysToElement.png"));
+     e.printStackTrace();
+     if ("__blank__".equals(Password)) {
+     System.out.println("[End][Step]");
+     } else throw e;
+   }
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"id\",\"value\":\"Submit\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
+    try {
+wd.findElement(By.id("Submit")).click();
+System.out.println("[End][Step]");
+} catch (Exception e) {
+wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_clickElement.png"));
+e.printStackTrace();
+throw e ;
+}
+}
+   } catch (Exception e) { 
+e.printStackTrace();
+throw e ; 
+ }
+
+try {
+String[] array_textSearch = textSearch.split("\\|\\|");
+for(int i = 0; i < 3; i++){
+textSearch = array_textSearch[i];
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"sendKeysToElement \",\"locator\":{\"type\":\"xpath\",\"value\":\"//*[@id=\\\"lst-ib\\\"]\"},\"text\":\"${textSearch}\",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\", \"text\"]} "); 
+    try { 
+     wd.findElement(By.xpath("//*[@id=\"lst-ib\"]")).click();
+     wd.findElement(By.xpath("//*[@id=\"lst-ib\"]")).sendKeys(textSearch);
+     System.out.println("[End][Step]"); 
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_sendKeysToElement.png"));
+     e.printStackTrace();
+     if ("__blank__".equals(textSearch)) {
+     System.out.println("[End][Step]");
+     } else throw e;
+   }
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"clickElement \",\"locator\":{\"type\":\"name\",\"value\":\"btnG\"},\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[\"locator\"]} "); 
+    try {
+wd.findElement(By.name("btnG")).click();
+System.out.println("[End][Step]");
+} catch (Exception e) {
+wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"_clickElement.png"));
+e.printStackTrace();
+throw e ;
+}
+}
+   } catch (Exception e) { 
+e.printStackTrace();
+throw e ; 
+ }
 
 System.out.println("[End][Data]"); 
     System.out.println("[End][Case]"); 

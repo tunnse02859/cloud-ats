@@ -30,7 +30,7 @@ public class VerifyElementPresent extends AbstractAction {
     StringBuilder sb = new StringBuilder();
 	sb.append("try { \n");
 	sb.append("     if (").append(negated ? "!" : "");
-	sb.append("     wd.findElements(@locator).size() != 0) {\n");
+	sb.append("     (wd.findElements(@locator).size() != 0)) {\n");
 	sb.append("     System.out.println(\"[End][Step]\"); \n");
 	sb.append("    } else {\n");
     sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_verifyElementPresent.png\"));\n");

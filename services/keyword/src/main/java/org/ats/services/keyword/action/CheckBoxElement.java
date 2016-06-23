@@ -37,7 +37,15 @@ public class CheckBoxElement extends AbstractAction {
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_checkBoxElement.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
-	sb.append("     throw e ; \n");
+	
+	if (check.isVariable()) {
+    sb.append("     if (\"__blank__\".equals(@check)) {\n");
+    sb.append("     System.out.println(\"[End][Step]\");\n");
+    sb.append("     } else throw e;\n");
+  } else {
+    sb.append("     throw e ; \n");
+  }
+	
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(sb.toString(), check.transform(), locator.transform());

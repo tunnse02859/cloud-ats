@@ -1004,15 +1004,22 @@ public class ActionFactory {
       str = str.substring(2, str.length() - 1);
       return new Value(str, isVariable);
     } else if (str.indexOf("${") != -1 && str.lastIndexOf("}") != -1 ) {
-      str = str.replace("\"", "\\\"");
-      int start = str.indexOf("${");
-      int end = str.indexOf("}");
-      String variable = str.substring(start + 2, end);
-      StringBuilder sb = new StringBuilder("\"").append(str.substring(0, start)).append("\" + ");
-      sb.append(variable).append(" + \"").append(str.substring(end + 1)).append("\"");
+      StringBuilder sb = new StringBuilder("\"").append(transformVariable(str.replace("\"", "\\\""))).append("\"");
       return new Value(sb.toString(), true);
     }
     return new Value(str, false);
+  }
+  
+  private String transformVariable(String source) {
+    if (source.indexOf("${") != -1 && source.lastIndexOf("}") != -1 ) {
+      int start = source.indexOf("${");
+      int end = source.indexOf("}");
+      String variable = source.substring(start + 2, end);
+      StringBuilder sb = new StringBuilder(source.substring(0, start)).append("\" + ");
+      sb.append(variable).append(" + \"").append(source.substring(end + 1));
+      return transformVariable(sb.toString());
+    }
+    return source;
   }
   
   public AbstractLocator parseLocator(JsonNode json) {

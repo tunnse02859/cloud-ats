@@ -36,7 +36,15 @@ public class SetElementText extends AbstractAction {
 	sb.append("   } catch (Exception e) { \n");
 	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_setElementText.png\"));\n");
 	sb.append("     e.printStackTrace();\n");
-	sb.append("     throw e ; \n");
+	
+	if (text.isVariable()) {
+    sb.append("     if (\"__blank__\".equals(@text)) {\n");
+    sb.append("     System.out.println(\"[End][Step]\");\n");
+    sb.append("     } else throw e;\n");
+  } else {
+    sb.append("     throw e ; \n");
+  }
+	
 	sb.append("   }\n");
     return Rythm.render(sb.toString(), locator.transform(), text.transform());
   }

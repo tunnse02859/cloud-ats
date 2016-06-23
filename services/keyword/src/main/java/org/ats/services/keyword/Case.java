@@ -118,7 +118,6 @@ public class Case extends AbstractTemplate {
   }
   
   public String transform(int valueDelay, boolean sequenceMode, int order) throws IOException {
-	List<String> listParams = new ArrayList<String>();
 	StringBuilder sb = new StringBuilder();
     boolean isUseDataProvider = getDataDriven() != null;
     int valueDelayTransform = valueDelay*1000;
@@ -151,7 +150,7 @@ public class Case extends AbstractTemplate {
       
       while (nodeIterator.hasNext()) {
         Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodeIterator.next();
-        String key = entry.getKey();
+        String key = entry.getKey().trim();
         sb.append("    Object data_").append(key).append(" = data.get(\"").append(key).append("\");\n");
         sb.append("    String ").append(key).append(" = null;\n");
         sb.append("    if (data_").append(key).append(" != null) {\n");
