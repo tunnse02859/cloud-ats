@@ -50,6 +50,7 @@ import org.ats.services.keyword.action.SendKeysToElement;
 import org.ats.services.keyword.action.SetElementNotSelected;
 import org.ats.services.keyword.action.SetElementSelected;
 import org.ats.services.keyword.action.SetElementText;
+import org.ats.services.keyword.action.Snippet;
 import org.ats.services.keyword.action.Store;
 import org.ats.services.keyword.action.StoreAlertPresent;
 import org.ats.services.keyword.action.StoreAlertText;
@@ -985,6 +986,16 @@ public class ActionFactory {
         stepHolder.add(step);
       }
       return new Loopor(times, paramHolder, stepHolder, this) {
+        @Override
+        public DBObject toJson() {
+          DBObject dbObj = (DBObject) JSON.parse(json.toString());
+          return dbObj;
+        }
+      };
+      
+    case "snippet":
+      String code = json.get("code").asText().toString();
+      return new Snippet(code) {
         @Override
         public DBObject toJson() {
           DBObject dbObj = (DBObject) JSON.parse(json.toString());

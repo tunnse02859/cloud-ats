@@ -35,12 +35,12 @@ public class Google {
   
   @BeforeClass
   public void beforeClass() throws Exception {
-  System.out.println("[Start][Suite]{\"name\": \"Google\", \"id\": \"c1b969b0-e33d-4382-a25c-48fc347f1ee0\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+  System.out.println("[Start][Suite]{\"name\": \"Google\", \"id\": \"f538fc08-c515-4d47-84b8-7d4f833598a4\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
    
   @AfterClass
   public void afterClass() throws Exception {
-  System.out.println("[End][Suite]{\"name\": \"Google\", \"id\": \"c1b969b0-e33d-4382-a25c-48fc347f1ee0\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
+  System.out.println("[End][Suite]{\"name\": \"Google\", \"id\": \"f538fc08-c515-4d47-84b8-7d4f833598a4\", \"jobId\" : \"\", \"timestamp\": \""+System.currentTimeMillis()+"\"}");
   }
 
   @BeforeMethod
@@ -55,8 +55,8 @@ public class Google {
     wd.quit();
   }
   
-  @DataProvider(name = "userSource72081f2a")
-  public static Object[][] userSource72081f2a() throws Exception {
+  @DataProvider(name = "userSourcec74409aa")
+  public static Object[][] userSourcec74409aa() throws Exception {
     ObjectMapper obj = new ObjectMapper();
     JsonNode rootNode = obj.readTree("[	{\"username\":\"foo\", \"UserName\": \"aaa\", \"Password\": \"bbb\", \"OrderId\": \"ccc\", \"textSearch\":\"aaa||bbb||ccc\"},	{\"username\":\"__blank__\", \"UserName\": \"aaa\", \"Password\": \"bbb\", \"OrderId\": \"ccc\", \"textSearch\":\"aaa||bbb||ccc\"}]");
 
@@ -66,9 +66,9 @@ public class Google {
     }
     return objData;
 }
-  @Test (dataProvider = "userSource72081f2a")
-  public void test72081f2a(JsonNode data) throws Exception {
-    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"72081f2a-b320-47f4-b716-c5c0b5dd1068\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
+  @Test (dataProvider = "userSourcec74409aa")
+  public void testc74409aa(JsonNode data) throws Exception {
+    System.out.println("[Start][Case]{\"name\": \"test\", \"id\": \"c74409aa-9da5-4913-a1b4-a95904f2cd64\", \"timestamp\": \""+System.currentTimeMillis()+"\"} "); 
     System.out.println("[Start][Data]"+data.toString()); 
     Object data_username = data.get("username");
     String username = null;
@@ -128,6 +128,17 @@ throw e ;
      if ("__blank__".equals(username)) {
      System.out.println("[End][Step]");
      } else throw e;
+   }
+
+
+    System.out.println("[Start][Step]{\"keyword_type\":\"snippet \",\"timestamp\": \""+System.currentTimeMillis()+"\",\"params\":[]} "); 
+    try { 
+String xpath="//input[@id='ABC']";
+     System.out.println("[End][Step]"); 
+   } catch (Exception e) { 
+     wd.getScreenshotAs(FILE).renameTo(new File("target/error_"+System.currentTimeMillis()+"snippet.png"));
+     e.printStackTrace();
+     throw e ; 
    }
 
 

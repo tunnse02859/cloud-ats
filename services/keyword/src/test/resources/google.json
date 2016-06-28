@@ -16,6 +16,10 @@
       "text": "${username}"
     },
     {
+      "type": "snippet",
+      "code": "String xpath=\"//input[@id='ABC']\";\n"
+    },
+    {
       "type": "submitElement",
       "locator": {
         "type": "xpath",
