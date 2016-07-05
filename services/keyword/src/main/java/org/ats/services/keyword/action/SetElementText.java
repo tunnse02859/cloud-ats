@@ -28,25 +28,32 @@ public class SetElementText extends AbstractAction {
   
   public String transform() throws IOException {
     StringBuilder sb = new StringBuilder();
-	sb.append("try { \n");
-	sb.append("     wd.findElement(@locator).click();\n");
-	sb.append("     wd.findElement(@locator).clear();\n");
-	sb.append("     wd.findElement(@locator).sendKeys(@text);\n");
-	sb.append("     System.out.println(\"[End][Step]\"); \n");
-	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_setElementText.png\"));\n");
-	sb.append("     e.printStackTrace();\n");
-	
-	if (text.isVariable()) {
-    sb.append("     if (\"__blank__\".equals(@text)) {\n");
-    sb.append("     System.out.println(\"[End][Step]\");\n");
-    sb.append("     } else throw e;\n");
-  } else {
+    
+    sb.append("try { \n");
+    
+    if (text.isVariable()) {
+      sb.append("     if (!(\"__blank__\".equals(@text))) {\n");
+      sb.append("     wd.findElement(@locator).click();\n");
+      sb.append("     wd.findElement(@locator).clear();\n");
+      sb.append("     wd.findElement(@locator).sendKeys(@text);\n");
+      sb.append("     System.out.println(\"[End][Step]\");\n");
+      sb.append("     } else {\n");
+      sb.append("     System.out.println(\"[End][Step]\");\n");
+      sb.append("     }\n");
+    } else {
+      sb.append("     wd.findElement(@locator).click();\n");
+      sb.append("     wd.findElement(@locator).clear();\n");
+      sb.append("     wd.findElement(@locator).sendKeys(@text);\n");
+      sb.append("     System.out.println(\"[End][Step]\");\n");
+    }
+    
+    sb.append("   } catch (Exception e) { \n");
+    sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_setElementText.png\"));\n");
+    sb.append("     e.printStackTrace();\n");
     sb.append("     throw e ; \n");
-  }
 	
 	sb.append("   }\n");
-    return Rythm.render(sb.toString(), locator.transform(), text.transform());
+    return Rythm.render(sb.toString(), text.transform(), locator.transform());
   }
 
   public String getAction() {

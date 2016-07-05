@@ -30,22 +30,24 @@ public class CheckBoxElement extends AbstractAction {
   public String transform() throws IOException {
 	StringBuilder sb = new StringBuilder();
 	sb.append("try { \n");
-	sb.append("if(\"true\".equals(@check)){");
-	sb.append("     wd.findElement(@locator).click();\n");
-	sb.append("    }\n");
-	sb.append("     System.out.println(\"[End][Step]\"); \n");
-	sb.append("   } catch (Exception e) { \n");
-	sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_checkBoxElement.png\"));\n");
-	sb.append("     e.printStackTrace();\n");
 	
 	if (check.isVariable()) {
-    sb.append("     if (\"__blank__\".equals(@check)) {\n");
+    sb.append("     if (!(\"__blank__\".equals(@check))) {\n");
+    sb.append("     wd.findElement(@locator).click();\n");
+    sb.append("     System.out.println(\"[End][Step]\"); \n");
+    sb.append("     } else {\n");
     sb.append("     System.out.println(\"[End][Step]\");\n");
-    sb.append("     } else throw e;\n");
+    sb.append("     }\n");
   } else {
-    sb.append("     throw e ; \n");
+    sb.append("     wd.findElement(@locator).click();\n");
+    sb.append("     System.out.println(\"[End][Step]\");\n");
   }
-	
+  
+  sb.append("   } catch (Exception e) { \n");
+  sb.append("     wd.getScreenshotAs(FILE).renameTo(new File(\"target/error_\"+System.currentTimeMillis()+\"_checkBoxElement.png\"));\n");
+  sb.append("     e.printStackTrace();\n");
+  sb.append("     throw e ; \n");
+  
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
     return engine.render(sb.toString(), check.transform(), locator.transform());
