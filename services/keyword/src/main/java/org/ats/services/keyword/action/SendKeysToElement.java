@@ -4,6 +4,8 @@
 package org.ats.services.keyword.action;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.ats.common.MapBuilder;
 import org.ats.services.keyword.Value;
@@ -52,7 +54,10 @@ public class SendKeysToElement extends AbstractAction {
 	
 	sb.append("   }\n");
     RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
-    return engine.render(sb.toString(), text.transform(), locator.transform());
+    Map<String, String> params = new HashMap<String, String>();
+    params.put("text", text.transform());
+    params.put("locator", locator.transform());
+    return engine.render(sb.toString(), params);
   }
 
   public String getAction() {

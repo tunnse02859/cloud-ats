@@ -4,10 +4,13 @@
 package org.ats.services.keyword.action;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.ats.common.MapBuilder;
 import org.ats.services.keyword.Value;
 import org.ats.services.keyword.locator.AbstractLocator;
-import org.rythmengine.Rythm;
+import org.rythmengine.RythmEngine;
 
 /**
  * @author <a href="mailto:haithanh0809@gmail.com">Nguyen Thanh Hai</a>
@@ -53,7 +56,11 @@ public class SetElementText extends AbstractAction {
     sb.append("     throw e ; \n");
 	
 	sb.append("   }\n");
-    return Rythm.render(sb.toString(), text.transform(), locator.transform());
+	  RythmEngine engine = new RythmEngine(new MapBuilder<String, Boolean>("codegen.compact", false).build());
+	 Map<String, String> params = new HashMap<String, String>();
+   params.put("text", text.transform());
+   params.put("locator", locator.transform());
+   return engine.render(sb.toString(), params);
   }
 
   public String getAction() {
