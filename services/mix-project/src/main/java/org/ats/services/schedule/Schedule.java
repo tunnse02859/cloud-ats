@@ -39,7 +39,7 @@ public class Schedule extends AbstractEntity<Schedule> {
     this.put("project_id", project_id);
     this.put("created_date", new Date());
     this.put("_id", UUID.randomUUID().toString());
-    this.put("creator", context.getUser());
+    this.put("user", user);
   }
   
   public String getId() {

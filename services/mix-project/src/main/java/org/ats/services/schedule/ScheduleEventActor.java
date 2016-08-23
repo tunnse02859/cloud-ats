@@ -75,8 +75,8 @@ public class ScheduleEventActor extends UntypedActor{
         schedule.put("suites", schedule.get("suites"));
         String expTime = schedule.get("hour").toString() + ":" + schedule.get("minute").toString();
         
-        BasicDBObject obj = (BasicDBObject) schedule.get("creator");
-        User user = userService.transform(obj);
+        BasicDBObject obj = (BasicDBObject) schedule.get("user");
+        User user = userService.get(obj.get("_id").toString());
         context.setUser(user);
         
         if(schedule.get("dateRepeat") !=null){

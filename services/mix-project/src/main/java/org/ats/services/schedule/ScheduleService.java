@@ -53,7 +53,7 @@ public class ScheduleService extends AbstractMongoCRUD<Schedule> {
     schedule.put("created_date", source.get("created_date"));
     schedule.put("_id", source.get("_id"));
    
-    schedule.put("creator", source.get("creator"));
+    schedule.put("user", source.get("user"));
     
     schedule.put("hour", source.get("hour"));
     schedule.put("minute", source.get("minute"));
