@@ -5,8 +5,10 @@ package org.ats.services.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import scala.concurrent.duration.Duration;
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -61,6 +63,16 @@ public class EventService {
   
   public Map<Class<? extends Actor>, ActorRef> getActors() {
     return actors;
+  }
+  
+  public void schedule(Class<? extends Actor> clazz, long timeout) {
+    ActorRef actor = 
+        actors.get(clazz) == null ? 
+            system.actorOf(Props.create(GenericDependencyInjector.class, injector, clazz), clazz.getName()) : actors.get(clazz);
+    system.scheduler().schedule(
+        Duration.create(0, TimeUnit.MILLISECONDS), 
+        Duration.create(timeout, TimeUnit.MILLISECONDS), 
+        actor, "schedule", system.dispatcher(), null);        
   }
 
   public void process(Event event) {

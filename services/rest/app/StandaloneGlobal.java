@@ -39,6 +39,7 @@ import org.ats.services.organization.entity.reference.SpaceReference;
 import org.ats.services.organization.entity.reference.TenantReference;
 import org.ats.services.performance.PerformanceProject;
 import org.ats.services.performance.PerformanceProjectService;
+import org.ats.services.schedule.ScheduleEventActor;
 import org.ats.services.upload.SeleniumUploadProject;
 import org.ats.services.upload.SeleniumUploadProjectService;
 import org.ats.services.vmachine.VMachine;
@@ -109,6 +110,7 @@ public class StandaloneGlobal extends GlobalSettings {
       eventService.setInjector(injector);
       eventService.addActor(EventTrackingActor.class, "server-bus");
       eventService.start();
+      eventService.schedule(ScheduleEventActor.class, 60000);
       
       OrganizationContext context = injector.getInstance(OrganizationContext.class);
       //hardcode to initialize fsoft tenant

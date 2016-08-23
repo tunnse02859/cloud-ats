@@ -109,7 +109,6 @@ public class ExecutorService extends AbstractMongoCRUD<AbstractJob<?>> {
   public KeywordJob execute(KeywordProject project, List<SuiteReference> suites, BasicDBObject options) throws Exception {
     project.setStatus(KeywordProject.Status.RUNNING);
     keywordService.update(project);
-    
     String projectHash = project.getId().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
     KeywordJob job = keywordFactory.create(projectHash, project.getId(), suites, options, null, Status.Queued);
     create(job);

@@ -110,6 +110,11 @@ PUT     /api/v1/project/keyword/:projectId/custom/rename   	@controllers.CustomK
 GET     /api/v1/event/close/:token   @controllers.EventController.close(token)
 GET     /api/v1/event/feed/:token    @controllers.EventController.feed(token)
 
+# Keyword schedule 
+POST    /api/v1/project/keyword/:projectId/schedule/:name   @controllers.ScheduleController.create(projectId, name)
+GET     /api/v1/project/keyword/:projectId/schedule  @controllers.ScheduleController.list(projectId)
+DELETE  /api/v1/project/keyword/:projectId/schedule/:scheduleId  @controllers.ScheduleController.delete(projectId, scheduleId)
+
 ########################################################################################################
 
 # Performance controller
